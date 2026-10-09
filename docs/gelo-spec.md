@@ -12,15 +12,16 @@ A terceira camada, debaixo das Criptas da catedral, de 372 a 558 m (o mundo pass
 | `js/72-gelo-bichos.js` | yeti, lobo da geada, espírito da nevasca, verme da geada, sentinela de gelo, gosma gelada: arte, IA, projéteis (`icThrow`, `icWave`), lentidão do frio (`icSlowT`), sons, drops, materiais. Exporta `ICB` (o yeti em qualquer escala, para o chefe). |
 | `js/73-gelo-mundo.js` | geração (`icBuild`, `icAfter`, `icPlaceProps`), camada distante, zonas, spawn, nível, loot, gelo escorregadio, brilhos, neve caindo, loja, missões, save (`wg: 4`). |
 | `js/74-yeti-ancestral.js` | o chefe, a sala do trono e o Manto do Yeti Ancestral. |
+| `js/78-gelo-novos.js` | sincelo vivo, caçador congelado (arpão que puxa), javali da tundra (investida que quebra gelo), wendigo (some no escuro, grito, foge de tocha); arte, IA, sons, drops, materiais (olho de sincelo, ponta de arpão, presa de javali, galhada), missões e o spawn novo das 4 faixas. |
 
 ## 2. Faixas
 
 | Zona | Faixa | Metros | Material | Monstros |
 |---|---|---|---|---|
-| 13 | Fendas Geladas | 372 a 418 | calcário congelado, permafrost, rocha gelada | lobo, espírito, gosma, verme |
-| 14 | Salões de Gelo Azul | 418 a 476 | gelo azul, gelo, lagos congelados | lobo, espírito, sentinela, gosma, verme |
-| 15 | Covis dos Yetis | 476 a 528 | permafrost, neve batida, neve no chão | yeti, lobo, verme, espírito |
-| 16 | Coração do Inverno | 528 a 558 | gelo negro, cristais | sentinela, yeti, espírito, lobo |
+| 13 | Fendas Geladas | 372 a 418 | calcário congelado, permafrost, rocha gelada | lobo, espírito, gosma, verme, sincelo, caçador |
+| 14 | Salões de Gelo Azul | 418 a 476 | gelo azul, gelo, lagos congelados | lobo, espírito, sentinela, sincelo, caçador, javali |
+| 15 | Covis dos Yetis | 476 a 528 | permafrost, neve batida, neve no chão | yeti, lobo, verme, espírito, javali, wendigo |
+| 16 | Coração do Inverno | 528 a 558 | gelo negro, cristais | sentinela, yeti, espírito, lobo, wendigo |
 
 Nível dos monstros: 6 + 1 a cada 60 m (até 8), 30% vêm 1 nível acima. Loot: profundidade 4 em toda a camada. Lobos chegam em bando (1 ou 2 a mais); o verme nasce enterrado.
 

@@ -32,14 +32,16 @@ function updatePlayer(dt) {
   else if (pl.atkT < 0 && dir !== 0) pl.facing = dir;
 
   // attack
-  const canStart = (pl.atkT < 0 || pl.atkT > ATK_TOTAL - 0.07) && gameTime - pl.atkAt >= pl.atkPeriod - 0.01;   // weapon speed: js/48-itemizacao.js
+  const atkTm = pl.twoHand ? GS_TM : ATK_TM;   // two-handed swords have their own blow: js/61-montante.js
+  const canStart = (pl.atkT < 0 || pl.atkT > atkTm.total - 0.07) && gameTime - pl.atkAt >= pl.atkPeriod - 0.01;   // weapon speed: js/48-itemizacao.js
   if (hb.sel === 0 && (pl.atkBuf > 0 || mouse.l) && canStart && pl.shieldK < 0.35 && pl.stunT <= 0) {
     const d = mwx - pcx; if (Math.abs(d) > 2) pl.facing = d > 0 ? 1 : -1;
     const combo = pl.atkT >= 0 || gameTime - pl.lastAtkEnd < 0.3;
     pl.atkType = combo ? 1 - pl.atkType : 0;
-    pl.atkStart = pl.sAng; pl.atkT = 0; pl.atkAt = gameTime; pl.atkHit.clear(); pl.atkBuf = 0; pl.trail.length = 0;
-    if (pl.onGround) pl.vx += pl.facing * 35;
-    sfx.swing();
+    pl.atkStart = pl.sAng; pl.atkT = 0; pl.atkAt = gameTime; pl.atkHit.clear(); pl.atkBuf = 0; pl.trail.length = 0; pl.bladeA = null; pl.atkF0 = pl.fArm;
+    if (pl.thrust) { const [, mwy] = mouseWorld(), sy = pl.y + pl.h - 11.5; pl.thrA = clamp(Math.atan2(Math.abs(mwx - pcx), sy - mwy), 1.15, 2.3); }   // a spear thrusts toward the mouse, so it can reach low targets
+    if (pl.twoHand) pl.atkType = 0;   // the lunge and the whoosh come with the chop itself (gsSwing)
+    else { if (pl.onGround) pl.vx += pl.facing * 35; sfx.swing(); }
   }
   pl.atkBuf -= dt;
 
@@ -82,18 +84,20 @@ function updatePlayer(dt) {
   if (pl.atkT >= 0) {
     pl.atkT += dt * (pl.atkSpd || 1);
     const t = pl.atkT;
-    if (pl.thrust) {
-      pl.sAng = 1.52; pl.fArm = 1.58;
+    if (pl.twoHand) gsSwing(t);
+    else if (pl.thrust) {
+      pl.sAng = pl.thrA || 1.52; pl.fArm = pl.sAng + 0.06;
       pl.spearPy = t < ATK_WIND ? lerp(12, 8, t / ATK_WIND) : t < ATK_WIND + ATK_SWING ? lerp(8, 17, easeOut((t - ATK_WIND) / ATK_SWING)) : lerp(17, 12, clamp((t - ATK_WIND - ATK_SWING) / 0.12, 0, 1));
     } else { pl.sAng = swordAngle(t, pl.atkType, pl.atkStart); pl.fArm = clamp(pl.sAng * 0.6, -1.25, 1.7); }
-    if (pl.atkT >= ATK_WIND && pl.atkT <= ATK_WIND + ATK_SWING + 0.02) {
+    if (pl.atkT >= atkTm.wind && pl.atkT <= atkTm.wind + atkTm.swing + 0.02) {
       if (!pl.thrust) { pl.trail.push(pl.sAng); if (pl.trail.length > 5) pl.trail.shift(); }
-      const cx = pl.x + pl.w / 2, reach = pl.reach;
-      const hb = pl.thrust ? { x: pl.facing > 0 ? cx : cx - reach, y: pl.y + 3, w: reach, h: 17 } : { x: pl.facing > 0 ? cx - 3 : cx - (reach - 3), y: pl.y - 9, w: reach, h: pl.h + 12 };
-      for (const e of enemies) if (!e.dead && !pl.atkHit.has(e) && overlap(hb, e) && clearPath(pl, e)) { pl.atkHit.add(e); hitEnemy(e, pl.facing, 1, true); }
-      for (let ty = Math.floor(hb.y / T); ty <= Math.floor((hb.y + hb.h) / T); ty++) for (let tx = Math.floor(hb.x / T); tx <= Math.floor((hb.x + hb.w) / T); tx++) if (tileAt(tx, ty) === URN) breakTile(tx, ty);
+      // the blow lands only where the blade really is: the path it swept since the last frame, hand to tip
+      const pts = bladeSweep();
+      for (const e of enemies) if (!e.dead && !pl.atkHit.has(e) && pts.some(q => q[0] >= e.x - BLADE_PAD && q[0] <= e.x + e.w + BLADE_PAD && q[1] >= e.y - BLADE_PAD && q[1] <= e.y + e.h + BLADE_PAD) && clearPath(pl, e)) { pl.atkHit.add(e); hitEnemy(e, pl.facing, 1, true); }
+      for (const q of pts) { const tx = Math.floor(q[0] / T), ty = Math.floor(q[1] / T); if (tileAt(tx, ty) === URN) breakTile(tx, ty); }
     } else if (pl.trail.length) pl.trail.shift();
-    if (pl.atkT >= ATK_TOTAL) { pl.atkT = -1; pl.lastAtkEnd = gameTime; pl.trail.length = 0; }
+    pl.bladeA = pl.sAng; pl.bladeF = pl.fArm; pl.bladeL = bladeLen();
+    if (pl.atkT >= atkTm.total) { pl.atkT = -1; pl.lastAtkEnd = gameTime; pl.trail.length = 0; }
   } else if (pl.mining) mineSwing(dt);
   else {
     let tA = 2.7, tS = 0.9;
@@ -112,6 +116,28 @@ function updatePlayer(dt) {
   if (pl.regenB > 0 && gameTime - pl.lastHurt > 4 && pl.hp < pl.maxHp) { pl.regen += dt * pl.regenB; if (pl.regen >= 1) { const n = Math.floor(pl.regen); pl.hp = Math.min(pl.maxHp, pl.hp + n); pl.regen -= n; } }
 
   updateDig(dt);
+}
+// timing of a one-handed blow (game seconds, scaled by pl.atkSpd); the two-handed one is GS_TM in js/61-montante.js
+const ATK_TM = { wind: ATK_WIND, swing: ATK_SWING, total: ATK_TOTAL };
+// where the held weapon is in the world: the near shoulder, the arm (6 px), then the blade from the hand to its tip.
+// The tip sits `py` px from the hand (the pivot row of the weapon art); a spear's grows with the thrust (spearPy).
+const BLADE_PAD = 2;   // px of slack around the target, so a blade that grazes the outline still counts
+const BLADE_GRIP = 3;  // px from the hand to where the edge starts
+function bladeLen() { return (pl.thrust ? pl.spearPy : look && look.wpy ? look.wpy : 11) + 1; }
+function bladeSeg(fArm, sAng, len) {
+  const f = pl.facing, sx = pl.x + pl.w / 2 + f * 1.5, sy = pl.y + pl.h - 11.5;
+  const hx = sx + f * Math.sin(fArm) * 6, hy = sy - Math.cos(fArm) * 6;
+  return [hx, hy, hx + f * Math.sin(sAng) * len, hy - Math.cos(sAng) * len];
+}
+// sample the blade at its angle last frame, now, and every step between, so a fast swing cannot skip over a target
+function bladeSweep() {
+  const a0 = pl.bladeA == null ? pl.sAng : pl.bladeA, f0 = pl.bladeA == null ? pl.fArm : pl.bladeF, l0 = pl.bladeA == null ? bladeLen() : pl.bladeL, l1 = bladeLen();
+  const n = Math.max(1, Math.ceil(Math.abs(pl.sAng - a0) / 0.08)), pts = [];
+  for (let i = 0; i <= n; i++) {
+    const k = i / n, [hx, hy, tx, ty] = bladeSeg(lerp(f0, pl.fArm, k), lerp(a0, pl.sAng, k), lerp(l0, l1, k)), m = Math.max(2, Math.ceil(Math.hypot(tx - hx, ty - hy) / 2.5));
+    for (let j = 0; j <= m; j++) { const u = j / m; if (u * l1 >= BLADE_GRIP) pts.push([lerp(hx, tx, u), lerp(hy, ty, u)]); }   // the grip and guard do not cut
+  }
+  return pts;
 }
 const MINE_P = 0.3, MINE_HIT = 0.72;
 // one pickaxe swing: raise over the shoulder, then strike toward the mouse; damage lands on the strike

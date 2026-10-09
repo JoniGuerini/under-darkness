@@ -23,7 +23,7 @@ const IC_HOST = new Uint8Array(NT);    // what the ice layer may overwrite (the 
 for (const t of [CT_CALCARIO, CT_CALC_TERRA, COAL, COPPER, IRON, GOLD, CRYSTAL, BEDROCK, LAVA, AIR]) IC_HOST[t] = 1;
 
 function icBuild() {
-  const NN = WW * WH, W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   IC_S0 = CB_S0 + Math.round(186 * CB_F);
   const S0 = IC_S0, YB = Math.min(WH - 8, S0 + IC_D), DB = YB - S0;   // the ice: rows S0..YB-1 (squeezed if the world is short)
   const R = mulberry32(seed ^ 0x1ce5), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
@@ -126,7 +126,8 @@ function icBuild() {
   }
   // chambers per band: [count, wMin, wMax, hMin, hMax, top metre, bottom metre, kind]
   const PLAN = [[12, 10, 18, 5, 8, 6, 42, 'gruta'], [7, 28, 55, 14, 24, 52, 100, 'salao'], [10, 14, 24, 8, 12, 110, 152, 'covil'], [7, 14, 26, 8, 12, 160, 182, 'gruta']];
-  PLAN.forEach(([n, wa, wb, ha, hb, d0, d1, kind], band) => {
+  PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1, kind], band) => {
+    const n = n0 * WSC;
     for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
       const w = wa + ((R() * (wb - wa + 1)) | 0), h = Math.min(mb(hb), ha + ((R() * (hb - ha + 1)) | 0)), cx = (R() * WW) | 0, cy = S0 + mb(d0) + h / 2 + R() * Math.max(0, mb(d1 - d0) - h);
       if (overlaps(cx, cy, w, h)) continue;
@@ -134,7 +135,7 @@ function icBuild() {
     }
   });
   // the Fendas: tall narrow fissures, as if the ground had been split by the cold
-  for (let k = 0, tries = 0; k < 14 && tries < 200; tries++) {
+  for (let k = 0, tries = 0; k < 14 * WSC && tries < 200 * WSC; tries++) {
     const x = (R() * WW) | 0, y0 = S0 + 3 + ((R() * mb(14)) | 0), hgt = mb(14) + ((R() * mb(12)) | 0), w = 4 + ((R() * 5) | 0);
     if (icChambers.some(c => Math.abs(wdx(c.cx - x)) < c.w / 2 + w && Math.abs(c.cy - (y0 + hgt / 2)) < c.h / 2 + hgt / 2)) continue;
     for (let y = y0; y < y0 + hgt; y++) { const t = (y - y0) / hgt, half = w / 2 * Math.sin(Math.PI * (0.15 + t * 0.85)) + 0.6, cx = x + Math.sin(y * 0.2 + k) * 1.4 + t * 2; for (let xx = Math.floor(cx - half); xx <= cx + half; xx++) dig(xx, y); }
@@ -148,7 +149,7 @@ function icBuild() {
   }
   for (let b = 0; b < 3; b++) {
     const U = icChambers.filter(c => c.band === b && !c.boss), D = icChambers.filter(c => c.band === b + 1 && !c.boss);
-    for (let k = 0; k < 4 && U.length && D.length; k++) {
+    for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
       const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
       worm(A.cx, A.cy, B.cx, B.cy, Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x17f0 + b * 9 + k);
     }
@@ -203,7 +204,7 @@ function icBuild() {
     }
   };
   const rocky = t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO || t === IC_NEVE_DURA, blackish = t => t === IC_GELO_NEGRO || t === IC_ROCHA;
-  vein(IC_O_FERRO, 90, 0, 156, 2, 6, rocky); vein(IC_O_OURO, 45, 28, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO); vein(IC_O_CRISTAL, 70, 46, 186, 2, 5, t => blackish(t) || t === IC_GELO_AZUL);
+  vein(IC_O_FERRO, 90 * WSC, 0, 156, 2, 6, rocky); vein(IC_O_OURO, 45 * WSC, 28, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO); vein(IC_O_CRISTAL, 70 * WSC, 46, 186, 2, 5, t => blackish(t) || t === IC_GELO_AZUL);
 }
 
 /* the props of the crypt rooms that lost their footing when the floor broke open: dropped */
@@ -215,7 +216,7 @@ function icPruneProps() {
 }
 
 function icAfter() {
-  const NN = WW * WH, W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = IC_S0, YB = Math.min(WH - 8, S0 + IC_D), DB = YB - S0, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R3 = mulberry32(seed ^ 0x1d3c1);
   const mb = m => Math.round(m * DB / IC_D);
   const iceRow = y => y >= S0 && y < YB - 1;
@@ -235,7 +236,7 @@ function icAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = s0 => { if (reach[s0] || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= S0 * WW - 40 * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of icExits) flood(I(E.x0 + 3, E.fy - 2));
-  for (let pass = 0; pass < 60; pass++) {
+  for (let pass = 0; pass < 60 * WSC; pass++) {
     const lab = new Uint8Array(NN); let bestC = null;
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
@@ -326,7 +327,7 @@ function icAfter() {
   const chests = [];
   for (let b = 0; b < 4; b++) {
     let n = 0;
-    for (let tries = 0; tries < 3000 && n < 3; tries++) {
+    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
       const x = (R3() * WW) | 0, y = S0 + mb(IC_BANDS[b]) + 2 + ((R3() * Math.max(1, mb(IC_BANDS[b + 1] - IC_BANDS[b]) - 4)) | 0);
       if (y >= YB - 2 || at(x, y) !== AIR || !iceSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)]) continue;
       if (icBoss && Math.abs(wdx(x - icBoss.cx)) < icBoss.w / 2 + 2 && y <= icBoss.fy && y >= icBoss.top) continue;
@@ -341,7 +342,7 @@ function icAfter() {
 
 /* ---------- props: on ice floors, under ice roofs, against the walls ---------- */
 function icPlaceProps() {
-  const W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a1c5);
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a1c5);
   const S0 = IC_S0, YB = Math.min(WH - 8, S0 + IC_D), used = new Uint8Array(WW * WH * 2);
   const fits = (x0, y0, tw, th, layer, needAir) => {
     if (x0 < 1 || x0 + tw >= WW - 1 || y0 < 2) return false;

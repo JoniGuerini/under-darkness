@@ -29,7 +29,7 @@ function inYetiHall(tx, ty, m = 0) { const B = icBoss; if (!B) return false; con
 function yetiDrop(m) { const k = enemies.indexOf(m); if (k >= 0) enemies.splice(k, 1); m.dead = true; }
 function yetiDress() {
   const B = icBoss; if (!B) return;
-  const W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), x0 = B.cx - (B.w >> 1), x1 = x0 + B.w - 1;
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), x0 = B.cx - (B.w >> 1), x1 = x0 + B.w - 1;
   for (let x = x0; x <= x1; x++) {
     tiles[I(x, B.fy)] = IC_NEVE_DURA; tiles[I(x, B.fy + 1)] = IC_PERMA;
     for (let y = B.top - 4; y < B.fy; y++) { const i = I(x, y), t = tiles[i]; if (t !== AIR && !SOLID[t]) tiles[i] = AIR; if (y >= B.top) walls[i] = WIC_GELO; }

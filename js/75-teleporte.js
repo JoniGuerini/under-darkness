@@ -2,19 +2,20 @@
 
 /* ================= teleporte de teste: ir direto para uma camada =================
    No menu de pausa, "Teleporte" troca os botões pela lista de camadas (Vilarejo, Cavernas, Catedral, Cavernas de
-   Gelo); cada camada abre as suas faixas. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
+   Gelo, Mina Abandonada); cada camada abre as suas faixas. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
    dela, o mais perto possível da entrada da camada (a boca das cavernas, as escadarias do átrio, as fendas das
-   criptas), num lugar que dá para alcançar andando a partir do vilarejo e fora das salas dos chefes.
+   criptas, os poços sob o gelo), num lugar que dá para alcançar andando a partir do vilarejo e fora das salas dos chefes.
    "Batalhão" (também de teste, para medir desempenho) solta 25, 50, 100, 200 ou 500 monstros da faixa onde o herói
    está, espalhados pelos vãos abertos ao redor dele, sem respeitar o limite normal de spawn; "Limpar" tira todos
    os que não são chefe. Na superfície ele primeiro leva o herói às Grutas Rasas.
    Usa tpGoTo e tpVilSpot do 29-portal. Carrega depois do 40-opcoes. */
 (() => {
-  const W1 = x => ((x % WW) + WW) % WW;
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW;
   const LAYERS = () => [
     { nome: 'Cavernas', ok: typeof CAVERNA !== 'undefined' && CAVERNA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[CV_ZONE0 + b], y0: CV_S0 + CV_BANDS[b], y1: CV_S0 + CV_BANDS[b + 1] })), entrada: () => cavePortalEnd },
     { nome: 'Catedral', ok: true, faixas: [[0, 26], [26, 82], [82, 132], [132, 186]].map(([a, b], k) => ({ nome: ZONE_NAMES[5 + k], y0: cbY(a), y1: cbY(b) })), entrada: () => caveExits && caveExits[0] },
-    { nome: 'Cavernas de Gelo', ok: typeof GELO !== 'undefined' && GELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[IC_ZONE0 + b], y0: IC_S0 + IC_BANDS[b], y1: IC_S0 + IC_BANDS[b + 1] })), entrada: () => icExits && icExits[0] && [icExits[0].x0 + 3, IC_S0 + 13] }
+    { nome: 'Cavernas de Gelo', ok: typeof GELO !== 'undefined' && GELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[IC_ZONE0 + b], y0: IC_S0 + IC_BANDS[b], y1: IC_S0 + IC_BANDS[b + 1] })), entrada: () => icExits && icExits[0] && [icExits[0].x0 + 3, IC_S0 + 13] },
+    { nome: 'Mina Abandonada', ok: typeof MINA !== 'undefined' && MINA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[MN_ZONE0 + b], y0: MN_S0 + MN_BANDS[b], y1: Math.min(WH - 8, MN_S0 + MN_BANDS[b + 1]) })), entrada: () => mnExits && mnExits[0] && [mnExits[0].x0 + 1, mnExits[0].fy - 2] }
   ].filter(L => L.ok);
 
   // everything open that can be walked to from the village (no jumping rules: open space joined to the surface)
@@ -27,19 +28,19 @@
     }
     return seen;
   }
-  const inBossHall = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) || (typeof inThroneHall === 'function' && inThroneHall(x, y, -3));
+  const inBossHall = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) || (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3));
   // a standing spot: feet in (x, y), two more rows of air above, a firm block underneath, inside the cave (back wall)
-  function spot(F, near) {
-    const seen = reachable(), tx = near ? near[0] : SPX, ty = F.y0 + 3;
+  function spot(F, near, any) {
+    const seen = any ? null : reachable(), tx = near ? near[0] : SPX, ty = F.y0 + 3;
     let best = null, bd = 1e9;
     for (let y = F.y0 + 1; y < F.y1 - 1; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x, below = tiles[i + WW];
-      if (!seen[i] || SOLID[tiles[i]] || SOLID[tiles[i - WW]] || SOLID[tiles[i - 2 * WW]] || !SOLID[below] || !BLOCKY[below] || (typeof IC_SLIP !== 'undefined' && IC_SLIP[below])) continue;
+      if (seen && !seen[i] || SOLID[tiles[i]] || SOLID[tiles[i - WW]] || SOLID[tiles[i - 2 * WW]] || !SOLID[below] || !BLOCKY[below] || (typeof IC_SLIP !== 'undefined' && IC_SLIP[below])) continue;
       if (!walls[i] || SOLID[tiles[y * WW + W1(x - 1)]] && SOLID[tiles[y * WW + W1(x + 1)]] || inBossHall(x, y)) continue;
       const d = Math.abs(wdx(x - tx)) + Math.abs(y - ty) * 3;
       if (d < bd) { bd = d; best = [x, y]; }
     }
-    return best;
+    return best || (any ? null : spot(F, near, true));   // nothing joined to the village by open air: any open spot will do
   }
   function go(x, y) {
     if (bossFight) endBossFight(false);

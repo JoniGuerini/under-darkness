@@ -38,6 +38,6 @@ const icY = d => IC_S0 + d;
 // which band a row is in: 0 fendas, 1 salões, 2 covis, 3 coração, -1 above (cathedral) or 4 below (bedrock)
 function iceBand(ty) { const d = ty - IC_S0; if (d < 0) return -1; for (let b = 0; b < 4; b++) if (d < IC_BANDS[b + 1]) return b; return 4; }
 // ice you slide on (70 fills it, 73 reads it under the hero)
-const IC_SLIP = new Uint8Array(96);
+const IC_SLIP = new Uint8Array(NT);
 // set while the world is built: the two ways down from the crypts ([x, row] of the fissure's foot) and the boss hall
 let icExits = [], icBoss = null;

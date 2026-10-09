@@ -250,7 +250,7 @@ placeProps = function (occ) {
 // a floor tile you can actually stand on: solid, not a grate or gate, open above (props only go on these)
 function reiFloorOk(x, y) { const t = tileAt(x, y), u = tileAt(x, y - 1); return SOLID[t] === 1 && !SEETHRU[t] && t !== GATE && !SOLID[u] && u !== CHAIN; }
 function reiPickHall() {
-  const W1 = x => ((x % WW) + WW) % WW, R = mulberry32(seed ^ 0x4e1c0a7);
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, R = mulberry32(seed ^ 0x4e1c0a7);
   const ok = cathRooms.filter(Rm => (Rm.band === 1 || Rm.band === 2) && Rm.w >= 22 && Rm.w <= 46 && Rm.h >= 8 && W1(Rm.x0) > 3 && W1(Rm.x0) + Rm.w < WW - 4 && Rm.kind !== 'vestibulo');
   for (let j = ok.length - 1; j > 0; j--) { const q = (R() * (j + 1)) | 0; [ok[j], ok[q]] = [ok[q], ok[j]]; }
   const I = (x, y) => y * WW + W1(x);

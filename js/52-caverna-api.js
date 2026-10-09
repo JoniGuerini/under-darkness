@@ -36,7 +36,7 @@ const cvDepth = ty => ty - CV_S0;
 // which cave band a row is in: 0 grutas, 1 galerias, 2 ninho, 3 fundações, -1 above (surface) or 4 below (cathedral)
 function caveBand(ty) { const d = ty - CV_S0; if (d < CV_BANDS[0]) return -1; for (let b = 0; b < 4; b++) if (d < CV_BANDS[b + 1]) return b; return 4; }
 // hanging and standing decorations that fall when the block holding them breaks (56 wires it into propsLoseSupport)
-const CV_HANGS = new Uint8Array(96), CV_STANDS = new Uint8Array(96);
+const CV_HANGS = new Uint8Array(NT), CV_STANDS = new Uint8Array(NT);
 // set while the world is built: where the portal's stairway ends (45 builds it), and the grottos whose
 // right-hand wall opens onto a ruined stairway down to the cathedral's atrium ([x, floor row], 45 builds the stairs)
 let cavePortalEnd = null, caveExits = [];

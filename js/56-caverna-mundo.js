@@ -19,7 +19,7 @@ const CV_SOILS = new Uint8Array(NT);   // natural cave ground: what decorations 
 for (const t of [CV_TERRA, CV_ARGILA, CV_ROCHA, CV_MUSGO, CV_CALCITA, CV_CASCALHO, CV_XISTO, CV_TEIA, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, DIRT, CT_CALCARIO, CT_CALC_TERRA]) CV_SOILS[t] = 1;
 
 function cvBuild() {
-  const NN = WW * WH, W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = surf[SPX], YB = S0 + CAVE_D; CV_S0 = S0;
   const R = mulberry32(seed ^ 0xca7e5), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
   const db = (x, y) => y - S0 + (nz(x, y, 30, 0xb1) - 0.5) * 9;   // band depth, its borders wobble
@@ -105,7 +105,8 @@ function cvBuild() {
     cvBoss = { x0: W1(x0), x1: W1(x0 + w - 1), w, top, fy, cx };
     cvChambers.push({ cx, cy: fy - (h >> 1), w, h, band: 2, boss: true });
   }
-  PLAN.forEach(([n, wa, wb, ha, hb, d0, d1], band) => {
+  PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1], band) => {
+    const n = n0 * WSC;
     for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
       const w = wa + ((R() * (wb - wa + 1)) | 0), h = ha + ((R() * (hb - ha + 1)) | 0), cx = (R() * WW) | 0, cy = S0 + d0 + h / 2 + R() * Math.max(0, d1 - d0 - h);
       if (overlaps(cx, cy, w, h) || cy - h / 2 < minY(cx) + 1) continue;
@@ -120,13 +121,13 @@ function cvBuild() {
   }
   for (let b = 0; b < 3; b++) {
     const U = cvChambers.filter(c => c.band === b && !c.boss), D = cvChambers.filter(c => c.band === b + 1 && !c.boss);
-    for (let k = 0; k < 4 && U.length && D.length; k++) {
+    for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
       const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
       worm(A.cx, A.cy, B.cx, B.cy, RAD[b] + 0.2, 0x7f0 + b * 9 + k);
     }
   }
   // the Galerias' shafts: straight down out of a hall floor
-  for (const H of cvChambers.filter(c => c.band === 1).slice(0, 4)) {
+  for (const H of cvChambers.filter(c => c.band === 1).slice(0, 4 * WSC)) {
     const x = Math.round(H.cx + (R() - 0.5) * H.w * 0.5), ya = Math.round(H.cy), yb = Math.min(YB - 6, ya + 16 + ((R() * 16) | 0));
     for (let y = ya; y <= yb; y++) { const xx = x + Math.round(Math.sin(y * 0.3) * 0.8); for (let dx = -1; dx <= 1; dx++) dig(xx + dx, y); }
   }
@@ -191,11 +192,11 @@ function cvBuild() {
       }
     }
   };
-  vein(CV_O_CARVAO, 150, 6, 186, 3, 7); vein(CV_O_COBRE, 120, 6, 120, 2, 6); vein(CV_O_FERRO, 100, 35, 186, 2, 6); vein(CV_O_OURO, 40, 100, 186, 2, 5);
+  vein(CV_O_CARVAO, 150 * WSC, 6, 186, 3, 7); vein(CV_O_COBRE, 120 * WSC, 6, 120, 2, 6); vein(CV_O_FERRO, 100 * WSC, 35, 186, 2, 6); vein(CV_O_OURO, 40 * WSC, 100, 186, 2, 5);
 }
 
 function cvAfter() {
-  const NN = WW * WH, W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = CV_S0, YB = S0 + CAVE_D, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R = mulberry32(seed ^ 0xca7e6);
   const caveRow = (x, y) => y >= surf[W1(x)] + 4 && y < YB - 1;
   const dig = (x, y) => { if (!caveRow(x, y) || y < surf[W1(x)] + 8) return; const i = I(x, y); if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; };
@@ -238,7 +239,7 @@ function cvAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = (s0) => { if (reach[s0]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   flood(I(ex + 1, ey - 2));
-  for (let pass = 0; pass < 60; pass++) {
+  for (let pass = 0; pass < 60 * WSC; pass++) {
     // the biggest cave pocket still cut off
     const lab = new Uint8Array(NN); let bestC = null;
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
@@ -320,7 +321,7 @@ function cvAfter() {
   // a few narrow nest tunnels plugged with a wall of solid web (it breaks in a blink)
   {
     let n = 0;
-    for (let tries = 0; tries < 4000 && n < 14; tries++) {
+    for (let tries = 0; tries < 4000 * WSC && n < 14 * WSC; tries++) {
       const x = (R3() * WW) | 0, y = S0 + 124 + ((R3() * 42) | 0), i = I(x, y);
       if (tiles[i] !== AIR || !SOLID[at(x, y + 1)]) continue;
       let h = 0; while (h < 5 && at(x, y - h) === AIR) h++;
@@ -335,7 +336,7 @@ function cvAfter() {
   const chests = [];
   for (let b = 0; b < 4; b++) {
     let n = 0;
-    for (let tries = 0; tries < 3000 && n < 3; tries++) {
+    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
       const x = (R3() * WW) | 0, y = S0 + CV_BANDS[b] + 2 + ((R3() * (CV_BANDS[b + 1] - CV_BANDS[b] - 4)) | 0);
       if (y >= YB - 2 || y < surf[x] + 10 || at(x, y) !== AIR || !caveSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)]) continue;
       if (cvBoss && Math.abs(wdx(x - cvBoss.cx)) < cvBoss.w / 2 + 2 && y <= cvBoss.fy && y >= cvBoss.top) continue;
@@ -350,7 +351,7 @@ function cvAfter() {
 
 /* ---------- props: on cave floors, under cave roofs, against the cave walls ---------- */
 function cvPlaceProps() {
-  const W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a0c5);
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a0c5);
   const S0 = CV_S0, YB = S0 + CAVE_D, used = new Uint8Array(WW * WH * 2);
   const fits = (x0, y0, tw, th, layer, needAir) => {
     if (x0 < 1 || x0 + tw >= WW - 1 || y0 < 2) return false;

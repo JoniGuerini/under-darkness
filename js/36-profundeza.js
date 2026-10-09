@@ -20,6 +20,7 @@ const DEEP_NAMES = ['', 'Rocha antiga', 'Ardósia funda', 'Basalto', 'Pedra fós
 
 // value noise that repeats around the world (period = WW tiles)
 function depthNz(x, y, cells, s) {
+  cells *= WSC;   // same feature size whatever the world width
   const f = x / WW * cells, ix = Math.floor(f), ux = sm3(f - ix), g = y / (WW / cells), iy = Math.floor(g), uy = sm3(g - iy);
   const w = (a, b) => hash2(((a % cells) + cells) % cells, b, s);
   const A = w(ix, iy), B = w(ix + 1, iy), C = w(ix, iy + 1), D = w(ix + 1, iy + 1);

@@ -7,6 +7,7 @@ Camada nova e, por enquanto, **a única** debaixo do vilarejo. Três threads tra
 | **Catedral: mundo e integração** (líder) | geração do mundo, motor de objetos, ganchos nos arquivos antigos, spawns, save, testes | `js/41-catedral-api.js`, `js/45-catedral-mundo.js`, e os pequenos ganchos em `03`, `06`, `07`, `10`, `15`, `23`, `36`, HTML |
 | **Catedral: blocos e objetos** | texturas de blocos, paredes de fundo, blocos da 3ª camada, arte dos objetos (props), itens de bloco | `js/42-catedral-blocos.js`, `js/43-catedral-objetos.js` |
 | **Catedral: mortos-vivos** | arte e animação dos monstros, IA nova, drops, projéteis/efeitos deles | `js/44-mortos-vivos.js` |
+| **Catedral: monstros 7 a 10** | gárgula, acólito profano, carniçal, abominação; spawn novo das faixas (regra dos 10 monstros por camada) | `js/77-catedral-novos.js` |
 
 Regras de sempre: arquivos são scripts comuns (não módulos), todos com `'use strict'`; antes de gravar, releia do dispositivo o arquivo e mexa só no seu; depois de gravar, re-stage e compare. Nenhum texto de dica, atalho ou linha extra na interface. Nada de trabalho por pixel por quadro: tudo é pintado uma vez (na carga ou na 1ª vez que aparece) e guardado. O jogador roda a ~180 FPS.
 

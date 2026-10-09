@@ -117,3 +117,52 @@ CHEST_LOOT[3].push('montante_ouro', 'montante_cristal');
     return { cv: o, url };
   };
 }
+
+/* ---- the two-handed blow: its own movement, not the one-handed arc ----
+   One-handed weapons whip from behind the shoulder in a quick arc that slows down at the end, and alternate
+   up and down. The montante does one heavy overhead chop:
+     raise   - the hands come up in front of the face and the blade is laid back over the shoulder (slow, eased),
+               the body leaning back 1 px
+     load    - a short creep further back at the top, the weight loading
+     chop    - the blade falls forward and down, accelerating all the way (the opposite of the one-handed ease)
+               with a step forward and the whoosh as it starts
+     impact  - it stops low in front, the body sinks 1 px, a jolt, dust where the tip meets the floor
+     recover - the sword is hauled back up into the guard
+   Times are game seconds scaled by pl.atkSpd (62-montante-maos makes one blow fill the weapon's period).
+   The hit is decided by where the blade really passes (bladeSweep in 11-jogador), during the chop. */
+const GS_TM = { wind: 0.24, swing: 0.075, total: 0.54 };
+const GS_HOLD = 0.07;   // stays down after the impact before recovering
+// [blade angle, near arm angle] (0 = up, +pi/2 = forward)
+const GS_KEY = { up: [-0.95, 1.05], top: [-1.25, 0.92], end: [2.3, 1.7], rest: [0.3, 2.0] };
+const smooth01 = k => k * k * (3 - 2 * k);
+function gsSwing(t) {
+  const W = GS_TM.wind, S = GS_TM.swing, K = GS_KEY;
+  let a, f, ph;
+  if (t < W) {
+    const k = t / W; ph = 'raise';   // (the last 22% is the load)
+    if (k < 0.78) { const e = smooth01(k / 0.78); a = lerp(pl.atkStart, K.up[0], e); f = lerp(pl.atkF0 == null ? K.rest[1] : pl.atkF0, K.up[1], e); }
+    else { const e = smooth01((k - 0.78) / 0.22); a = lerp(K.up[0], K.top[0], e); f = lerp(K.up[1], K.top[1], e); }
+  } else if (t < W + S) {
+    const k = (t - W) / S, e = k * k; ph = 'chop';
+    a = lerp(K.top[0], K.end[0], e); f = lerp(K.top[1], K.end[1], e);
+  } else if (t < W + S + GS_HOLD) { ph = 'hold'; a = K.end[0]; f = K.end[1]; }
+  else {
+    const e = smooth01(clamp((t - W - S - GS_HOLD) / (GS_TM.total - W - S - GS_HOLD), 0, 1)); ph = 'recover';
+    a = lerp(K.end[0], K.rest[0], e); f = lerp(K.end[1], K.rest[1], e);
+  }
+  if (ph !== pl.gsPh) {
+    if (ph === 'chop') { if (pl.onGround) pl.vx += pl.facing * 55; sfx.swing(); }
+    if (ph === 'hold') {
+      shake(1.6);
+      // dust where the tip comes down, if there is floor under it
+      const sx = pl.x + pl.w / 2 + pl.facing * 1.5, sy = pl.y + pl.h - 11.5;
+      const hx = sx + pl.facing * Math.sin(f) * 6, hy = sy - Math.cos(f) * 6, len = (look && look.wpy ? look.wpy : 18) + 1;
+      const tx = hx + pl.facing * Math.sin(a) * len, ty = hy - Math.cos(a) * len;
+      if (SOLID[tileAt(Math.floor(tx / T), Math.floor((ty + 3) / T))]) burst(tx, ty + 1, 7, '#8a7a62', 55, 260, 0.35);
+    }
+    pl.gsPh = ph;
+  }
+  pl.gsLean = ph === 'raise' ? -1 : ph === 'chop' || ph === 'hold' ? 1 : 0;
+  pl.gsSink = ph === 'hold' || (ph === 'recover' && t < W + S + GS_HOLD + 0.06) ? 1 : 0;
+  pl.sAng = a; pl.fArm = f;
+}

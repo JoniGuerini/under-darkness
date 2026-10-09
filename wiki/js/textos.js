@@ -29,14 +29,40 @@ const UDW_TXT = {
     maeteia: 'Chefe das cavernas. Veja as fases abaixo.',
     fungo: 'Fica parado e parece um cogumelo do cenário. Quando o herói chega perto, incha e solta uma nuvem de esporos: quem fica dentro é envenenado e perde vida aos poucos. Bater nele também solta a nuvem. Anda devagar.',
     centopeia: 'Corre pelo chão, pelas paredes e pelo teto atrás do herói e morde de qualquer lado. Do teto, se solta em cima dele. Rápida e fraca.',
-    goblin: 'Lampião no capacete. Fica longe, acende uma dinamite e joga em arco: ela quica e explode depois de um tempo, ferindo o herói e os monstros perto e quebrando os blocos em volta. Foge quando o herói chega perto.',
+    goblin: 'Saiu das cavernas e foi morar na mina, no acampamento dos goblins. Lampião no capacete. Fica longe, acende uma dinamite e joga em arco: ela quica e explode depois de um tempo, ferindo o herói e os monstros perto e quebrando os blocos em volta. Foge quando o herói chega perto.',
     yeti: 'O grandão. Anda pesado e quase não recua com golpes. De perto levanta os dois punhos e soca o chão: o golpe pega quem está na frente e uma onda corre pelo chão (pule por cima). De longe arranca um bloco de gelo e arremessa em arco.',
     lobo: 'Chega em bando de 2 ou 3, rápido. Agacha, dá um bote longo com mordida e recua.',
     espirito: 'Voa e atravessa o ar deixando neve. Fica longe e atira 3 lascas de gelo que deixam o herói lento por 2 s.',
     verme: 'Vive dentro do chão e não leva dano enterrado. Uma rachadura embaixo do herói avisa; ele sai mordendo de baixo, fica exposto um tempo e volta a se enterrar.',
     sentinela: 'Golem de gelo azul. Bloqueia golpes de frente com o braço, dá uma pancada lenta e forte. Ao morrer se estilhaça em 6 lascas que machucam.',
-    yetiancestral: 'Chefe das Cavernas de Gelo. Veja as fases abaixo.'
+    yetiancestral: 'Chefe das Cavernas de Gelo. Veja as fases abaixo.',
+    gargula: 'Fica parada como estátua e leva pouco dano assim. Acorda quando o herói passa perto, voa por cima dele e mergulha. Sem ninguém por perto, pousa de novo.',
+    acolito: 'Conjurador de capuz que fica longe. Atira bolas de fogo roxo e, de tempos em tempos, levanta um esqueleto do chão perto do herói (no máximo 2 de cada vez).',
+    carnical: 'Morto-vivo de quatro patas, rápido. Agacha e pula de longe; a mordida faz o herói sangrar por 3 s.',
+    abominacao: 'Pilha enorme de cadáveres costurados, lenta. Ergue o gancho e bate pegando dos dois lados e jogando o herói longe. Ao morrer, dois zumbis saem de dentro.',
+    sincelo: 'Fica pendurado no teto igual aos sincelos do cenário e despenca quando o herói passa embaixo (deixa lento). Depois rasteja e morde.',
+    cacador: 'Explorador morto no gelo. De longe arremessa um arpão com corda que puxa o herói para perto; de perto dá machadada.',
+    javali: 'Bufa e cava o chão, depois investe em linha reta e joga o herói longe. Quebra o gelo no caminho; se bater em outra coisa fica tonto e leva mais dano.',
+    wendigo: 'Alto e magro, quase invisível no escuro até chegar perto; só os olhos brilham. Grita e deixa o herói lento, ataca com duas garradas rápidas e foge da luz das tochas.',
+    mineiro: 'Mineiro que morreu lá embaixo e continua trabalhando. Anda devagar até o herói, ergue a picareta e golpeia forte. Se a rocha estiver no caminho, cava através dela.',
+    carrinho: 'Parece um vagonete parado nos trilhos. Quando o herói fica na mesma linha, chacoalha, dispara e atropela; ao bater na parede se arrebenta por um tempo e leva mais dano.',
+    grisu: 'Bolsão de gás da mina que flutua atrás do herói, incha e explode. Qualquer fogo acende antes: um golpe, uma tocha perto, o fogo do lampião. Um grisu explodindo acende os outros perto.',
+    lampiao: 'Lampião que flutua sozinho, longe do alcance da espada, e atira bolas de fogo no herói.',
+    falsoveio: 'Parece um veio de ouro no chão. Quando o herói chega perto, abre uma boca cheia de dentes e morde; persegue pulando e volta a se esconder entre os blocos.',
+    golem: 'Minério que ganhou corpo, lento e muito resistente. De perto soca o chão: uma onda corre pelo chão e caem pedras do teto. De longe arranca um bloco e arremessa.',
+    toupeira: 'Pequena e rápida, morde. Se o herói estiver atrás da rocha, cava um túnel direto até ele.',
+    gatuno: 'Goblin pequeno e rápido que anda em bando. Corre até o herói, corta a bolsa e foge com o ouro; matando ele, o ouro volta.',
+    capataz: 'Goblin grande com um chicote de longo alcance. Estala o chicote sobre os goblins perto e eles ficam mais rápidos por alguns segundos.',
+    reigoblin: 'Chefe da Mina Abandonada. Veja as fases abaixo.',
+    sapo: 'Fica parado no escuro, só os olhos amarelos brilham. Pula atrás do herói em saltos compridos e, de longe, lança a língua: se pegar, puxa o herói para perto e morde.',
   },
+  // fases do Rei Goblin (js/85-rei-goblin.js)
+  rgFases: [
+    ['Fase 1', 'Avança com a Escavadeira de broca na frente, de parede a parede; quando bate na parede, a máquina fica tremendo um tempo (é a hora de bater). Da cabine joga dinamites.'],
+    ['Fase 2', 'Abaixo de 60% da vida, toca a corneta e goblins chegam correndo dos dois lados. Cada batida na parede derruba pedras do teto (uma sombra marca o chão antes), e ele vira a broca contra o teto.'],
+    ['Fase 3', 'Abaixo de 25%, a máquina explode e ele pula fora com o martelo-picareta: salta em cima do herói e esmaga o chão (a onda corre pelo chão), e joga feixes de três dinamites.']
+  ],
+  rgOnde: 'A Oficina da Escavadeira, um salão de 48 x 16 blocos nas Fornalhas Esquecidas (cerca de 730 m), do outro lado do mundo em relação aos poços de descida, com um trono feito de vagonete, montes de saque e fornalhas. Ao entrar, grades de ferro fecham as saídas. Fica salvo que o rei morreu.',
   // fases do Yeti Ancestral (docs/biomas.md, parte 4, seção 7, e js/74-yeti-ancestral.js)
   yetiFases: [
     ['Fase 1', 'Soco duplo no chão (levanta os punhos antes) com ondas de choque para os dois lados: pule por cima. De longe arranca um bloco de gelo e arremessa; o bloco se quebra em 3 lascas.'],
@@ -94,7 +120,15 @@ const UDW_TXT = {
     { zona: 16, nome: 'Coração do Inverno', de: 528, ate: 558, salas: 'grutas de gelo negro, o Trono de Gelo', carater: 'gelo negro antigo com veios azuis que brilham, cristais, gigantes e feras presos no gelo, altares de gelo' }
   ],
   icMinerios: [['min_ferro', 372, 528], ['min_ouro', 400, 558], ['min_cristal', 418, 558]],
-  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações' },
+  // faixas da mina (js/79-mina-api.js: MN_BANDS; js/84-mina-mundo.js) e os minérios delas (84: vein)
+  mnFaixas: [
+    { zona: 17, nome: 'Galerias Escoradas', de: 558, ate: 604, salas: 'galerias retas escoradas em níveis fixos, os pés dos dois poços de descida', carater: 'rocha ferrosa listrada de preto e vermelho, escoras e vigas, trilhos com vagonetes, lampiões, ferramentas largadas' },
+    { zona: 18, nome: 'Poços e Andaimes', de: 604, ate: 656, salas: 'poços fundos com escadas e andaimes, galerias de lavra', carater: 'rejeito, guinchos, polias com balde, elevadores, beliches podres, veios de ouro no quartzito' },
+    { zona: 19, nome: 'Acampamento Goblin', de: 656, ate: 708, salas: 'salões do acampamento com piso de tábua', carater: 'entulho, tendas, fogueiras, jaulas, estandartes, pinturas e o saque dos goblins, estacas com caveira' },
+    { zona: 20, nome: 'Fornalhas Esquecidas', de: 708, ate: 744, salas: 'salões das fornalhas, a Oficina da Escavadeira', carater: 'tijolo de fornalha e escória, fornalhas que ainda brilham, cadinhos, bigornas, engrenagens quebradas, brasas' }
+  ],
+  mnMinerios: [['carvao', 558, 688], ['min_ferro', 558, 744], ['min_ouro', 588, 744], ['min_cristal', 648, 744]],
+  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas' },
   // nome de cada bloco do mundo pela constante do jogo (03-blocos, 41/42 catedral, 52/53 cavernas). Os que viram item usam o nome do item.
   blocoNome: {
     DIRT: 'Terra', GRASS: 'Grama', STONE: 'Pedra', DEEP: 'Pedra funda', BEDROCK: 'Rocha-mãe (fundo do mundo)', LAVA: 'Lava', TRUNK: 'Tronco', LEAVES: 'Folhas',
@@ -107,12 +141,17 @@ const UDW_TXT = {
     CV_CASULO: 'Casulo', CV_FIOS: 'Fios de teia',
     IC_NEVE_DURA: 'Neve batida', IC_CALC_GELO: 'Calcário congelado', IC_O_FERRO: 'Veio de ferro', IC_O_OURO: 'Veio de ouro', IC_O_CRISTAL: 'Veio de cristal no gelo negro',
     IC_SINCELO: 'Sincelo', IC_ESTALAG: 'Estalagmite de gelo', IC_CRISTAL: 'Cristal de gelo', IC_CRISTAL_TETO: 'Cristal de gelo no teto', IC_NEVE_MONTE: 'Montinho de neve',
-    IC_OSSOS: 'Ossos congelados', IC_BARREIRA: 'Parede de gelo do chefe', IC_VEIO: 'Veio de gelo azul', IC_COLUNA: 'Coluna de gelo'
+    IC_OSSOS: 'Ossos congelados', IC_BARREIRA: 'Parede de gelo do chefe', IC_VEIO: 'Veio de gelo azul', IC_COLUNA: 'Coluna de gelo',
+    MN_FERROSA: 'Rocha ferrosa', MN_REJEITO: 'Rejeito', MN_ENTULHO: 'Entulho', MN_TABUA: 'Tábua de mina', MN_VIGA: 'Viga de mina', MN_CAVADA: 'Rocha cavada', MN_TIJOLO: 'Tijolo de fornalha',
+    MN_ESCORIA: 'Escória', MN_QUARTZITO: 'Quartzito', MN_BARREIRA: 'Grade de ferro do chefe', MN_O_CARVAO: 'Veio de carvão', MN_O_FERRO: 'Veio de ferro', MN_O_OURO: 'Veio de ouro no quartzito',
+    MN_O_CRISTAL: 'Veio de cristal no quartzito', MN_ESCORA: 'Escora', MN_TRILHO: 'Trilho', MN_LAMPIAO: 'Lampião no gancho', MN_ESCADA: 'Escada', MN_FERRAMENTA: 'Ferramentas largadas',
+    MN_PEDRAS: 'Monte de pedras', MN_CORDA: 'Corda', MN_BRASA: 'Brasa de escória', MN_ESTACA: 'Estaca com caveira'
   },
   paredeNome: {
     1: 'Terra', 2: 'Pedra', 3: 'Pedra funda', 4: 'Cripta', WCT_CALCARIO: 'Calcário', WCT_CANTARIA: 'Cantaria', WCT_REBOCO: 'Reboco', WCT_PAINEL: 'Painel de madeira',
     WCT_CRIPTA: 'Pedra de cripta', WCT_OSSARIO: 'Ossário', WCT_ARCADA: 'Arcada', WCT_MARMORE: 'Mármore', WCV_TERRA: 'Terra úmida', WCV_ROCHA: 'Rocha', WCV_CALCITA: 'Calcita',
-    WCV_TEIA: 'Teia', WCV_XISTO: 'Xisto', WIC_CALC: 'Calcário congelado', WIC_ROCHA: 'Rocha gelada', WIC_GELO: 'Gelo azul', WIC_NEVE: 'Neve batida', WIC_NEGRO: 'Gelo negro'
+    WCV_TEIA: 'Teia', WCV_XISTO: 'Xisto', WIC_CALC: 'Calcário congelado', WIC_ROCHA: 'Rocha gelada', WIC_GELO: 'Gelo azul', WIC_NEVE: 'Neve batida', WIC_NEGRO: 'Gelo negro',
+    WMN_FERROSA: 'Rocha ferrosa', WMN_TABUADO: 'Tabuado', WMN_CAVADA: 'Rocha cavada', WMN_TIJOLO: 'Tijolo de fornalha', WMN_QUARTZITO: 'Quartzito'
   },
   apoio: { chao: 'No chão', teto: 'No teto', parede: 'Na parede de fundo', janela: 'Janela' },
 
@@ -122,5 +161,7 @@ const UDW_TXT = {
   cavernaEntrada: 'O pórtico de pedra à direita da placa do vilarejo ("Cavernas →"): a escadaria de cantaria desce e vai virando terra até abrir nas Grutas Rasas.',
   gelo: 'A terceira camada, debaixo das criptas da catedral, de 372 a 558 m: um frio mais velho que a catedral subiu pelas rachaduras e congelou tudo. Fendas de geada, salões de gelo azul que brilha, as tocas dos yetis e, no fundo, o gelo negro do Coração do Inverno. O gelo, o gelo azul e o gelo negro escorregam: o herói demora para arrancar e para frear.',
   geloEntrada: 'Duas salas das Criptas mais baixas têm o chão rachado: uma fenda desce de cada uma até as Fendas Geladas, com degraus de pedra congelada a cada 3 blocos para voltar pulando.',
+  mina: 'A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m: uma mina de ferro e ouro que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins tomaram o lugar: galerias escoradas, poços com andaimes, o acampamento goblin e, no fundo, as fornalhas que nunca apagaram.',
+  minaEntrada: 'Dois poços antigos descem do chão do Coração do Inverno: uma boca de madeira no gelo, um poço revestido de tábuas e uma escada até a primeira galeria. Volta-se pela mesma escada.',
   cavernas: 'O mundo antigo de cavernas (Cavernas Rasas, Profundas, Abismo e a Cripta do Carrasco) continua no código, mas está desligado. As cavernas de hoje são outras (js/52 a 57).'
 };

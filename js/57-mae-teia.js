@@ -26,7 +26,7 @@ function inTeiaHall(tx, ty, m = 0) { const B = cvBoss; if (!B) return false; con
 function teiaDrop(m) { const k = enemies.indexOf(m); if (k >= 0) enemies.splice(k, 1); m.dead = true; }
 function teiaDress() {
   const B = cvBoss; if (!B) return;
-  const W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), x0 = B.cx - (B.w >> 1), x1 = x0 + B.w - 1;
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), x0 = B.cx - (B.w >> 1), x1 = x0 + B.w - 1;
   // a clean floor of schist, the hall cleared of loose decorations, webbed walls
   for (let x = x0; x <= x1; x++) { tiles[I(x, B.fy)] = CV_XISTO; tiles[I(x, B.fy + 1)] = CV_XISTO; for (let y = B.top; y < B.fy; y++) { const t = tiles[I(x, y)]; if (t !== AIR && !SOLID[t]) tiles[I(x, y)] = AIR; walls[I(x, y)] = WCV_TEIA; } }
   for (let y = B.top - 1; y < B.fy; y++) for (const x of [x0 - 1, x1 + 1]) { const t = tiles[I(x, y)]; if (SOLID[t] && (t === CV_XISTO || t === CV_ROCHA)) tiles[I(x, y)] = CV_TEIA; }

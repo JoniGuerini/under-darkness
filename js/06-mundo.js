@@ -40,15 +40,17 @@ function generate(sd) {
     }
   }
   // caves: noisy fill + cellular automata = chunky organic caverns with ledges
+  // with the cave layer on (52-57) everything under the crust is rebuilt, so the old caverns are skipped (they cost seconds in the wide world)
+  const OLD_CAVES = !(typeof CAVERNA !== 'undefined' && CAVERNA);
   const cave = new Uint8Array(NN), tmp = new Uint8Array(NN);
   const top = x => surf[x] + 9;
-  for (let y = 0; y < WH - 4; y++) for (let x = 0; x < WW; x++) {
+  if (OLD_CAVES) for (let y = 0; y < WH - 4; y++) for (let x = 0; x < WW; x++) {
     const d = y - top(x); if (d < 0) continue;
     const ramp = clamp(d / 8, 0, 1), reg = seam((a, b) => N.fbm(a * 0.02, b * 0.028 + 77, 3), x, y), streak = seam((a, b) => N.n2(a * 0.22, b * 0.55 + 300), x, y);
     const p = (0.445 + (reg - 0.5) * 0.55 + (streak - 0.5) * 0.16) * ramp;
     cave[y * WW + x] = R() < p ? 1 : 0;
   }
-  for (let it = 0; it < 6; it++) {
+  for (let it = 0; it < (OLD_CAVES ? 6 : 0); it++) {
     for (let y = 1; y < WH - 4; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x; if (y < top(x)) { tmp[i] = 0; continue; }
       let s1 = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!cave[(y + dy) * WW + W1(x + dx)]) s1++;
@@ -87,10 +89,15 @@ function generate(sd) {
   };
   // connect the caverns (nearest-neighbour spanning tree over region centres)
   if (big.length > 1) {
-    const inT = new Uint8Array(big.length); inT[0] = 1;
+    // Prim's with a nearest-tree-node table: O(n^2) instead of O(n^3) (the 3x world has three times the caverns)
+    const inT = new Uint8Array(big.length), nd = new Float64Array(big.length).fill(1e9), nf = new Int32Array(big.length).fill(-1);
+    const dd = (i, j) => Math.hypot(wdx(big[i].px - big[j].px), (big[i].py - big[j].py) * 1.4);
+    const add = i => { inT[i] = 1; for (let j = 0; j < big.length; j++) if (!inT[j]) { const d = dd(i, j); if (d < nd[j]) { nd[j] = d; nf[j] = i; } } };
+    add(0);
     for (let k = 1; k < big.length; k++) {
       let best = 1e9, a = -1, b = -1;
-      for (let i = 0; i < big.length; i++) if (inT[i]) for (let j = 0; j < big.length; j++) if (!inT[j]) { const d = Math.hypot(wdx(big[i].px - big[j].px), (big[i].py - big[j].py) * 1.4); if (d < best) { best = d; a = i; b = j; } }
+      for (let j = 0; j < big.length; j++) if (!inT[j] && nd[j] < best) { best = nd[j]; a = nf[j]; b = j; }
+      add(b);
       inT[b] = 1; tunnel(big[a].px, big[a].py, big[a].px + wdx(big[b].px - big[a].px), big[b].py, 1.35 + R() * 0.4, null);   // the short way round
     }
   }
@@ -98,7 +105,7 @@ function generate(sd) {
   const entrance = [];
   { let x = SPX + VIL_HALF + 4, y = surf[SPX + VIL_HALF + 4] - 1; const pts = [[x, y]]; for (let k = 0; k < 6; k++) { x += 7 + R() * 8; y += 6 + R() * 6; pts.push([x, y]); }
     for (let k = 1; k < pts.length; k++) tunnel(pts[k - 1][0], pts[k - 1][1], pts[k][0], pts[k][1], 1.75, entrance); }
-  for (let k = 0; k < 4; k++) {
+  for (let k = 0; k < 4 * WSC; k++) {
     let x = 15 + R() * (WW - 30); if (Math.abs(x - SPX) < VIL_HALF + 16) x += VIL_HALF + 40; x = clamp(x, 10, WW - 10);
     const dir = R() < 0.5 ? 1 : -1, x1 = clamp(x + dir * (20 + R() * 20), 6, WW - 6);
     tunnel(x, surf[Math.floor(x)] - 1, x1, surf[Math.floor(x)] + 26 + R() * 14, 1.55, null);
@@ -110,7 +117,7 @@ function generate(sd) {
     if (n === 0) tiles[i] = AIR;
   }
   // dissolve small rock islands floating in big caverns
-  { const seen = new Uint8Array(NN), st = [];
+  if (OLD_CAVES) { const seen = new Uint8Array(NN), st = [];
     for (let s0 = 0; s0 < NN; s0++) {
       const y0 = (s0 / WW) | 0, x0 = s0 % WW; if (seen[s0] || !SOLID[tiles[s0]] || y0 < surf[x0] + 10 || y0 > WH - 6) continue;
       const cells = []; let open = true; seen[s0] = 1; st.push(s0);
@@ -124,7 +131,7 @@ function generate(sd) {
     if (tiles[i] === AIR && y >= WH - 13) tiles[i] = LAVA;
   }
   // ores
-  for (let k = 0; k < 760; k++) {
+  for (let k = 0; k < 760 * WSC; k++) {
     let x = 3 + Math.floor(R() * (WW - 6)), y = SURF_BASE + 6 + Math.floor(R() * (WH - SURF_BASE - 22));
     const t0 = tiles[y * WW + x]; if (t0 !== STONE && t0 !== DEEP && t0 !== DIRT) continue;
     const r = R(); let ore = COPPER;
@@ -214,9 +221,9 @@ function generate(sd) {
     tiles[y * WW + x] = CHEST; chestAt.push([x, y]); return true;
   };
   if (entrance.length > 6) { const [ex, ey] = entrance[Math.floor(entrance.length * 0.6)]; for (let r = 0; r < 8; r++) { let ok = false; for (let y = ey - 2; y < ey + 6 && !ok; y++) ok = tryChest(ex + r, y) || tryChest(ex - r, y); if (ok) break; } }
-  for (let k = 0; k < 6000 && chestAt.length < 36; k++) { const x = 4 + Math.floor(R() * (WW - 8)); tryChest(x, Math.floor(surf[x] + 16 + R() * (WH - surf[x] - 34))); }
+  for (let k = 0; k < 6000 * WSC && chestAt.length < 36 * WSC; k++) { const x = 4 + Math.floor(R() * (WW - 8)); tryChest(x, Math.floor(surf[x] + 16 + R() * (WH - surf[x] - 34))); }
   // then thin them out to a few, far apart (done without the random stream, so the rest of the world comes out the same)
-  { const keep = []; for (const c of chestAt) { if (keep.length < 14 && !keep.some(([kx, ky]) => Math.abs(wdx(kx - c[0])) < 24 && Math.abs(ky - c[1]) < 14)) keep.push(c); else tiles[c[1] * WW + c[0]] = AIR; } }
+  { const keep = []; for (const c of chestAt) { if (keep.length < 14 * WSC && !keep.some(([kx, ky]) => Math.abs(wdx(kx - c[0])) < 24 && Math.abs(ky - c[1]) < 14)) keep.push(c); else tiles[c[1] * WW + c[0]] = AIR; } }
 
   // ---------- the abandoned crypt: a grid of rooms deep in the caves; where it is, its layout and its dressing change every world ----------
   crypt = null;

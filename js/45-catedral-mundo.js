@@ -26,7 +26,7 @@ const CATH_SPAWN = {
 const BAND_NAMES = ['atrio', 'nave', 'claustro', 'criptas'];
 
 function buildCathedral() {
-  const NN = WW * WH, W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const R = mulberry32(seed ^ 0x7ca7ed2a);
   CB_S0 = surf[SPX] + CAVE_D; CB_F = Math.min(1, (WH - 7 - CB_S0) / 188);   // the caves (js/56-caverna-mundo.js) fill the CAVE_D metres above
   const occ = new Uint8Array(NN);   // 1 masonry, 2 inside a room or passage, 3 kept clear (the crypt)
@@ -189,7 +189,7 @@ function buildCathedral() {
     const U = F[ORDER[k]], L = F[ORDER[k + 1]], pairs = [];
     for (const A of U) for (const B of L) { const [o0, o1] = overlapX(A, B); if (o1 - o0 >= 2) pairs.push([A, B, o0, o1]); }
     for (let j = pairs.length - 1; j > 0; j--) { const q = (R() * (j + 1)) | 0; [pairs[j], pairs[q]] = [pairs[q], pairs[j]]; }
-    const want = Math.min(pairs.length, k === 0 ? 2 : 3 + (R() < 0.5 ? 1 : 0));
+    const want = Math.min(pairs.length, (k === 0 ? 2 : 3 + (R() < 0.5 ? 1 : 0)) * WSC);
     for (let j = 0; j < want; j++) {
       const [A, B, o0, o1] = pairs[j], st = STY[B.band];
       if (j === 0 && k >= 1 && k <= 4 && R() < 0.75) {
@@ -289,7 +289,7 @@ function buildCathedral() {
       }
     }
   };
-  vein(COAL, 170, 6, 184, 3, 7); vein(COPPER, 150, 6, 110, 2, 6); vein(IRON, 130, 26, 184, 2, 6); vein(GOLD, 80, 82, 184, 2, 5); vein(CRYSTAL, 50, 132, 184, 2, 5);
+  vein(COAL, 170 * WSC, 6, 184, 3, 7); vein(COPPER, 150 * WSC, 6, 110, 2, 6); vein(IRON, 130 * WSC, 26, 184, 2, 6); vein(GOLD, 80 * WSC, 82, 184, 2, 5); vein(CRYSTAL, 50 * WSC, 132, 184, 2, 5);
 
   // ---------- 9. everything reachable from the village ----------
   const reach = new Uint8Array(NN), stack = [];
@@ -339,7 +339,7 @@ function buildCathedral() {
     if (R3() < 0.35) { const x = Rm.x0 + 1 + ((R3() * (Rm.w - 2)) | 0), y = Rm.ceil[x - Rm.x0]; if (ceilOk(x, y)) for (let j = 0, len = 1 + ((R3() * 3) | 0); j < len && tiles[I(x, y + j)] === AIR; j++) put(x, y + j, CHAIN); }
     if (Rm.w >= 8 && R3() < 0.5) { const x = Rm.x0 + 1 + ((R3() * (Rm.w - 2)) | 0); if (floorOk(x, Rm.fy - 1) && !chests.some(([a, b]) => Math.abs(W1(a - x + WW / 2) - WW / 2) < 30 && Math.abs(b - Rm.fy) < 20)) chests.push([x, Rm.fy - 1]); }
   }
-  for (const [x, y] of chests.slice(0, 16)) tiles[I(x, y)] = CHEST;
+  for (const [x, y] of chests.slice(0, 16 * WSC)) tiles[I(x, y)] = CHEST;
 
   // ---------- 10b. columns run from floor to vault; trees only stand on soil ----------
   for (let x = 0; x < WW; x++) for (let y = 1; y < WH - 1; y++) {
@@ -385,7 +385,7 @@ function addProp(def, v, X, Y, sup) {
 }
 function placeProps() {
   PROPS.length = 0; propBuckets.clear(); propBySup.clear();
-  const W1 = x => ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a0b5);
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), R = mulberry32(seed ^ 0x9a0b5);
   const used = new Uint8Array(WW * WH * 2);   // [floor/ceiling layer, back layer] per tile
   const fits = (x0, y0, tw, th, layer, needAir) => {
     if (x0 < 1 || x0 + tw >= WW - 1 || y0 < 1 || y0 + th >= WH - 3) return false;   // never across the seam of the world

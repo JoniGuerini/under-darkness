@@ -1,13 +1,14 @@
 # Biomas de Under Darkness
 
-Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2), a Catedral (parte 3) e as Cavernas de Gelo (parte 4); o resto é ideia.
+Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2), a Catedral (parte 3), as Cavernas de Gelo (parte 4) e a Mina Abandonada (parte 5); o resto é ideia.
 
 - Parte 1: o que é um bioma e a ficha com todas as variáveis.
 - Parte 2: a primeira camada, As Cavernas (existe).
 - Parte 3: a segunda camada, a Catedral Abandonada (existe), com tudo que tem nela.
 - Parte 4: a terceira camada, As Cavernas de Gelo (existe).
-- Parte 5: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
-- Parte 6: outras ideias soltas, só o conceito.
+- Parte 5: a quarta camada, A Mina Abandonada (existe).
+- Parte 6: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
+- Parte 7: outras ideias soltas, só o conceito.
 
 As regras técnicas de geração (apoio dos objetos, janelas, colunas, entrada, ordem e testes) continuam em [regras-de-bioma.md](regras-de-bioma.md). Este documento não repete essas regras; ele diz **o que** um bioma tem, e aquele diz **como** gerar sem erro.
 
@@ -454,16 +455,20 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 | [ ] | Esqueleto Arqueiro | recua, mira, flecha | 44 / 11 |
 | [ ] | Guardião Esquelético | lança e escudo de torre, bloqueia de frente, estocada longa | 90 / 15 |
 | [ ] | Espectro | atravessa paredes, some e aparece, investida | 40 / 12 |
+| [ ] | Gárgula | parada como estátua (leva só 35% do dano assim); acorda quando o herói passa perto, voa por cima dele e mergulha; leva 65% do dano no voo; sem ninguém por perto, pousa de novo | 70 / 13 |
+| [ ] | Acólito Profano | conjurador de capuz que fica longe; atira bolas de fogo roxo e, de tempos em tempos, levanta um esqueleto do chão perto do herói (no máximo 2 vivos por acólito) | 50 / 12 |
+| [ ] | Carniçal | morto-vivo de quatro patas, rápido; agacha (aviso) e pula de longe; a mordida faz sangrar (perde vida por 3 s) | 55 / 12 |
+| [ ] | Abominação | pilha de cadáveres costurados, o dobro do zumbi, lenta; ergue o gancho (aviso) e bate pegando dos dois lados e jogando longe; ao morrer, 2 zumbis saem de dentro | 260 / 22 |
 
-Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a cada 45 m (até o 6). Antes das cavernas eram 1 a 5. Ao morrer: esqueletos viram montes de ossos, zumbis desabam e afundam.
+Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/44-mortos-vivos.js`, os 4 últimos do `js/77-catedral-novos.js`. Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a cada 45 m (até o 6). Antes das cavernas eram 1 a 5. Ao morrer: esqueletos viram montes de ossos, zumbis desabam e afundam.
 
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
 |---|---|---|
-| Átrio | zumbi 0.6, esqueleto 0.4 | 5 |
-| Nave | zumbi 0.3, vomitador 0.15, esqueleto 0.3, arqueiro 0.25 | 8 |
-| Claustro | zumbi 0.1, vomitador 0.13, esqueleto 0.22, arqueiro 0.2, guardião 0.2, espectro 0.15 | 9 |
-| Criptas | zumbi 0.13, vomitador 0.1, esqueleto 0.2, arqueiro 0.1, guardião 0.22, espectro 0.25 | 10 |
+| Átrio | zumbi 0.45, esqueleto 0.3, arqueiro 0.12, gárgula 0.22 | 6 |
+| Nave | zumbi 0.25, vomitador 0.12, esqueleto 0.23, arqueiro 0.18, gárgula 0.14, acólito 0.12 | 8 |
+| Claustro | vomitador 0.12, esqueleto 0.2, guardião 0.2, espectro 0.16, acólito 0.14, carniçal 0.18 | 9 |
+| Criptas | zumbi 0.13, esqueleto 0.18, guardião 0.2, espectro 0.22, carniçal 0.17, abominação 0.1 | 10 |
 
 ## 7. Chefe: O Rei Esqueleto
 - **Onde:** um salão da nave ou do claustro, sorteado pela semente, com estrado, trono, tapete, candelabros e tocheiros. Ao entrar, grades de ferro fecham todas as saídas.
@@ -634,8 +639,12 @@ Ficha feita em 2026-10-09 a pedido do Jonathan ("um bioma de gelo, cavernas de g
 | [ ] | Verme da Geada | vive dentro da neve e do gelo; uma rachadura no chão embaixo do herói avisa, e ele sai mordendo de baixo; depois volta a se enterrar | 60 / 14 |
 | [ ] | Sentinela de Gelo | um golem de gelo azul: bloqueia golpes de frente com o braço de gelo, dá uma pancada lenta e forte; ao morrer se estilhaça em lascas | 120 / 16 |
 | [ ] | Gosma gelada | a gosma, azul clara e com gelo por dentro | 22 / 9 |
+| [ ] | Sincelo Vivo | pendurado no teto igual aos sincelos do cenário; despenca quando o herói passa embaixo (dano alto, deixa lento) e depois rasteja mordendo | 34 / 16 |
+| [ ] | Caçador Congelado | explorador morto no gelo; de longe mira (aviso) e arremessa um arpão com corda: se pegar, puxa o herói para perto; de perto, machadada | 70 / 14 |
+| [ ] | Javali da Tundra | bufa e cava o chão (aviso), investe em linha reta, derruba e joga o herói longe; quebra o gelo no caminho; se bater em outra coisa fica tonto e leva 60% a mais de dano | 110 / 18 |
+| [ ] | Wendigo | alto e magro, quase invisível no escuro até chegar perto (os olhos brilham sempre); grita e deixa o herói lento; duas garradas rápidas; foge da luz das tochas | 150 / 20 |
 
-Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Sem dano de contato: só o soco, a onda, o bloco, o bote, as lascas, a mordida e a pancada machucam. Todos usam linha de visão e busca de caminho (o espírito voa, o verme anda por dentro do chão).
+Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/72-gelo-bichos.js`, os 4 últimos do `js/78-gelo-novos.js`. Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Sem dano de contato: só o soco, a onda, o bloco, o bote, as lascas, a mordida, a pancada, a queda do sincelo, o arpão, a machadada, a investida e as garras machucam. Todos usam linha de visão e busca de caminho (o espírito voa, o verme anda por dentro do chão).
 
 **Feras do frio:** a Nevasca e qualquer efeito de frio deixam estas feras só levemente lentas e nunca as congelam.
 
@@ -644,10 +653,10 @@ Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Se
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
 |---|---|---|
-| Fendas Geladas | lobo 0.35, espírito 0.25, gosma 0.25, verme 0.15 | 8 |
-| Salões de Gelo Azul | lobo 0.25, espírito 0.25, sentinela 0.2, gosma 0.15, verme 0.15 | 9 |
-| Covis dos Yetis | yeti 0.3, lobo 0.3, verme 0.2, espírito 0.2 | 9 |
-| Coração do Inverno | sentinela 0.3, yeti 0.25, espírito 0.25, lobo 0.2 | 10 |
+| Fendas Geladas | lobo 0.3, espírito 0.22, gosma 0.2, verme 0.13, sincelo 0.18, caçador 0.15 | 8 |
+| Salões de Gelo Azul | lobo 0.2, espírito 0.17, sentinela 0.18, sincelo 0.15, caçador 0.15, javali 0.15 | 9 |
+| Covis dos Yetis | yeti 0.25, lobo 0.2, verme 0.15, espírito 0.15, javali 0.15, wendigo 0.1 | 9 |
+| Coração do Inverno | sentinela 0.28, yeti 0.22, espírito 0.2, lobo 0.15, wendigo 0.15 | 10 |
 
 ## 7. Chefe: O Yeti Ancestral
 - **Quem é:** o primeiro dos yetis, branco-azulado de velho, com o dobro do tamanho dos outros, chifres curvos e cristais de gelo crescendo nas costas.
@@ -696,7 +705,76 @@ Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Se
 
 ---
 
-# Parte 5. Bioma 4 (ideia): As Minas Fúngicas
+# Parte 5. Bioma 4: A Mina Abandonada (a quarta camada)
+
+A parte técnica está em [mina-spec.md](mina-spec.md).
+
+## 1. Identidade
+- **Nome:** A Mina Abandonada.
+- **Faixas:** Galerias Escoradas, Poços e Andaimes, Acampamento Goblin, Fornalhas Esquecidas.
+- **Conceito:** uma mina de ferro e ouro que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins se mudaram para lá com o que sobrou.
+- **Clima:** escuro, quente e empoeirado; madeira rangendo, pingos, picaretas ao longe, brasas no fundo.
+
+## 2. Lugar no mundo
+- Debaixo das Cavernas de Gelo, de 558 a 744 m.
+- **Entrada:** dois poços antigos descem do chão do Coração do Inverno: boca de madeira no gelo, poço revestido de tábuas e escada até a primeira galeria.
+- **Saída:** a mesma escada. Toda parte da mina tem caminho de volta sem cavar (escadas em todo desnível alto).
+
+## 3. Estrutura e geração
+- Galerias retas e escoradas em níveis fixos, poços com escadas e andaimes, salões do acampamento com piso de tábua, salões das fornalhas e a Oficina da Escavadeira (o chefe), do outro lado do mundo em relação aos poços.
+- Cavernas naturais entre as obras dos mineiros, ligadas por túneis.
+
+## 4. Blocos
+- **Sólidos:** rocha ferrosa (listrada de preto e vermelho), rejeito, entulho, tábua de mina, viga de mina, rocha cavada, tijolo de fornalha, escória, quartzito, grade de ferro do chefe.
+- **Decoração de 1 bloco:** escora, trilho, lampião no gancho, escada, ferramentas largadas, monte de pedras, corda, brasa de escória, estaca com caveira.
+- **Paredes de fundo:** rocha ferrosa, tabuado, rocha cavada, tijolo de fornalha, quartzito.
+- **Terceira camada:** rocha, andaimes, fornalhas.
+- **Minérios:** carvão e ferro na rocha ferrosa; ouro e cristal no quartzito.
+
+## 5. Objetos de cena
+28 objetos: vagonete (cheio e vazio), vagonete tombado, guincho, pilha de caixotes, barril de pólvora, beliche podre, mesa com lampião e mapa, bigorna e fole, monte de minério, carrinho de mão, mineiro morto, tenda goblin, saque dos goblins, fogueira goblin, engrenagem quebrada, fornalha, cadinho, polia com balde, lanterna grande, jaula goblin, estandarte goblin, elevador de mina, placa de galeria, ferramentas na parede, mapa da mina, pintura goblin, veio de ouro, e o Trono do Rei Goblin.
+
+## 6. Inimigos: os mineiros e os goblins
+| Monstro | O que faz |
+|---|---|
+| Mineiro Morto | anda até o herói e golpeia com a picareta; cava através da rocha no caminho |
+| Carrinho Assombrado | parado nos trilhos até o herói ficar na linha; chacoalha, dispara e se arrebenta na parede |
+| Grisu | gás que flutua, incha e explode; qualquer fogo acende antes, e um acende os outros |
+| Lampião Assombrado | flutua longe e atira bolas de fogo |
+| Falso Veio | um veio de ouro que abre a boca e morde, persegue pulando e se esconde de novo |
+| Golem de Minério | lento e duro: soca o chão (onda e pedras do teto), arremessa blocos |
+| Rato-Toupeira | rápido, morde e cava túnel até o herói |
+| Goblin Dinamiteiro | veio das cavernas: joga dinamite que quica e quebra blocos |
+| Goblin Gatuno | em bando; rouba ouro e foge (matando, o ouro volta) |
+| Capataz Goblin | chicote longo; acelera os goblins perto |
+
+No lugar do goblin, as Fundações Soterradas (cavernas) ganharam o **Sapo das Grutas**: pula atrás do herói e puxa com a língua.
+
+## 7. Chefe: O Rei Goblin
+Na Escavadeira, uma broca a vapor que era dos mineiros. Fase 1: investida com a broca e dinamite da cabine. Fase 2 (60%): corneta que chama goblins, pedras do teto, broca no teto. Fase 3 (25%): a máquina explode e ele luta a pé com o martelo-picareta (salto, onda no chão, feixes de dinamite). Solta o **Capacete do Rei Goblin** (lendário).
+
+## 8. Loot e economia
+Materiais novos: engrenagem enferrujada, pepita de ouro, núcleo de minério, óleo de lampião (e a pele de sapo nas cavernas). O ferreiro e a curandeira compram; o ancião tem missões novas para eles.
+
+## 9. Luz e atmosfera
+Lampiões, fogueiras, fornalhas e brasas dão luz quente; poeira caindo e brasas subindo nas fornalhas; o quartzito brilha onde tem ouro e cristal.
+
+## 10. Arquivos
+| Arquivo | O que tem |
+|---|---|
+| `js/79-mina-api.js` | ids, faixas, zonas |
+| `js/80-mina-blocos.js` | blocos, paredes, camada distante, decoração |
+| `js/81-mina-objetos.js` | objetos de cena |
+| `js/82-mina-bichos.js` | os 7 monstros da mina |
+| `js/83-mina-goblins.js` | gatuno e capataz |
+| `js/84-mina-mundo.js` | geração, spawn, nível, loja, missões, save |
+| `js/85-rei-goblin.js` | o chefe |
+| `js/86-sapo-grutas.js` | o sapo das cavernas |
+| `docs/mina-spec.md` | a parte técnica |
+
+---
+
+# Parte 6. Bioma 5 (ideia): As Minas Fúngicas
 
 ## 1. Identidade
 - **Nome:** As Minas Fúngicas (nome provisório; alternativa: Galerias de Ferroalto).
@@ -849,7 +927,7 @@ Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Se
 
 ---
 
-# Parte 6. Outras ideias soltas (só o conceito)
+# Parte 7. Outras ideias soltas (só o conceito)
 
 Para escolher quais viram ficha completa depois.
 

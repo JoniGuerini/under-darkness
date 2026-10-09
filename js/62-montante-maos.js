@@ -23,7 +23,12 @@ function twoHandRule() {
 }
 {
   const _recalc = recalc;
-  recalc = function () { twoHandRule(); _recalc.apply(this, arguments); twoHand.w = equip.weapon; twoHand.s = equip.shield; };
+  recalc = function () {
+    twoHandRule(); _recalc.apply(this, arguments); twoHand.w = equip.weapon; twoHand.s = equip.shield;
+    // its own blow (gsSwing in 61): one chop fills most of the time between blows, like the one-handed swing does
+    pl.twoHand = !!(equip.weapon && isTwoHand(equip.weapon.id));
+    if (pl.twoHand) pl.atkSpd = clamp(GS_TM.total / (pl.atkPeriod * 0.85), 0.5, 1.6);
+  };
 }
 
 /* ---- sword talents ---- */
@@ -103,5 +108,14 @@ function gripBothHands(P) {
       if (on) { img.src = ICON[w.id].url; img.hidden = false; d._key = 'dm' + w.uid; }
       else if (d._key && String(d._key).startsWith('dm')) { d._key = null; paintSlot(d, null, true); }
     });
+  };
+}
+
+/* ---- the chop carries the body: lean back 1 px on the raise, forward on the chop, sink 1 px at the impact ---- */
+{
+  const _drawPlayer = drawPlayer;
+  drawPlayer = function (cx, cy) {
+    if (!pl.twoHand || pl.atkT < 0) return _drawPlayer(cx, cy);
+    return _drawPlayer(cx - pl.facing * (pl.gsLean || 0), pl.gsSink ? cy - 1 : cy);   // lean back on the raise, forward on the chop
   };
 }

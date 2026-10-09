@@ -3,7 +3,7 @@
 /* ================= início e busca ================= */
 (() => {
   const gear = () => Object.keys(ITEMS).filter(id => ITEMS[id].slot);
-  const ativos = () => { const s = new Set(['rei', 'maeteia', 'filhote', 'yetiancestral']); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
+  const ativos = () => { const s = new Set(['rei', 'maeteia', 'filhote', 'yetiancestral', 'reigoblin']); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
   UDW.ativos = ativos;
 
   UDW.pages.inicio = {
@@ -25,7 +25,7 @@
         ${card('forja', 'Receitas da forja', RECIPES.length + Object.keys(FURN).length, `${Object.keys(FURN).length} fundições na fornalha e ${RECIPES.length} peças na bigorna`)}
         ${card('inimigos', 'Inimigos', Object.keys(ET).length, `${A.size} aparecem no mundo de hoje; os outros estão nas cavernas desligadas`)}
         ${card('npcs', 'Moradores', NPCS.length, NPCS.map(n => n.name).join(', '))}
-        ${card('biomas', 'Biomas', 3, `As Cavernas, a Catedral Abandonada e as Cavernas de Gelo: ${Object.keys(PROP_DEFS).length} objetos de cena, ${UDW.cathBlocks().length} blocos de construção`)}
+        ${card('biomas', 'Biomas', 3, `As Cavernas, a Catedral Abandonada, as Cavernas de Gelo e a Mina Abandonada: ${Object.keys(PROP_DEFS).length} objetos de cena, ${UDW.cathBlocks().length} blocos de construção`)}
         ${card('regras', 'Regras do jogo', '', 'herói, níveis, defesa, vigor, poção, dia e noite, tamanho do mundo')}
       </section>`;
     }
