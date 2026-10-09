@@ -1,0 +1,8 @@
+/* cursor and selection (js/30-cursor.js draws the pointer) */
+html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text}
+img,canvas,a{-webkit-user-drag:none}
+::selection{background:transparent}
+input::selection,textarea::selection{background:#7a4e1a;color:#fff6dc}
+html.own-cursor,html.own-cursor *{cursor:none!important}
+#cursor{position:fixed;left:0;top:0;z-index:2147483647;pointer-events:none;image-rendering:pixelated;will-change:transform}

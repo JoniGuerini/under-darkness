@@ -1,0 +1,9 @@
+/* tooltip of gear (js/48-itemizacao.js): item level, damage and speed, DPS, base numbers, effects in green, legendary flavour */
+.tipbox .il{color:#e9c64a;font-size:13px;font-weight:600}
+.tipbox .wdmg{display:flex;justify-content:space-between;gap:16px;color:var(--parch);font-size:14px;font-variant-numeric:tabular-nums;margin-top:3px}
+.tipbox .dps{color:var(--parch);font-size:13px;font-variant-numeric:tabular-nums}
+.tipbox .base,.tipbox .fx{display:grid;gap:1px;margin-top:4px;font-size:14px;font-variant-numeric:tabular-nums}
+.tipbox .base{color:var(--parch)}
+.tipbox .fx{color:#7fd36a}
+.tipbox .fx i{font-style:normal;font-weight:600}
+.tipbox .flavor{color:#e9c64a;font-style:italic}

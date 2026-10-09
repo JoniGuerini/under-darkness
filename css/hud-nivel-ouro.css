@@ -1,0 +1,18 @@
+/* Nível à esquerda e ouro à direita da barra de ação, colados nela */
+#hbrow{position:absolute;left:50%;bottom:calc(34px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:stretch;gap:8px}
+#hbrow>#hotbar{position:static;left:auto;bottom:auto;transform:none}
+
+.hbside{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 10px;min-width:58px;text-align:center}
+.hbside b,.hbside span{font-variant-numeric:tabular-nums;text-shadow:2px 2px 0 #000}
+#hudLvl b{font-family:var(--font-title);font-size:34px;line-height:1;font-weight:400;color:var(--parch)}
+#hudGold{flex-direction:row;gap:6px}
+#hudGold span{font-family:var(--font-title);font-size:28px;line-height:1;color:#ffd27a}
+#hudGold img{order:-1;width:20px;height:20px;image-rendering:pixelated}
+
+@media (max-width:560px){
+  #hbrow{bottom:calc(28px + env(safe-area-inset-bottom,0px));gap:4px}
+  .hbside{min-width:44px;padding:4px 6px}
+  #hudLvl b{font-size:26px}
+  #hudGold span{font-size:19px}
+  #hudGold img{width:15px;height:15px}
+}

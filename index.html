@@ -1,0 +1,277 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Under Darkness</title>
+<meta name="description" content="Jogo 2D de exploração e combate em cavernas: um guerreiro de túnica com espada e escudo de madeira.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Rubik:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/estilo.css">
+<link rel="stylesheet" href="css/missoes.css">
+<link rel="stylesheet" href="css/temas-npc.css">
+<link rel="stylesheet" href="css/rolagem.css">
+<link rel="stylesheet" href="css/bau.css">
+<link rel="stylesheet" href="css/itens.css">
+<link rel="stylesheet" href="css/menu-pausa.css">
+<link rel="stylesheet" href="css/globos.css">
+<link rel="stylesheet" href="css/cursor.css">
+<link rel="stylesheet" href="css/titulo.css">
+<link rel="stylesheet" href="css/opcoes.css">
+<link rel="stylesheet" href="css/botoes.css">
+<link rel="stylesheet" href="css/hud-nivel-ouro.css">
+<link rel="stylesheet" href="css/vigor.css">
+<link rel="stylesheet" href="css/portal.css">
+<link rel="stylesheet" href="css/talentos.css">
+
+<canvas id="screen" aria-label="Tela do jogo Under Darkness"></canvas>
+
+<div id="hud" hidden>
+  <div class="world panel">
+    <div id="zone">Superfície</div>
+    <div class="row"><em>Profundidade</em><span id="hDepth">0 m</span></div>
+    <div class="row"><span class="sun" id="hSun"></span><span id="hClock">08:00</span></div>
+    <div class="row"><em>Tochas</em><span id="hTorch">12</span><kbd>Q</kbd></div>
+    <div class="row"><em>Poções</em><span id="hPot">2</span><kbd>R</kbd></div>
+  </div>
+  <div id="help" class="panel">
+    <div><span class="k">A</span><span class="k">D</span> andar · <span class="k">W</span> pular / subir corrente · <span class="k">S</span> descer</div>
+    <div><span class="k">1</span>–<span class="k">0</span> item da barra <em>(ou rodinha)</em></div>
+    <div><span class="k">Clique esq.</span> golpear · minerar · colocar bloco</div>
+    <div><span class="k">Segurar dir.</span> levantar escudo <em>(ou Shift)</em></div>
+    <div><span class="k">E</span> conversar · abrir baú · <span class="k">Q</span> tocha · <span class="k">R</span> poção</div>
+    <div><span class="k">Tab</span> mapa · <span class="k">I</span> inventário · <span class="k">C</span> atributos · <span class="k">P</span> talentos · <span class="k">Esc</span> pausa · <span class="k">F</span> tela cheia · <span class="k">M</span> som · <span class="k">H</span> esconder</div>
+  </div>
+  <div id="hbrow">
+    <div id="hudLvl" class="panel hbside"><b id="hLvl">1</b></div>
+    <div id="hotbar" class="panel" aria-label="Barra de itens">
+      <div class="slot" data-hb="0"><img alt="" hidden><span class="lbl">Arma</span><span class="hk">1</span></div>
+      <div class="slot" data-hb="1"><img alt="" hidden><span class="lbl">Picareta</span><span class="hk">2</span></div>
+      <div class="slot" data-hb="2"><img alt="" hidden><span class="n"></span><span class="hk">3</span></div>
+      <div class="slot" data-hb="3"><img alt="" hidden><span class="n"></span><span class="hk">4</span></div>
+      <div class="slot" data-hb="4"><img alt="" hidden><span class="n"></span><span class="hk">5</span></div>
+      <div class="slot" data-hb="5"><img alt="" hidden><span class="n"></span><span class="hk">6</span></div>
+      <div class="slot" data-hb="6"><img alt="" hidden><span class="n"></span><span class="hk">7</span></div>
+      <div class="slot" data-hb="7"><img alt="" hidden><span class="n"></span><span class="hk">8</span></div>
+      <div class="slot" data-hb="8"><img alt="" hidden><span class="n"></span><span class="hk">9</span></div>
+      <div class="slot" data-hb="9"><img alt="" hidden><span class="n"></span><span class="hk">0</span></div>
+    </div>
+    <div id="hudGold" class="panel hbside"><span id="hStats">0</span><img id="hGoldIcon" alt="" hidden></div>
+  </div>
+  <div id="vigbar"><i id="hVigFill"></i></div>
+  <div id="xpbar" class="panel"><i id="hXpFill"></i><span id="hXp">0 / 25 XP</span></div>
+  <div class="orb hp" id="orbHp"><div class="liq"><i id="hHpFill"></i></div><div class="gloss"></div><span id="hHp">50 / 50</span><small>Vida</small></div>
+  <div class="orb mp" id="orbMp"><div class="liq"><i id="hMpFill"></i></div><div class="gloss"></div><span id="hMp">25 / 25</span><small>Mana</small></div>
+  <div id="hbName"></div>
+  <div id="toasts"></div>
+  <div id="bossbar" class="panel" hidden><div class="bn"><b>O Carrasco</b><span>guardião da cripta</span></div><div class="bar bossb"><i id="bossFill"></i></div></div>
+  <div id="banner"></div>
+  <div id="lowhp"></div>
+</div>
+
+<div id="menu" class="overlay" hidden>
+  <div class="card">
+    <h1>Under Darkness</h1>
+    <p class="tag">Você é um guerreiro de túnica, descalço, com uma espada de ferro, um escudo de madeira e uma picareta velha. Parta do vilarejo, desça pelas cavernas, derrote o que vive no escuro e suba de nível.</p>
+    <dl class="keys">
+      <dt><kbd>A</kbd> <kbd>D</kbd></dt><dd><b>Andar</b> para os lados</dd>
+      <dt><kbd>W</kbd></dt><dd><b>Pular</b> (segure para pular mais alto)</dd>
+      <dt><kbd>1</kbd> a <kbd>0</kbd></dt><dd><b>Escolher o item</b> da barra de baixo (ou gire a rodinha): espada, picareta e mais 8 casas, que no inventário (<kbd>I</kbd>) ficam na fileira de baixo</dd>
+      <dt><kbd>Clique esquerdo</kbd></dt><dd>Espada: <b>golpe</b> na direção do mouse (clique de novo para emendar o combo). Picareta: segure para <b>minerar</b>. Bloco: <b>coloca</b> onde o mouse aponta</dd>
+      <dt><kbd>Segurar direito</kbd></dt><dd><b>Levantar o escudo</b>. Bloqueia ataques pela frente</dd>
+      <dt><kbd>E</kbd> / <kbd>Q</kbd></dt><dd><b>Conversar</b> com os moradores e <b>abrir baú</b> / <b>colocar tocha</b> onde o mouse aponta</dd>
+      <dt><kbd>I</kbd> / <kbd>C</kbd></dt><dd><b>Inventário</b>: equipamento e mochila / <b>atributos</b> do personagem</dd>
+      <dt><kbd>R</kbd></dt><dd>Beber <b>poção</b></dd>
+      <dt><kbd>Tab</kbd></dt><dd><b>Mapa</b> por cima da tela, com tudo que você já viu</dd>
+    </dl>
+    <p class="tip">Levante o escudo um instante antes do golpe inimigo para <b>aparar</b>: o inimigo fica atordoado e leva dano extra. Esqueletos não param de atacar quando apanham, então use o escudo.</p>
+    <p class="tip">O vilarejo na superfície é o único lugar seguro: nada lá de baixo sobe até ele. O ferreiro, a curandeira, o taverneiro e o ancião compram o que você traz das cavernas, vendem equipamento e dão tarefas.</p>
+    <p class="tip">Tudo que você minera vai para a mochila. Terra, pedra e madeira servem para construir pontes, paredes e abrigos.</p>
+    <p class="tip">Dizem que uma cripta esquecida dorme nas Cavernas Profundas, cheia de demônios e guardada por algo que não morreu direito. Em cada mundo ela fica num lugar diferente.</p>
+    <div class="actions">
+      <button id="btnPlay" type="button">Começar</button>
+      <button id="btnNewMenu" class="ghost" type="button" hidden>Novo mundo</button>
+    </div>
+    <p class="note" id="touchNote" hidden>Este jogo precisa de teclado e mouse.</p>
+  </div>
+</div>
+
+<div id="pause" class="overlay" hidden>
+  <div class="card">
+    <h2>Menu</h2>
+    <div class="actions">
+      <button id="btnResume" type="button">Continuar</button>
+      <button id="btnSound" class="ghost" type="button">Som: ligado</button>
+      <button id="btnFull" class="ghost" type="button">Tela cheia</button>
+    </div>
+    <div class="danger">
+      <button id="btnNew" class="ghost warn" type="button">Novo mundo</button>
+    </div>
+  </div>
+</div>
+
+<div id="inv" class="overlay" hidden>
+  <section class="invcard" aria-label="Inventário">
+    <header class="ch"><h3>Inventário</h3><span class="tagl" id="eqLvl">Nível 1</span><button class="ghost x" id="btnCloseInv" type="button" aria-label="Fechar">×</button></header>
+    <div class="paper">
+      <div class="eqcol">
+        <div class="slot eq" data-eq="head" data-label="Cabeça"></div>
+        <div class="slot eq" data-eq="body" data-label="Corpo"></div>
+        <div class="slot eq" data-eq="feet" data-label="Pés"></div>
+      </div>
+      <div class="dollbox"><canvas id="dollCv" width="48" height="44" aria-label="Seu guerreiro com o equipamento atual"></canvas></div>
+      <div class="eqcol">
+        <div class="slot eq" data-eq="shield" data-label="Escudo"></div>
+        <div class="slot eq" data-eq="acc1" data-label="Acessório"></div>
+        <div class="slot eq" data-eq="acc2" data-label="Acessório"></div>
+      </div>
+    </div>
+    <div class="sep" role="separator"></div>
+    <div class="ph"><h4 class="sub4">Mochila</h4><span id="bagCount">0 / 30</span><span id="bagGold" class="coin"></span><button class="ghost sm push" id="btnSort" type="button">Organizar</button><div class="slot trash" data-trash="1" title="Arraste um item aqui para jogar fora"><span class="lbl">Lixo</span></div></div>
+    <div class="grid" id="invGrid"></div>
+    <div class="sep hotsep" role="separator"></div>
+    <div class="grid" id="invHot" aria-label="Barra de acesso rápido">
+      <div class="slot eq hot" data-eq="weapon" data-label="Arma" data-hk="1"></div>
+      <div class="slot eq hot" data-eq="tool" data-label="Picareta" data-hk="2"></div>
+    </div>
+    <p class="charf">Clique: pegar e mover · <b>Botão direito</b>: equipar, tirar ou beber · A fileira de baixo é a barra (teclas 1 a 0) · <kbd>I</kbd> fecha · <kbd>C</kbd> atributos</p>
+  </section>
+</div>
+<div id="tip" class="tipbox" hidden></div>
+<div id="ghost" class="ghost-drag" hidden></div>
+
+<div id="char" class="overlay" hidden>
+  <section class="charcard" aria-label="Atributos do personagem">
+    <header class="ch"><h3>Personagem</h3><span class="tagl" id="chLvl">Nível 1</span><button class="ghost x" id="btnCloseChar" type="button" aria-label="Fechar">×</button></header>
+    <div class="chtop">
+      <div class="dollbox"><canvas id="charCv" width="48" height="44" aria-hidden="true"></canvas></div>
+      <div class="vitals">
+        <div class="vbar hp"><i id="chHpF"></i><span><b>Vida</b><b id="chHp"></b></span></div>
+        <div class="vbar mp"><i id="chMpF"></i><span><b>Mana</b><b id="chMp"></b></span></div>
+        <div class="vbar xp"><i id="chXpF"></i><span><b>Experiência</b><b id="chXp"></b></span></div>
+      </div>
+    </div>
+    <div class="sep" role="separator"></div>
+    <div class="statcols" id="chStats"></div>
+    <p class="charf">Passe o mouse num atributo para ver o que ele faz · <kbd>C</kbd> ou <kbd>Esc</kbd> fecha · <kbd>I</kbd> abre o inventário</p>
+  </section>
+  <div id="charTip" class="tipbox" hidden></div>
+</div>
+
+<div id="talk" class="overlay" hidden>
+  <div class="card">
+    <div class="talkh"><div class="portrait"><canvas id="talkCv" width="48" height="44" aria-hidden="true"></canvas></div><div><h2 id="talkName"></h2><span class="role" id="talkRole"></span></div></div>
+    <p class="tag" id="talkText"></p>
+    <div class="quest" id="talkQuest" hidden></div>
+    <div class="opts" id="talkOpts"></div>
+  </div>
+</div>
+
+<div id="shop" class="overlay" hidden>
+  <div class="inv">
+    <section class="panel vendor" aria-label="Loja">
+      <header class="ch"><h3 id="shopTitle">Loja</h3><button class="ghost sm push" id="btnShopBack" type="button">Voltar</button></header>
+      <div class="ph"><span id="shopSub"></span><span id="shopGold" class="coin push"></span></div>
+      <div class="grid" id="shopGrid"></div>
+      <p class="shopf" id="shopHint"></p>
+      <div class="sep" role="separator"></div>
+      <p class="shopf"><b>Botão direito</b> num item da loja compra (<kbd>Shift</kbd> compra 5 do que não acaba).<br><kbd>Shift</kbd> + <b>botão direito</b> num item seu vende, ou arraste o item até a loja. O que estiver apagado este morador não compra.<br><b>Botão direito</b> num item seu equipa, igual ao inventário. <kbd>Esc</kbd> volta.</p>
+    </section>
+  </div>
+  <div id="shopTip" class="tipbox" hidden></div>
+</div>
+
+<div id="forge" class="overlay" hidden>
+  <section class="panel forgep" aria-label="Forja">
+    <header class="ch"><h3>Forja do Grimaldo</h3><div class="tabs" role="tablist"><button class="tab on" type="button" data-tab="smelt">Fornalha</button><button class="tab" type="button" data-tab="craft">Bigorna</button></div><span id="forgeGold" class="coin"></span><button class="ghost sm" id="btnForgeBack" type="button">Voltar</button></header>
+    <div class="prof">
+      <div class="plist">
+        <label class="psearch"><input id="profSearch" type="search" placeholder="Procurar" autocomplete="off" spellcheck="false"></label>
+        <div class="recipes" id="profList" role="listbox" aria-label="Receitas"></div>
+      </div>
+      <div class="pdet" id="profDet">
+        <div class="pdh"><div class="pico"><img id="pdIcon" alt=""></div><div><h4 id="pdName"></h4><small id="pdSub"></small></div></div>
+        <div class="pdbody" id="pdBody"></div>
+        <div class="pwork">
+          <div class="pstate"><canvas id="fireCv" width="16" height="12" aria-hidden="true"></canvas><div class="pbar"><i id="pdFill"></i><span id="pdBarTxt"></span></div></div>
+          <p class="pnote" id="pdNote"></p>
+          <div class="pact">
+            <button class="ghost" id="btnMakeAll" type="button"></button>
+            <div class="qty"><button class="ghost sm" id="btnQtyDn" type="button" aria-label="Menos">◀</button><input id="pdQty" type="text" inputmode="numeric" value="1" aria-label="Quantidade"><button class="ghost sm" id="btnQtyUp" type="button" aria-label="Mais">▶</button></div>
+            <button id="btnMake" type="button"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="death" class="overlay" hidden>
+  <div class="card">
+    <h2>Você tombou</h2>
+    <p class="stat-line" id="deathStats"></p>
+    <div class="actions"><button id="btnRespawn" type="button">Renascer no vilarejo</button></div>
+  </div>
+</div>
+
+<script src="js/00-texturas-ui.js"></script>
+<script src="js/01-base.js"></script>
+<script src="js/02-arte.js"></script>
+<script src="js/03-blocos.js"></script>
+<script src="js/04-sprites.js"></script>
+<script src="js/05-itens.js"></script>
+<script src="js/48-itemizacao.js"></script>
+<script src="js/37-heroi.js"></script>
+<script src="js/06-mundo.js"></script>
+<script src="js/07-chunks-luz.js"></script>
+<script src="js/36-profundeza.js"></script>
+<script src="js/41-catedral-api.js"></script>
+<script src="js/52-caverna-api.js"></script>
+<script src="js/42-catedral-blocos.js"></script>
+<script src="js/53-caverna-blocos.js"></script>
+<script src="js/43-catedral-objetos.js"></script>
+<script src="js/54-caverna-objetos.js"></script>
+<script src="js/08-estado-entrada.js"></script>
+<script src="js/09-audio.js"></script>
+<script src="js/10-combate.js"></script>
+<script src="js/11-jogador.js"></script>
+<script src="js/12-inimigos-ia.js"></script>
+<script src="js/13-cripta-chefe.js"></script>
+<script src="js/44-mortos-vivos.js"></script>
+<script src="js/55-caverna-bichos.js"></script>
+<script src="js/14-atualizacao.js"></script>
+<script src="js/15-render.js"></script>
+<script src="js/32-fundo.js"></script>
+<script src="js/34-arvores.js"></script>
+<script src="js/58-pulo.js"></script>
+<script src="js/59-sons-pulo.js"></script>
+<script src="js/16-mapa.js"></script>
+<script src="js/17-vilarejo.js"></script>
+<script src="js/18-forja.js"></script>
+<script src="js/19-loja.js"></script>
+<script src="js/20-hud-menus.js"></script>
+<script src="js/35-globos.js"></script>
+<script src="js/21-inventario.js"></script>
+<script src="js/22-ficha.js"></script>
+<script src="js/23-save.js"></script>
+<script src="js/25-temas-npc.js"></script>
+<script src="js/27-bau.js"></script>
+<script src="js/29-missoes.js"></script>
+<script src="js/45-catedral-mundo.js"></script>
+<script src="js/46-rei-esqueleto.js"></script>
+<script src="js/56-caverna-mundo.js"></script>
+<script src="js/57-mae-teia.js"></script>
+<script src="js/47-hud-nivel-ouro.js"></script>
+<script src="js/49-itens-efeitos.js"></script>
+<script src="js/50-vigor.js"></script>
+<script src="js/51-talentos.js"></script>
+<script src="js/29-portal.js"></script>
+<script src="js/24-boot.js"></script>
+<script src="js/26-rolagem.js"></script>
+<script src="js/28-fps.js"></script>
+<script src="js/30-tela-cheia.js"></script>
+<script src="js/31-cursor.js"></script>
+<script src="js/33-atalhos.js"></script>
+<script src="js/38-musica.js"></script>
+<script src="js/39-titulo.js"></script>
+<script src="js/40-opcoes.js"></script>
+
+
+</body></html>

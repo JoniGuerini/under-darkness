@@ -1,0 +1,33 @@
+/* ================= scrollbars drawn by the game (js/26-rolagem.js) ================= */
+/* the browser's own bar never shows */
+*{scrollbar-width:none}
+*::-webkit-scrollbar{width:0;height:0;display:none}
+
+.sbwrap{position:relative;display:flex;min-height:0;min-width:0}
+.sbwrap>:first-child{flex:1;min-width:0;max-height:none;overflow-y:auto;overscroll-behavior:contain}
+.sbwrap.scrolls>:first-child{padding-right:20px}
+.sbar{position:absolute;top:0;bottom:0;right:0;width:14px;display:none;cursor:pointer;
+  background:linear-gradient(90deg,#000 0 2px,#0d0a10 2px 4px,#16121b 4px 10px,#0d0a10 10px 12px,#000 12px);
+  box-shadow:inset 0 2px 0 #000,inset 0 -2px 0 #000}
+.sbwrap.scrolls>.sbar{display:block}
+.sbar::before,.sbar::after{content:"";position:absolute;left:3px;right:3px;height:4px;background:#6e4718;border:1px solid #000;pointer-events:none}
+.sbar::before{top:-1px}.sbar::after{bottom:-1px}
+/* the thumb: a bronze bar like the frames, with grip lines in the middle */
+.sbar>i{position:absolute;left:0;right:0;top:0;display:block;cursor:grab;touch-action:none;
+  background:
+    linear-gradient(#000,#000) center calc(50% - 4px)/6px 1px no-repeat,linear-gradient(#000,#000) center 50%/6px 1px no-repeat,linear-gradient(#000,#000) center calc(50% + 4px)/6px 1px no-repeat,
+    linear-gradient(#f2c470,#f2c470) center calc(50% - 5px)/6px 1px no-repeat,linear-gradient(#f2c470,#f2c470) center calc(50% - 1px)/6px 1px no-repeat,linear-gradient(#f2c470,#f2c470) center calc(50% + 3px)/6px 1px no-repeat,
+    linear-gradient(90deg,#000 0 2px,#e0b060 2px 4px,#b07a34 4px 10px,#6e4718 10px 12px,#000 12px);
+  box-shadow:inset 0 2px 0 #000,inset 0 4px 0 #f2c470,inset 0 -2px 0 #000,inset 0 -4px 0 #5e3c14,0 0 8px -2px rgba(240,168,60,.45)}
+.sbar>i:hover,.sbar>i.drag{filter:brightness(1.15)}
+.sbar>i.drag{cursor:grabbing}
+
+/* Grimaldo's shed: a dark wooden groove with a nailed timber for a thumb */
+body[data-npc=ferreiro] .sbar{background:linear-gradient(90deg,#000 0 2px,#1e130b 2px 4px,#0d0805 4px 10px,#352214 10px 12px,#000 12px);box-shadow:inset 0 2px 0 #000,inset 0 -2px 0 #000}
+body[data-npc=ferreiro] .sbar::before,body[data-npc=ferreiro] .sbar::after{background:#4a4e57}
+body[data-npc=ferreiro] .sbar>i{
+  background:
+    linear-gradient(#949ca8,#949ca8) 4px 5px/2px 2px no-repeat,linear-gradient(#949ca8,#949ca8) 4px calc(100% - 5px)/2px 2px no-repeat,
+    linear-gradient(#141519,#141519) 6px 7px/1px 1px no-repeat,linear-gradient(#141519,#141519) 6px calc(100% - 3px)/1px 1px no-repeat,
+    linear-gradient(90deg,#000 0 2px,#9e6e40 2px 4px,#674528 4px 9px,#4d331d 9px 10px,#1e130b 10px 12px,#000 12px);
+  box-shadow:inset 0 2px 0 #000,inset 0 3px 0 #9e6e40,inset 0 -2px 0 #000,inset 0 -3px 0 #1e130b,0 0 10px -3px rgba(255,120,30,.45)}

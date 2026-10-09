@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Under Darkness · Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Rubik:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="wiki.css">
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <a class="logo" href="#/inicio"><span>Under Darkness</span><small>Wiki</small></a>
+    <label class="busca"><input id="busca" type="search" placeholder="Buscar" autocomplete="off" spellcheck="false"></label>
+    <nav id="nav"></nav>
+  </aside>
+  <main id="main"><div class="carregando">Carregando o jogo…</div></main>
+</div>
+<div id="wtip" class="tipbox" hidden></div>
+<canvas id="screen" hidden></canvas>
+
+<!-- 1. guarda: a wiki não deixa o código do jogo ouvir o teclado nem gravar o save -->
+<script src="js/00-guarda.js"></script>
+
+<!-- 2. os arquivos do próprio jogo, na mesma ordem do "../index.html" (só os de dados e desenho; sem HUD, menus, música e o loop do jogo) -->
+<script src="../js/00-texturas-ui.js"></script>
+<script src="../js/01-base.js"></script>
+<script src="../js/02-arte.js"></script>
+<script src="../js/03-blocos.js"></script>
+<script src="../js/04-sprites.js"></script>
+<script src="../js/05-itens.js"></script>
+<script src="../js/48-itemizacao.js"></script>
+<script src="../js/37-heroi.js"></script>
+<script src="../js/06-mundo.js"></script>
+<script src="../js/07-chunks-luz.js"></script>
+<script src="../js/36-profundeza.js"></script>
+<script src="../js/41-catedral-api.js"></script>
+<script src="../js/52-caverna-api.js"></script>
+<script src="../js/42-catedral-blocos.js"></script>
+<script src="../js/53-caverna-blocos.js"></script>
+<script src="../js/43-catedral-objetos.js"></script>
+<script src="../js/54-caverna-objetos.js"></script>
+<script src="../js/08-estado-entrada.js"></script>
+<script src="../js/09-audio.js"></script>
+<script src="../js/10-combate.js"></script>
+<script src="../js/11-jogador.js"></script>
+<script src="../js/12-inimigos-ia.js"></script>
+<script src="../js/13-cripta-chefe.js"></script>
+<script src="../js/44-mortos-vivos.js"></script>
+<script src="../js/55-caverna-bichos.js"></script>
+<script src="../js/14-atualizacao.js"></script>
+<script src="../js/15-render.js"></script>
+<script src="../js/32-fundo.js"></script>
+<script src="../js/34-arvores.js"></script>
+<script src="../js/16-mapa.js"></script>
+<script src="../js/17-vilarejo.js"></script>
+<script src="../js/18-forja.js"></script>
+<script src="../js/19-loja.js"></script>
+<script src="../js/23-save.js"></script>
+<script src="../js/25-temas-npc.js"></script>
+<script src="../js/29-missoes.js"></script>
+<script src="../js/45-catedral-mundo.js"></script>
+<script src="../js/46-rei-esqueleto.js"></script>
+<script src="../js/56-caverna-mundo.js"></script>
+<script src="../js/57-mae-teia.js"></script>
+<script src="../js/49-itens-efeitos.js"></script>
+<script src="../js/50-vigor.js"></script>
+
+<!-- 3. a wiki -->
+<script src="js/docs.js"></script>
+<script src="js/textos.js"></script>
+<script src="js/base.js"></script>
+<script src="js/p-inicio.js"></script>
+<script src="js/p-itens.js"></script>
+<script src="js/p-modificadores.js"></script>
+<script src="js/p-raridades.js"></script>
+<script src="js/p-forja.js"></script>
+<script src="js/p-inimigos.js"></script>
+<script src="js/p-npcs.js"></script>
+<script src="js/p-biomas.js"></script>
+<script src="js/p-regras.js"></script>
+<script src="js/p-docs.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

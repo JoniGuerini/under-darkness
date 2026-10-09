@@ -1,0 +1,16 @@
+/* menu (Esc): uma coluna só, todos os botões com a mesma largura e o texto no centro.
+   Opção nova é só mais uma linha: qualquer botão que entrar em #pause .actions já fica no lugar.
+   "Novo mundo" fica sozinho embaixo, separado, porque apaga o progresso. */
+#pause .card{width:min(280px,100%);gap:14px;padding:22px 26px 22px}
+#pause h2{text-align:center;font-size:clamp(48px,9vw,68px)}
+
+#pause .actions,#pause .danger{display:flex;flex-direction:column;gap:8px;flex-wrap:nowrap;align-items:stretch}
+#pause .actions button,#pause .danger button{width:100%;display:flex;align-items:center;justify-content:center;text-align:center;margin:0}
+#pause .actions button.ghost,#pause .danger button.ghost{min-height:40px;padding:4px 12px;font-size:15px;font-weight:600}
+#btnResume{min-height:44px;padding:6px 16px;font-size:18px}
+
+/* zona de perigo: um friso de ferro e o botão com tom de sangue */
+#pause .danger{position:relative;padding-top:14px}
+#pause .danger::before{content:"";position:absolute;left:4px;right:4px;top:0;height:4px;background:linear-gradient(#000 0 1px,#3b3245 1px 3px,#000 3px)}
+#pause .danger button.warn{background:linear-gradient(#3a1a1c,#22100f);color:#ffb4a8}
+#pause .danger button.warn:hover{filter:brightness(1.2)}

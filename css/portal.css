@@ -1,0 +1,9 @@
+/* botão do portal, depois do ouro na barra de baixo (js/29-portal.js) */
+#btnTP{position:relative;overflow:hidden;cursor:pointer;min-width:52px;padding:4px 10px;font:inherit;color:inherit;pointer-events:auto}
+#btnTP canvas{position:relative;width:32px;height:48px;image-rendering:pixelated;filter:drop-shadow(0 0 4px rgba(90,156,255,.55))}
+#btnTP .tpfill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,rgba(47,106,224,.55),rgba(156,203,255,.25));pointer-events:none}
+#btnTP:hover:not(.off) canvas{filter:drop-shadow(0 0 7px rgba(156,203,255,.9)) brightness(1.15)}
+#btnTP.casting{outline:2px solid #5a9cff;outline-offset:-2px}
+#btnTP.off canvas{filter:grayscale(.85) brightness(.55)}
+#btnTP.off{cursor:default}
+@media (max-width:560px){#btnTP{min-width:40px;padding:3px 6px}#btnTP canvas{width:22px;height:33px}}

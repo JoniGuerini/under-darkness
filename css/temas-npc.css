@@ -1,0 +1,292 @@
+/* ================= themed villager screens =================
+   body[data-npc] holds the id of the villager you are talking to (set by openTalk, cleared by closeTalk).
+   Textures come from js/25-temas-npc.js. Only the villager's own windows change; your inventory stays yours. */
+
+/* ---- Grimaldo, the smith: his windows are his shed. Shingled roof on top, squared posts, the plank wall
+   behind the rack, the fieldstone furnace, and the warm light of the coals coming from below ---- */
+body[data-npc=ferreiro]{--sm-hot:#ffb233;--sm-hot-2:#f2701a;--sm-ash:#e6dabd;--sm-ash-dim:#b3a998}
+body[data-npc=ferreiro] :is(#talk .card,#shop .vendor,#forge .forgep){
+  position:relative;isolation:isolate;image-rendering:pixelated;
+  border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--smith-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
+  background-color:#22160d;
+  background-image:
+    radial-gradient(ellipse 120% 55% at 50% 112%,rgba(255,120,36,.26),rgba(255,90,24,.07) 55%,transparent 75%),
+    linear-gradient(rgba(8,5,2,.78),rgba(8,5,2,.4) 26%,rgba(8,5,2,.46)),
+    var(--smith-wall);
+  background-size:auto,auto,180px 180px;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65),0 0 100px -34px rgba(255,110,30,.45);
+  color:var(--sm-ash);
+}
+/* sparks rising from the coals. They are a real element (.npc-embers, added by 25-temas-npc.js) moved with transform,
+   so nothing is repainted per frame; and they live only in a low band at the bottom of the window (one layer, one mask),
+   so the graphics card composites a small strip instead of several window-sized layers */
+.npc-embers{display:none}
+body[data-npc=ferreiro] :is(#talk .card,#shop .vendor,#forge .forgep)>.npc-embers{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:min(260px,60%);z-index:-1;overflow:hidden;pointer-events:none;opacity:.75;
+  -webkit-mask-image:linear-gradient(to top,#000,rgba(0,0,0,.3) 55%,transparent);mask-image:linear-gradient(to top,#000,rgba(0,0,0,.3) 55%,transparent)
+}
+body[data-npc=ferreiro] .npc-embers>i{position:absolute;left:0;right:0;top:0;height:calc(100% + 480px);background:var(--smith-embers) 0 0/320px 480px;image-rendering:pixelated;will-change:transform;animation:smEmbersA 16s linear infinite}
+body[data-npc=ferreiro] .npc-embers>i+i{display:none}
+@keyframes smEmbersA{from{transform:translateY(0)}to{transform:translateY(-480px)}}
+@media (prefers-reduced-motion:reduce){body[data-npc=ferreiro] .npc-embers>i{animation:none}}
+
+/* titles glow like the coals; the emblem is the sign that hangs from his shed */
+body[data-npc=ferreiro] :is(#talk .talkh h2,#shop .vendor .ch h3,#forge .forgep .ch h3){
+  background:linear-gradient(#fff0a8 0 24%,#ffcf5a 24% 50%,#f2701a 50% 78%,#c8420b 78%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(3px 3px 0 #000) drop-shadow(0 0 10px rgba(255,110,30,.35));
+}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .ch{gap:10px;background:linear-gradient(90deg,transparent,#3e2716 8%,#815833 30%,#9e6e40 50%,#815833 70%,#3e2716 92%,transparent) bottom/100% 2px no-repeat}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .ch h3{white-space:nowrap;font-size:29px}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .ch::before,
+body[data-npc=ferreiro] #talk .talkh>div:last-child::after{content:"";flex:none;width:26px;height:30px;background:var(--smith-sign) center/26px 30px no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .ch button.ghost{padding:2px 10px}
+body[data-npc=ferreiro] #talk .card{width:min(680px,100%)}
+body[data-npc=ferreiro] #talk .talkh>div:last-child{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:end;flex:1}
+body[data-npc=ferreiro] #talk .talkh>div:last-child::after{grid-row:1 / span 2;grid-column:2;align-self:center;width:39px;height:45px;background-size:39px 45px}
+body[data-npc=ferreiro] #talk .talkh .role{grid-column:1;color:var(--sm-hot);letter-spacing:.22em}
+/* the portrait stands in front of his own furnace */
+body[data-npc=ferreiro] #talk .portrait{
+  width:99px;height:108px;background:#160c08 var(--smith-mouth) center bottom/99px 108px no-repeat;border-width:15px;image-rendering:pixelated;
+  border:10px solid #000;border-image:var(--smith-frame-sm) 5 / 15px stretch;box-shadow:0 0 22px -6px rgba(255,120,30,.6)
+}
+body[data-npc=ferreiro] #talk .portrait canvas{width:96px;height:88px;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+body[data-npc=ferreiro] #talk .tag{color:var(--sm-ash);font-style:italic;padding:10px 14px;border-left:3px solid #9e6e40;background:linear-gradient(90deg,rgba(0,0,0,.5),transparent)}
+
+/* buttons: metal hot from the fire for the main action, rack boards for the rest */
+body[data-npc=ferreiro] :is(#talk .opts button:first-child,#forge #btnMake:not(.stop)){
+  background:linear-gradient(#ffe590 0 14%,#ffb233 14% 46%,#f2701a 46% 78%,#b8380c 78%);
+  color:#2a0d03;text-shadow:0 1px 0 rgba(255,236,180,.55);border:3px solid #000;
+  box-shadow:inset 0 2px 0 #fff6cc,inset 0 -3px 0 #6e1c06,0 0 16px -2px rgba(255,120,30,.6),0 3px 0 rgba(0,0,0,.55);
+}
+body[data-npc=ferreiro] :is(#talk .opts button:first-child,#forge #btnMake:not(.stop)):hover{filter:brightness(1.12) saturate(1.1);box-shadow:inset 0 2px 0 #fff6cc,inset 0 -3px 0 #6e1c06,0 0 24px 0 rgba(255,130,40,.7),0 3px 0 rgba(0,0,0,.55)}
+body[data-npc=ferreiro] #forge #btnMake:disabled,body[data-npc=ferreiro] #forge button.ghost:disabled{background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),var(--smith-board) 0 0/180px 42px;color:#7a6a58;text-shadow:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.5);filter:none}
+body[data-npc=ferreiro] :is(#talk .card,#shop .vendor,#forge .forgep) button.ghost,
+body[data-npc=ferreiro] #talk .opts button:not(:first-child){
+  background:var(--smith-board) 0 0/180px 42px;image-rendering:pixelated;
+  color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
+  border:10px solid #000;border-image:var(--smith-frame-sm) 5 / 10px stretch;
+  box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px;
+}
+body[data-npc=ferreiro] :is(#talk .card,#shop .vendor,#forge .forgep) button.ghost:hover,
+body[data-npc=ferreiro] #talk .opts button:not(:first-child):hover{filter:brightness(1.15);box-shadow:0 3px 0 rgba(0,0,0,.55),0 0 14px -3px rgba(255,120,30,.55)}
+body[data-npc=ferreiro] #forge button.stop{
+  background:linear-gradient(#6a707b 0 14%,#4a4e57 14% 50%,#33363d 50% 82%,#22242a 82%);
+  color:#d8ecff;text-shadow:1px 1px 0 #000;border:3px solid #000;
+  box-shadow:inset 0 2px 0 #949ca8,inset 0 -3px 0 #141519,0 0 14px -5px rgba(140,190,255,.5),0 3px 0 rgba(0,0,0,.55)
+}
+
+/* the profession book: the list hangs on the rack boards, the recipe sits on the workbench,
+   and the work happens at the furnace stone with the coals glowing under it */
+body[data-npc=ferreiro] #forge .forgep{width:min(940px,100%);height:min(680px,calc(100dvh - 20px));padding:12px 16px 14px}
+body[data-npc=ferreiro] #forge .tab{
+  background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.4)),var(--smith-board);background-size:auto,180px 42px;image-rendering:pixelated;
+  color:var(--sm-ash-dim);border:3px solid #000;box-shadow:0 2px 0 rgba(0,0,0,.5);text-shadow:1px 1px 0 #000
+}
+body[data-npc=ferreiro] #forge .tab.on{
+  background:linear-gradient(rgba(255,150,50,.24),rgba(255,90,20,.08)),var(--smith-board);background-size:auto,180px 42px;
+  color:#fff0c8;box-shadow:inset 0 0 0 1px var(--sm-hot-2),0 0 14px -4px rgba(255,120,30,.7),0 2px 0 rgba(0,0,0,.5)
+}
+body[data-npc=ferreiro] #forgeGold{color:var(--sm-hot)}
+body[data-npc=ferreiro] #forge .plist{
+  background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.58)),var(--smith-board);background-size:auto,180px 42px;image-rendering:pixelated;
+  border:10px solid #000;border-image:var(--smith-frame-sm) 5 / 10px stretch;box-shadow:inset 0 0 20px rgba(0,0,0,.6),0 3px 0 rgba(0,0,0,.5);padding:8px 6px 8px 8px
+}
+body[data-npc=ferreiro] #forge .psearch input{background:#0d0805;box-shadow:inset 0 0 0 1px #4d331d,inset 0 2px 0 rgba(0,0,0,.7);color:var(--sm-ash)}
+body[data-npc=ferreiro] #forge .psearch input:focus{box-shadow:inset 0 0 0 1px var(--sm-hot-2),0 0 10px -3px rgba(255,120,30,.6)}
+body[data-npc=ferreiro] #forge .pg{
+  color:var(--sm-hot);background:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.32)),var(--smith-board);background-size:auto,180px 42px;image-rendering:pixelated;
+  border:2px solid #000;box-shadow:inset 0 2px 0 rgba(255,210,150,.16),0 2px 0 rgba(0,0,0,.45);text-shadow:1px 1px 0 #000,0 0 8px rgba(255,120,30,.35)
+}
+body[data-npc=ferreiro] #forge .pg small{color:var(--sm-ash-dim)}
+body[data-npc=ferreiro] #forge .pr{color:#8a7a68}
+body[data-npc=ferreiro] #forge .pr.can{color:var(--sm-ash)}
+body[data-npc=ferreiro] #forge .pr em{color:#b8e08a}
+body[data-npc=ferreiro] #forge .pr:hover{background:rgba(255,170,90,.08)}
+body[data-npc=ferreiro] #forge .pr.on{background:linear-gradient(90deg,rgba(255,130,40,.34),rgba(255,110,30,.06));border-color:var(--sm-hot-2);color:#fff0c8;box-shadow:0 0 12px -4px rgba(255,120,30,.6)}
+body[data-npc=ferreiro] #forge .pdet{
+  background:linear-gradient(rgba(10,6,3,.55),rgba(10,6,3,.66)),var(--smith-wall);background-size:auto,180px 180px;image-rendering:pixelated;
+  border:10px solid #000;border-image:var(--smith-frame-sm) 5 / 10px stretch;box-shadow:inset 0 0 26px rgba(0,0,0,.6),0 3px 0 rgba(0,0,0,.5)
+}
+/* the shop sign, big and faint, like a watermark on the wall */
+body[data-npc=ferreiro] #forge .pdet::before{content:"";position:absolute;right:14px;top:96px;width:130px;height:150px;background:var(--smith-sign) center/130px 150px no-repeat;image-rendering:pixelated;opacity:.09;pointer-events:none}
+body[data-npc=ferreiro] #forge .pico{
+  background:radial-gradient(circle,rgba(0,0,0,.25),rgba(0,0,0,.55) 70%),var(--smith-mouth) center 70%/96px 104px;image-rendering:pixelated;
+  box-shadow:0 0 0 2px #837a70,0 0 0 4px #000,0 0 0 6px #504943,0 0 0 8px #000,0 0 18px rgba(255,120,30,.5)
+}
+body[data-npc=ferreiro] #forge .pico img{filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+body[data-npc=ferreiro] #forge .pdh h4{color:#f4ecd8}
+body[data-npc=ferreiro] #forge .pdh small{color:var(--sm-hot)}
+body[data-npc=ferreiro] #forge .pdesc{color:var(--sm-ash)}
+body[data-npc=ferreiro] #forge .pdbody h5{color:var(--sm-hot)}
+body[data-npc=ferreiro] #forge .preag .ri{background:radial-gradient(circle at 50% 70%,#3a1a0a,#0d0704 74%);box-shadow:inset 0 0 0 1px #504943,inset 2px 2px 0 1px rgba(0,0,0,.7)}
+body[data-npc=ferreiro] #forge .preag li.ok b{color:#b8e08a}
+body[data-npc=ferreiro] #forge .preag li.no b{color:#ff8a6a}
+body[data-npc=ferreiro] #forge .pdtip.tipbox{background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 1px #4d331d}
+/* the work: done at the furnace stone */
+body[data-npc=ferreiro] #forge .pwork{
+  margin:0 -14px -14px;padding:14px 14px 12px;border-top:3px solid #000;
+  background:radial-gradient(ellipse 30% 90% at 6% 30%,rgba(255,150,40,.35),rgba(255,90,20,.08) 60%,transparent 80%),linear-gradient(rgba(8,5,3,.35),rgba(8,5,3,.55)),var(--smith-stone) 0 0/540px 300px;
+  image-rendering:pixelated;box-shadow:inset 0 3px 0 #a0968a,inset 0 5px 0 #39342f
+}
+body[data-npc=ferreiro] #forge #fireCv{width:48px;height:36px;background:radial-gradient(ellipse at 50% 100%,#4a200c,#140a06 70%);border:2px solid #000;filter:drop-shadow(0 0 6px rgba(255,120,30,.7))}
+body[data-npc=ferreiro] #forge .pbar{background:#0a0604;box-shadow:inset 0 0 0 1px #3f2a1a,inset 0 3px 0 rgba(0,0,0,.6)}
+body[data-npc=ferreiro] #forge .pbar>i{background:linear-gradient(#fff6c0 0 20%,#ffcf5a 20% 45%,#f2701a 45% 75%,#a8300a 75%);box-shadow:0 0 10px 1px rgba(255,130,40,.8);}
+body[data-npc=ferreiro] #forge .pnote{color:#d8ccb4;text-shadow:1px 1px 0 #000}
+body[data-npc=ferreiro] #forge .qty input{background:#0d0805;color:var(--sm-ash);box-shadow:inset 0 0 0 1px #4d331d}
+body[data-npc=ferreiro] #forge .qty button.ghost{padding:0 6px;border-width:8px;border-image-width:8px}
+
+/* slots: dark hollows in the wood */
+body[data-npc=ferreiro] #shop .vendor .slot{background:radial-gradient(circle at 50% 40%,#2c1d12,#0a0604 76%);box-shadow:inset 0 0 0 1px var(--rc,#4d331d),inset 2px 2px 0 1px rgba(0,0,0,.8),inset -2px -2px 0 1px rgba(255,180,110,.1)}
+body[data-npc=ferreiro] #shop .vendor .slot.full{box-shadow:inset 0 0 0 2px var(--rc,#674528),inset 3px 3px 0 2px rgba(0,0,0,.6),0 0 10px -2px var(--rc,transparent)}
+
+/* small print and the separator */
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .shopf{color:var(--sm-ash-dim)}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) .shopf b{color:var(--sm-hot)}
+body[data-npc=ferreiro] #shop .vendor .ph span{color:var(--sm-ash)}
+body[data-npc=ferreiro] #shop .vendor .sep{background:var(--smith-board) 0 50%/180px 12px repeat-x;height:12px;border-block:2px solid #000;margin-block:3px}
+body[data-npc=ferreiro] #shop .vendor .sep::before,body[data-npc=ferreiro] #shop .vendor .sep::after{display:none}
+body[data-npc=ferreiro] :is(#shop .vendor,#forge .forgep) kbd{background:#2c1d12;color:var(--sm-ash);box-shadow:inset 0 -2px 0 #120a06}
+
+/* ---- Caetano, the elder: his window is his stone house. Slate roof with lichen, dressed corner stones with ivy,
+   the blue fieldstone wall lit by a candle, and his tasks written on the parchment of the book on his lectern ---- */
+body[data-npc=anciao]{--el-ink:#2c1e12;--el-ink-2:#5a4128;--el-red:#7a1a1a;--el-gold:#e8c04a;--el-text:#e4e0d6;--el-dim:#a9b0bc}
+body[data-npc=anciao] #talk .card{
+  width:min(720px,100%);position:relative;isolation:isolate;image-rendering:pixelated;
+  border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--elder-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
+  background-color:#1a1c22;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 88% 6%,rgba(255,196,110,.22),rgba(255,170,80,.06) 50%,transparent 72%),
+    linear-gradient(rgba(6,7,10,.62),rgba(6,7,10,.4) 30%,rgba(6,7,10,.55)),
+    var(--elder-wall);
+  background-size:auto,auto,1080px 720px;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65),0 0 90px -40px rgba(255,190,110,.35);
+  color:var(--el-text);
+}
+/* his name in pale stone, the role in candle gold, the lectern as his sign */
+body[data-npc=anciao] #talk .talkh h2{
+  background:linear-gradient(#f4f1ea 0 26%,#c9ccd4 26% 54%,#959ca6 54% 80%,#6a707b 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;
+  filter:drop-shadow(3px 3px 0 #000) drop-shadow(0 0 10px rgba(255,200,120,.2))
+}
+body[data-npc=anciao] #talk .talkh>div:last-child{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:end;flex:1}
+body[data-npc=anciao] #talk .talkh>div:last-child::after{content:"";grid-row:1 / span 2;grid-column:2;align-self:center;width:78px;height:78px;background:var(--elder-lectern) center/78px 78px no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6)) drop-shadow(0 0 8px rgba(255,200,120,.25))}
+body[data-npc=anciao] #talk .talkh .role{grid-column:1;color:var(--el-gold);letter-spacing:.22em}
+/* the portrait: Caetano at his own window */
+body[data-npc=anciao] #talk .portrait{
+  width:99px;height:108px;background:#10131a var(--elder-window) center bottom/99px 108px no-repeat;image-rendering:pixelated;
+  border:15px solid #000;border-image:var(--elder-frame-sm) 5 / 15px stretch;box-shadow:0 0 22px -8px rgba(255,200,120,.5)
+}
+body[data-npc=anciao] #talk .portrait canvas{width:96px;height:88px;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+body[data-npc=anciao] #talk .tag{color:var(--el-text);font-style:italic;padding:10px 14px;border-left:3px solid #787e89;background:linear-gradient(90deg,rgba(0,0,0,.5),transparent);max-width:none}
+
+/* the task: a page of his book, written in brown ink, sealed in red wax */
+body[data-npc=anciao] #talk .quest{
+  position:relative;color:var(--el-ink);padding:16px 22px 18px;
+  background:radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(74,58,38,.45)),var(--elder-parch) 0 0/360px 360px;image-rendering:pixelated;
+  border:3px solid #000;box-shadow:inset 0 0 0 2px #9a8460,inset 0 0 0 4px #6e5a3c,0 4px 0 rgba(0,0,0,.55),0 0 18px -6px rgba(255,200,120,.35)
+}
+body[data-npc=anciao] #talk .quest::after{   /* the wax seal */
+  content:"";position:absolute;right:18px;bottom:-16px;width:45px;height:45px;background:var(--elder-seal) center/45px 45px no-repeat;image-rendering:pixelated;
+  filter:drop-shadow(2px 3px 0 rgba(0,0,0,.5))
+}
+body[data-npc=anciao] #talk .quest .qk{color:var(--el-ink-2)}
+body[data-npc=anciao] #talk .quest .qs{color:var(--el-ink-2);border-color:var(--el-ink-2)}
+body[data-npc=anciao] #talk .quest .qs-ready{color:#2e5a14;border-color:#2e5a14;background:rgba(80,140,40,.12)}
+body[data-npc=anciao] #talk .quest .qt{color:var(--el-red);text-shadow:1px 1px 0 rgba(255,240,200,.5);font-size:34px}
+body[data-npc=anciao] #talk .quest h5{color:var(--el-ink-2);border-bottom:1px solid rgba(90,65,40,.4);padding-bottom:3px}
+body[data-npc=anciao] #talk .quest .qi{background:radial-gradient(circle at 50% 40%,#3a3f48,#14161c 76%);box-shadow:0 0 0 2px #2c1e12,inset 2px 2px 0 rgba(0,0,0,.6)}
+body[data-npc=anciao] #talk .quest .qn b{color:var(--el-ink)}
+body[data-npc=anciao] #talk .quest .qn small{color:var(--el-ink-2);font-style:italic}
+body[data-npc=anciao] #talk .quest .qc em{color:var(--el-red)}
+body[data-npc=anciao] #talk .quest .qg.ok .qc em{color:#2e5a14}
+body[data-npc=anciao] #talk .quest .qbar{background:rgba(44,30,18,.25);box-shadow:inset 0 0 0 1px var(--el-ink-2)}
+body[data-npc=anciao] #talk .quest .qbar i{background:linear-gradient(#a42222 0 50%,#7a1a1a 50%)}
+body[data-npc=anciao] #talk .quest .qg.ok .qbar i{background:linear-gradient(#5a9a2a 0 50%,#2e5a14 50%)}
+body[data-npc=anciao] #talk .quest .qrew li{color:var(--el-ink)}
+body[data-npc=anciao] #talk .quest .qnote{color:var(--el-ink-2)}
+body[data-npc=anciao] #talk .quest.qstate-ready .qnote{color:#2e5a14}
+
+/* buttons: the red leather of his tomes, gilt at the edges, for the main action; slate slabs for the rest */
+body[data-npc=anciao] #talk .opts button:not(.ghost){
+  background:linear-gradient(90deg,rgba(0,0,0,.25),transparent 12%,transparent 88%,rgba(0,0,0,.25)),linear-gradient(#9a3a4a 0 12%,#7a2a3a 12% 55%,#5a1a2a 55% 86%,#3a0e1a 86%);
+  color:#ffe9b0;text-shadow:1px 1px 0 #000;border:3px solid #000;
+  box-shadow:inset 0 0 0 2px var(--el-gold),inset 0 0 0 3px #5a3a10,0 0 14px -4px rgba(232,192,74,.5),0 3px 0 rgba(0,0,0,.55)
+}
+body[data-npc=anciao] #talk .opts button:not(.ghost):hover{filter:brightness(1.15);box-shadow:inset 0 0 0 2px #fff0b0,inset 0 0 0 3px #5a3a10,0 0 20px -2px rgba(232,192,74,.65),0 3px 0 rgba(0,0,0,.55)}
+body[data-npc=anciao] #talk .opts button.ghost{
+  background:var(--elder-slab) 0 0/180px 42px;image-rendering:pixelated;
+  color:#eef0f4;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
+  border:10px solid #000;border-image:var(--elder-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px
+}
+body[data-npc=anciao] #talk .opts button.ghost:hover{filter:brightness(1.18);box-shadow:0 3px 0 rgba(0,0,0,.55),0 0 14px -3px rgba(255,200,120,.45)}
+
+/* ================= villager kit: Marta, Odo and whoever comes next =================
+   Each villager sets the --k-* values below (textures painted by 25-temas-npc.js from their own house,
+   and a few colours); the rules after that dress the talk card and the shop from them. No animations:
+   moving things belong on their own transformed layer (see .npc-embers). */
+body[data-npc=curandeira]{
+  --k-frame:var(--healer-frame);--k-frame-sm:var(--healer-frame-sm);--k-wall:var(--healer-wall);--k-board:var(--healer-board);--k-sign:var(--healer-sign);--k-portrait:var(--healer-portrait);
+  --k-bg:#1a1c12;--k-shade:rgba(12,14,8,.78);--k-shade-2:rgba(12,14,8,.62);--k-glow:radial-gradient(ellipse 80% 60% at 15% 0%,rgba(190,230,140,.13),transparent 70%);
+  --k-txt:#ece6d2;--k-dim:#b8b49a;--k-acc:#b4e07a;--k-line:#5a7a3a;
+  --k-title:linear-gradient(#f4f8e4 0 26%,#d4e8a8 26% 52%,#9cc860 52% 78%,#5a8a2e 78%);
+  --k-main:linear-gradient(#c8f08a 0 14%,#7ab83a 14% 50%,#4a8a26 50% 82%,#2c5a14 82%);--k-main-txt:#0e1e04;--k-main-hi:#eaffc8;--k-main-lo:#1c3a0a;--k-main-glow:rgba(160,230,90,.5);
+  --k-slot:#1e2614;--k-slot-2:#0a0d06
+}
+body[data-npc=taverneiro]{
+  --k-frame:var(--tavern-frame);--k-frame-sm:var(--tavern-frame-sm);--k-wall:var(--tavern-wall);--k-board:var(--tavern-board);--k-sign:var(--tavern-sign);--k-portrait:var(--tavern-portrait);
+  --k-bg:#20140c;--k-shade:rgba(14,8,4,.66);--k-shade-2:rgba(14,8,4,.44);--k-glow:radial-gradient(ellipse 110% 50% at 50% 108%,rgba(255,150,60,.22),rgba(255,120,40,.06) 55%,transparent 75%);
+  --k-txt:#f2e6cc;--k-dim:#c4b08c;--k-acc:#f0cc66;--k-line:#8a5a18;
+  --k-title:linear-gradient(#fff6d8 0 24%,#fff0b0 24% 46%,#f0cc66 46% 74%,#b8822a 74%);
+  --k-main:linear-gradient(#fff6e0 0 16%,#f0cc66 16% 40%,#d8a83e 40% 74%,#8a5a18 74%);--k-main-txt:#2a1604;--k-main-hi:#fffbe8;--k-main-lo:#5a3a10;--k-main-glow:rgba(240,200,100,.5);
+  --k-slot:#2a1a0e;--k-slot-2:#0c0704
+}
+/* the window is the house: its roof on top, its posts at the sides, its foundation below, its wall inside */
+body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor){
+  position:relative;isolation:isolate;image-rendering:pixelated;
+  border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
+  background-color:var(--k-bg);
+  background-image:var(--k-glow),linear-gradient(var(--k-shade),var(--k-shade-2) 30%,var(--k-shade)),var(--k-wall);background-size:auto,auto,1080px 720px;background-position:0 0,0 0,0 100%;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65);color:var(--k-txt)
+}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .card{width:min(680px,100%)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .talkh h2,#shop .vendor .ch h3){
+  background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)
+}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch{gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch h3{white-space:nowrap;font-size:29px}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch::before,
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child::after{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:end;flex:1}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child::after{grid-row:1 / span 2;grid-column:2;align-self:center;width:57px;height:48px}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh .role{grid-column:1;color:var(--k-acc);letter-spacing:.22em}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .portrait{
+  width:99px;height:108px;background:#10100c var(--k-portrait) center bottom/99px 108px no-repeat;image-rendering:pixelated;
+  border:15px solid #000;border-image:var(--k-frame-sm) 5 / 15px stretch
+}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .portrait canvas{width:96px;height:88px;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .tag{color:var(--k-txt);font-style:italic;padding:10px 14px;border-left:3px solid var(--k-line);background:linear-gradient(90deg,rgba(0,0,0,.5),transparent)}
+/* buttons: the house's own colour for the main action, boards from the house for the rest */
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .opts button:not(.ghost){
+  background:var(--k-main);color:var(--k-main-txt);text-shadow:0 1px 0 var(--k-main-hi);border:3px solid #000;
+  box-shadow:inset 0 2px 0 var(--k-main-hi),inset 0 -3px 0 var(--k-main-lo),0 0 14px -4px var(--k-main-glow),0 3px 0 rgba(0,0,0,.55)
+}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .opts button:not(.ghost):hover{filter:brightness(1.1)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor) button.ghost{
+  background:var(--k-board) 0 0/180px 42px;image-rendering:pixelated;color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
+  border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px
+}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch button.ghost{padding:2px 10px}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor) button.ghost:hover{filter:brightness(1.15)}
+/* the shop: slots as hollows, small print in the house's colours */
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .slot{background:radial-gradient(circle at 50% 40%,var(--k-slot),var(--k-slot-2) 76%);box-shadow:inset 0 0 0 1px var(--rc,var(--k-line)),inset 2px 2px 0 1px rgba(0,0,0,.8)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .slot.full{box-shadow:inset 0 0 0 2px var(--rc,var(--k-line)),inset 3px 3px 0 2px rgba(0,0,0,.6),0 0 10px -2px var(--rc,transparent)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ph span{color:var(--k-txt)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .shopf{color:var(--k-dim)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .shopf b{color:var(--k-acc)}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep{background:var(--k-board) 0 50%/180px 12px repeat-x;height:12px;border-block:2px solid #000;margin-block:3px}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep::before,body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep::after{display:none}
+body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor kbd{background:var(--k-slot);color:var(--k-txt);box-shadow:inset 0 -2px 0 #000}

@@ -1,0 +1,7 @@
+{
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/Under%20Darkness.html", "destination": "/", "permanent": true },
+    { "source": "/wiki/Wiki.html", "destination": "/wiki/", "permanent": true }
+  ]
+}

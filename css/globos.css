@@ -1,0 +1,27 @@
+/* Life and mana orbs, Path of Exile style: one big orb in each bottom corner, close to the edge.
+   The art is 88x88 pixels painted once by js/35-globos.js and scaled by --os (whole pixels when possible). */
+:root{--os:3px}
+.orb{position:absolute;bottom:calc(8px - 4 * var(--os) + env(safe-area-inset-bottom,0px));width:calc(88 * var(--os));height:calc(88 * var(--os));image-rendering:pixelated}
+.orb.hp{left:calc(8px - 4 * var(--os) + env(safe-area-inset-left,0px))}
+.orb.mp{right:calc(8px - 4 * var(--os) + env(safe-area-inset-right,0px))}
+.orb .liq{position:absolute;left:calc(11 * var(--os));top:calc(11 * var(--os));width:calc(66 * var(--os));height:calc(66 * var(--os));border-radius:50%;overflow:hidden;background:var(--orb-back) 0 0/100% 100% no-repeat;image-rendering:pixelated}
+.orb .liq i{position:absolute;left:0;right:0;bottom:0;height:100%;background:var(--orb-liq) 50% 100%/calc(66 * var(--os)) calc(66 * var(--os)) no-repeat;image-rendering:pixelated}
+/* the liquid's flat top: one bright pixel line and a darker one under it, no motion */
+.orb .liq i::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--os);background:var(--orb-top);box-shadow:0 var(--os) 0 var(--orb-top2)}
+.orb .gloss{position:absolute;inset:0;background:var(--orb-front) 0 0/100% 100% no-repeat;image-rendering:pixelated;pointer-events:none}
+.orb.hp{--orb-back:var(--orb-hp-back);--orb-liq:var(--orb-hp-liq);--orb-front:var(--orb-hp-front);--orb-top:#ff8a6c;--orb-top2:#e0463a}
+.orb.mp{--orb-back:var(--orb-mp-back);--orb-liq:var(--orb-mp-liq);--orb-front:var(--orb-mp-front);--orb-top:#8ab6ff;--orb-top2:#3e6ce0}
+.orb span{position:absolute;left:0;right:0;top:50%;transform:translateY(-58%);text-align:center;font-family:var(--font-title);font-size:calc(13 * var(--os));line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:#fff4e4;text-shadow:var(--os) var(--os) 0 #000,calc(-.5 * var(--os)) calc(-.5 * var(--os)) 0 #000,calc(.5 * var(--os)) calc(-.5 * var(--os)) 0 #000,calc(-.5 * var(--os)) calc(.5 * var(--os)) 0 #000}
+.orb small{position:absolute;left:0;right:0;top:calc(50% + 5 * var(--os));text-align:center;font-size:calc(4 * var(--os));font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,240,226,.8);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+/* low life: a red halo behind the orb breathes (only opacity animates) */
+.orb::before{content:"";position:absolute;inset:calc(-6 * var(--os));border-radius:50%;background:radial-gradient(circle,rgba(255,50,40,.55) 45%,rgba(255,40,40,0) 70%);opacity:0;pointer-events:none;will-change:opacity}
+.orb.low::before{animation:orbLow .9s ease-in-out infinite}
+@keyframes orbLow{50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.orb.low::before{animation:none;opacity:.7}}
+#help{bottom:calc(88 * var(--os) + 28px + env(safe-area-inset-bottom,0px))}
+/* smaller screens: shrink so the orbs never touch the hotbar; very narrow screens lift them above it */
+@media (min-width:2400px) and (min-height:1300px){:root{--os:4px}}
+@media (max-width:1279px),(max-height:859px){:root{--os:2px}}
+@media (max-width:1059px){:root{--os:1.5px}}
+@media (max-width:959px){.orb{bottom:calc(124px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:560px){:root{--os:1px}.orb{bottom:calc(96px + env(safe-area-inset-bottom,0px))}.orb small{display:none}}

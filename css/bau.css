@@ -1,0 +1,50 @@
+/* ================= the village chest (js/27-bau.js) =================
+   Its window is the chest: oak boards round the edge, iron corner plates and straps, the dark inside of the lid
+   behind the slots, brass for the title. Textures come from js/27-bau.js (--bau-*). Your inventory stays yours. */
+#stash{padding-block:10px}
+#stash .inv{width:min(1300px,100%);align-items:flex-start;flex-wrap:nowrap}
+#stash .invcard{margin-block:0}
+@media (max-width:1320px){#stash .inv{flex-wrap:wrap}}
+
+#stash .chestp{
+  --oak-hi:#e8c06a;--oak-txt:#ecdcbc;--oak-dim:#b49a76;
+  flex:0 0 auto;box-sizing:border-box;position:relative;isolation:isolate;image-rendering:pixelated;
+  padding:10px 14px 14px;gap:10px;
+  border-style:solid;border-color:#000;border-width:36px;
+  border-image:var(--bau-frame) 12 / 36px repeat;
+  background-color:#1c120b;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%,rgba(255,196,110,.12),transparent 70%),
+    linear-gradient(rgba(6,3,1,.62),rgba(6,3,1,.3) 30%,rgba(6,3,1,.5)),
+    var(--bau-wall);
+  background-size:auto,auto,180px 180px;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65);
+  color:var(--oak-txt);
+}
+#stash .chestp .ch{gap:12px;background:linear-gradient(90deg,transparent,#54360c 8%,#a8761e 30%,#f6d27a 50%,#a8761e 70%,#54360c 92%,transparent) bottom/100% 2px no-repeat}
+#stash .chestp .ch::before{content:"";flex:none;width:48px;height:35px;background:var(--bau-icon) center/48px 35px no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#stash .chestp .ch h3{
+  white-space:nowrap;font-size:34px;
+  background:linear-gradient(#fff2c0 0 22%,#f6d27a 22% 50%,#d29e34 50% 78%,#a8761e 78%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(3px 3px 0 #000);
+}
+#stash .chestp .acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#stash .chestp .acts button{white-space:nowrap}
+#stash .chestp .ch .push{margin-left:auto}
+#stash #stashCount{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--oak-hi);font-variant-numeric:tabular-nums;padding:3px 10px;background:rgba(0,0,0,.5);border:2px solid #000;box-shadow:inset 0 0 0 1px #7e5414}
+#stash .chestp button.ghost{
+  background:var(--bau-board) 0 0/180px 42px;image-rendering:pixelated;
+  color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
+  border:10px solid #000;border-image:var(--bau-frame-sm) 5 / 10px stretch;
+  box-shadow:0 3px 0 rgba(0,0,0,.55);padding:2px 10px;
+}
+#stash .chestp button.ghost:hover{filter:brightness(1.15)}
+#stash .chestp .grid{grid-template-columns:repeat(8,52px);gap:6px;padding:8px;background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 2px #000,inset 0 0 0 3px #4f2c15,inset 0 6px 14px rgba(0,0,0,.6)}
+#stash .chestp .slot{background:radial-gradient(circle at 50% 40%,#2a1a10,#0c0705 80%);box-shadow:inset 0 0 0 1px var(--rc,#54360c),inset 2px 2px 0 1px rgba(0,0,0,.75),inset -2px -2px 0 1px rgba(210,158,52,.12)}
+#stash .chestp .slot.full{background:radial-gradient(circle at 50% 40%,#3a2616,#140b06 80%);box-shadow:inset 0 0 0 2px var(--rc,#7e5414),inset 3px 3px 0 2px rgba(0,0,0,.55),0 0 10px -2px var(--rc,transparent)}
+#stash .chestp .slot:hover,#stash .chestp .slot.over{background:radial-gradient(circle at 50% 40%,#4a321c,#1c1009 80%)}
+#stash .chestp .sep{background:linear-gradient(90deg,transparent,#54360c 10%,#d29e34 50%,#54360c 90%,transparent) center/100% 2px no-repeat}
+#stash .chestp .shopf{color:var(--oak-dim);max-width:466px}
+#stash .chestp .shopf b{color:var(--oak-txt)}
+@media (max-width:560px){#stash .chestp .grid{grid-template-columns:repeat(6,48px)}}

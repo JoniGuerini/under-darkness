@@ -1,0 +1,9 @@
+# cópias antigas e prévias geradas durante o desenvolvimento
+backup/
+prints/
+
+# sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+.vercel

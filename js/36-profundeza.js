@@ -1,0 +1,191 @@
+'use strict';
+
+/* ================= the third layer: deep rock blocks behind the back wall =================
+   Underground there are three layers of blocks: the ones you walk on and break (tiles), the back
+   wall (walls), and behind it the deep layer (DEEPT), its own grid of blocks with their own rocks:
+   rocha antiga up top, ardósia funda in the deep caves, basalto in the abyss, with fossils and
+   dim crystal veins, and hollows here and there. The back wall is torn open in the big caverns so
+   the deep blocks show through. Everything comes from world generation (buildDepth, called at the
+   end of generate) from the seed alone, so saves don't store it and old saves load the same.
+   It is decoration: nothing collides with it, and light and monsters still treat it as back wall.
+   It is drawn into the chunk images like the other two layers, so a frame costs nothing extra. */
+
+const DEPTH_THR = 0.77;                 // openness above this tears the back wall open
+let DF = null, FAR = null, DEEPT = null; // per tile openness, "an opening reaches this tile", deep block type
+const depthCache = new Map();           // tile index -> its pixel codes (null: no opening there); the openings never change
+
+// deep block types (0 = hollow)
+const DP_ANTIGA = 1, DP_ARDOSIA = 2, DP_BASALTO = 3, DP_FOSSIL = 4, DP_CRISTAL = 5;
+const DEEP_NAMES = ['', 'Rocha antiga', 'Ardósia funda', 'Basalto', 'Pedra fóssil', 'Veio de cristal apagado'];
+
+// value noise that repeats around the world (period = WW tiles)
+function depthNz(x, y, cells, s) {
+  const f = x / WW * cells, ix = Math.floor(f), ux = sm3(f - ix), g = y / (WW / cells), iy = Math.floor(g), uy = sm3(g - iy);
+  const w = (a, b) => hash2(((a % cells) + cells) % cells, b, s);
+  const A = w(ix, iy), B = w(ix + 1, iy), C = w(ix, iy + 1), D = w(ix + 1, iy + 1);
+  return A + (B - A) * ux + (C - A) * uy + (A - B - C + D) * ux * uy;
+}
+
+function buildDepth() {
+  const NN = WW * WH; DF = new Float32Array(NN).fill(-1); FAR = new Uint8Array(NN); DEEPT = new Uint8Array(NN); depthCache.clear(); deepCache.clear();
+  // how open the rock around each tile is (a wide window), so the big caverns open up and narrow tunnels stay walled
+  const RX = 6, RY = 4, air = new Uint16Array((WW + 1) * (WH + 1)), W1 = WW + 1;
+  for (let y = 0; y < WH; y++) { let run = 0; for (let x = 0; x < WW; x++) { const i = y * WW + x; run += !SOLID[tiles[i]] && walls[i] ? 1 : 0; air[(y + 1) * W1 + x + 1] = air[y * W1 + x + 1] + run; } }
+  const box = (x0, y0, x1, y1) => air[y1 * W1 + x1] - air[y0 * W1 + x1] - air[y1 * W1 + x0] + air[y0 * W1 + x0];
+  const openAt = (x, y) => {
+    const y0 = Math.max(0, y - RY), y1 = Math.min(WH, y + RY + 1); let n = 0;
+    const xa = x - RX, xb = x + RX + 1;
+    if (xa < 0) n = box(0, y0, xb, y1) + box(WW + xa, y0, WW, y1);
+    else if (xb > WW) n = box(xa, y0, WW, y1) + box(0, y0, xb - WW, y1);
+    else n = box(xa, y0, xb, y1);
+    return n / ((xb - xa) * (y1 - y0));
+  };
+  const cr = crypt;
+  for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x, w = walls[i];
+    if (!w || w === 4 || y < surf[x] + 13 || y > WH - 9) continue;
+    if (cr && x >= cr.x0 - 3 && x <= cr.x1 + 3 && y >= cr.y0 - 3 && y <= cr.y1 + 3) continue;
+    const n = depthNz(x, y, 25, seed ^ 0x6d31) * 0.65 + depthNz(x, y, 60, seed ^ 0x6d32) * 0.35;
+    const k = clamp((y - surf[x] - 13) / 10, 0, 1);       // the openings ease in below the surface
+    DF[i] = (n * 0.62 + openAt(x, y) * 0.62 + clamp((y - Z1) / 400, -0.05, 0.08)) * k;
+  }
+  // tiles an opening (or its rim) can reach
+  for (let y = 1; y < WH - 1; y++) for (let x = 0; x < WW; x++) {
+    let m = -1; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const v = DF[(y + dy) * WW + wrapX(x + dx)]; if (v > m) m = v; }
+    if (m > DEPTH_THR - 0.09) FAR[y * WW + x] = 1;
+  }
+  buildDeepTiles();
+}
+
+// is the back wall open at this world pixel? bilinear openness between tile centres, plus a little grain on the edge
+function depthOpen(X, Y) {
+  const fx = X / T - 0.5, fy = Y / T - 0.5, ix = Math.floor(fx), iy = Math.floor(fy), ux = fx - ix, uy = fy - iy;
+  if (iy < 0 || iy >= WH - 1) return false;
+  const x0 = wrapX(ix), x1 = wrapX(ix + 1), r0 = iy * WW, r1 = r0 + WW;
+  const a = DF[r0 + x0], b = DF[r0 + x1], c = DF[r1 + x0], d = DF[r1 + x1];
+  const f = a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+  if (f < DEPTH_THR - 0.035) return false; if (f > DEPTH_THR + 0.035) return true;
+  return f + (hash2(X >> 1, Y >> 1, 977) - 0.5) * 0.02 + (hash2(X >> 2, Y >> 2, 978) - 0.5) * 0.045 > DEPTH_THR;
+}
+
+// per pixel of one tile: 0 back wall, 1 its cut edge, 2/3 the lip seen on the wall below an opening,
+// 10 + n an opening, n = how deep the wall above shades it
+const DEPTH_M = 5, DEPTH_GW = T + 2, DEPTH_GH = T + DEPTH_M + 1, depthG = new Uint8Array(DEPTH_GW * DEPTH_GH), depthOut = new Uint8Array(T * T);   // 5 px above for the shade, 1 px around for the edge
+function depthTile(gx, gy) {
+  const key = gy * WW + gx; let c = depthCache.get(key);
+  if (c === undefined) { c = depthTileCalc(gx, gy); depthCache.set(key, c && c.slice()); }
+  return c;
+}
+function depthTileCalc(gx, gy) {
+  const X0 = gx * T - 1, Y0 = gy * T - DEPTH_M; let any = 0;
+  for (let j = 0; j < DEPTH_GH; j++) for (let i = 0; i < DEPTH_GW; i++) { const o = depthOpen(X0 + i, Y0 + j) ? 1 : 0; depthG[j * DEPTH_GW + i] = o; any |= o; }
+  if (!any) return null;
+  for (let py = 0; py < T; py++) for (let px = 0; px < T; px++) {
+    const g = (py + DEPTH_M) * DEPTH_GW + px + 1;
+    if (depthG[g]) { let n = 0; while (n < 5 && depthG[g - (n + 1) * DEPTH_GW]) n++; depthOut[py * T + px] = 10 + (5 - n); continue; }
+    if (depthG[g - DEPTH_GW]) depthOut[py * T + px] = depthG[g - DEPTH_GW * 2] ? 2 : 1;
+    else if (depthG[g - 1] || depthG[g + 1] || depthG[g + DEPTH_GW]) depthOut[py * T + px] = 1;
+    else if (depthG[g - DEPTH_GW * 2] && depthG[g - DEPTH_GW * 3]) depthOut[py * T + px] = 3;
+    else depthOut[py * T + px] = 0;
+  }
+  return depthOut;
+}
+
+/* ---------- the deep blocks: generated from the seed ---------- */
+function buildDeepTiles() {
+  const zb = (x, y, s) => (depthNz(x, y, 30, seed ^ s) - 0.5) * 10;
+  for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x; if (y < surf[x] + 3) continue;
+    // hollows: a far cave system of its own, a little sparser than the near one
+    if (depthNz(x, y, 50, seed ^ 0x7e01) * 0.7 + depthNz(x, y, 100, seed ^ 0x7e02) * 0.3 > 0.66) continue;
+    let t = y < Z1 + 6 + zb(x, y, 0x7e03) ? DP_ANTIGA : y < Z2 + zb(x, y, 0x7e04) ? DP_ARDOSIA : DP_BASALTO;
+    const h = hash2(x, y, seed ^ 0x7e05);
+    if (t !== DP_BASALTO && h < 0.022) t = DP_FOSSIL;
+    else if (t !== DP_ANTIGA && depthNz(x, y, 75, seed ^ 0x7e06) > 0.8 && h < 0.5) t = DP_CRISTAL;
+    DEEPT[i] = t;
+  }
+}
+
+// textures, baked once like the other materials (seamless 240x240)
+function vAntiga(x, y) {   // big rough stones packed together
+  const cs = 8, gx = Math.floor(x / cs), gy = Math.floor(y / cs); let d1 = 99, d2 = 99, id = 0;
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const cx = gx + i, cy = gy + j, wx = ((cx % 30) + 30) % 30, wy = ((cy % 30) + 30) % 30;
+    const px = cx * cs + hash2(wx, wy, 131) * cs, py = cy * cs + hash2(wx, wy, 132) * cs, d = Math.hypot(x - px, (y - py) * 1.2);
+    if (d < d1) { d2 = d1; d1 = d; id = hash2(wx, wy, 133); } else if (d < d2) d2 = d;
+  }
+  if (d2 - d1 < 1.1) return 0.35;
+  let v = 2.2 + (id - 0.5) * 1.1 + (hash2(x, y, 134) - 0.5) * 0.7 + (pn(x, y, 60, 60, 135) - 0.5) * 0.6;
+  if (d2 - d1 < 2.2) v += 0.7;              // the rounded top of each stone catches a little light
+  return v - d1 * 0.06;
+}
+function vArdosia(x, y) {  // thin slate plates in tilted layers
+  const w = pn(x, y, 12, 30, 141) * 7, ly = (y + w + x * 0.08) % 5;
+  let v = 2.3 + (pn(x, y, 48, 120, 142) - 0.5) * 1.5 + (hash2(x, y, 143) - 0.5) * 0.5;
+  if (ly < 0.9) v -= 1.3; else if (ly < 1.9) v += 0.9;
+  if (hash2(Math.floor(x / 9), Math.floor((y + w) / 5), 144) < 0.08 && ly > 2) v -= 0.6;
+  return v;
+}
+function vBasalto(x, y) {  // tall columns, each a slightly different shade, broken by cross cracks
+  const cw = 6, c = Math.floor(x / cw), lx = x - c * cw, cid = c % (TP / cw), off = (hash2(cid, 0, 151) * 40) | 0, len = 14 + ((hash2(cid, 1, 151) * 12) | 0), ly = (y + off) % len;
+  if (lx === cw - 1) return 0.3;
+  if (ly === 0) return 0.6;
+  let v = 2.2 + (hash2(cid, Math.floor((y + off) / len), 152) - 0.5) * 1.1 + (hash2(x, y, 153) - 0.5) * 0.5;
+  if (lx === 0) v += 1.0; else if (lx === cw - 2) v -= 0.6;
+  if (ly === 1) v += 0.6;
+  return v;
+}
+pal('deepAntiga', ['#0e0b0c', '#181416', '#211b1e', '#2b2427', '#362e31', '#433a3d']);
+pal('deepArdosia', ['#0a0c12', '#11151d', '#191f29', '#212935', '#2a3443', '#364254']);
+pal('deepBasalto', ['#0b0910', '#130f1a', '#1b1524', '#241c30', '#2f253d', '#3b2f4c']);
+const BKD = { antiga: bake(vAntiga), ardosia: bake(vArdosia), basalto: bake(vBasalto) };
+const DMAT = [null, [PALS.deepAntiga, BKD.antiga], [PALS.deepArdosia, BKD.ardosia], [PALS.deepBasalto, BKD.basalto]];   // fossils and crystal veins sit in the rock of their depth
+const DEEP_HOLLOW = ph('#040306');
+// shade a packed colour toward the dark of the far rock (s = 0..5)
+const DSH = new Map();
+function deepShade(c, s) {
+  if (s <= 0) return c; s = Math.min(6, Math.round(s * 2) / 2); const k = c * 16 + s * 2; let r = DSH.get(k); if (r !== undefined) return r;
+  const f = Math.max(0.12, 1 - s * 0.17), R = c & 255, G = (c >>> 8) & 255, B = (c >>> 16) & 255;
+  r = pack((3 + (R - 3) * f) | 0, (2 + (G - 2) * f) | 0, (6 + (B - 6) * f) | 0); DSH.set(k, r); return r;
+}
+// small accents: fossil shells and crystal shards (dim, they are far back)
+const DEEP_BONE = ['#2c2820', '#423c30', '#5a5240'].map(h => ph(h)), DEEP_CRY = ['#2a1e44', '#45306e', '#6a50a0'].map(h => ph(h));
+const FOSSILS = [
+  ['............', '............', '....111.....', '...12221....', '..1231121...', '..123.3121..', '..12.3.121..', '..1231.21...', '...12221....', '....111.....', '............', '............'],
+  ['............', '............', '..1.....1...', '..21...12...', '...2111211..', '..1232232...', '...2111211..', '..21...12...', '..1.....1...', '............', '............', '............']
+];
+const DEEP_SHARD = ['............', '.......1....', '......12....', '..1...121...', '..21..1231..', '..121.1231..', '..1231.121..', '...121.1....', '....1.......', '............', '............', '............'];
+
+// the colour of one pixel of the deep layer at world tile (gx, gy), local pixel (px, py), shaded by s;
+// each deep block is painted once and kept (it never changes), so redrawing a chunk after mining stays cheap
+const deepCache = new Map();
+function deepPix(gx, gy, px, py, s) {
+  const key = gy * WW + wrapX(gx); let a = deepCache.get(key);
+  if (!a) { a = new Uint32Array(T * T); for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) a[y * T + x] = deepPixRaw(gx, gy, x, y); deepCache.set(key, a); }
+  return deepShade(a[py * T + px], s);
+}
+function deepPixRaw(gx, gy, px, py) {
+  const s = 0;
+  const i = gy * WW + wrapX(gx), t = DEEPT[i];
+  if (!t) return deepShade(DEEP_HOLLOW, s);
+  const dt = (x, y) => y < 0 || y >= WH ? 1 : DEEPT[y * WW + wrapX(x)];
+  const up = dt(gx, gy - 1), dn = dt(gx, gy + 1), lf = dt(gx - 1, gy), rt = dt(gx + 1, gy);
+  const ul = px + py, ur = (T - 1 - px) + py, dl = px + (T - 1 - py), dr = (T - 1 - px) + (T - 1 - py);
+  if ((!up && !lf && ul < 2) || (!up && !rt && ur < 2) || (!dn && !lf && dl < 2) || (!dn && !rt && dr < 2)) return deepShade(DEEP_HOLLOW, s);
+  const M = DMAT[t <= DP_BASALTO || (t > DP_CRISTAL && DMAT[t]) ? t : gy < Z1 + 6 ? DP_ANTIGA : gy < Z2 ? DP_ARDOSIA : DP_BASALTO] || DMAT[DP_ANTIGA], P = M[0], X = gx * T + px, Y = gy * T + py, tk = (Y % TP) * TP + (X % TP);
+  const eu = up ? 99 : py, ed = dn ? 99 : T - 1 - py, el = lf ? 99 : px, er = rt ? 99 : T - 1 - px, e = Math.min(eu, ed, el, er);
+  if (e === 0) return deepShade(P[0], s);
+  let v = M[1].v[tk];
+  // each deep block shows its own edges a little, so the layer reads as blocks
+  if (py === 0 && up) v += 0.7; else if (py === T - 1 && dn) v -= 0.9;
+  if (px === 0 && lf) v += 0.4; else if (px === T - 1 && rt) v -= 0.5;
+  if (eu === 1) v += 1.4; else if (eu === 2) v += 0.5;
+  if (ed === 1) v -= 1; if (el === 1 || er === 1) v -= 0.3;
+  let c = shadeOf(P, v);
+  if (t === DP_FOSSIL || t === DP_CRISTAL) {
+    const art = t === DP_CRISTAL ? DEEP_SHARD : FOSSILS[(hash2(gx, gy, 161) * 2) | 0], flip = hash2(gx, gy, 162) < 0.5;
+    const ch = art[py][flip ? T - 1 - px : px];
+    if (ch !== '.' && (t === DP_FOSSIL || hash2(gx, gy, 163) < 0.45)) c = (t === DP_CRISTAL ? DEEP_CRY : DEEP_BONE)[+ch - 1];
+  }
+  return deepShade(c, s);
+}

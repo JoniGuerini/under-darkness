@@ -1,0 +1,585 @@
+*BIOMAS DE UNDER DARKNESS*
+
+Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2) e a Catedral (parte 3), levantadas direto do código; o resto é ideia.
+
+• Parte 1: o que é um bioma e a ficha com todas as variáveis.
+• Parte 2: a primeira camada, As Cavernas (existe).
+• Parte 3: a segunda camada, a Catedral Abandonada (existe), com tudo que tem nela.
+• Parte 4: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
+• Parte 5: outras ideias soltas, só o conceito.
+
+As regras técnicas de geração (apoio dos objetos, janelas, colunas, entrada, ordem e testes) continuam em regras-de-bioma.md. Este documento não repete essas regras; ele diz *o que* um bioma tem, e aquele diz *como* gerar sem erro.
+
+Para marcar a validação, troque [ ] por [x] (aprovado) ou [-] (remover) em cada item.
+
+━━━━━━━━━━━━
+
+*PARTE 1. O QUE É UM BIOMA*
+
+Um bioma é *um pedaço do mundo com identidade própria*: o jogador entra, percebe na hora que mudou de lugar (pela pedra, pela luz, pelo som, pelos monstros) e encontra ali desafios e recompensas que não existem em outro canto.
+
+Na prática, quando pedirmos "vamos fazer um bioma novo", isso significa preencher *todas* as seções da ficha abaixo. Se uma seção ficar vazia, o bioma fica com cara de remendo (por exemplo, blocos novos com os monstros de outro bioma).
+
+*A ficha de bioma*
+
+*1. Identidade*
+• *Nome* do bioma e nome de cada *faixa* (sub-região) que aparece no jogo.
+• *Conceito* em 2 ou 3 frases: o que esse lugar foi, o que aconteceu com ele, o que há lá agora.
+• *Sensação* que ele deve passar (medo, solidão, opressão, maravilha...).
+• *Referências* de jogos, filmes ou arte.
+
+*2. Lugar no mundo*
+• *Profundidade* (de quantos metros a quantos metros) ou posição horizontal.
+• *Faixas internas*: cada faixa é uma zona do jogo (cathZone), com nome no HUD e no mapa, e muda os monstros, a decoração e os minérios.
+• *Entrada*: como o jogador chega (portal, escada, poço, rachadura) e de onde.
+• *Ligação com outros biomas*: por onde se passa de um para o outro.
+
+*3. Estrutura e geração*
+• *Massa*: a rocha natural que envolve tudo.
+• *Tipos de sala* (ex.: nave, capela, cripta), com largura e altura, e o que cada uma recebe.
+• *Andares* por faixa e como se ligam (portas, corredores, escadas, poços com corrente).
+• *Estragos*: desabamentos, buracos, escombros, água, o que for do tema.
+• *Elementos estruturais* com regra própria (ex.: colunas que vão do chão ao teto).
+• Tudo segue a ordem e os testes de regras-de-bioma.md.
+
+*4. Blocos (as quatro camadas do mundo)*
+• *Sólidos da frente*: os blocos que o jogador anda, quebra e coloca. Para cada um: nome, uso, dureza, cor no mapa, item que solta.
+• *Decoração de 1 bloco*: coisas pequenas, não sólidas (velas, crânios, teias, raízes), algumas com luz.
+• *Paredes de fundo*: o que aparece atrás das salas (sempre bem mais escuro que a frente; sem cor de destaque, porque o jogo só lê o tom da parede: cor no fundo tem que ser objeto).
+• *Terceira camada* (a mais distante, atrás da parede): blocos grandes e escuros que dão profundidade.
+• *Minérios*: quais aparecem, em que faixa, e em qual pedra eles ficam engastados.
+
+*5. Objetos de cena (props)*
+Os objetos maiores que um bloco, pintados uma vez e "assados" na imagem do mundo. Para cada um: nome, tamanho, variações, *apoio* (chão, teto, parede de fundo, janela), faixas onde aparece, se tem luz ou chama, e o que acontece se quebrar o apoio (ele cai).
+
+*6. Inimigos*
+• *Família* temática (na catedral: mortos-vivos).
+• Para cada inimigo: nome, papel no combate (tanque, distância, rápido, atravessa parede...), ataque principal com aviso claro, vida e dano base, drops.
+• *Tabela de spawn por faixa* (pesos e máximo de monstros ao mesmo tempo).
+• Regras da casa: sem dano de contato genérico, linha de visão, busca de caminho, XP baixo.
+
+*7. Chefe*
+• Quem é, onde fica (sala especial gerada pela semente), fases, ataques, o que solta (item lendário único), o que fica salvo.
+
+*8. Loot e economia*
+• *Itens de bloco* que o bioma dá para construir.
+• *Baús*: quantos, onde, o que trazem.
+• *Drops* dos monstros e materiais exclusivos do bioma (usados na forja, em missões ou na loja).
+• *Itens únicos*: lendários ou bases de equipamento temáticas (ligar com a itemização do GDD).
+
+*9. Luz e atmosfera*
+• Quanto o lugar é escuro, quais fontes de luz existem (velas, tochas, objetos) e de que *cor*.
+• Partículas e efeitos (poeira, gotas, névoa, brasas).
+• Paleta geral: as rampas de 6 tons de cada material.
+
+*10. Som e música*
+• Tema musical do bioma (hoje só existem "vila" e "caverna").
+• Sons de ambiente e sons próprios dos monstros.
+
+*11. Interface e progressão*
+• Nome da zona que aparece ao entrar, cor no mapa (Tab).
+• Missões do vilarejo ligadas ao bioma (ancião, ferreiro, taverna).
+• Nível dos monstros pela profundidade.
+
+*12. Arte*
+• Tudo no padrão do vilarejo: pixel art granulada, rampas de 6 tons, luz de cima à esquerda, contorno escuro só onde toca o ar, nada de preto ou branco puro dominando.
+• Bloco 12x12 px; humanoides 12x22 com os mesmos encaixes do herói.
+
+*13. Arquivos*
+• Um arquivo por sistema (API, blocos, objetos, monstros, mundo, chefe), numerados, e uma spec própria em docs/.
+
+━━━━━━━━━━━━
+
+*PARTE 2. BIOMA 1: AS CAVERNAS (A PRIMEIRA CAMADA)*
+
+Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas no código) e implementada em seguida. É a primeira camada debaixo do vilarejo; a catedral fica embaixo dela. Detalhes técnicos (ids, arquivos, ganchos) em caverna-spec.md.
+
+*1. Identidade*
+• *Nome:* As Cavernas.
+• *Faixas no jogo:* Grutas Rasas, Galerias de Pedra, O Ninho, Fundações Soterradas.
+• *Conceito:* a terra debaixo do vilarejo é oca. Primeiro vêm grutas de terra úmida cortadas pelas raízes do bosque, depois galerias enormes que a água levou mil anos para cavar, com estalactites e cortinas de calcita. Mais fundo, as aranhas tomaram tudo e teceram um ninho do tamanho de uma vila. No fundo do ninho a rocha fica clara e começam a aparecer pedras lavradas: são as fundações da catedral que afundou.
+• *Sensação:* começa como exploração (curiosidade, eco, gotas), vira assombro nas galerias grandes e termina em nojo e medo no ninho, onde tudo gruda.
+• *Contraste com a catedral:* nada aqui foi construído. Formas orgânicas em vez de salas retas, terra e rocha em vez de cantaria, bichos em vez de mortos-vivos, luz fria de fungo e cristal em vez de vela.
+• *Referências:* as cavernas de Terraria, as grutas de Spelunky, o ninho de aranhas de Mirkwood e de Laracna.
+
+*2. Lugar no mundo*
+• *Grutas Rasas* — profundidade: 6 a 60 m; caráter: terra úmida, raízes, túneis que serpenteiam, grutas pequenas, cogumelos
+• *Galerias de Pedra* — profundidade: 60 a 120 m; caráter: rocha, salões grandes e altos, estalactites e estalagmites, cortinas de calcita, poços fundos
+• *O Ninho* — profundidade: 120 a 168 m; caráter: xisto escuro, teia em tudo, casulos, ovos, ossos das presas, a câmara da Mãe-Teia
+• *Fundações Soterradas* — profundidade: 168 a 186 m; caráter: a rocha vira calcário e aparecem blocos lavrados caídos: é a transição para a catedral
+
+• A catedral começa logo abaixo, a 186 m (Átrio Soterrado), e vai até 372 m. O mundo ficou mais alto (440 blocos em vez de 240).
+• *Entrada:* a mesma de antes, o pórtico de pedra à direita da placa do vilarejo, com a escadaria quebrada. A escadaria desce uns 14 m em cantaria; depois a pedra lavrada vai rareando, vira terra e a escada acaba numa gruta. Duas ou três bocas naturais de caverna aparecem nos morros, longe do vilarejo.
+• *Ligação com a catedral:* duas descidas por mundo no fundo das Fundações, onde o teto do átrio desabou: uma escadaria em ruína que sai de uma gruta e desce até uma sala do átrio. A catedral continua igual por dentro.
+
+*3. Estrutura e geração*
+• *Massa:* terra úmida no alto, rocha da caverna no meio, xisto escuro no ninho, calcário nas fundações. As bordas entre elas se misturam com ruído (nunca uma linha reta).
+• *Tipos de espaço:*
+
+• *Grutas Rasas* — espaços: túneis sinuosos (2 a 4 de altura), grutas pequenas; largura x altura: grutas de 8 a 18 x 5 a 9
+• *Galerias de Pedra* — espaços: salões naturais grandes, poços verticais, túneis; largura x altura: salões de 20 a 45 x 10 a 22
+• *O Ninho* — espaços: câmaras redondas ligadas por túneis forrados de teia, a câmara da Mãe-Teia; largura x altura: câmaras de 12 a 24 x 7 a 12; a da chefe 34 x 14
+• *Fundações* — espaços: grutas baixas, blocos caídos, as descidas para o átrio; largura x altura: grutas de 10 a 20 x 5 a 8
+
+• Gerado com ruído e autômato celular (forma orgânica, com bordas e degraus), mais túneis "minhoca" que ligam tudo.
+• *Estragos e detalhes:* montes de cascalho, poças de argila, teia sólida tapando passagens no ninho (quebra rápido), pedras lavradas caídas nas fundações.
+• *Elementos com regra própria:* estalactites ficam presas no teto e estalagmites no chão; se o bloco que as segura quebrar, elas caem (igual às colunas da catedral).
+• Tudo alcançável a partir do pórtico (a geração cava túneis se faltar). Segue a ordem e os testes de regras-de-bioma.md.
+
+*4. Blocos*
+
+*Sólidos da frente*
+• ☐ *Terra úmida* — uso: massa das Grutas Rasas, escura, com seixos e raízes; solta: Terra Úmida
+• ☐ *Argila* — uso: bolsões avermelhados, cava rápido; solta: Argila
+• ☐ *Rocha da caverna* — uso: massa das Galerias, camadas inclinadas e rachaduras; solta: Rocha
+• ☐ *Rocha com musgo* — uso: rocha úmida perto das raízes e da água; solta: Rocha
+• ☐ *Calcita* — uso: escorrimento cor de creme em volta das estalagmites e nas paredes das galerias; solta: Calcita
+• ☐ *Cascalho* — uso: montes de pedra solta embaixo de desabamentos; solta: Cascalho
+• ☐ *Xisto escuro* — uso: massa do Ninho, lâminas escuras com brilho de mica; solta: Xisto
+• ☐ *Teia sólida* — uso: massa de teia que tapa passagens no Ninho; quebra muito rápido; solta: Seda de Aranha
+• ☐ *Minérios da caverna* — uso: carvão, cobre, ferro e ouro engastados na rocha da caverna (o mesmo minério da catedral, pintado na pedra certa); solta: o minério
+
+*Decoração de 1 bloco*
+• ☐ *Estalactite* — onde: teto das Galerias e do Ninho; nota: ponta e meio; cai se quebrar o teto
+• ☐ *Estalagmite* — onde: chão das Galerias; nota: base e ponta; cai se quebrar o chão
+• ☐ *Raízes finas* — onde: teto das Grutas Rasas; nota: pendem da terra
+• ☐ *Cogumelo de gruta* — onde: chão das Grutas; nota: marrom, sem luz
+• ☐ *Cogumelo azul (o de antes)* — onde: chão das Galerias; nota: *luz fria*
+• ☐ *Drusa de cristal* — onde: chão e cantos das Galerias; nota: *luz fria* lilás, pequena
+• ☐ *Seixos* — onde: chão de todas
+• ☐ *Casulo pequeno* — onde: teto do Ninho; nota: pendurado
+• ☐ *Fios de teia* — onde: cantos do Ninho
+• ☐ *Reaproveitados* — nota: tocha (Grutas), ossos, teia, crânios (Ninho), baú
+
+*Paredes de fundo*
+• ☐ *Terra úmida* — onde: Grutas Rasas
+• ☐ *Rocha da caverna* — onde: Galerias
+• ☐ *Escorrimento de calcita* — onde: salões das Galerias
+• ☐ *Rocha com teia* — onde: Ninho
+• ☐ *Xisto* — onde: Ninho
+• ☐ *Calcário natural (o da catedral)* — onde: Fundações
+
+*Terceira camada (distante)*
+• ☐ *Terra com raízes distante* — onde: Grutas Rasas
+• ☐ *Rocha em camadas distante* — onde: Galerias
+• ☐ *Floresta de estalactites distante* — onde: salões grandes das Galerias
+• ☐ *Rocha com teia distante* — onde: Ninho
+• ☐ *Calcário fundo (o da catedral)* — onde: Fundações
+
+*Minérios*
+• *Carvão* — faixa: 6 a 186 m
+• *Cobre* — faixa: 6 a 120 m (o mais comum)
+• *Ferro* — faixa: 35 a 186 m
+• *Ouro* — faixa: 100 a 186 m, raro
+• *Cristal* — faixa: não aparece aqui (fica na catedral)
+
+*5. Objetos de cena*
+
+*No chão*
+• ☐ *Estalagmites grandes (2 tamanhos)* — faixas: Galerias, Ninho
+• ☐ *Pedregulho* — faixas: todas
+• ☐ *Drusa grande de cristal* — faixas: Galerias; nota: *luz fria* lilás
+• ☐ *Touceira de cogumelos* — faixas: Grutas, Galerias; nota: um deles brilha, *luz fria*
+• ☐ *Ossada do explorador com lampião* — faixas: Grutas, Galerias; nota: um aventureiro que não voltou; *luz quente* fraca
+• ☐ *Raiz caída* — faixas: Grutas; nota: um pedaço de raiz grossa no chão
+• ☐ *Ovos de aranha* — faixas: Ninho; nota: cacho de ovos claros
+• ☐ *Carcaça enrolada em teia* — faixas: Ninho
+• ☐ *Pedra lavrada caída (2)* — faixas: Fundações; nota: pedaços da catedral
+
+*No teto*
+• ☐ *Estalactites grandes (2 tamanhos)* — faixas: Galerias, Ninho
+• ☐ *Raízes pendentes* — faixas: Grutas
+• ☐ *Casulo grande (com e sem vítima)* — faixas: Ninho
+• ☐ *Morcegos dormindo* — faixas: Grutas, Galerias; nota: só enfeite
+• ☐ *Teia grande (a da catedral)* — faixas: Ninho
+
+*Na parede de fundo*
+• ☐ *Cortina de calcita* — faixas: Galerias; apoio: pé no chão
+• ☐ *Veio de cristal* — faixas: Galerias; apoio: altura do olho, *luz fria*
+• ☐ *Pinturas rupestres* — faixas: Grutas, Galerias; apoio: altura do olho; caçadores antigos e uma aranha enorme
+• ☐ *Fóssil na rocha* — faixas: Galerias, Ninho; apoio: altura do olho
+• ☐ *Lençol de teia* — faixas: Ninho; apoio: pé no chão
+• ☐ *Arco lavrado meio enterrado* — faixas: Fundações; apoio: pé no chão; o primeiro sinal da catedral
+
+*6. Inimigos: os bichos da caverna*
+• ☐ *Gosma (repintada, 3 cores por faixa)* — papel: pula em cima do herói; vida / dano base: 22 / 9
+• ☐ *Morcego (repintado)* — papel: dorme pendurado no teto; acorda, plana e dá rasante para morder; vida / dano base: 15 / 8
+• ☐ *Rato-de-Gruta* — papel: rápido e fraco, anda em bando de 2 ou 3, mordida curta; vida / dano base: 14 / 6
+• ☐ *Aranha Tecelã* — papel: espera no teto, desce no fio quando o herói passa embaixo, depois corre no chão e dá bote (aviso: se encolhe antes); vida / dano base: 28 / 9
+• ☐ *Aranha Cuspideira* — papel: fica longe e cospe bolas de teia em arco; quem leva fica lento por 2 s; vida / dano base: 24 / 7
+• ☐ *Besouro Couraçado* — papel: tanque: a carapaça bloqueia golpes de frente; se encolhe e sai rolando (aviso claro); bate na parede e fica tonto; vida / dano base: 60 / 11
+• ☐ *Filhote de aranha* — papel: fundo do Ninho e ovos da Mãe-Teia; fraco e rápido; vida / dano base: 8 / 4
+
+Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4) que todos os monstros. Sem dano de contato: só o bote, a mordida, o pulo, a rolagem e o cuspe machucam. Todos usam linha de visão e busca de caminho.
+
+*Nível pela profundidade:* nas cavernas, 1 nível a cada 50 m (níveis 1 a 4). Na catedral, que agora fica mais funda, começa no nível 2 e sobe 1 a cada 45 m (níveis 2 a 6; antes eram 1 a 5).
+
+*Spawn por faixa*
+• *Grutas Rasas* — monstros (peso): gosma 0.35, morcego 0.3, rato 0.35; máx.: 6
+• *Galerias de Pedra* — monstros (peso): morcego 0.2, gosma 0.15, rato 0.15, aranha 0.25, besouro 0.25; máx.: 7
+• *O Ninho* — monstros (peso): aranha 0.35, cuspideira 0.3, besouro 0.15, morcego 0.1, filhote 0.1; máx.: 8
+• *Fundações* — monstros (peso): aranha 0.25, cuspideira 0.2, besouro 0.25, morcego 0.15, rato 0.15; máx.: 8
+
+*7. Chefe: A Mãe-Teia*
+• *Quem é:* a aranha que teceu o ninho, do tamanho de uma carroça, com o abdômen marcado por uma caveira clara.
+• *Onde:* a Câmara do Ninho, uma gruta redonda de 34 x 14 no fundo do Ninho, sorteada pela semente, forrada de teia, com ovos e casulos. Ao entrar, cortinas de teia fecham as saídas; elas somem quando a chefe morre (ou quando o herói morre).
+• *Luta (3 fases):*
+  1. Anda pelo chão: bote com aviso (ela se encolhe), leque de 3 bolas de teia que deixam o herói lento.
+  2. Abaixo de 60% de vida: sobe para o teto, fica pendurada e cai em cima do herói (uma sombra no chão avisa onde), e os ovos da sala chocam filhotes.
+  3. Abaixo de 25%: mais rápida, cospe 5 bolas e salta de parede a parede.
+• *Vida / dano:* 640 / 16 (antes da escala).
+• *Drop:* *Presa da Mãe-Teia* (adaga lendária: veneno que causa dano por 4 s a cada golpe, crítico e velocidade de ataque). Fica salvo que ela morreu.
+
+*8. Loot e economia*
+• *Itens de bloco:* terra úmida, argila, rocha, calcita, cascalho, xisto. A teia sólida solta seda.
+• *Baús:* até 12, nas grutas e câmaras, longe uns dos outros.
+• *Materiais novos (a Marta e o Caetano compram):* Pele de Rato, Seda de Aranha, Glândula de Peçonha, Placa de Quitina.
+• *Drops de equipamento:* peças simples (capuz, botas de couro, túnica, adaga e maça de ferro, broquel), raras.
+• *Raridade pela profundidade real:* Grutas e Galerias contam como profundidade 1 (sem roxo nem laranja), Ninho e Fundações como 2. Na catedral: Átrio e Nave 2, Claustro 3, Criptas 4.
+• *Único:* a Presa da Mãe-Teia.
+
+*9. Luz e atmosfera*
+• Escuro de verdade: a luz vem das tochas que você leva, de umas poucas tochas velhas nas Grutas, do lampião da ossada e da *luz fria* dos cogumelos e cristais (azul e lilás).
+• Paletas: terra marrom-escura e úmida, rocha cinza-castanha, calcita creme, xisto azul-ardósia, teia branca acinzentada, quitina preta-esverdeada.
+
+*10. Som e música*
+• Usa o tema "caverna" que já existe (zumbido, vento, gotas e notas soltas), que agora é de fato o tema das cavernas. A catedral ainda divide esse tema.
+• Sons próprios: guincho do rato, chiado da aranha, cuspe, rolagem do besouro, o grito da Mãe-Teia.
+
+*11. Interface e progressão*
+• Nome da faixa aparece ao entrar (Grutas Rasas, Galerias de Pedra, O Ninho, Fundações Soterradas) e no mapa.
+• Missões do ancião com os materiais novos (seda, pele de rato, quitina, glândula).
+
+*12. Arte*
+• Mesmo padrão da catedral e do vilarejo: pixel art granulada, rampas de 6 tons, luz de cima à esquerda, contorno escuro só onde toca o ar.
+• Bichos pintados uma vez e guardados (corpo, patas em quadros de animação), como os mortos-vivos.
+
+*13. Arquivos*
+• *js/52-caverna-api.js* — o que tem: ids dos blocos, paredes e camada distante, faixas, profundidades
+• *js/53-caverna-blocos.js* — o que tem: texturas dos blocos, paredes, camada distante e decorações; minérios na rocha da caverna; itens de bloco
+• *js/54-caverna-objetos.js* — o que tem: os objetos de cena
+• *js/55-caverna-bichos.js* — o que tem: gosma e morcego repintados, rato, aranhas, besouro, filhote: arte, IA, drops, materiais
+• *js/56-caverna-mundo.js* — o que tem: geração das cavernas, transição, descidas, decoração, baús, objetos, zonas, nível e loot por profundidade, save
+• *js/57-mae-teia.js* — o que tem: a chefe: câmara, luta, drop
+• *docs/caverna-spec.md* — o que tem: a parte técnica
+
+━━━━━━━━━━━━
+
+*PARTE 3. BIOMA 2: A CATEDRAL ABANDONADA (EXISTE)*
+
+Levantado do código atual (js/41 a js/46) e de catedral-spec.md.
+
+*1. Identidade*
+• *Nome:* Catedral Abandonada.
+• *Faixas no jogo:* Átrio Soterrado, Nave da Catedral, Claustro Profanado, Criptas.
+• *Conceito:* uma catedral gótica soterrada há séculos debaixo do vilarejo, com o claustro e as criptas embaixo. Os mortos dela se levantaram.
+• *Sensação:* grandiosidade abandonada. Salões enormes no escuro, luz quente de vela, silêncio de igreja.
+• *Referências:* a catedral de Tristram em Diablo 1.
+
+*2. Lugar no mundo*
+• *Átrio Soterrado* — profundidade: 186 a 212 m; andares: 1 (a 207 m); caráter: terra virando calcário, escadaria quebrada, raízes, vestíbulos
+• *Nave da Catedral* — profundidade: 212 a 268 m; andares: 2 (236 m e 264 m); caráter: salões altos com colunas, bancos, vitrais, órgão
+• *Claustro Profanado* — profundidade: 268 a 318 m; andares: 3 (284, 300 e 316 m); caráter: capelas, corredores com arcadas, biblioteca, afrescos
+• *Criptas* — profundidade: 318 a 372 m; andares: 3 (333, 348 e 363 m); caráter: corredores baixos, ossários, túmulos
+
+• Desde 2026-10-08 fica *embaixo das Cavernas* (parte 2): as profundidades acima somam os 186 m das cavernas. Abaixo de 372 m: rocha-mãe.
+• *Entrada:* o pórtico de pedra à direita da placa do vilarejo agora leva às Cavernas. Para a catedral se desce pelas Fundações Soterradas, onde o teto do átrio desabou: duas escadarias em ruína por mundo descem de uma gruta até uma sala do átrio.
+• A cripta roxa do Carrasco está *escondida* (código guardado, sem gerar).
+
+*3. Estrutura e geração*
+• *Massa:* calcário claro, com bolsões de terra perto do topo e algumas fendas naturais.
+• *Salas por faixa:*
+
+• *Átrio* — tipos de sala: vestíbulo, sala; largura: 9 a 18; altura: 6 a 8
+• *Nave* — tipos de sala: nave, principal (com altar e órgão), capela; largura: 22 a 50; altura: 15 a 21
+• *Claustro* — tipos de sala: capela, claustro, sala, biblioteca; largura: 10 a 30; altura: 8 a 11
+• *Criptas* — tipos de sala: cripta, ossário, túmulos; largura: 8 a 22; altura: 5 a 7
+
+• Cada andar dá a volta no mundo inteiro, sala ao lado de sala, ligadas por portas e corredores.
+• *Abóbadas* com curva (mais funda na nave), *colunas* entre os vãos (arcadas na nave e no claustro, pilares curtos nas criptas). Capelas podem ter piso de mármore e lambri de madeira na parte de baixo da parede.
+• *Entre andares:* poços com corrente para subir e, às vezes, uma escadaria grande.
+• *Estragos:* montes de escombros embaixo de buracos na abóbada; cantaria rachada e com musgo (átrio).
+• Tudo alcançável a partir da entrada (a geração abre passagens se faltar). Cerca de 80 salas e 370 objetos por mundo.
+
+*4. Blocos*
+
+*Sólidos da frente*
+• ☐ *Calcário* — uso: a massa natural; recebe os minérios; solta: Calcário
+• ☐ *Calcário com terra* — uso: transição no átrio; solta: Calcário
+• ☐ *Cantaria* — uso: paredes lavradas das salas; solta: Cantaria
+• ☐ *Cantaria rachada* — uso: bordas de desabamento; solta: Cantaria
+• ☐ *Cantaria com musgo* — uso: ruína do átrio; solta: Cantaria
+• ☐ *Laje* — uso: piso gasto; solta: Laje
+• ☐ *Mosaico* — uso: piso xadrez de mármore com friso; solta: Mosaico
+• ☐ *Mármore* — uso: piso das capelas; solta: Mármore
+• ☐ *Mármore negro* — uso: degraus, rodapés, molduras; solta: Mármore Negro
+• ☐ *Friso* — uso: faixa entalhada com rosáceas sobre portas; solta: Friso
+• ☐ *Pilastra* — uso: fuste canelado nas laterais da nave; solta: Pilastra
+• ☐ *Ardósia* — uso: telhas em escama da abóbada da nave; solta: Ardósia
+• ☐ *Tijolo velho* — uso: remendos no claustro e criptas; solta: Tijolo Velho
+• ☐ *Escombros* — uso: montes de pedra solta; solta: Calcário
+• ☐ *Pedra da cripta* — uso: alvenaria fria e escura das criptas; solta: Pedra da Cripta
+• ☐ *Lápide* — uso: pedra tumular; solta: Pedra da Cripta
+• ☐ *Ossário* — uso: parede de crânios e ossos; solta: Osso
+• ☐ *Grade de ferro* — uso: sólida, mas vazada (vê-se o fundo); solta: —
+
+*Decoração de 1 bloco*
+• ☐ *Coluna* — onde: naves, claustros, criptas; nota: não sólida, base, fuste e capitel; vai sempre do chão ao teto e cai inteira se quebrar o apoio
+• ☐ *Raízes* — onde: teto do átrio; nota: ponta afinando
+• ☐ *Cacos de vitral* — onde: chão do átrio e da nave; nota: pontinhos coloridos
+• ☐ *Crânios* — onde: chão do claustro e criptas; nota: pilha pequena
+• ☐ *Velas derretidas* — onde: chão; nota: *luz*, chama animada
+• ☐ *Teia grossa* — onde: cantos do teto
+• ☐ *Reaproveitados* — nota: tocha (átrio), vela, ossos, urna, teia, estandarte curto, corrente, baú
+
+*Paredes de fundo*
+• ☐ *Calcário natural* — onde: rocha
+• ☐ *Cantaria* — onde: átrio
+• ☐ *Arcada cega (arcos finos em relevo)* — onde: nave
+• ☐ *Reboco rachado* — onde: claustro
+• ☐ *Lambri de madeira* — onde: metade de baixo das capelas
+• ☐ *Painel de mármore* — onde: capelas
+• ☐ *Pedra da cripta* — onde: criptas
+• ☐ *Ossário (crânios em nichos)* — onde: ossários
+
+*Terceira camada (distante)*
+• ☐ *Alvenaria distante* — onde: perto das salas
+• ☐ *Nervuras de abóbada* — onde: logo acima das salas
+• ☐ *Calcário fundo* — onde: longe das salas
+• ☐ *Nichos de túmulo distantes* — onde: faixa das criptas
+
+*Minérios (engastados no calcário; o cristal, na pedra da cripta)*
+• *Carvão* — faixa: 192 a 370 m
+• *Cobre* — faixa: 192 a 296 m
+• *Ferro* — faixa: 212 a 370 m
+• *Ouro* — faixa: 268 a 370 m
+• *Cristal* — faixa: 318 a 370 m
+
+*5. Objetos de cena (31 tipos)*
+
+*No chão*
+• ☐ *Banco (inteiro, quebrado, tombado)* — faixas: nave, claustro; nota: fileiras na nave
+• ☐ *Candelabro de pé* — faixas: nave, claustro, criptas; nota: 3 velas, *luz*
+• ☐ *Estátua de santo (com e sem cabeça)* — faixas: nave, claustro, criptas
+• ☐ *Estátua de anjo (asa quebrada)* — faixas: nave, claustro, criptas
+• ☐ *Altar* — faixas: nave, claustro; nota: velas, *luz*
+• ☐ *Púlpito* — faixas: nave
+• ☐ *Cadeira do bispo* — faixas: nave
+• ☐ *Pia batismal* — faixas: nave, claustro
+• ☐ *Sino caído* — faixas: átrio, nave
+• ☐ *Arco caído* — faixas: átrio, nave, claustro
+• ☐ *Coluna tombada* — faixas: átrio, nave, claustro
+• ☐ *Sarcófago (fechado e aberto)* — faixas: claustro, criptas
+• ☐ *Caixão (fechado e com ossos)* — faixas: claustro, criptas
+• ☐ *Monte de ossos* — faixas: claustro, criptas
+• ☐ *Trono do Rei Esqueleto e tapete* — faixas: sala do trono; nota: só no salão do chefe
+
+*No teto*
+• ☐ *Lustre de ferro com velas* — faixas: nave, claustro; nota: *luz*
+• ☐ *Incensário* — faixas: nave, claustro
+• ☐ *Estandarte rasgado (3 brasões)* — faixas: nave, claustro, criptas
+• ☐ *Teia grande* — faixas: todas
+• ☐ *Corrente com gancho* — faixas: claustro, criptas
+• ☐ *Gaiola com esqueleto* — faixas: claustro, criptas
+
+*Na parede de fundo*
+• ☐ *Vitral alto (2 variações)* — faixas: nave, claustro; apoio: janela
+• ☐ *Rosácea* — faixas: nave; apoio: janela, no centro
+• ☐ *Órgão (um por mundo)* — faixas: nave principal; apoio: pé no chão
+• ☐ *Arco ogival em relevo* — faixas: todas; apoio: pé no chão
+• ☐ *Nichos de túmulo com crânios* — faixas: criptas; apoio: pé no chão
+• ☐ *Cruz torta* — faixas: nave, claustro, criptas; apoio: pé no chão
+• ☐ *Nicho com estatueta* — faixas: nave, claustro; apoio: altura do olho
+• ☐ *Afresco desbotado (2)* — faixas: claustro; apoio: altura do olho
+• ☐ *Brasão* — faixas: nave, claustro; apoio: altura do olho
+• ☐ *Quadro rasgado* — faixas: claustro; apoio: altura do olho
+• ☐ *Tocheiro* — faixas: todas; apoio: altura do olho, *luz*
+
+*6. Inimigos: os mortos-vivos*
+• ☐ *Zumbi* — papel: lento, aguenta, agarra e arranha; vida / dano base: 55 / 10
+• ☐ *Zumbi Vomitador* — papel: meia distância, 3 bolas de bile em arco que deixam poça ácida; vida / dano base: 45 / 8
+• ☐ *Esqueleto* — papel: espada com preparação clara; às vezes dorme como pilha de ossos e se remonta quando o herói chega; vida / dano base: 64 / 14
+• ☐ *Esqueleto Arqueiro* — papel: recua, mira, flecha; vida / dano base: 44 / 11
+• ☐ *Guardião Esquelético* — papel: lança e escudo de torre, bloqueia de frente, estocada longa; vida / dano base: 90 / 15
+• ☐ *Espectro* — papel: atravessa paredes, some e aparece, investida; vida / dano base: 40 / 12
+
+Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a cada 45 m (até o 6). Antes das cavernas eram 1 a 5. Ao morrer: esqueletos viram montes de ossos, zumbis desabam e afundam.
+
+*Spawn por faixa*
+• *Átrio* — monstros (peso): zumbi 0.6, esqueleto 0.4; máx.: 5
+• *Nave* — monstros (peso): zumbi 0.3, vomitador 0.15, esqueleto 0.3, arqueiro 0.25; máx.: 8
+• *Claustro* — monstros (peso): zumbi 0.1, vomitador 0.13, esqueleto 0.22, arqueiro 0.2, guardião 0.2, espectro 0.15; máx.: 9
+• *Criptas* — monstros (peso): zumbi 0.13, vomitador 0.1, esqueleto 0.2, arqueiro 0.1, guardião 0.22, espectro 0.25; máx.: 10
+
+*7. Chefe: O Rei Esqueleto*
+• *Onde:* um salão da nave ou do claustro, sorteado pela semente, com estrado, trono, tapete, candelabros e tocheiros. Ao entrar, grades de ferro fecham todas as saídas.
+• *Luta (3 fases):* golpe de maça e salto com onda de choque (pular por cima), invoca esqueletos; a partir de 55% de vida, investe e fica tonto se bater na parede; na primeira "morte" desaba e se remonta com metade da vida, e passa a soltar fileiras de espinhos de osso.
+• *Vida / dano:* 760 / 20.
+• *Drop:* Coroa do Rei Esqueleto (lendária: defesa 5, vida 20, roubo de vida 2%, velocidade de ataque 8%, efeito ao matar). Aparece na cabeça do herói. Fica salvo que o rei morreu.
+
+*8. Loot e economia*
+• *Itens de bloco:* 11 (calcário, cantaria, laje, mosaico, mármore, mármore negro, friso, pilastra, tijolo velho, ardósia, pedra da cripta). Ossário solta osso.
+• *Baús:* até 16 espalhados pelas salas, longe uns dos outros.
+• *Drops:* os de cada monstro (carne, poção, peças de equipamento, raramente anéis).
+• *Único:* a Coroa do Rei Esqueleto.
+
+*9. Luz e atmosfera*
+• Subsolo escuro; a luz vem só de velas, candelabros, lustres, altar, tocheiros e tochas, todas *quentes* (âmbar), com chama animada e halo.
+• Vitrais têm brilho próprio fraco, sem iluminar.
+• Paleta: pedra cinza-osso quente na frente, fundo bem mais escuro, toques de bronze, ferro, madeira velha, tecido vermelho gasto e vidro colorido apagado.
+
+*10. Som e música*
+• Música: usa o tema "caverna" (zumbido grave, vento, notas soltas), o mesmo das Cavernas. *Não há tema próprio da catedral ainda.*
+• Sons próprios: ânsia e vômito, ossos se remontando, chefe.
+
+*11. O que ainda falta na catedral (para decidir)*
+• [ ] Música própria (órgão distante, coro abafado, sino).
+• [ ] Materiais exclusivos da catedral para a forja (ex.: prata benta, cera, relíquia).
+• [ ] Missões do vilarejo ligadas à catedral e ao Rei.
+• [ ] Partículas: poeira caindo da abóbada, cera pingando.
+• [ ] O destino da cripta do Carrasco (renomear e virar outro bioma? ver parte 4).
+
+━━━━━━━━━━━━
+
+*PARTE 4. BIOMA 3 (IDEIA): AS MINAS FÚNGICAS*
+
+*1. Identidade*
+• *Nome:* As Minas Fúngicas (nome provisório; alternativa: Galerias de Ferroalto).
+• *Faixas:* Galerias Escoradas, Veio Profundo, Lago Subterrâneo, Coração do Micélio.
+• *Conceito:* uma colônia de mineração que cavou fundo demais atrás de cristal e despertou um fungo antigo. Os mineiros nunca subiram: o micélio tomou as galerias, os corpos e os túneis inundados.
+• *Sensação:* claustrofobia e estranheza. Túneis estreitos de madeira rangendo, e depois cavernas enormes iluminadas por cogumelos azul-esverdeados.
+• *Contraste com a catedral:* madeira e terra em vez de pedra lavrada; luz *fria e viva* (bioluminescência) em vez de vela quente; túneis apertados em vez de salões.
+• *Referências:* Moria, as minas de Darkest Dungeon, cavernas de cogumelo de Terraria e Hollow Knight.
+
+*2. Lugar no mundo*
+• *Onde:* decisão em aberto (ver fim desta parte). Proposta: abaixo da catedral, a partir de ~380 m, o que exige aumentar de novo a altura do mundo.
+• *Entrada:* pelo fundo das Criptas, um poço de mina antigo com elevador quebrado (corrente para descer) que a catedral escondia.
+
+• *Galerias Escoradas* — caráter: túneis de 3 a 5 blocos de altura com escoras de madeira, trilhos, primeiras manchas de fungo
+• *Veio Profundo* — caráter: poços verticais, andaimes, escadas de mão, cavernas naturais com veios de minério à mostra
+• *Lago Subterrâneo* — caráter: cavernas largas alagadas, plataformas de madeira, cogumelos gigantes
+• *Coração do Micélio* — caráter: rocha tomada por carne fúngica, cordões de micélio, câmara do chefe
+
+*3. Estrutura e geração*
+• *Massa:* xisto escuro e argila; veios de minério mais grossos que na catedral.
+• *Tipos de sala:* galeria (túnel com escoras), câmara de extração (mais larga, com guindaste), dormitório dos mineiros, depósito, poço vertical, caverna natural, gruta alagada, câmara do micélio.
+• *Estrutura com regra própria:* escoras de madeira (poste e viga) sempre do chão ao teto, como as colunas; se quebrar, o teto daquele trecho *desaba* (escombros caem), o que vira um perigo e uma armadilha.
+• *Trilhos* seguem o chão das galerias; *água* parada nas grutas (se o jogo ainda não tem água, entra como bloco decorativo raso ou fica para depois).
+• *Estragos:* desabamentos antigos, galerias inundadas até a metade, fungo rompendo as paredes.
+
+*4. Blocos*
+
+*Sólidos da frente*
+• ☐ *Xisto* — uso: a massa natural; recebe minérios
+• ☐ *Argila úmida* — uso: bolsões macios, cava rápido
+• ☐ *Rocha britada* — uso: entulho de desabamento
+• ☐ *Tábua de mina* — uso: pisos e plataformas
+• ☐ *Viga escorada* — uso: vigas horizontais do teto
+• ☐ *Rocha fúngica* — uso: pedra coberta de fungo, solta esporos ao quebrar
+• ☐ *Carne de micélio* — uso: parede orgânica do Coração (pulsa devagar)
+• ☐ *Grade de mina* — uso: grade de ferro dos elevadores
+
+*Decoração de 1 bloco*
+• ☐ *Escora (poste)* — nota: não sólida, chão ao teto, base, meio e topo
+• ☐ *Trilho* — nota: no chão das galerias
+• ☐ *Cogumelo pequeno (3 cores)* — nota: *luz fria*
+• ☐ *Cordão de micélio* — nota: pendurado do teto, como as raízes
+• ☐ *Lanterna de mineiro* — nota: *luz quente*, rara, só nas galerias de cima
+• ☐ *Picareta enferrujada, balde, pá* — nota: chão
+• ☐ *Gotejo* — nota: teto das grutas, gota animada
+
+*Paredes de fundo*
+• ☐ *Xisto natural*
+• ☐ *Tabuado (paredes de madeira das galerias)*
+• ☐ *Rocha cavada (marcas de picareta)*
+• ☐ *Fungo de parede (manchas, sem cor própria: a cor vem dos objetos)*
+• ☐ *Micélio (fios finos)*
+
+*Terceira camada*
+• ☐ *Xisto distante*
+• ☐ *Andaimes distantes (galerias vistas lá no fundo)*
+• ☐ *Cogumelos gigantes distantes (silhuetas)*
+
+*Minérios*
+• Carvão, ferro e ouro em veios grossos; *cristal* comum aqui (era o que os mineiros buscavam).
+• [ ] Minério novo: *Esporita*, cristal verde-azulado que só existe no Coração do Micélio (material de equipamento novo).
+
+*5. Objetos de cena*
+*No chão*
+• ☐ *Vagonete (inteiro e tombado, cheio de minério)* — nota: sobre o trilho
+• ☐ *Guindaste de madeira* — nota: câmaras de extração
+• ☐ *Pilha de caixotes* — nota: depósito
+• ☐ *Barril de pólvora* — nota: depósito; pode explodir (ideia para depois)
+• ☐ *Beliche podre* — nota: dormitório
+• ☐ *Mesa com lampião e mapa* — nota: dormitório, *luz*
+• ☐ *Bigorna velha e fole* — nota: oficina da mina
+• ☐ *Cogumelo gigante (3 tamanhos)* — nota: grutas, *luz fria*
+• ☐ *Mineiro fossilizado no fungo* — nota: estátua macabra, preso na parede
+• ☐ *Monte de minério* — nota: perto dos vagonetes
+
+*No teto*
+• ☐ *Polia com corda e balde* — nota: poços
+• ☐ *Lampião pendurado* — nota: *luz quente*
+• ☐ *Cacho de esporos brilhantes* — nota: *luz fria*, solta partículas
+• ☐ *Estalactite fúngica* — nota: grutas
+
+*Na parede de fundo*
+• ☐ *Elevador de mina (estrutura e gaiola)* — apoio: pé no chão
+• ☐ *Placa de galeria ("Galeria 3", com seta)* — apoio: altura do olho
+• ☐ *Ferramentas penduradas* — apoio: altura do olho
+• ☐ *Mapa da mina riscado* — apoio: altura do olho
+• ☐ *Repisa de cogumelos de prateleira* — apoio: altura do olho, *luz fria*
+• ☐ *Rombo no tabuado mostrando a rocha* — apoio: pé no chão
+
+*6. Inimigos: os Tomados (família fúngica)*
+• ☐ *Mineiro Tomado* — papel: lento, picareta com preparação longa, golpe forte
+• ☐ *Capataz Tomado* — papel: lampião numa mão e chicote; puxa o herói para perto
+• ☐ *Rastejante* — papel: aranha-fungo do teto, desce por um fio e morde, sobe de novo
+• ☐ *Bolor Andante* — papel: massa que solta nuvem de esporos (veneno lento, área no chão como a poça do vomitador)
+• ☐ *Toupeira Cega* — papel: escava pela terra macia e emerge embaixo do herói (aviso: o chão treme)
+• ☐ *Sentinela de Esporita* — papel: cristal vivo, parado, atira estilhaços; fraco por trás
+
+*Spawn por faixa (rascunho)*
+• *Galerias Escoradas* — monstros: Mineiro Tomado, Rastejante
+• *Veio Profundo* — monstros: Mineiro, Capataz, Rastejante, Toupeira
+• *Lago Subterrâneo* — monstros: Mineiro, Bolor, Rastejante, Toupeira
+• *Coração do Micélio* — monstros: Capataz, Bolor, Toupeira, Sentinela
+
+*7. Chefe: A Mãe-Esporo*
+• *Onde:* câmara redonda no Coração do Micélio, paredes de carne de micélio.
+• *Ideia:* um cogumelo colossal enraizado no chão e no teto, com o corpo do primeiro capataz preso no tronco.
+• *Fases:* 1) chuva de esporos em áreas marcadas e invoca Rastejantes; 2) raízes saem do chão em linha (aviso pelo chão rachando) e o capataz se solta para lutar ao lado; 3) a câmara escurece, só os pontos fracos brilham.
+• *Drop lendário (ideia):* *Lampião da Mãe-Esporo* (acessório de luz: ilumina em volta do herói, regenera vida devagar enquanto parado no escuro).
+
+*8. Loot e economia*
+• Itens de bloco: xisto, tábua, viga, argila.
+• Baús e *vagonetes saqueáveis* com minério e ferramentas.
+• Materiais novos: *Esporita* (minério), *Esporo* (drop, poção nova), *Couro de toupeira*.
+• Bases de equipamento temáticas: picareta de mineiro (ferramenta e arma), capacete com lanterna, botas de borracha de seiva.
+
+*9. Luz e atmosfera*
+• Galerias de cima: escuro com lampiões quentes raros.
+• Mais fundo: a luz passa a ser *toda fria* (azul, verde, ciano) dos cogumelos, mais forte que velas, cobrindo áreas grandes.
+• Partículas: esporos flutuando, gotas caindo, poeira quando uma escora range.
+• Paletas: madeira úmida, xisto azulado, fungo verde-azulado, carne de micélio rosada pálida.
+
+*10. Som e música*
+• Tema próprio: madeira rangendo, pingos com eco, um pulso grave lento (o "coração" do fungo) que fica mais forte perto do chefe.
+• Sons: picareta distante batendo na rocha (sem ninguém lá), rangido de escora antes de desabar.
+
+*11. Decisões em aberto*
+• [ ] *Onde fica:* (a) abaixo da catedral, aumentando a altura do mundo; (b) ao lado da catedral, na mesma profundidade, dividindo o mundo na horizontal; (c) dentro das Cavernas, como uma faixa delas. Recomendo (a), porque mantém a progressão "quanto mais fundo, mais perigoso".
+• [ ] Água de verdade (nadar) ou só decorativa.
+• [ ] Escoras que desabam o teto: perigo divertido ou irritante?
+
+━━━━━━━━━━━━
+
+*PARTE 5. OUTRAS IDEIAS SOLTAS (SÓ O CONCEITO)*
+
+Para escolher quais viram ficha completa depois.
+
+• ☐ **Catacumbas Alagadas** — ideia em uma linha: esgotos e cisternas romanas abaixo do vilarejo, água negra, ratos gigantes e afogados
+• ☐ **Forja dos Anões** — ideia em uma linha: cidade de pedra e bronze abandonada, lava canalizada, autômatos de ferro, a origem da forja do Grimaldo
+• ☐ **Floresta Petrificada** — ideia em uma linha: uma floresta inteira engolida pela terra e virada pedra, árvores de cristal, bestas de raiz
+• ☐ **O Abismo* (antiga cripta do Carrasco)* — ideia em uma linha: a cripta roxa renomeada e ampliada: carne, correntes, diabretes, cães e demônios, o Carrasco como chefe
+• ☐ **Cidade Afundada** — ideia em uma linha: uma cidade inteira soterrada com ruas, casas e torres tortas, saqueadores e cultistas vivos (inimigos humanos)

@@ -1,0 +1,75 @@
+# Under Darkness: como o código está organizado
+
+O jogo se chama **Under Darkness** (antes "Sob a Terra"; as chaves do save continuam com o nome antigo para os jogos salvos não se perderem).
+
+Abra `index.html` com dois cliques. Não precisa de servidor nem de instalar nada.
+
+- `index.html`: só o HTML dos painéis (HUD, menu, inventário, ficha, conversa, loja, morte) e a lista de scripts.
+- `css/estilo.css`: todo o visual da interface.
+- `css/menu-pausa.css`: o menu (Esc): uma coluna de botões do mesmo tamanho. Opção nova é só um botão a mais dentro de `#pause .actions`. "Novo mundo" fica separado em `#pause .danger`.
+- `css/hud-nivel-ouro.css`: os dois quadros ao lado da barra de ação (nível à esquerda, ouro à direita) e o deslocamento da barra de ação e da barra de XP.
+- `css/botoes.css`: o "afundar" ao clicar de todos os botões (e das linhas de receita). Fica por último no HTML; botão novo já ganha o efeito sozinho.
+- `js/`: o jogo, em scripts comuns (não são ES modules) carregados em ordem. Todos compartilham as mesmas variáveis globais, então uma função de um arquivo enxerga as dos outros.
+
+| Arquivo | O que tem |
+|---|---|
+| 00-texturas-ui | molduras e textura de pedra da interface, geradas no início |
+| 01-base | constantes do mundo e utilitários |
+| 02-arte | sprites desenhados à mão (herói, monstros, cripta) |
+| 03-blocos | tipos de bloco, materiais, decorações |
+| 04-sprites | montagem dos sprites e do herói com equipamento |
+| 05-itens | itens, armas, armaduras, receitas da forja, raridade e afixos, inventário |
+| 06-mundo | geração do mundo e da cripta, leitura e escrita de blocos |
+| 07-chunks-luz | cache de chunks e iluminação |
+| 08-estado-entrada | estado do jogador e do jogo, hotbar, teclado e mouse |
+| 09-audio | sons |
+| 10-combate | efeitos, tipos de inimigo, física, dano, loot |
+| 11-jogador | atualização do jogador, mineração, baús, colocar blocos |
+| 12-inimigos-ia | IA dos monstros, visão, pathfinding |
+| 13-cripta-chefe | luta contra O Carrasco |
+| 14-atualizacao | projéteis, hora do dia, update geral, câmera |
+| 15-render | desenho do mundo |
+| 16-mapa | mapa (Tab): uma cópia pequena do mundo pintada com as texturas reais de cada bloco (6 px por bloco, rocha translúcida, muro de fundo mais escuro, decorações), guardada em pedaços de 30x30 blocos que só se repintam onde algo mudou; baús e altar marcados |
+| 17-vilarejo | vilarejo, NPCs, preços, conversas, recompensas |
+| 18-forja | fornalha e bigorna |
+| 19-loja | tela da loja |
+| 20-hud-menus | HUD, menus, pausa, tela cheia, morte |
+| 21-inventario | tela de inventário |
+| 22-ficha | ficha de atributos (C), tooltips, arrastar itens |
+| 23-save | salvar e carregar |
+| 24-boot | inicialização e loop principal |
+| 25-temas-npc | texturas das telas temáticas de cada morador (ferreiro, ancião, curandeira e taverneiro); o visual fica em `css/temas-npc.css` |
+| 26-rolagem | barras de rolagem desenhadas pelo jogo (`customScroll(el)`); o visual fica em `css/rolagem.css` |
+| 27-bau | o baú do vilarejo (40 casas, salvo no save): o desenho dele, a janela ao lado do inventário e os ganchos no manuseio de itens; carrega antes do 24-boot; o visual fica em `css/bau.css` |
+| 28-fps | contador de FPS (F3 ou botão no menu de pausa; vem desligado e a escolha fica salva) |
+| 29-portal | portal para o vilarejo estilo Diablo 2: botão depois do ouro na barra de baixo conjura por 3 s (dano, andar, pular, golpear ou escudo interrompem); abre um portal azul onde o herói está; clicar nele (ou E) leva ao portal par, fixo à esquerda do poço; voltar por ele leva ao ponto salvo e fecha os dois. Sem recarga, apagado no vilarejo, salvo no save (`tp`). Carregado antes do 24-boot. Estilo em css/portal.css |
+| 29-missoes | cartão de missão na conversa (objetivo com ícone e contagem, onde achar, recompensa); qualquer morador usa `showQuest(q)`; carrega antes do 24-boot; o visual base fica em `css/missoes.css` |
+| 30-tela-cheia | a tela cheia volta sozinha: se o jogo sair dela (alt-tab, perda de foco), volta no primeiro clique ou tecla; desligar pelo menu ou F apaga a escolha, que fica salva no navegador |
+| 31-cursor | cursor do jogo em pixel-art desenhado por cima de tudo (seta; manopla sobre o que é clicável; punho segurando item; espada sobre monstro; picareta sobre bloco ao alcance; barra de texto em campos de digitar) e bloqueio de seleção de texto e de arrastar elementos; o visual fica em `css/cursor.css`. A antiga mira do `15-render` saiu |
+| 32-fundo | o fundo da superfície: céu em faixas com pontilhado, sol, lua com 8 fases, estrelas e via láctea, nuvens, montanhas nevadas, floresta de pinheiros e campos; tudo é pintado uma vez no início em 4 paletas (dia, entardecer, crepúsculo, noite) e cada quadro só mistura duas; carrega logo depois do 15-render |
+| 33-atalhos | quadro de atalhos do canto da tela: vem desligado; liga e desliga pelo botão "Atalhos" do menu ou pela tecla H, e a escolha fica salva no navegador |
+| 34-arvores | as árvores da superfície pintadas inteiras (carvalhos, carvalho grande, pinheiro e árvore baixa, 3 variações cada, algumas com frutas ou folhas amareladas); o mundo continua guardando TRUNK e LEAVES para cortar, iluminar e o mapa, mas o `07-chunks-luz` não desenha mais esses blocos e o `drawTrees` (chamado no render logo depois dos chunks) pinta cada árvore; sem a copa sobra o tronco cortado |
+| 35-globos | os globos de vida e mana, grandes, um em cada canto de baixo, encostados na beira: vidro, líquido e borda de ferro em pixel art (88x88), pintados uma vez no início; o líquido é uma imagem parada cortada de cima pela altura de `#hHpFill`/`#hMpFill`; o visual e os tamanhos por resolução ficam em `css/globos.css` |
+| 36-profundeza | a terceira camada de blocos, atrás do muro de fundo (`DEEPT`, gerada com o mundo pelo `buildDepth` só a partir da semente, por isso não entra no save): rocha antiga em cima, ardósia funda nas profundas, basalto no abismo, com pedra fóssil, veios de cristal apagado e ocos; o muro de fundo se abre nas cavernas grandes e mostra esses blocos. É só decoração (luz, monstros e mapa continuam vendo o muro). O `07-chunks-luz` pinta esses blocos dentro da imagem de cada chunk (`deepPix`), então não custa nada por quadro |
+| 37-heroi | o herói pintado no estilo do vilarejo: corpo, pernas, braços (pré-desenhados em 64 ângulos), elmos e escudos sombreados em rampas de 6 tons com luz de cima à esquerda; tudo é pintado uma vez e guardado; mesmo tamanho e mesmos pontos de encaixe do sprite antigo (hitbox igual); carrega logo depois do 05-itens |
+| 38-musica | música de fundo composta no próprio código (sem arquivos de áudio): tema da vila (violão dedilhado lento em ré menor, bordão grave, melodia esparsa) e tema das cavernas (suspense: zumbido, vento, notas soltas, gotas, acordes dissonantes). Os dois são gravados aos poucos depois que a página abre e tocam em loop; na superfície toca a vila, abaixo dela a caverna, com troca lenta de volume. Passa pelo volume geral (o botão Som cala tudo) e tem o botão "Música" no menu (escolha salva no navegador). O mesmo arquivo roda no Node para gerar prévias .wav |
+| 39-titulo | a tela de título que abre o jogo: arte dark fantasy em pixel art (480x270: lua, castelo no penhasco, abismo em brasa, cavaleiro na beira) pintada uma vez no início, só as brasas mexem por quadro e só com o título aberto; o nome "Under Darkness" é desenhado em latão com a fonte do jogo; menu no canto inferior esquerdo: Continuar (só com save), Novo jogo (pede um segundo clique se houver save), Opções (abre a tela do 40-opcoes) e Sair (fecha a aba quando o navegador deixa; senão a tela apaga e volta ao título com um clique). O antigo cartão `#menu` fica escondido e seus botões continuam sendo usados. Também põe no menu de pausa o botão "Voltar ao início", que salva e volta para o título. Carrega por último; o visual fica em `css/titulo.css` |
+| 40-opcoes | a tela de opções, a mesma no título e no menu de pausa (no Esc ela entra no lugar dos botões soltos de som, música, tela cheia, FPS e atalhos, que continuam no HTML escondidos). Abas Som (som geral, música, volume da música e dos efeitos em sliders de pixel art), Vídeo (tela cheia, FPS) e Atalhos (quadro na tela ligado/desligado e a lista de teclas). Os volumes ficam em `musVol`/`sfxVol` (09-audio): os efeitos passam por `sfxOut`, a música usa `setMusicVol` (38-musica); salvos no navegador. O visual fica em `css/opcoes.css` |
+| 47-hud-nivel-ouro | os quadros de nível e ouro colados na barra de ação: `fmtOuro` (pontos de milhar), o ícone de moeda do jogo no quadro do ouro (`paintCoinIcon`, chamado no 24-boot) e `alignXp`, que mantém a barra de XP do mesmo tamanho e no mesmo eixo da barra de ação. O texto dos dois é atualizado pelo `updateHUD` do 20-hud-menus |
+| 46-rei-esqueleto | o chefe da catedral, O Rei Esqueleto: a sala do trono (sorteada pela semente entre as naves e claustros, montada embrulhando o `placeProps` do 45), o trono e o tapete (props), o rei sentado antes da luta, arte das poses (pintadas uma vez e guardadas), a luta em 3 fases (golpe de maça, salto com ondas no chão, invocar esqueletos, investida, espinhos de osso; na primeira morte ele desmorona e se refaz com metade da vida), portões que fecham a sala, o drop da Coroa do Rei Esqueleto (lendária, aparece na cabeça do herói) e `rei.dead` no save. Ajustes de vida, dano e tempos ficam na tabela `REI` no topo. Carrega logo depois do 45 |
+| 51-talentos | a árvore de talentos do guerreiro (P), inspirada no Path of Exile: tela que cobre tudo menos os globos, canvas em pixel art com arrastar e zoom (rodinha), 45 nós em 4 ramos (espada, escudo, maça, adaga) ligados por pontes, 1 ponto por nível. Clique esquerdo liga o caminho até o nó; clique direito devolve um nó da ponta. Os efeitos entram no `recalc` do 08 por `talentTot` (somas, junto com os itens) e `talentPost` (multiplicadores); Revide, Apunhalar, Crânio Partido e o vigor embrulham `hitEnemy`, `hurtPlayer` e `spendVigor`. Salvo no save como `tal`. Os nós ficam nas tabelas `TAL_BRANCH`/`TAL_BRIDGE` no topo. Carrega depois do 50-vigor; o visual da tela fica em `css/talentos.css` |
+| 52-caverna-api | as cavernas, a primeira camada debaixo do vilarejo (6 a 186 m; a catedral começa embaixo dela): ids de blocos, paredes e camada distante, as faixas `CV_BANDS` (Grutas Rasas, Galerias de Pedra, O Ninho, Fundações Soterradas, zonas 9 a 12), `CAVE_D` e ajudantes de profundidade. `CAVERNA = false` desliga tudo. Especificação em `docs/caverna-spec.md`. Carrega logo depois do 41 |
+| 53-caverna-blocos | texturas dos blocos das cavernas (terra úmida, argila, rocha, musgo, calcita, cascalho, xisto, teia), paredes de fundo, camada distante, minérios na rocha, decoração de 1 bloco e os itens de bloco. Carrega depois do 42 |
+| 54-caverna-objetos | os 20 objetos de cena das cavernas (estalagmites, drusas, cogumelos luminosos, ossada do explorador, ovos, casulos, pinturas rupestres, fósseis, lençóis de teia, arco enterrado...) e o plano de quantos vão em cada faixa (`CV_PROP_PLAN`). Carrega depois do 43 |
+| 55-caverna-bichos | os bichos das cavernas: rato, aranha (no fio do teto), cuspideira (teia que prende), besouro (rola e fica de costas), filhote; slime e morcego repintados. Arte, IA, sons, drops e materiais novos. Carrega depois do 44 e antes do 49 |
+| 56-caverna-mundo | geração das cavernas (antes da catedral) e o acabamento depois dela: o portal que vira terra, as grutas de saída com escadas para o átrio, alcance garantido, forro, baús e objetos; zonas, níveis por profundidade, loot, loja, missões e o save (`wg: 3`, save antigo ganha mundo novo e mantém nível, itens e ouro). Carrega depois do 46 |
+| 57-mae-teia | a chefe das cavernas, A Mãe-Teia, na Câmara do Ninho: 3 fases (mordida e leque de teia; pendurada no fio caindo sobre o herói com os ovos chocando filhotes; saltos de parede a parede), cortinas de teia nas saídas, drop da Presa da Mãe-Teia (adaga lendária com veneno, `lgVeneno`) e `teia.dead` no save. Carrega depois do 56 e antes do 49 |
+| 59-sons-pulo | sons do pulo e da queda do herói, feitos como foley gravado (sem arquivos de áudio): pé empurrando e raspando o chão, respiração, roupa e fivelas/cota de malha no pulo; calcanhar e segundo pé batendo, terra ou pedra, roupa assentando e equipamento chacoalhando na queda, mais forte quanto maior a queda. O chão debaixo do pé escolhe o som (terra, cascalho, pedra, madeira, grade). No subterrâneo ganha um eco curto. Troca `sfx.jump`/`sfx.land` (09-audio) e embrulha `updatePlayer` (11) para pegar a velocidade da queda. Passa por `sfxOut`. Roda no Node para gerar prévias (.wav) |
+
+## Regras para quem for mexer
+
+- A ordem dos `<script>` no HTML importa só para o código que roda no carregamento (constantes, sprites, ligar botões). Funções podem chamar funções de qualquer arquivo.
+- Código que roda na hora do carregamento não pode chamar uma função de um arquivo que vem **depois**. Ligue botões dentro do arquivo onde a função está, ou no `start()` de `24-boot.js`.
+- Arquivo novo: crie em `js/` e acrescente o `<script>` no HTML na posição certa.
+- Antes de gravar, releia o arquivo atual; mexa só no trecho da sua tarefa.
+- O save fica no navegador (`localStorage`) e não depende dos arquivos.

@@ -1,0 +1,60 @@
+'use strict';
+
+/* ================= moradores do vilarejo (NPCS, SHOPS, CHAT, HELLO e BOUNTIES do 17-vilarejo) ================= */
+(() => {
+  const E = UDW.esc;
+  const HOUSE = { ferreiro: 'forge', curandeira: 'cottage', taverneiro: 'tavern', anciao: 'elder' };
+  const line = l => { try { return typeof l === 'function' ? l() : l; } catch (e) { return ''; } };
+
+  // o vilarejo inteiro, montado com as casas e os moradores do jogo nas posições de verdade
+  function panorama() {
+    const W = (VIL_HALF * 2 + 4) * T, H = 120, c = mk(W, H), x = c.getContext('2d'), gy = H - 10, X = v => (v + VIL_HALF + 2) * T;
+    x.imageSmoothingEnabled = false;
+    for (const v of VIL_BUILD) { const b = SPR.vil[v.k]; if (b) x.drawImage(b.c, Math.round(X(v.x0) + b.ox), gy - b.c.height + 1); }
+    for (const n of NPCS) { n.attend = false; n.facing = n.face; const cv = compose(npcPose(n)), fx = Math.round(X(n.x)); x.save(); if (n.facing < 0) { x.translate(fx, 0); x.scale(-1, 1); x.drawImage(cv, -CW / 2, gy - (OY + 22) + 1); } else x.drawImage(cv, fx - CW / 2, gy - (OY + 22) + 1); x.restore(); }
+    for (let i = 0; i < W; i += T) { x.drawImage(blockCanvas(GRASS, T, 0, i, 0), i, gy + 1); }
+    return c;
+  }
+
+  let lvlLoja = 1;
+  function lojaGrimaldo(lvl) {
+    const L0 = pl.lvl; pl.lvl = lvl;
+    try { restock(); } finally { pl.lvl = L0; }
+    return `<div class="rolls">${stock.ferreiro.map(g => `<div class="preco">${UDW.tipBox(g.s)}<b>${g.price} de ouro</b></div>`).join('')}</div>`;
+  }
+
+  UDW.pages.npcs = {
+    render(focus) {
+      let h = UDW.head('Moradores', 'O vilarejo é o único lugar seguro: nada ataca na superfície. Aperte E perto de um morador para conversar.');
+      h += `<div class="pano">${UDW.canvasImg('vila-pano', panorama, 2)}</div>`;
+      restock();
+      for (const n of NPCS) {
+        const buys = SHOPS[n.id] ? Object.keys(ITEMS).filter(id => { try { return SHOPS[n.id].buys(id) && !ITEMS[id].slot; } catch (e) { return false; } }) : [];
+        const gearToo = SHOPS[n.id] && Object.keys(ITEMS).some(id => ITEMS[id].slot && SHOPS[n.id].buys(id));
+        const sells = (stock[n.id] || []).filter(g => g.inf);
+        h += `<section class="npc" id="npc-${n.id}"><div class="nart">${UDW.npcImg(n, 5)}</div><div class="ntxt">
+          <h2>${E(n.name)} <small>${E(n.role)}</small></h2><p class="lead">${E(UDW_TXT.npcs[n.id] || '')}</p>
+          ${SHOPS[n.id] ? `<h3>${E(SHOPS[n.id].title)}</h3>` : ''}
+          ${sells.length ? `<p><span class="rot">Vende</span>${sells.map(g => `${UDW.item(g.s.id)} <b class="ouro">${g.price}</b>`).join(' ')}</p>` : ''}
+          ${n.id === 'ferreiro' ? '<p><span class="rot">Vende</span>10 peças sorteadas por dia (veja abaixo) e a forja: <a href="#/forja">fornalha e bigorna</a>.</p>' : ''}
+          ${n.id === 'curandeira' ? '<p><span class="rot">Serviço</span>Cura toda a vida, de graça.</p>' : ''}
+          ${buys.length || gearToo ? `<p><span class="rot">Compra</span>${gearToo ? '<span class="it">qualquer equipamento</span>' : ''}${buys.map(id => UDW.item(id, { px: 22 })).join('')}</p>` : ''}
+          <details><summary>Falas</summary><ul class="falas">${[...(HELLO[n.id] || []), ...(CHAT[n.id] || [])].map(l => `<li>"${E(line(l))}"</li>`).join('')}</ul></details>
+          </div><div class="casa">${UDW.villageImg(HOUSE[n.id], 1)}</div></section>`;
+        if (n.id === 'ferreiro') h += `<div class="sub"><h3>Mercadoria do dia <label>com o herói no nível <select id="lojaLv">${[1, 6, 12].map(l => `<option${l === lvlLoja ? ' selected' : ''}>${l}</option>`).join('')}</select></label> <button id="lojaGo" type="button">Sortear outro dia</button></h3><div id="lojaOut"></div></div>`;
+        if (n.id === 'anciao') {
+          h += `<div class="sub"><h3>Tarefas</h3><p class="nota">O ancião dá uma por vez, do nível do herói ou um abaixo (nível 1 a 5: lista 1; 6 a 11: listas 1 e 2; 12+: listas 2 e 3). Paga em ouro e 35% da experiência que falta para o próximo nível.</p>`
+            + UDW.table([{ t: 'Lista', cls: 'n' }, { t: 'Tarefa' }, { t: 'Trazer' }, { t: 'Ouro', cls: 'n' }],
+              BOUNTIES.map(b => { const g = Math.round(MAT_VAL[b[1]] * b[2] * 2 + 20 * b[0]); return { cells: [b[0], `<b>${E(b[4])}</b><small>${E(b[3])}</small>`, UDW.item(b[1], { n: b[2] }), g], keys: [b[0], b[4], ITEMS[b[1]].name, g] }; }))
+            + `<h3>Missão: O guardião da cripta</h3><p>Derrotar o Carrasco e contar ao ancião: ${CARRASCO_GOLD} de ouro e metade da experiência do nível. Só aparece quando a cripta existe no mundo (hoje está desligada).</p></div>`;
+        }
+      }
+      return h;
+    },
+    after(root, focus) {
+      const go = () => { lvlLoja = +$('lojaLv').value; $('lojaOut').innerHTML = lojaGrimaldo(lvlLoja); };
+      if ($('lojaGo')) { $('lojaGo').addEventListener('click', go); $('lojaLv').addEventListener('change', go); go(); }
+      if (focus && $('npc-' + focus)) setTimeout(() => $('npc-' + focus).scrollIntoView(), 30);
+    }
+  };
+})();

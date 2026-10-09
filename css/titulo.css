@@ -1,0 +1,38 @@
+/* tela de título "Under Darkness" (js/39-titulo.js): arte cobrindo a tela, nome em cima à esquerda,
+   menu no canto inferior esquerdo, opções em texto puro, sem caixas. */
+#title{position:fixed;inset:0;z-index:50;background:#030205;overflow:hidden;--px:4px;transition:opacity .26s ease-out}
+#title.out{opacity:0;pointer-events:none}
+#title[hidden]{display:none}
+#ttArt,#ttFx{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%;image-rendering:pixelated}
+#title .shade{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(90deg,rgba(3,2,5,.55),rgba(3,2,5,0) 42%),
+  linear-gradient(0deg,rgba(3,2,5,.6),rgba(3,2,5,0) 38%)}
+#title .logo{position:absolute;left:max(24px,5.5vw);top:max(18px,7vh);margin:0;line-height:0;filter:drop-shadow(0 0 calc(var(--px)*6) rgba(0,0,0,.65))}
+#ttLogo,#ttByeLogo{image-rendering:pixelated;display:block}
+
+#title .tmenu{position:absolute;left:max(24px,5.5vw);bottom:max(22px,8vh);display:flex;flex-direction:column;align-items:flex-start;gap:clamp(2px,.6vh,8px)}
+#title .tmenu h2{margin:0 0 6px;padding-left:30px;font-family:var(--font-title);font-weight:400;font-size:clamp(28px,4.4vh,46px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:.02em}
+#title .tmenu button,#title .tmenu button:hover,#title .tmenu button:active{all:unset;box-sizing:border-box;position:relative;display:block;padding:2px 0 2px 30px;
+  font-family:var(--font-title);font-size:clamp(30px,5.2vh,56px);line-height:1;letter-spacing:.02em;color:#b9a68a;text-shadow:3px 3px 0 #000,0 0 18px rgba(0,0,0,.8);
+  translate:none;scale:none;filter:none!important;box-shadow:none!important;transition:color 90ms,padding-left 120ms ease-out}
+#title .tmenu button[hidden]{display:none}
+/* marcador: uma chama de pixel à esquerda da opção escolhida */
+#title .tmenu button::before{content:"";position:absolute;left:4px;top:50%;width:14px;height:14px;translate:0 -50%;opacity:0;image-rendering:pixelated;transition:opacity 90ms;
+  background:
+    linear-gradient(#ffe08a,#ffe08a) 6px 6px/2px 4px no-repeat,
+    linear-gradient(#f39a3a,#f39a3a) 4px 4px/6px 8px no-repeat,
+    linear-gradient(#d0601e,#d0601e) 2px 6px/10px 6px no-repeat,
+    linear-gradient(#f39a3a,#f39a3a) 6px 0/2px 4px no-repeat,
+    linear-gradient(#9c3414,#9c3414) 2px 12px/10px 2px no-repeat}
+#title .tmenu button:focus-visible,#title .tmenu button:focus,#title .tmenu button:hover{color:#ffd98a;padding-left:36px;outline:none}
+#title .tmenu button:focus::before,#title .tmenu button:hover::before{opacity:1}
+#title .tmenu button:active{color:#fff1c4}
+#title .tmenu button.warn{color:#ff8f7a}
+#title .tmenu button.warn:focus,#title .tmenu button.warn:hover{color:#ffb4a8}
+#title .tmenu .back{margin-top:8px}
+
+/* "Sair" quando a aba não pode ser fechada: a tela apaga e fica só o nome */
+#ttBye{position:absolute;inset:0;background:#030205;display:grid;place-items:center;animation:ttfade .6s ease-out}
+#ttBye[hidden]{display:none}
+#ttByeLogo{opacity:.55}
+@keyframes ttfade{from{opacity:0}to{opacity:1}}
