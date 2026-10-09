@@ -22,7 +22,7 @@
     for (const z in CATH_SPAWN) { const [tab, max] = CATH_SPAWN[z], tot = tab.reduce((n, r) => n + r[1], 0), r = tab.find(x => x[0] === t); if (r) o.push({ z: +z, nome: ZONE_NAMES[z], p: r[1] / tot, max }); }
     return o;
   };
-  const flags = t => { const D = ET[t], f = []; if (D.fly) f.push('Voa'); if (D.phase) f.push('Atravessa paredes'); if (D.boss) f.push('Chefe'); if (D.touch) f.push('Corpo machuca'); return f; };
+  const flags = t => { const D = ET[t], f = []; if (D.fly && !D.crawl) f.push('Voa'); if (D.crawl) f.push('Anda em parede e teto'); if (D.phase) f.push('Atravessa paredes'); if (D.boss) f.push('Chefe'); if (D.touch) f.push('Corpo machuca'); return f; };
 
   function card(t) {
     const D = ET[t], e = UDW.enemyAt(t, 1), sp = UDW.spawnsOf(t);

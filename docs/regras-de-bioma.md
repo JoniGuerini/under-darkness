@@ -53,6 +53,14 @@ Aprendido no gelo (2026-10-09):
 - O chão debaixo dos degraus e o chão da gruta de baixo ficam protegidos dos túneis e da decoração, senão um túnel de ligação come o chão e o herói cai direto.
 - Bloco que muda o controle do herói (gelo que escorrega) nunca fica nos degraus de subida nem no chão da sala do chefe.
 
+## Monstros
+
+Regra do Jonathan (2026-10-09), fixa:
+
+- Toda camada tem **exatamente 10 monstros** próprios, sem contar o chefe. Variante de outro bicho (a gosma gelada) conta como um dos 10 da camada onde aparece.
+- Cada faixa usa de 4 a 6 deles, e todos os 10 aparecem em pelo menos uma faixa.
+- Os 10 se dividem entre jeitos diferentes de lutar: corpo a corpo, à distância, voador, emboscada (parede, teto ou enterrado), pesado (lento e forte) e enxame. Monstro novo não repete o comportamento de outro da mesma camada.
+
 ## Ordem da geração
 
 1. Rocha base do bioma.

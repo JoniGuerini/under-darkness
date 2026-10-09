@@ -9,6 +9,7 @@ A primeira camada debaixo do vilarejo, de 6 a 186 m. A catedral começa logo aba
 | `js/52-caverna-api.js` | ids de blocos (54 a 73), paredes (13 a 17), camada distante (10 a 13), faixas `CV_BANDS`, `CAVE_D = 186`, zonas 9 a 12, `caveBand`, `cavePortalEnd`, `caveExits`. `CAVERNA = false` desliga a camada inteira. |
 | `js/53-caverna-blocos.js` | texturas (terra úmida, argila, rocha, musgo, calcita, cascalho, xisto, teia), paredes, camada distante, minérios na rocha, decoração de 1 bloco, itens de bloco. Exporta `CVART`. |
 | `js/54-caverna-objetos.js` | 20 objetos de cena (`caverna: true`) e o plano por faixa `CV_PROP_PLAN`. |
+| `js/76-cavernas-novos.js` | fungo esporento (nuvem de esporos, veneno), centopeia das rochas (anda em parede e teto), goblin dinamiteiro (dinamite que quebra blocos); arte, IA, sons, drops, materiais (esporo, patas de centopeia, pólvora), missões e o spawn novo das faixas. |
 | `js/55-caverna-bichos.js` | rato, aranha, cuspideira, besouro, filhote; slime (3 cores novas) e morcego repintados; IA, sons, drops, materiais (pele de rato, glândula, quitina). |
 | `js/56-caverna-mundo.js` | geração, passagem para a catedral, zonas, níveis, loot, loja, missões, save (`wg: 3`). |
 | `js/57-mae-teia.js` | a chefe, a Câmara do Ninho e a Presa da Mãe-Teia. |
@@ -17,10 +18,10 @@ A primeira camada debaixo do vilarejo, de 6 a 186 m. A catedral começa logo aba
 
 | Zona | Faixa | Metros | Material | Monstros |
 |---|---|---|---|---|
-| 9 | Grutas Rasas | 6 a 60 | terra úmida, argila, rocha | slime, morcego, rato |
-| 10 | Galerias de Pedra | 60 a 120 | rocha, calcita, poços | aranha, besouro, morcego, slime, rato |
+| 9 | Grutas Rasas | 6 a 60 | terra úmida, argila, rocha | slime, morcego, rato, fungo |
+| 10 | Galerias de Pedra | 60 a 120 | rocha, calcita, poços | aranha, besouro, morcego, rato, fungo, centopeia |
 | 11 | O Ninho | 120 a 168 | xisto, teia | aranha, cuspideira, besouro, morcego, filhote |
-| 12 | Fundações Soterradas | 168 a 186 | rocha virando calcário | aranha, besouro, cuspideira, morcego, rato |
+| 12 | Fundações Soterradas | 168 a 186 | rocha virando calcário | aranha, besouro, cuspideira, morcego, centopeia, goblin |
 
 Nível dos monstros: 1 + 1 a cada 50 m (até 4); na catedral começa no 2 e sobe 1 a cada 45 m. Loot por faixa: 1, 1, 2, 2.
 

@@ -69,10 +69,14 @@
     try {
     for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
       let r = Math.random() * tot, type = table[0][0]; for (const [t, w] of table) { r -= w; if (r <= 0) { type = t; break; } }
-      const D = ET[type], [cx, cy, floor] = cands[(Math.random() * cands.length) | 0];
-      if (!D.fly && !floor) continue;
-      const px = cx * T + T / 2 - D.w / 2, py = (cy + 1) * T - D.h - 0.5;
-      if (rectSolid(px, py, D.w, D.h)) continue;
+      const D = ET[type];
+      let px = 0, py = 0, ok = false;
+      for (let a = 0; a < 40 && !ok; a++) {   // a spot that fits this one (walkers need a floor), so the mix follows the table
+        const [cx, cy, floor] = cands[(Math.random() * cands.length) | 0];
+        if (!D.fly && !floor) continue;
+        px = cx * T + T / 2 - D.w / 2; py = (cy + 1) * T - D.h - 0.5; ok = !rectSolid(px, py, D.w, D.h);
+      }
+      if (!ok) continue;
       const e = spawnEnemy(type, px, py, zone); if (e) { e.memT = 6; made++; } k++;
     }
     } finally { if (typeof icPacking !== 'undefined') icPacking = false; }

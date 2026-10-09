@@ -232,18 +232,21 @@ Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas 
 | [ ] | Aranha Cuspideira | fica longe e cospe bolas de teia em arco; quem leva fica lento por 2 s | 24 / 7 |
 | [ ] | Besouro Couraçado | tanque: a carapaça bloqueia golpes de frente; se encolhe e sai rolando (aviso claro); bate na parede e fica tonto | 60 / 11 |
 | [ ] | Filhote de aranha | fundo do Ninho e ovos da Mãe-Teia; fraco e rápido | 8 / 4 |
+| [ ] | Fungo Esporento | parado como cogumelo do cenário; perto do herói incha (aviso) e solta uma nuvem de esporos que envenena (perde vida aos poucos, sem empurrão) enquanto ele fica dentro; bater nele também solta a nuvem | 40 / 7 |
+| [ ] | Centopeia das Rochas | anda grudada no chão, nas paredes e no teto atrás do herói e morde de qualquer lado; do teto se solta em cima dele; rápida e fraca | 20 / 8 |
+| [ ] | Goblin Dinamiteiro | lampião no capacete; fica longe, acende a dinamite (aviso) e joga em arco; ela quica, explode depois de um tempo, fere o herói e os monstros perto e quebra os blocos em volta; foge quando o herói chega perto | 30 / 16 |
 
-Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4) que todos os monstros. Sem dano de contato: só o bote, a mordida, o pulo, a rolagem e o cuspe machucam. Todos usam linha de visão e busca de caminho.
+Os 10 da camada (regra fixa, sem contar o chefe): os 7 primeiros vêm do `js/55-caverna-bichos.js`, os 3 últimos do `js/76-cavernas-novos.js`. Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4) que todos os monstros. Sem dano de contato: só o bote, a mordida, o pulo, a rolagem, o cuspe, a nuvem e a explosão machucam. Todos usam linha de visão e busca de caminho.
 
 **Nível pela profundidade:** nas cavernas, 1 nível a cada 50 m (níveis 1 a 4). Na catedral, que agora fica mais funda, começa no nível 2 e sobe 1 a cada 45 m (níveis 2 a 6; antes eram 1 a 5).
 
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
 |---|---|---|
-| Grutas Rasas | gosma 0.35, morcego 0.3, rato 0.35 | 6 |
-| Galerias de Pedra | morcego 0.2, gosma 0.15, rato 0.15, aranha 0.25, besouro 0.25 | 7 |
+| Grutas Rasas | gosma 0.3, morcego 0.25, rato 0.3, fungo 0.2 | 6 |
+| Galerias de Pedra | morcego 0.17, rato 0.13, aranha 0.22, besouro 0.2, fungo 0.13, centopeia 0.17 | 7 |
 | O Ninho | aranha 0.35, cuspideira 0.3, besouro 0.15, morcego 0.1, filhote 0.1 | 8 |
-| Fundações | aranha 0.25, cuspideira 0.2, besouro 0.25, morcego 0.15, rato 0.15 | 8 |
+| Fundações | aranha 0.2, cuspideira 0.18, besouro 0.2, morcego 0.12, centopeia 0.15, goblin 0.2 | 8 |
 
 ## 7. Chefe: A Mãe-Teia
 - **Quem é:** a aranha que teceu o ninho, do tamanho de uma carroça, com o abdômen marcado por uma caveira clara.

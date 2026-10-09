@@ -27,6 +27,9 @@ const UDW_TXT = {
     besouro: 'Couraçado e lento. Se agacha, vira uma bola e rola contra o herói; se bater na parede, cai de costas e leva o dobro de dano.',
     filhote: 'Filhote de aranha, fraco e rápido. Sai dos ovos da Mãe-Teia durante a luta.',
     maeteia: 'Chefe das cavernas. Veja as fases abaixo.',
+    fungo: 'Fica parado e parece um cogumelo do cenário. Quando o herói chega perto, incha e solta uma nuvem de esporos: quem fica dentro é envenenado e perde vida aos poucos. Bater nele também solta a nuvem. Anda devagar.',
+    centopeia: 'Corre pelo chão, pelas paredes e pelo teto atrás do herói e morde de qualquer lado. Do teto, se solta em cima dele. Rápida e fraca.',
+    goblin: 'Lampião no capacete. Fica longe, acende uma dinamite e joga em arco: ela quica e explode depois de um tempo, ferindo o herói e os monstros perto e quebrando os blocos em volta. Foge quando o herói chega perto.',
     yeti: 'O grandão. Anda pesado e quase não recua com golpes. De perto levanta os dois punhos e soca o chão: o golpe pega quem está na frente e uma onda corre pelo chão (pule por cima). De longe arranca um bloco de gelo e arremessa em arco.',
     lobo: 'Chega em bando de 2 ou 3, rápido. Agacha, dá um bote longo com mordida e recua.',
     espirito: 'Voa e atravessa o ar deixando neve. Fica longe e atira 3 lascas de gelo que deixam o herói lento por 2 s.',
@@ -115,7 +118,7 @@ const UDW_TXT = {
 
   catedral: 'Uma catedral gótica soterrada há séculos debaixo das cavernas, com o claustro e as criptas embaixo. Os mortos dela se levantaram. É a segunda camada, de 186 a 372 m.',
   catedralEntrada: 'Nas Fundações Soterradas, duas grutas de saída abrem para escadarias em ruína que descem até o átrio.',
-  caverna: 'A primeira camada debaixo do vilarejo, de 6 a 186 m: terra e rocha que vão virando ninho de aranhas e, no fundo, pedra lavrada da catedral que está embaixo. Slimes e morcegos repintados, ratos, aranhas, cuspideiras e besouros. Nenhum morto-vivo.',
+  caverna: 'A primeira camada debaixo do vilarejo, de 6 a 186 m: terra e rocha que vão virando ninho de aranhas e, no fundo, pedra lavrada da catedral que está embaixo. Slimes e morcegos repintados, ratos, aranhas, cuspideiras, besouros, fungos esporentos, centopeias e goblins dinamiteiros. Nenhum morto-vivo.',
   cavernaEntrada: 'O pórtico de pedra à direita da placa do vilarejo ("Cavernas →"): a escadaria de cantaria desce e vai virando terra até abrir nas Grutas Rasas.',
   gelo: 'A terceira camada, debaixo das criptas da catedral, de 372 a 558 m: um frio mais velho que a catedral subiu pelas rachaduras e congelou tudo. Fendas de geada, salões de gelo azul que brilha, as tocas dos yetis e, no fundo, o gelo negro do Coração do Inverno. O gelo, o gelo azul e o gelo negro escorregam: o herói demora para arrancar e para frear.',
   geloEntrada: 'Duas salas das Criptas mais baixas têm o chão rachado: uma fenda desce de cada uma até as Fendas Geladas, com degraus de pedra congelada a cada 3 blocos para voltar pulando.',
