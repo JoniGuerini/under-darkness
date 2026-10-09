@@ -1,0 +1,2 @@
+/* the shield slot while a two-handed sword fills both hands (js/62-montante-maos.js) */
+.slot.eq.duas-maos img { opacity: 0.32; filter: grayscale(0.7); }
