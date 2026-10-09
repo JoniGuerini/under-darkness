@@ -29,14 +29,33 @@
       <div class="mini"><span>Vida <b>${e.hp}</b></span><span>Dano <b>${e.dmg}</b></span><span>XP <b>${e.xp}</b></span></div>
       <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
   }
+  // os monstros de cada bioma, faixa por faixa (CATH_SPAWN do 45 e do 56)
+  const lvAt = m => m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : Math.min(6, 2 + Math.floor((m - CAVE_D) / 45));
+  const BIOMAS = () => [
+    { id: 'cavernas', nome: 'As Cavernas', faixas: UDW_TXT.cvFaixas, chefes: [['maeteia', 'Câmara do Ninho, no fundo do Ninho']], extra: { filhote: 'Só sai dos ovos durante a luta com a Mãe-Teia' } },
+    { id: 'catedral', nome: 'A Catedral Abandonada', faixas: UDW_TXT.faixas, chefes: [['rei', 'Sala do trono, na Nave ou no Claustro']], extra: {} }
+  ];
+  function bioma(B) {
+    const zs = B.faixas.map(f => ({ ...f, sp: CATH_SPAWN[f.zona] })), seen = [];
+    for (const z of zs) for (const [t] of (z.sp ? z.sp[0] : [])) if (!seen.includes(t)) seen.push(t);
+    const head = `<thead><tr><th></th>${zs.map(z => `<th class="fxh"><b>${E(ZONE_NAMES[z.zona] || z.nome)}</b><small>${z.de} a ${z.ate} m</small><small>nível ${lvAt(z.de)} a ${Math.min(7, lvAt(z.ate - 1) + 1)}${z.sp ? ` · até ${z.sp[1]} juntos` : ''}</small></th>`).join('')}</tr></thead>`;
+    const nome = t => { const e = UDW.enemyAt(t, 1); return `<td class="en"><a href="#/inimigo/${t}"><span class="eimg">${UDW.enemyImg(t, ET[t].boss ? 2 : 3)}</span><span><b>${E(ET[t].name)}</b><small>Vida ${e.hp} · Dano ${e.dmg} · XP ${e.xp}</small></span></a></td>`; };
+    const rows = seen.map(t => `<tr>${nome(t)}${zs.map(z => { const tab = z.sp ? z.sp[0] : [], tot = tab.reduce((n, r) => n + r[1], 0), r = tab.find(x => x[0] === t);
+      if (!r) return '<td class="fx0"></td>'; const p = r[1] / tot, lv = p >= 0.25 ? 3 : p >= 0.15 ? 2 : 1; return `<td class="fx${lv}"><i></i><span>${UDW.pct(p, 0)}</span></td>`; }).join('')}</tr>`);
+    if (B.extra) for (const t in B.extra) if (ET[t] && !seen.includes(t)) rows.push(`<tr>${nome(t)}<td colspan="${zs.length}" class="onde">${E(B.extra[t])}</td></tr>`);
+    const boss = B.chefes.filter(([t]) => ET[t]).map(([t, onde]) => `<tr class="chefe-l">${nome(t)}<td colspan="${zs.length}" class="onde"><a href="#/chefes">Chefe</a>: ${E(onde)}</td></tr>`);
+    return `<h2 id="${B.id}">${E(B.nome)} <small>${seen.length} monstros</small></h2><div class="tw"><table class="grade matriz inim">${head}<tbody>${rows.join('')}${boss.length ? `<tr class="grupo"><td colspan="${zs.length + 1}">Chefe</td></tr>` + boss.join('') : ''}</tbody></table></div>`;
+  }
   UDW.pages.inimigos = {
-    render() {
-      const A = UDW.ativos(), all = Object.keys(ET).filter(t => !isBoss(t));
-      const on = all.filter(t => A.has(t)), off = all.filter(t => !A.has(t));
-      return UDW.head('Inimigos', 'Números no nível 1. Cada nível a mais soma 30% de vida e 20% de dano. Nas cavernas o nível sobe 1 a cada 50 m; a catedral começa no nível 2 e sobe 1 a cada 45 m. 30% nascem um nível acima.')
-        + `<h2>No mundo de hoje <small>${on.length}</small></h2><div class="egrid">${on.map(card).join('')}</div>`
-        + `<h2>Nas cavernas desligadas <small>${off.length}</small></h2><p class="nota">${UDW_TXT.cavernas}</p><div class="egrid">${off.map(card).join('')}</div>`;
-    }
+    render(anchor) {
+      const A = UDW.ativos(), off = Object.keys(ET).filter(t => !isBoss(t) && !A.has(t));
+      return UDW.head('Inimigos', 'Por bioma e faixa. A porcentagem é a chance de cada monstro entre os que nascem naquela faixa. Números no nível 1: cada nível a mais soma 30% de vida e 20% de dano, e 30% nascem um nível acima.')
+        + `<p class="bnav">${BIOMAS().map(B => `<a href="#/inimigos/${B.id}">${E(B.nome)}</a>`).join('')}<a href="#/inimigos/desligadas">Cavernas desligadas</a></p>`
+        + `<h2 id="superficie">Superfície</h2><p class="nota">Nenhum monstro: o vilarejo e os campos são seguros, de dia e de noite.</p>`
+        + BIOMAS().map(bioma).join('')
+        + `<h2 id="desligadas">Nas cavernas desligadas <small>${off.length}</small></h2><p class="nota">${UDW_TXT.cavernas}</p><div class="egrid">${off.map(card).join('')}</div>`;
+    },
+    after(root, anchor) { if (anchor && $(anchor)) $(anchor).scrollIntoView(); }
   };
 
   UDW.pages.inimigo = {

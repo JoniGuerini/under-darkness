@@ -305,3 +305,13 @@ article.md .lk{color:var(--ember)}
 .fx1 i{background:color-mix(in srgb,var(--ember) 22%,#1a1420)}
 .legenda span{margin:0 4px 0 10px}
 .legenda span:first-child{margin-left:0}
+
+/* inimigos por bioma */
+.matriz.inim td.en a{display:flex;gap:10px;align-items:center;color:inherit}
+.matriz.inim td.en a:hover b{color:var(--ember)}
+.matriz.inim .eimg{flex:none;width:72px;height:56px;display:flex;align-items:center;justify-content:center}
+.matriz.inim .eimg img{max-width:72px;max-height:56px;width:auto;height:auto}
+.matriz.inim td.en span{display:grid;gap:2px}
+.matriz.inim td[class^=fx] span{display:block;font-size:12px;color:var(--dim);margin-top:3px}
+.matriz.inim td.onde{color:var(--dim);font-size:14px}
+.matriz th.fxh small+small{margin-top:1px}
