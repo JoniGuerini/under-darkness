@@ -47,6 +47,12 @@ Aprendido nas cavernas (2026-10-08):
 - Cada camada tem pelo menos duas saídas para a de baixo, longe uma da outra, e todas são alcançáveis a partir da entrada.
 - Os monstros de uma camada não aparecem na outra.
 
+Aprendido no gelo (2026-10-09):
+
+- Cada descida tem que dar para **subir de volta pulando**: degraus a cada 3 fileiras no máximo (o pulo do herói sobe 3 blocos), começando do chão da gruta de baixo até a sala de cima. Conferir com uma busca que simula o pulo, não só com o preenchimento de espaço vazio: o preenchimento diz que está aberto, não que dá para subir.
+- O chão debaixo dos degraus e o chão da gruta de baixo ficam protegidos dos túneis e da decoração, senão um túnel de ligação come o chão e o herói cai direto.
+- Bloco que muda o controle do herói (gelo que escorrega) nunca fica nos degraus de subida nem no chão da sala do chefe.
+
 ## Ordem da geração
 
 1. Rocha base do bioma.
@@ -68,4 +74,5 @@ Rodar pelo menos 8 sementes e conferir por código:
 - nenhum objeto de teto sem teto em cima;
 - todas as janelas da mesma sala na mesma altura e sem se encostar;
 - todas as salas alcançáveis a partir da entrada;
+- as descidas sobem de volta com o pulo do herói;
 - nenhuma árvore sobre pedra.

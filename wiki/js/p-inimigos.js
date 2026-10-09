@@ -8,13 +8,14 @@
   UDW.enemyAt = (t, lvl) => {
     if (t === 'rei') return { lvl: REI.lvl, hp: REI.hp, dmg: REI.dmg, xp: REI.xp, gold: 0 };
     if (t === 'boss') return { lvl: 10, hp: ET.boss.hp, dmg: ET.boss.dmg, xp: 450, gold: 0 };
+    if (t === 'yetiancestral') return { lvl: 9, hp: ET.yetiancestral.hp, dmg: ET.yetiancestral.dmg, xp: ET.yetiancestral.xp, gold: 0 };
     if (t === 'maeteia') return { lvl: 4, hp: ET.maeteia.hp, dmg: ET.maeteia.dmg, xp: ET.maeteia.xp, gold: 0 };
     // the same numbers the spawnEnemy of 10 and 56 give at that level
     const D = ET[t], m = 1 + 0.3 * (lvl - 1);
     return { lvl, hp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) };
   };
   // where each level is found (56: caves 1 level every 50 m, the cathedral starts at 2 and goes up 1 every 45 m; 30% are born a level higher)
-  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); if (l >= 2) o.push(`${CAVE_D + (l - 2) * 45} a ${CAVE_D + (l - 1) * 45 - 1} m`); return o.join(' e '); };
+  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); if (l >= 2 && l <= 6) o.push(`${CAVE_D + (l - 2) * 45} a ${Math.min(IC_TOP, CAVE_D + (l - 1) * 45) - 1} m`); if (l >= 6 && l <= 8) o.push(`${IC_TOP + (l - 6) * 60} a ${Math.min(IC_TOP + IC_D, IC_TOP + (l - 5) * 60) - 1} m`); return o.join(' e ') || '30% nascem um nível acima'; };
   // onde cada um aparece: CATH_SPAWN (45) faixa por faixa
   UDW.spawnsOf = t => {
     const o = [];
@@ -27,18 +28,19 @@
     const D = ET[t], e = UDW.enemyAt(t, 1), sp = UDW.spawnsOf(t);
     return `<a class="ecard${UDW.ativos().has(t) ? '' : ' off'}" href="#/inimigo/${t}"><div class="eart">${UDW.enemyImg(t, D.boss ? 2 : 3)}</div><b>${E(D.name)}</b>
       <div class="mini"><span>Vida <b>${e.hp}</b></span><span>Dano <b>${e.dmg}</b></span><span>XP <b>${e.xp}</b></span></div>
-      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
+      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'yetiancestral' ? 'Trono de Gelo' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
   }
   // os monstros de cada bioma, faixa por faixa (CATH_SPAWN do 45 e do 56)
-  const lvAt = m => m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : Math.min(6, 2 + Math.floor((m - CAVE_D) / 45));
+  const lvAt = m => m >= IC_TOP ? 6 + Math.min(2, Math.floor((m - IC_TOP) / 60)) : m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : Math.min(6, 2 + Math.floor((m - CAVE_D) / 45));
   const BIOMAS = () => [
     { id: 'cavernas', nome: 'As Cavernas', faixas: UDW_TXT.cvFaixas, chefes: [['maeteia', 'Câmara do Ninho, no fundo do Ninho']], extra: { filhote: 'Só sai dos ovos durante a luta com a Mãe-Teia' } },
-    { id: 'catedral', nome: 'A Catedral Abandonada', faixas: UDW_TXT.faixas, chefes: [['rei', 'Sala do trono, na Nave ou no Claustro']], extra: {} }
+    { id: 'catedral', nome: 'A Catedral Abandonada', faixas: UDW_TXT.faixas, chefes: [['rei', 'Sala do trono, na Nave ou no Claustro']], extra: {} },
+    { id: 'gelo', nome: 'As Cavernas de Gelo', faixas: UDW_TXT.icFaixas, chefes: [['yetiancestral', 'Trono de Gelo, no Coração do Inverno']], extra: {} }
   ];
   function bioma(B) {
     const zs = B.faixas.map(f => ({ ...f, sp: CATH_SPAWN[f.zona] })), seen = [];
     for (const z of zs) for (const [t] of (z.sp ? z.sp[0] : [])) if (!seen.includes(t)) seen.push(t);
-    const head = `<thead><tr><th></th>${zs.map(z => `<th class="fxh"><b>${E(ZONE_NAMES[z.zona] || z.nome)}</b><small>${z.de} a ${z.ate} m</small><small>nível ${lvAt(z.de)} a ${Math.min(7, lvAt(z.ate - 1) + 1)}${z.sp ? ` · até ${z.sp[1]} juntos` : ''}</small></th>`).join('')}</tr></thead>`;
+    const head = `<thead><tr><th></th>${zs.map(z => `<th class="fxh"><b>${E(ZONE_NAMES[z.zona] || z.nome)}</b><small>${z.de} a ${z.ate} m</small><small>nível ${lvAt(z.de)} a ${Math.min(z.de >= IC_TOP ? 9 : 7, lvAt(z.ate - 1) + 1)}${z.sp ? ` · até ${z.sp[1]} juntos` : ''}</small></th>`).join('')}</tr></thead>`;
     const nome = t => { const e = UDW.enemyAt(t, 1); return `<td class="en"><a href="#/inimigo/${t}"><span class="eimg">${UDW.enemyImg(t, ET[t].boss ? 2 : 3)}</span><span><b>${E(ET[t].name)}</b><small>Vida ${e.hp} · Dano ${e.dmg} · XP ${e.xp}</small></span></a></td>`; };
     const rows = seen.map(t => `<tr>${nome(t)}${zs.map(z => { const tab = z.sp ? z.sp[0] : [], tot = tab.reduce((n, r) => n + r[1], 0), r = tab.find(x => x[0] === t);
       if (!r) return '<td class="fx0"></td>'; const p = r[1] / tot, lv = p >= 0.25 ? 3 : p >= 0.15 ? 2 : 1; return `<td class="fx${lv}"><i></i><span>${UDW.pct(p, 0)}</span></td>`; }).join('')}</tr>`);
@@ -61,7 +63,7 @@
   UDW.pages.inimigo = {
     render(t) {
       const D = ET[t]; if (!D) return UDW.head('Inimigo não encontrado');
-      const A = UDW.ativos(), sp = UDW.spawnsOf(t), lv = D.boss ? [1] : [1, 2, 3, 4, 5, 6];
+      const A = UDW.ativos(), sp = UDW.spawnsOf(t), lv = D.boss ? [1] : sp.length && sp.every(s => s.z >= IC_ZONE0) ? [6, 7, 8, 9] : [1, 2, 3, 4, 5, 6];
       let h = `<p class="volta"><a href="#/${D.boss ? 'chefes' : 'inimigos'}">← ${D.boss ? 'Chefes' : 'Inimigos'}</a></p>`;
       h += `<div class="etopo"><div class="eart big">${UDW.enemyImg(t, D.boss ? 4 : 6)}</div><div><h1>${E(D.name)}</h1>
         <div class="chips">${A.has(t) ? UDW.chip('No mundo', '#7fd36a') : UDW.chip('Desligado', '#8a7f70')}${flags(t).map(f => UDW.chip(f)).join('')}</div>
@@ -99,7 +101,12 @@
         <div class="stats">${UDW.stat(ET.maeteia.hp, 'vida')}${UDW.stat(ET.maeteia.dmg, 'dano')}${UDW.stat(ET.maeteia.xp, 'XP')}${UDW.stat(4, 'nível')}</div>
         <ol class="fases">${UDW_TXT.teiaFases.map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
         <h3>Solta</h3><div class="lista">${(DROPS.maeteia || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
-      return UDW.head('Chefes') + T2 + rei + carr;
+      const T3 = ET.yetiancestral ? `<section class="chefe"><div class="eart big">${UDW.enemyImg('yetiancestral', 2)}</div><div>
+        <h2>${E(ET.yetiancestral.name)} ${UDW.chip('No mundo', '#7fd36a')}</h2><p class="lead">${E(UDW_TXT.yetiOnde)}</p>
+        <div class="stats">${UDW.stat(ET.yetiancestral.hp, 'vida')}${UDW.stat(ET.yetiancestral.dmg, 'dano')}${UDW.stat(ET.yetiancestral.xp, 'XP')}${UDW.stat(9, 'nível')}</div>
+        <ol class="fases">${UDW_TXT.yetiFases.map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
+        <h3>Solta</h3><div class="lista">${(DROPS.yetiancestral || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
+      return UDW.head('Chefes') + T3 + T2 + rei + carr;
     }
   };
 })();

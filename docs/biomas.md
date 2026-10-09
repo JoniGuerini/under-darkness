@@ -1,12 +1,13 @@
 # Biomas de Under Darkness
 
-Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2) e a Catedral (parte 3), levantadas direto do código; o resto é ideia.
+Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2), a Catedral (parte 3) e as Cavernas de Gelo (parte 4); o resto é ideia.
 
 - Parte 1: o que é um bioma e a ficha com todas as variáveis.
 - Parte 2: a primeira camada, As Cavernas (existe).
 - Parte 3: a segunda camada, a Catedral Abandonada (existe), com tudo que tem nela.
-- Parte 4: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
-- Parte 5: outras ideias soltas, só o conceito.
+- Parte 4: a terceira camada, As Cavernas de Gelo (existe).
+- Parte 5: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
+- Parte 6: outras ideias soltas, só o conceito.
 
 As regras técnicas de geração (apoio dos objetos, janelas, colunas, entrada, ordem e testes) continuam em [regras-de-bioma.md](regras-de-bioma.md). Este documento não repete essas regras; ele diz **o que** um bioma tem, e aquele diz **como** gerar sem erro.
 
@@ -310,7 +311,7 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 | Claustro Profanado | 268 a 318 m | 3 (284, 300 e 316 m) | capelas, corredores com arcadas, biblioteca, afrescos |
 | Criptas | 318 a 372 m | 3 (333, 348 e 363 m) | corredores baixos, ossários, túmulos |
 
-- Desde 2026-10-08 fica **embaixo das Cavernas** (parte 2): as profundidades acima somam os 186 m das cavernas. Abaixo de 372 m: rocha-mãe.
+- Desde 2026-10-08 fica **embaixo das Cavernas** (parte 2): as profundidades acima somam os 186 m das cavernas. Desde 2026-10-09, abaixo de 372 m ficam as Cavernas de Gelo (parte 4).
 - **Entrada:** o pórtico de pedra à direita da placa do vilarejo agora leva às Cavernas. Para a catedral se desce pelas Fundações Soterradas, onde o teto do átrio desabou: duas escadarias em ruína por mundo descem de uma gruta até uma sala do átrio.
 - A cripta roxa do Carrasco está **escondida** (código guardado, sem gerar).
 
@@ -491,7 +492,208 @@ Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a
 
 ---
 
-# Parte 4. Bioma 3 (ideia): As Minas Fúngicas
+# Parte 4. Bioma 3: As Cavernas de Gelo (a terceira camada)
+
+Ficha feita em 2026-10-09 a pedido do Jonathan ("um bioma de gelo, cavernas de gelo, uns yetis grandões") e implementada em seguida. É a terceira camada: fica debaixo das criptas da catedral. Detalhes técnicos (ids, arquivos, ganchos) em [gelo-spec.md](gelo-spec.md).
+
+## 1. Identidade
+- **Nome:** As Cavernas de Gelo.
+- **Faixas no jogo:** Fendas Geladas, Salões de Gelo Azul, Covis dos Yetis, Coração do Inverno.
+- **Conceito:** debaixo das criptas a terra para de ser quente. Um frio antigo, mais velho que a catedral, subiu pelas rachaduras e congelou tudo: primeiro as rachaduras do calcário, cheias de geada e de tumbas que escorregaram lá de cima; depois salões enormes de gelo azul, translúcido, com colunas, lagos congelados e cachoeiras paradas no ar. Mais fundo, os yetis fizeram suas tocas no permafrost, com ossos roídos e fogueiras apagadas. No fundo de tudo está o Coração do Inverno: gelo negro, cristais que brilham sozinhos, gigantes presos dentro do gelo e o trono do Yeti Ancestral.
+- **Sensação:** silêncio e frio. Começa estranho (a catedral congelada), vira deslumbramento nos salões azuis (a camada mais bonita e mais clara do jogo), passa a ameaça nas tocas (pegadas, ossos, rugidos ao longe) e termina em reverência no Coração, onde as coisas presas no gelo parecem que vão acordar.
+- **Contraste com as outras camadas:** a caverna é marrom e úmida, a catedral é cinza, dourada e de vela. O gelo é azul, branco e frio, com luz própria (o gelo azul e os cristais brilham), e o chão escorrega. Os monstros são feras vivas e espíritos do frio, não bichos nem mortos.
+- **Referências:** as cavernas de gelo de Terraria, a Skyrim das ruínas congeladas, os yetis de Diablo 2 (Planalto Gelado) e as cavernas de cristal azul da Groenlândia.
+
+## 2. Lugar no mundo
+| Faixa | Profundidade | Caráter |
+|---|---|---|
+| Fendas Geladas | 372 a 418 m | o calcário das criptas coberto de geada vira permafrost; fendas altas e estreitas, tumbas e lápides caídas e congeladas |
+| Salões de Gelo Azul | 418 a 476 m | gelo azul translúcido, salões enormes, colunas de gelo, lagos congelados, cachoeiras paradas, sincelos |
+| Covis dos Yetis | 476 a 528 m | neve batida e permafrost, tocas redondas, ossos de mamute, fogueiras apagadas, montes de neve |
+| Coração do Inverno | 528 a 558 m | gelo negro antigo, cristais que brilham, gigantes e feras presos no gelo, o Trono de Gelo do chefe |
+
+- O mundo fica mais fundo de novo: 640 blocos de altura em vez de 440. Abaixo do Coração só tem a rocha do fundo.
+- **Entrada:** duas descidas por mundo, saindo das salas mais baixas das Criptas. O chão da cripta está rachado e o frio entra por ali: uma fenda irregular desce da sala até as Fendas Geladas, com degraus de gelo e geada nas paredes. As duas ficam longe uma da outra e são alcançáveis a partir do vilarejo.
+- **Passagem:** as últimas fileiras das Criptas já aparecem com calcário congelado e sincelos; as Fendas começam com calcário congelado, tumbas e pedra lavrada caída que vão sumindo ao descer, até virar só permafrost e gelo (segue a regra de passagem entre camadas).
+
+## 3. Estrutura e geração
+- **Massa:** calcário congelado no alto das Fendas, permafrost e rocha gelada no meio, gelo azul nos Salões, neve batida e permafrost nos Covis, gelo negro no Coração. Bordas misturadas com ruído.
+- **Tipos de espaço:**
+
+| Faixa | Espaços | Largura x altura |
+|---|---|---|
+| Fendas Geladas | fendas verticais altas e estreitas, grutas baixas, ligações em zigue-zague | fendas de 4 a 8 x 14 a 26; grutas de 10 a 18 x 5 a 8 |
+| Salões de Gelo Azul | salões enormes com teto alto, colunas de gelo do chão ao teto, lagos congelados no chão | salões de 28 a 55 x 14 a 24 |
+| Covis dos Yetis | tocas redondas ligadas por túneis largos (o yeti é grande), montes de neve | tocas de 14 a 24 x 8 a 12 |
+| Coração do Inverno | grutas de gelo negro e o Trono de Gelo | grutas de 14 a 26 x 8 a 12; o trono 40 x 16 |
+
+- Gerado com ruído e autômato celular, como as cavernas, mais túneis largos (3 a 5 de altura) para os yetis passarem.
+- **Elementos com regra própria:**
+  - **Gelo escorregadio:** em gelo, gelo azul e gelo negro o herói demora mais para frear e para acelerar. Neve, permafrost e rocha não escorregam.
+  - **Lagos congelados:** placas lisas de gelo no chão dos Salões, sempre planas.
+  - **Colunas de gelo:** vão sempre do chão ao teto e caem inteiras se quebrar o apoio (igual às colunas da catedral).
+  - **Sincelos** ficam presos no teto e caem em corrente se quebrar o bloco que os segura.
+  - **Neve no chão:** uma camada fina de neve cobre o chão dos Covis (só chão, nunca parede ou teto).
+- Tudo alcançável a partir das descidas (a geração cava túneis se faltar). Segue a ordem e os testes de [regras-de-bioma.md](regras-de-bioma.md).
+
+## 4. Blocos
+
+### Sólidos da frente
+| | Bloco | Uso | Solta |
+|---|---|---|---|
+| [ ] | Calcário congelado | o calcário da catedral com geada branca nas frestas; topo das Fendas | Calcário |
+| [ ] | Permafrost | terra e cascalho congelados, castanho-acinzentado com cristais de gelo; massa das Fendas e dos Covis | Permafrost |
+| [ ] | Rocha gelada | rocha azul-ardósia com veios de gelo; massa geral | Rocha Gelada |
+| [ ] | Neve | fofa, cava muito rápido; chão dos Covis e montes | Neve |
+| [ ] | Neve batida | camadas compactadas, mais firme | Neve |
+| [ ] | Gelo | branco-azulado, com bolhas presas; **escorrega** | Gelo |
+| [ ] | Gelo azul | o gelo antigo e translúcido dos Salões, **luz fria** fraca; **escorrega** | Gelo Azul |
+| [ ] | Gelo negro | gelo muito velho, quase preto, com rachaduras azuis; Coração; **escorrega** | Gelo Negro |
+| [ ] | Minérios do gelo | ferro e ouro no permafrost e na rocha gelada, cristal na rocha gelada e no gelo negro | o minério |
+
+### Decoração de 1 bloco
+| | Nome | Onde | Nota |
+|---|---|---|---|
+| [ ] | Sincelo | teto de todas | ponta e meio; cai em corrente se quebrar o teto |
+| [ ] | Estalagmite de gelo | chão dos Salões e do Coração | base e ponta |
+| [ ] | Cristal de gelo | chão do Coração e dos Salões | **luz fria** azul |
+| [ ] | Cristal pendente | teto do Coração | **luz fria** azul, pendurado |
+| [ ] | Montinho de neve | chão dos Covis e das Fendas | |
+| [ ] | Ossos congelados | chão dos Covis | |
+| [ ] | Reaproveitados | | crânios e lápides (Fendas), baú |
+
+### Paredes de fundo
+| | Parede | Onde |
+|---|---|---|
+| [ ] | Calcário com geada (a da cripta, congelada) | topo das Fendas |
+| [ ] | Rocha gelada | Fendas, Covis |
+| [ ] | Gelo azul em camadas | Salões |
+| [ ] | Neve compactada | Covis |
+| [ ] | Gelo negro rachado | Coração |
+
+### Terceira camada (distante)
+| | Bloco | Onde |
+|---|---|---|
+| [ ] | Rocha gelada distante | Fendas |
+| [ ] | Geleira azul distante (paredes de gelo enormes) | Salões |
+| [ ] | Floresta de sincelos distante | salões grandes |
+| [ ] | Gelo negro distante | Coração |
+
+### Minérios
+| Minério | Faixa |
+|---|---|
+| Ferro | 372 a 528 m |
+| Ouro | 400 a 558 m |
+| Cristal | 418 a 558 m (o mais comum aqui; brilha no gelo negro) |
+| Carvão e cobre | não aparecem (o gelo é pobre em minério comum) |
+
+## 5. Objetos de cena
+
+**No chão**
+| | Objeto | Faixas | Nota |
+|---|---|---|---|
+| [ ] | Coluna de gelo | Salões | do chão ao teto, um bloco de largura; cai inteira se quebrar o apoio |
+| [ ] | Explorador congelado | Fendas, Salões | um aventureiro preso num bloco de gelo, de pé, com a tocha ainda na mão |
+| [ ] | Tumba congelada | Fendas | um sarcófago da cripta que caiu, coberto de gelo |
+| [ ] | Presas de mamute | Covis | duas presas curvas saindo da neve |
+| [ ] | Ossada de mamute | Covis | costelas enormes e o crânio |
+| [ ] | Fogueira apagada dos yetis | Covis | pedras em círculo, ossos, cinza; **luz quente** de brasa bem fraca |
+| [ ] | Monte de neve grande | Covis, Fendas | |
+| [ ] | Drusa de cristal de gelo | Salões, Coração | **luz fria** azul |
+| [ ] | Estátua congelada | Fendas | uma estátua da catedral coberta de gelo |
+| [ ] | Altar de gelo | Coração | pedra rúnica antiga com gelo; **luz fria** |
+| [ ] | Pedregulho gelado | todas | |
+| [ ] | Trono de Gelo | sala do chefe | o trono do Yeti Ancestral: degraus de gelo, encosto com cristais, crânios nos braços, uma pele branca no assento; **luz fria** |
+
+**No teto**
+| | Objeto | Faixas | Nota |
+|---|---|---|---|
+| [ ] | Cacho de sincelos grandes (2 tamanhos) | todas | |
+| [ ] | Cristal pendente grande | Coração | **luz fria** |
+| [ ] | Raízes congeladas | Fendas | as últimas raízes, cobertas de gelo |
+
+**Na parede de fundo**
+| | Objeto | Faixas | Apoio |
+|---|---|---|---|
+| [ ] | Cachoeira congelada | Salões | pé no chão; uma queda d'água parada no meio |
+| [ ] | Veio de gelo azul | Salões, Coração | altura do olho, **luz fria** |
+| [ ] | Fera presa no gelo | Coração, Covis | altura do olho; um bicho enorme visto através do gelo |
+| [ ] | Gigante preso no gelo | Coração | pé no chão; a silhueta de um gigante dentro da parede |
+| [ ] | Marcas de garra | Covis | altura do olho; o yeti marca a toca |
+| [ ] | Pinturas dos yetis | Covis | altura do olho; desenhos toscos de caça |
+
+## 6. Inimigos: as feras do gelo
+| | Inimigo | Papel | Vida / dano base |
+|---|---|---|---|
+| [ ] | Yeti | o grandão: anda pesado, levanta os dois punhos (aviso) e soca o chão, soltando uma onda curta pelo chão; de longe arranca um bloco de gelo e arremessa em arco. Quase não recua com golpes | 140 / 20 |
+| [ ] | Lobo da Geada | anda em bando de 2 ou 3, rápido; agacha (aviso) e dá um bote longo com mordida | 48 / 12 |
+| [ ] | Espírito da Nevasca | voa e atravessa o ar com um rastro de neve; fica longe e atira lascas de gelo que deixam o herói lento por 2 s | 36 / 11 |
+| [ ] | Verme da Geada | vive dentro da neve e do gelo; uma rachadura no chão embaixo do herói avisa, e ele sai mordendo de baixo; depois volta a se enterrar | 60 / 14 |
+| [ ] | Sentinela de Gelo | um golem de gelo azul: bloqueia golpes de frente com o braço de gelo, dá uma pancada lenta e forte; ao morrer se estilhaça em lascas | 120 / 16 |
+| [ ] | Gosma gelada | a gosma, azul clara e com gelo por dentro | 22 / 9 |
+
+Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4). Sem dano de contato: só o soco, a onda, o bloco, o bote, as lascas, a mordida e a pancada machucam. Todos usam linha de visão e busca de caminho (o espírito voa, o verme anda por dentro do chão).
+
+**Feras do frio:** a Nevasca e qualquer efeito de frio deixam estas feras só levemente lentas e nunca as congelam.
+
+**Nível pela profundidade:** começa no 6 e sobe 1 a cada 60 m (níveis 6 a 8); 30% dos monstros vêm 1 nível acima. Os lobos chegam em bando (mais 1 ou 2 junto) e o verme nasce enterrado.
+
+**Spawn por faixa**
+| Faixa | Monstros (peso) | Máx. |
+|---|---|---|
+| Fendas Geladas | lobo 0.35, espírito 0.25, gosma 0.25, verme 0.15 | 8 |
+| Salões de Gelo Azul | lobo 0.25, espírito 0.25, sentinela 0.2, gosma 0.15, verme 0.15 | 9 |
+| Covis dos Yetis | yeti 0.3, lobo 0.3, verme 0.2, espírito 0.2 | 9 |
+| Coração do Inverno | sentinela 0.3, yeti 0.25, espírito 0.25, lobo 0.2 | 10 |
+
+## 7. Chefe: O Yeti Ancestral
+- **Quem é:** o primeiro dos yetis, branco-azulado de velho, com o dobro do tamanho dos outros, chifres curvos e cristais de gelo crescendo nas costas.
+- **Onde:** o Trono de Gelo, um salão de 40 x 16 no Coração do Inverno, do outro lado do mundo em relação às descidas, com paredes vidradas de gelo azul, chão de neve batida (não escorrega), o trono esculpido no gelo, drusas, estalagmites e sincelos. Ao entrar, paredes de gelo que não dá para cavar fecham as saídas; elas derretem quando ele morre, quando o herói morre ou sai da sala (aí a luta recomeça).
+- **Luta (3 fases):**
+  1. Soco duplo no chão com aviso (levanta os punhos) e onda de choque pelo chão; arremessa um bloco de gelo que se quebra em 3 lascas ao cair.
+  2. Abaixo de 60% de vida: ruge e o teto solta sincelos enormes (uma sombra no chão avisa onde cada um cai) e chama 2 Lobos da Geada.
+  3. Abaixo de 25%: enfurecido, mais rápido; dá um carrinho de barriga de parede a parede (aviso: se agacha), e se bater na parede fica tonto por 2 s e solta sincelos do teto; sopra um bafo de geada em cone que segue o herói devagar e deixa ele lento.
+- **Sem recuo:** golpes não interrompem os ataques dele; a janela para bater é depois de cada ataque e quando fica tonto.
+- **Vida / dano:** 900 / 22 (antes da escala).
+- **Drop:** **Manto do Yeti Ancestral** (armadura de corpo lendária: defesa 7, +8 de vida, inimigos que te acertam de perto ficam resfriados por 3 s, e teia e gelo não te deixam mais lento), poções, pelo de yeti e lascas de gelo eterno. Fica salvo que ele morreu.
+
+## 8. Loot e economia
+- **Itens de bloco:** permafrost, rocha gelada, neve, gelo, gelo azul, gelo negro.
+- **Baús:** até 12, nas grutas e tocas, longe uns dos outros.
+- **Materiais novos (a Marta e o Caetano compram):** Pelo de Yeti, Presa de Lobo, Essência Gélida (do espírito), Lasca de Gelo Eterno (da sentinela).
+- **Raridade:** a camada inteira conta como profundidade 4 (a mais alta), como as Criptas.
+- **Único:** o Manto do Yeti Ancestral.
+
+## 9. Luz e atmosfera
+- A camada mais clara do subterrâneo: o gelo azul e os cristais emitem uma **luz fria** fraca, então os Salões ficam visíveis em tons de azul mesmo sem tocha. Fendas e Covis continuam escuros; o Coração tem pontos de luz azul dos cristais no meio do gelo negro.
+- Paletas: branco-neve, azul-gelo claro, azul profundo, cinza-ardósia da rocha, castanho frio do permafrost, quase preto do gelo negro com rachaduras azul elétrico. Os yetis são brancos com sombra azul e pele cinza-escura no rosto e nas mãos.
+- Flocos de neve caindo devagar em salões grandes e o bafo do herói visível são detalhes desejáveis.
+
+## 10. Som e música
+- Por enquanto usa o tema da caverna.
+- Sons próprios: rugido do yeti, soco no chão, uivo do lobo, gelo rachando (o aviso do verme), o tilintar do espírito, gelo quebrando ao morrer a sentinela.
+
+## 11. Interface e progressão
+- Nome da faixa aparece ao entrar e no mapa.
+- Missões do ancião com os materiais novos (pelo de yeti, presa de lobo, essência gélida).
+
+## 12. Arte
+- Mesmo padrão das outras camadas: pixel art granulada, rampas de 6 tons, luz de cima à esquerda, contorno escuro só onde toca o ar. O gelo tem bolhas, rachaduras e reflexos de luz em diagonal.
+
+## 13. Arquivos
+| Arquivo | O que tem |
+|---|---|
+| `js/69-gelo-api.js` | ids dos blocos, paredes e camada distante, faixas, profundidades, `GELO` (liga e desliga a camada) |
+| `js/70-gelo-blocos.js` | texturas, paredes, camada distante, decoração, minérios no gelo, itens de bloco, gelo escorregadio |
+| `js/71-gelo-objetos.js` | os objetos de cena |
+| `js/72-gelo-bichos.js` | yeti, lobo, espírito, verme, sentinela, gosma gelada: arte, IA, drops, materiais |
+| `js/73-gelo-mundo.js` | geração, descidas das criptas, decoração, baús, objetos, zonas, nível e loot, save |
+| `js/74-yeti-ancestral.js` | o chefe: Trono de Gelo, luta, drop |
+| `docs/gelo-spec.md` | a parte técnica |
+
+---
+
+# Parte 5. Bioma 4 (ideia): As Minas Fúngicas
 
 ## 1. Identidade
 - **Nome:** As Minas Fúngicas (nome provisório; alternativa: Galerias de Ferroalto).
@@ -644,7 +846,7 @@ Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a
 
 ---
 
-# Parte 5. Outras ideias soltas (só o conceito)
+# Parte 6. Outras ideias soltas (só o conceito)
 
 Para escolher quais viram ficha completa depois.
 
