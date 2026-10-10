@@ -40,7 +40,7 @@
   const FILT = [['', 'Todos'], ['weapon', 'Armas'], ['shield', 'Escudos'], ['head', 'Cabeça'], ['body', 'Corpo'], ['feet', 'Pés'], ['acc', 'Acessórios'], ['tool', 'Picaretas']];
   UDW.pages.itens = {
     render(f = '') {
-      const ids = Object.keys(ITEMS).filter(id => ITEMS[id].slot && (!f || ITEMS[id].slot === f));
+      const ids = Object.keys(ITEMS).filter(id => ITEMS[id].slot && !ITEMS[id].alias && (!f || ITEMS[id].slot === f));
       const weap = !f || f === 'weapon';
       const cols = [{ t: 'Item' }, { t: 'Tipo' }, { t: 'Nível', cls: 'n' }];
       if (weap) cols.push({ t: 'Dano', cls: 'n' }, { t: 'Golpes/s', cls: 'n' }, { t: 'DPS', cls: 'n' });
