@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.10.0';
+const VERSAO = '0.10.1';
 const NOVIDADES = [
+  { v: '0.10.1', data: '10/10/2026', titulo: 'Retratos nítidos', itens: [
+    'Os retratos dos moradores na conversa foram repintados e ficaram nítidos, sem borrão.'
+  ] },
   { v: '0.10.0', data: '10/10/2026', titulo: 'A descida', itens: [
     'Tela de início nova: um corte do chão que desce do poço do vilarejo, camada por camada, até a Escuridão, com o herói descendo na corda.'
   ] },
