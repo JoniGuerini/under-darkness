@@ -5,9 +5,9 @@
 #title .tnews{position:absolute;left:max(24px,5.5vw);top:clamp(150px,30vh,300px);bottom:max(22px,8vh);width:min(600px,calc(100vw - 48px));display:flex;flex-direction:column;gap:10px;
   padding:16px 18px 12px 0;background:linear-gradient(90deg,rgba(3,2,5,.82),rgba(3,2,5,.7) 75%,rgba(3,2,5,0))}
 #title .tnews[hidden]{display:none}
-#title .tnews h2{margin:0;padding-left:30px;font-family:var(--font-title);font-weight:400;font-size:clamp(28px,4.4vh,46px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:.02em}
+#title .tnews h2{margin:0;font-family:var(--font-title);font-weight:400;font-size:clamp(28px,4.4vh,46px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:.02em}
 #title .tnews .sbwrap{flex:1;min-height:0}
-#title .tnlist{flex:1;min-height:0;height:100%;overflow:auto;padding:0 18px 0 30px}
+#title .tnlist{flex:1;min-height:0;height:100%;overflow:auto;padding:0 18px 0 0}
 #title .tnlist article{padding:12px 0 14px;border-top:2px solid rgba(90,58,20,.55)}
 #title .tnlist article:first-child{border-top:0;padding-top:4px}
 #title .tnlist h3{margin:0 0 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-family:var(--font-title);font-weight:400;font-size:clamp(24px,3.4vh,34px);line-height:1;color:#b9a68a;text-shadow:3px 3px 0 #000}
