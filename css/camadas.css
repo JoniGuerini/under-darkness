@@ -1,0 +1,16 @@
+/* ================= camadas: o que muda com o mouse não repinta a parede da janela =================
+   As janelas dos moradores têm fundo pesado (textura da casa, molduras, brilhos, títulos com sombra). Quando o
+   mouse passa por uma linha, um slot ou um botão, o navegador repinta o pedaço da camada onde essa coisa está; se
+   ela estiver na mesma camada do fundo, a placa de vídeo redesenha a parede junto, a cada movimento. Aqui as partes
+   vivas ganham camada própria (will-change), e o fundo fica pintado uma vez só.
+   Medido: passar o mouse na forja, alquimia, cozinha e encantador ficou 4 a 6 vezes mais barato.
+   A loja faz o mesmo em css/vitrine.css. Janela nova de morador: ponha a lista e o detalhe aqui também. */
+
+/* a dica que segue o mouse: só muda de lugar, não suja o que está embaixo */
+.tipbox:not(.pdtip):not(.vtip){will-change:transform}
+/* os livros de ofício (forja, alquimia, cozinha, encantador): a lista e o detalhe */
+.prof>*{will-change:transform}
+/* o inventário encostado: os slots */
+.invcard .paper,.invcard .grid,.invcard .ph{will-change:transform}
+/* a conversa: os botões */
+#talk .opts{will-change:transform}

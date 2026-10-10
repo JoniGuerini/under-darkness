@@ -22,6 +22,13 @@ function shelfOf(s) {
   return 'goods';
 }
 const coinURL = (() => { let u = ''; return () => { if (!u) { const a = ICON_ART.coin, c = mk(9, 9); c.getContext('2d').drawImage(fromRows(a[0], a[1]), 1, 1); try { u = outlined(c).toDataURL(); } catch (e) { } } return u; }; })();
+// the rays behind rare pieces, already faded towards the edge: one picture per rarity colour, made once
+const raysURL = (() => { const c = {}; return col => c[col] || (c[col] = (() => {
+  const S = 150, cv = mk(S, S), x = cv.getContext('2d'), g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+  g.addColorStop(0, col + '66'); g.addColorStop(0.2, col + '4d'); g.addColorStop(1, col + '00'); x.fillStyle = g;
+  for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8; x.beginPath(); x.moveTo(S / 2, S / 2); x.arc(S / 2, S / 2, S / 2, a, a + 0.13); x.closePath(); x.fill(); }
+  try { return `url(${cv.toDataURL()})`; } catch (e) { return 'none'; }
+})()); })();
 const coinTag = v => `<img class="vc" src="${coinURL()}" alt="">${v}`;
 
 function buildShopUI() {
@@ -93,6 +100,7 @@ function renderFeat() {
   if (!en) { $('vfIcon').hidden = true; $('vfInfo').innerHTML = ''; $('vfBuy').hidden = true; st.className = 'vstage'; return; }
   const rar = itemRar(en.s);
   st.className = 'vstage r' + Math.max(0, rar); st.style.setProperty('--rc', RAR_COL[rar]);
+  if (rar >= 2) st.style.setProperty('--rays', raysURL(RAR_COL[rar]));
   const ic = $('vfIcon'); ic.src = ICON[en.s.id].url; ic.hidden = false;
   $('vfInfo').innerHTML = tipHTML(en.s, { k: 'inv' }, '');
   const n = en.inf ? vQty : 1, tot = en.price * n, can = tot <= pl.gold;

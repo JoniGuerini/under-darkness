@@ -47,7 +47,7 @@ body[data-npc=ferreiro] #shop .vendor{
 #shop .vbig .vn{height:132px}
 #shop .vn .vglow{position:absolute;left:12%;right:12%;bottom:18px;height:30px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 55%,transparent),transparent);opacity:.6;pointer-events:none}
 #shop .vn.r0 .vglow{opacity:.25}
-#shop .vn>img{width:45px;height:45px;image-rendering:pixelated;pointer-events:none;margin-top:-14px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.55));transition:transform .12s}
+#shop .vn>img{width:45px;height:45px;image-rendering:pixelated;pointer-events:none;margin-top:-14px}
 #shop .vbig .vn>img{width:75px;height:75px;margin-top:-18px}
 #shop .vn .vtag{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;align-items:center;gap:3px;padding:1px 6px 1px 3px;white-space:nowrap;
   font-size:13px;font-weight:700;color:#ffd27a;font-variant-numeric:tabular-nums;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.62);border:1px solid #000;box-shadow:inset 0 0 0 1px rgba(255,210,122,.18);pointer-events:none}
@@ -74,13 +74,12 @@ body[data-npc=ferreiro] #shop .vendor{
 #shop .vstage.r0 .vlight{opacity:.45}
 #shop .vstage .vpool{position:absolute;left:18%;right:18%;bottom:20px;height:34px;z-index:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc,#fff) 60%,transparent),transparent);pointer-events:none}
 #shop .vstage .vped{position:absolute;left:24%;right:24%;bottom:0;height:30px;z-index:2;background:var(--v-board) 0 0/180px 42px;border:2px solid #000;border-bottom:0;box-shadow:inset 0 3px 0 rgba(255,236,190,.28),inset 0 -8px 0 rgba(0,0,0,.4),0 -2px 0 rgba(0,0,0,.4)}
-#shop .vstage img{position:absolute;left:50%;top:38px;width:105px;height:105px;margin-left:-52px;z-index:3;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.6)) drop-shadow(0 0 14px color-mix(in srgb,var(--rc,#fff) 45%,transparent));
-  will-change:transform;animation:vFloat 2.6s ease-in-out infinite alternate}
+#shop .vstage img{position:absolute;left:50%;top:38px;width:105px;height:105px;margin-left:-52px;z-index:3;image-rendering:pixelated;will-change:transform;animation:vFloat 2.6s ease-in-out infinite alternate}
 @keyframes vFloat{from{transform:translateY(0)}to{transform:translateY(-7px)}}
-/* rare pieces: slow rays turning behind them (one small layer, transform only) */
-#shop .vstage .vrays{display:none;position:absolute;left:50%;top:90px;width:300px;height:300px;margin:-150px 0 0 -150px;z-index:0;border-radius:50%;pointer-events:none;
-  background:repeating-conic-gradient(color-mix(in srgb,var(--rc) 30%,transparent) 0 7deg,transparent 7deg 22deg);
-  -webkit-mask-image:radial-gradient(closest-side,#000 20%,transparent);mask-image:radial-gradient(closest-side,#000 20%,transparent);will-change:transform;animation:vSpin 24s linear infinite}
+/* rare pieces: slow rays turning behind them. The rays and their fade are one image baked in js/19-loja.js (raysURL),
+   so the turning layer is a plain picture: no mask, no filter, nothing for the graphics card to redo each frame */
+#shop .vstage .vrays{display:none;position:absolute;left:50%;top:90px;width:300px;height:300px;margin:-150px 0 0 -150px;z-index:0;pointer-events:none;
+  background:var(--rays) center/100% 100% no-repeat;will-change:transform;animation:vSpin 24s linear infinite}
 #shop .vstage:is(.r2,.r3,.r4) .vrays{display:block}
 #shop .vstage.r4 .vrays{opacity:1}
 #shop .vstage:is(.r2) .vrays{opacity:.6}
@@ -124,3 +123,7 @@ body #shop .vendor #btnBuy:disabled{background:linear-gradient(rgba(0,0,0,.45),r
 #shop .vsell.no span{color:#ff9a8a}
 #shop .vendor.selling .vshelves{opacity:.55}
 #shop .vendor.selling .vbuy{visibility:hidden}
+
+/* hovering repaints only cheap layers: the shelves, the counter and the item numbers each get their own layer, so the
+   house's textured wall behind them is painted once and never again while the mouse moves (see css/camadas.css) */
+#shop .vit>*,#shop .vstage,#shop #vfInfo{will-change:transform}

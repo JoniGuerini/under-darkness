@@ -13,6 +13,7 @@ Abra `index.html` com dois cliques. Não precisa de servidor nem de instalar nad
 - `css/encantador.css`: o livro de encantamento do Teodoro (js/118-encantador.js), no kit dos moradores; `css/tema-encantador.css` tem as cores e texturas da oficina dele.
 - `css/alquimia.css`: o livro de alquimia da Marta (js/96-alquimista.js), vestido com o kit da casa dela, e os ícones dos elixires ativos no HUD (js/95-alquimia-uso.js).
 - `css/vitrine.css`: a janela da loja (js/19-loja.js), igual para todos os moradores; as cores e texturas vêm do tema da casa de quem vende (`--k-*` do kit, `--smith-*` do Grimaldo). Só a peça no pedestal e os raios das raras se mexem, por transform.
+- `css/camadas.css`: desempenho. As partes que mudam com o mouse (listas, detalhe, tooltip, slots) ganham camada própria (`will-change:transform`), assim passar o mouse não redesenha a parede texturizada da janela. Janela nova com fundo pesado: ponha as partes vivas aqui. Nada de `filter`, `mask` ou `background-position` animado em coisa que se mexe ou recebe hover.
 - `css/botoes.css`: o "afundar" ao clicar de todos os botões (e das linhas de receita). Fica por último no HTML; botão novo já ganha o efeito sozinho.
 - `js/`: o jogo, em scripts comuns (não são ES modules) carregados em ordem. Todos compartilham as mesmas variáveis globais, então uma função de um arquivo enxerga as dos outros.
 

@@ -10,6 +10,8 @@ Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2
 - Parte 6: ideia de bioma novo, as Minas Fúngicas, na mesma ficha.
 - Parte 7: outras ideias soltas, só o conceito.
 
+O mapa das 16 camadas do jogo, da primeira à última, está em [camadas.md](camadas.md).
+
 As regras técnicas de geração (apoio dos objetos, janelas, colunas, entrada, ordem e testes) continuam em [regras-de-bioma.md](regras-de-bioma.md). Este documento não repete essas regras; ele diz **o que** um bioma tem, e aquele diz **como** gerar sem erro.
 
 Para marcar a validação, troque `[ ]` por `[x]` (aprovado) ou `[-]` (remover) em cada item.
