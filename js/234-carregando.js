@@ -29,7 +29,10 @@ function comCarregando(nome, fn, depois) {
   void udLoadFill.offsetWidth;
   const est = carregaEstimativa();
   udLoadFill.style.transition = `transform ${Math.round(est * 1.15)}ms cubic-bezier(.2,.65,.35,1)`; udLoadFill.style.transform = 'scaleX(.94)';
-  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+  // dois quadros para a tela ser desenhada; com a aba escondida o requestAnimationFrame não roda, então o setTimeout garante
+  let foi = false;
+  const gera = () => {
+    if (foi) return; foi = true;
     const t0 = performance.now();
     try { fn(); } catch (err) { console.error(err); }
     try { localStorage.setItem('ud-gera-ms', String(Math.round(performance.now() - t0))); } catch (e) { }
@@ -37,7 +40,9 @@ function comCarregando(nome, fn, depois) {
     try { if (depois) depois(); } catch (err) { console.error(err); }
     if (carregaPlay) { carregaPlay = false; _carregaStart(); }
     carregaFecha();
-  }, 30)));
+  };
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(gera, 30)));
+  setTimeout(gera, document.hidden ? 30 : 400);
 }
 const _carregaNew = charNew, _carregaLoad = charLoad, _carregaStart = startPlaying;
 charNew = function () { comCarregando('Gerando o mundo', _carregaNew); };
