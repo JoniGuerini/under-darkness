@@ -14,7 +14,7 @@
 let fogoRoll = null;   // [min, max] durante um golpe de fogo
 const fgCD = { bola: 0, parede: 0, meteoro: 0, hidra: 0 };
 const fgBalls = [], fgBolts = [], fgWalls = [], fgMeteors = [], fgHydras = [], fgFlames = [], fgBooms = [];
-let fgBreathSnd = 0;
+let fgBreathSnd = 0, fgFlameId = 1;
 
 { const _roll = rollPlayerDmg; rollPlayerDmg = function () { return fogoRoll ? (fogoRoll[0] + Math.random() * (fogoRoll[1] - fogoRoll[0] + 1) - 0.01) * (1 + (pl.spellPct || 0)) : _roll(); }; }
 { const _ft = floatText; floatText = function (x, y, text, col, size) { return _ft(x, y, text, fogoRoll && (col === '#ffffff' || col === undefined) ? SPELL_ELEM.fogo.col : col, size); }; }
@@ -228,7 +228,10 @@ HOOK.update.push(dt => {
   for (let i = fgFlames.length - 1; i >= 0; i--) {
     const f = fgFlames[i]; f.t += dt;
     const nx = f.x + f.vx * dt, ny = f.y + f.vy * dt;
-    if (f.t >= f.life || solidAt(Math.floor(nx / T), Math.floor(ny / T))) { fgFlames.splice(i, 1); continue; }
+    if (f.t >= f.life || solidAt(Math.floor(nx / T), Math.floor(ny / T))) {
+      if (Math.random() < 0.18) parts.push({ x: f.x + rnd(-2, 2), y: f.y + rnd(-2, 1), vx: f.vx * 0.15 + rnd(-6, 6), vy: rnd(-26, -12), g: -6, life: rnd(0.6, 1), max: 1, col: Math.random() < 0.5 ? '#3a3030' : '#4a3e3a', size: 2, smoke: true });
+      fgFlames.splice(i, 1); continue;
+    }
     f.x = nx; f.y = ny; f.vx *= 1 - dt * 1.5; f.vy = f.vy * (1 - dt * 1.5) - 30 * dt;
     // o sopro só fere quando a chama encosta no bicho; cada bicho leva no máximo um golpe a cada FOGO.inferno.tick
     let hit = false;
@@ -267,8 +270,10 @@ HOOK.update.push(dt => {
     const [hx, hy] = handXY(), a = Math.atan2(my - hy, mx - hx);
     for (let s = 0, n = Math.round(dt * 150 + Math.random()); s < n; s++) {
       const fa = a + rnd(-F.ang, F.ang) * 0.85, sp = rnd(120, 170);
-      fgFlames.push({ x: hx, y: hy, vx: Math.cos(fa) * sp, vy: Math.sin(fa) * sp, t: 0, life: F.len / sp * rnd(0.85, 1.15), s: Math.random() });
+      fgFlames.push({ x: hx, y: hy, vx: Math.cos(fa) * sp, vy: Math.sin(fa) * sp, t: 0, life: F.len / sp * rnd(0.85, 1.15), s: Math.random(), id: fgFlameId++, wx: 0, wy: 0, r: 1, h: 1 });
     }
+    // brasas que saltam do jato
+    if (Math.random() < dt * 18) { const fa = a + rnd(-F.ang, F.ang), sp = rnd(70, 140), d = rnd(6, F.len * 0.7); parts.push({ x: hx + Math.cos(a) * d, y: hy + Math.sin(a) * d, vx: Math.cos(fa) * sp * 0.5 + rnd(-15, 15), vy: Math.sin(fa) * sp * 0.5 - rnd(10, 40), g: 40, life: rnd(0.3, 0.7), max: 0.7, col: Math.random() < 0.6 ? '#ffd23a' : '#fff6d0', size: 1, glow: true }); }
     if (fgBreathSnd <= 0) { fgBreathSnd = 0.12; sfx.fgBreath(); }
     return;
   }
@@ -288,7 +293,7 @@ HOOK.drawGlow.push((cx, cy) => {
   const at = (g, x, y, a) => { lc.globalAlpha = a; lc.drawImage(g, Math.round(x) - cx - g.width / 2, Math.round(y) - cy - g.height / 2); };
   for (const b of fgBalls) at(fgG.m, b.x, b.y, 0.8);
   for (const b of fgBolts) at(fgG.s, b.x, b.y, 0.8);
-  for (let i = 0; i < fgFlames.length; i += 3) { const f = fgFlames[i]; at(fgG.s, f.x, f.y, 0.35 * (1 - f.t / f.life)); }
+  for (let i = 0; i < fgFlames.length; i += 3) { const f = fgFlames[i], k = f.t / f.life; at(k < 0.5 ? fgG.s : fgG.m, f.x, f.y, (k < 0.5 ? 0.45 : 0.22) * (1 - k)); }
   for (const w of fgWalls) { const env = clamp(Math.min(w.t / 0.25, (w.dur - w.t) / 0.4), 0, 1); for (let i = 0; i < w.cols.length; i += 2) at(fgG.m, w.cols[i][0], w.cols[i][1] - (w.low ? 4 : 8), (0.32 + 0.08 * Math.sin(gameTime * 9 + i)) * env); }
   for (const m of fgMeteors) { const k = Math.min(1, m.t / FOGO.meteoro.delay), e = k * k; at(fgG.b, lerp(m.x0, m.x1, e), lerp(m.y0, m.y1, e), 0.7); }
   for (const h of fgHydras) at(fgG.m, h.x + h.face * 3, h.y - 14, 0.45);
@@ -333,10 +338,33 @@ function drawHydra(h, cx, cy) {
 }
 HOOK.drawTop.push((cx, cy) => {
   // sopro: chamas que nascem brancas e morrem vermelhas, e a fumaça por cima
-  for (const f of fgFlames) {
-    const k = f.t / f.life, s = k < 0.2 ? 2 : k < 0.6 ? 3 : 4;
-    lc.globalAlpha = k > 0.85 ? (1 - k) / 0.15 : 1;
-    lc.fillStyle = k > 0.8 ? '#4a3a3a' : fgCol(k * 1.1 + f.s * 0.1); lc.fillRect(Math.round(f.x) - cx - (s >> 1), Math.round(f.y) - cy - (s >> 1), s, s);
+  // jato do Inferno: cada chama é uma bolha de pixels de borda irregular, pintada em camadas (fumaça, vermelho, laranja,
+  // amarelo, miolo branco) para que as bolhas se fundam num jato só, quente no bico e frio na ponta. Anima a 14 quadros por segundo.
+  if (fgFlames.length) {
+    const fq = Math.floor(gameTime * 14);
+    const blob = (f, r, col, sd) => {
+      const ri = Math.ceil(r), x = Math.round(f.x + f.wx) - cx, y = Math.round(f.y + f.wy) - cy; lc.fillStyle = col;
+      for (let j = -ri; j <= ri; j++) {
+        const w = Math.sqrt(Math.max(0, r * r - j * j)), a = hash2(f.id, j, fq * 7 + sd), b = hash2(f.id, j, fq * 7 + sd + 3);
+        const l = Math.round(w + (a - 0.5) * 1.3), rr = Math.round(w + (b - 0.5) * 1.3); if (l + rr < 0) continue;
+        lc.fillRect(x - l, y + j, l + rr + 1, 1);
+      }
+    };
+    for (const f of fgFlames) {
+      const k = f.t / f.life, fl = 0.85 + 0.3 * hash2(f.id, fq, 5);
+      f.r = (1.1 + k * 3.2 - k * k * 1.2) * (0.75 + f.s * 0.5) * fl; f.h = 1 - k * 1.15 + (f.s - 0.5) * 0.2;
+      const ph = f.id * 1.7 + gameTime * 22; f.wx = Math.sin(ph) * k * 1.6; f.wy = Math.cos(ph * 0.8) * k * 1.6 - k * k * 2;
+    }
+    lc.globalAlpha = 0.35;
+    for (const f of fgFlames) if (f.t / f.life > 0.6) blob(f, f.r * 1.15, hash2(f.id, 0, 9) < 0.5 ? '#2e2424' : '#40302c', 1);
+    // línguas: na metade de trás do jato cada chama solta uma ponta que lambe para cima
+    const tongue = (f, sc, col, sd) => { const k = f.t / f.life; if (k < 0.45 || hash2(f.id, fq, 11) < 0.35) return; const ox = f.wx, oy = f.wy; f.wy -= f.r * (0.8 + k * 0.6); f.wx += Math.sin(f.id + gameTime * 9) * 1.2; blob(f, f.r * sc * 0.5, col, sd + 20); f.wx = ox; f.wy = oy; };
+    for (const f of fgFlames) { const k = f.t / f.life; lc.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1; const c = f.h > 0.05 ? '#a82a0e' : '#6a1a0a'; blob(f, f.r, c, 2); tongue(f, 1, c, 2); }
+    lc.globalAlpha = 1;
+    for (const f of fgFlames) if (f.h > 0.18) { blob(f, f.r * 0.8, '#e0501a', 3); tongue(f, 0.75, '#e0501a', 3); }
+    for (const f of fgFlames) if (f.h > 0.34) blob(f, f.r * 0.64, '#ff8a1e', 4);
+    for (const f of fgFlames) if (f.h > 0.5) blob(f, f.r * 0.48, '#ffd23a', 5);
+    for (const f of fgFlames) if (f.h > 0.7) blob(f, Math.max(0.6, f.r * 0.3), '#fff6d0', 6);
   }
   lc.globalAlpha = 1;
   // paredes de chamas e chão em chamas: brasa no chão, línguas de fogo em camadas (vermelho, laranja, amarelo, miolo branco)
