@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.11.1';
+const VERSAO = '0.11.2';
 const NOVIDADES = [
+  { v: '0.11.2', data: '10/10/2026', titulo: 'Modo deus ajustável', itens: [
+    'Modo deus (F4, para testes): clareia o subterrâneo e cada parte (vida, mana, dano, luz) liga e desliga em Menu > Testes > Modo deus.'
+  ] },
   { v: '0.11.1', data: '10/10/2026', titulo: 'Tocha onde o mouse aponta', itens: [
     'A tocha vai exatamente onde o mouse aponta, sem limite de distância, até dentro de um buraco no meio da parede.'
   ] },
