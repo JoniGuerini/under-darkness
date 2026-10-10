@@ -260,7 +260,15 @@ WARN_E.filhote = e => e.state === 'wind';
 WARN_E.cuspideira = e => e.state === 'aim';
 WARN_E.besouro = e => e.state === 'crouch';
 // the beetle's shell turns any blow from the front while it stands; on its back or rolling it has no guard (rolling, the blow just glances)
-BLOCK_E.besouro = (e, dir) => (e.state === 'walk' || e.state === 'crouch' || e.state === 'recover') && e.stun <= 0 && dir === -e.facing;
+// the shell no longer blocks everything (Jonathan, 2026-10-10): hit from the front while it walks, crouches or recovers,
+// the blow glances off the armour and only 35% of the damage goes through
+const BESOURO_CASCO = 0.35;
+const besouroCasco = (e, dir) => (e.state === 'walk' || e.state === 'crouch' || e.state === 'recover') && e.stun <= 0 && dir === -e.facing;
+{ const _he = hitEnemy; hitEnemy = function (e, dir, mult = 1, melee = false) {
+  if (e.type !== 'besouro' || e.dead || !besouroCasco(e, dir)) return _he(e, dir, mult, melee);
+  burst(e.x + e.w / 2 + e.facing * 6, e.y + 5, 5, '#ffd27a', 70, 120, 0.25, 1, true); sfx.block();
+  return _he(e, dir, mult * BESOURO_CASCO, melee);
+}; }
 
 /* ================= behaviour ================= */
 function cvWander(e, dt) { e.wtimer -= dt; if (e.wtimer <= 0) { e.wander = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? -1 : 1); e.wtimer = 2 + Math.random() * 3; } }
@@ -282,7 +290,7 @@ function cvBiter(sp, reach, wind, hopVx) {
     if (aggro && Math.abs(dx) < reach && Math.abs(dy) < 14 && e.atkCD <= 0 && e.onGround && clearPath(e, pl)) { e.state = 'wind'; e.stateT = wind; e.facing = Math.sign(dx) || e.facing; }
   };
 }
-AI.rato = cvBiter(60, 34, 0.28, 140);
+AI.rato = cvBiter(50, 34, 0.28, 120);   // a bit slower since 2026-10-10 (was 60 and a 140 hop)
 AI.filhote = cvBiter(64, 26, 0.22, 120);
 
 // the weaver: waits on a thread over the path and drops; on the ground it crouches and lunges

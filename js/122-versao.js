@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.22.2';
+const VERSAO = '0.22.3';
 const NOVIDADES = [
+  { v: '0.22.3', data: '10/10/2026', titulo: 'Bichos das Cavernas', itens: [
+    'Besouro Couraçado leva dano pela frente (armadura alta em vez de bloqueio total); Rato-de-Gruta um pouco mais lento.'
+  ] },
   { v: '0.22.2', data: '10/10/2026', titulo: 'Cozinha', itens: [
     'Na cozinha do Odo, assar é 1 para 1: 1 Carne Crua vira 1 Carne Assada. Todo prato agora gasta 1 madeira ou 1 carvão para o fogo.',
     'A Carne Assada devolve 8 de vida em 8 segundos, já que custa metade da carne.'
