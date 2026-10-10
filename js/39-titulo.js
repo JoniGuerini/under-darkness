@@ -1,6 +1,6 @@
 'use strict';
 /* tela de título "Under Darkness": a primeira coisa que aparece ao abrir o jogo.
-   A arte (480x270) é sorteada a cada abertura entre as de TITLE_ARTS (126-titulo-descida e uma por camada: 128 Cavernas, 135 Catedral, 136 Gelo, 137 Mina, 138 Minas Fúngicas, 139 Abismo;
+   A arte (480x270) é sorteada a cada abertura entre as de TITLE_ARTS (126-titulo-descida e uma por camada: 128 Cavernas, 135 Catedral, 136 Gelo, 137 Mina, 138 Minas Fúngicas, 139 Abismo, 230 Escuridão;
    cada arquivo se põe na lista), sem repetir a da vez anterior ('ud-titulo-arte'). Os efeitos de cada arte rodam
    numa camada pequena por cima, só enquanto o título está aberto.
    A arte antiga (castelo em ruína, abismo e cavaleiro com capa) continua guardada aqui em paintTitleArt, fora do sorteio;

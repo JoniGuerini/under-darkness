@@ -368,14 +368,14 @@ function columnPiece(k, s) {   // 0 foot, 1 shaft, 2 head, 3 shaft with the sun 
 const COLUNA = [columnPiece(0, 22491), columnPiece(1, 22492), columnPiece(2, 22493), columnPiece(3, 22494)];
 
 /* the Kindlers' pyre: a tall fire basket of black iron on a carved plinth, cold ash in it or a bed of embers (the great
-   flame of a lit pyre is drawn live) */
-function pyreSprite(lit, s) {
+   flame of a lit pyre is drawn live): blue coals while a wisp burns in it, warm ones after the Nox (227 swaps them) */
+function pyreSprite(lit, s, warm) {
   const a = spr(), F = DRE.ferro, P = DRE.pedra;
   for (let y = 7; y < 12; y++) for (let x = 2; x <= 9; x++) a.put(x, y, P, (y === 7 ? 4.8 : 3.4) - (x - 2) * 0.25 + cg(x, y, s) * 0.4 + (y === 9 && x > 3 && x < 8 && (x + y) % 2 ? -1 : 0));
-  for (let y = 1; y < 7; y++) { const hw = 1.8 + (6 - y) * 0.7; for (let x = Math.round(5.5 - hw); x <= Math.round(5.5 + hw) - 1; x++) { const bar = (x + y) % 2 === 0 || y === 1 || y === 6; if (bar) a.put(x, y, F, (y === 1 ? 5 : 3.4) - (x - 1) * 0.2); else a.put(x, y, lit ? DRE.brasa : DRE.cinza, lit ? 2.6 + hash2(x, y, s) * 3 : 1.2 + hash2(x, y, s) * 2); } }
+  for (let y = 1; y < 7; y++) { const hw = 1.8 + (6 - y) * 0.7; for (let x = Math.round(5.5 - hw); x <= Math.round(5.5 + hw) - 1; x++) { const bar = (x + y) % 2 === 0 || y === 1 || y === 6; if (bar) a.put(x, y, F, (y === 1 ? 5 : 3.4) - (x - 1) * 0.2); else a.put(x, y, lit ? (warm ? DRE.brasa : DRE.azul) : DRE.cinza, lit ? 2.6 + hash2(x, y, s) * 3 : 1.2 + hash2(x, y, s) * 2); } }
   return rimOut(a, F[0]);
 }
-const PIRA_FRIA = [pyreSprite(false, 22501)], PIRA = [pyreSprite(true, 22502)];
+const PIRA_FRIA = [pyreSprite(false, 22501)], PIRA = [pyreSprite(true, 22502)], PIRA_QUENTE = [pyreSprite(true, 22502, true)];
 
 /* the shadow wall: smoke that does not move, rising in tongues, a pale rim where it meets the air (see-through) */
 function shadowSprite(k, s) {
@@ -409,7 +409,7 @@ const ES_DECO = [
   [ES_BRASEIRO_FRIO, 0, '#3a3330', null], [ES_BRASEIRO, 0, '#7aa2dc', null], [ES_TOCHA_MORTA, 0.05, '#2e2318', 'carvao'], [ES_LUME, 0.03, '#b4ceff', 'lume_fatuo'],
   [ES_CORRENTE, 0.3, '#30343a', null], [ES_RAIZ_PEND, 0.2, '#3e2b48', 'raiz_noite'], [ES_ESPINHO, 0.4, '#262438', 'vidro_negro'], [ES_ESTALAG, 0.5, '#262438', 'vidro_negro'],
   [ES_OSSADA, 0.06, '#a09478', 'osso'], [ES_OLHOS, 0.01, '#14161e', null], [ES_SOL, 0.8, '#7c6e52', 'pedra_lavrada'], [ES_COLUNA, 0.7, '#7c6e52', 'pedra_lavrada'],
-  [ES_PIRA_FRIA, 0, '#42474e', null], [ES_PIRA, 0, '#ffb060', null]
+  [ES_PIRA_FRIA, 0, '#42474e', null], [ES_PIRA, 0, '#9ab8ec', null]
 ];
 for (const [t, dig, col, drop] of ES_DECO) { DIG[t] = dig; PCOL[t] = col; if (drop && ITEMS[drop]) BLOCK_DROP[t] = drop; }
 EMIT[ES_BRASEIRO] = 1.3; EMIT[ES_PIRA] = 1.6; EMIT[ES_LUME] = 0.3;
@@ -438,12 +438,12 @@ const sx = (gx, cx) => { let x = gx * T - cx; const W = WW * T; if (x < -W / 2) 
 const esLB = (gx, gy) => { if (!LB) return 0; const i = gx - LX0, j = gy - LY0; if (i < 0 || j < 0 || i >= LW || j >= LH) { const i2 = wrapX(gx) - wrapX(LX0); return i2 >= 0 && i2 < LW && j >= 0 && j < LH ? LB[j * LW + i2] : 0; } return LB[j * LW + i]; };
 HOOK.drawGlow.push((cx, cy) => {
   if (!ESCURO || cy + VH < (ES_S0 - 6) * T) return;
-  if (!ES_GLOW.b) { ES_GLOW.b = glow(30, '#6a94dc'); ES_GLOW.p = glow(44, '#ffa848'); ES_GLOW.l = glow(14, '#7aa2dc'); ES_GLOW.s = glow(12, '#8eaee6'); }
+  if (!ES_GLOW.b) { ES_GLOW.b = glow(30, '#6a94dc'); ES_GLOW.p = glow(44, '#ffa848'); ES_GLOW.pc = glow(44, '#5a86d0'); ES_GLOW.l = glow(14, '#7aa2dc'); ES_GLOW.s = glow(12, '#8eaee6'); }
   for (let i = 0; i < emitters.length; i += 3) {
     const t = emitters[i + 2]; if (t !== ES_BRASEIRO && t !== ES_PIRA && t !== ES_LUME) continue;
     const gx = emitters[i], gy = emitters[i + 1], x = gx * T - cx, y = gy * T - cy;
     if (t === ES_BRASEIRO) { lc.globalAlpha = 0.36 + Math.sin(gameTime * 9 + gx * 1.3) * 0.04 + Math.sin(gameTime * 14 + gy) * 0.03; lc.drawImage(ES_GLOW.b, x + 6 - 30, y + 2 - 30); }
-    else if (t === ES_PIRA) { lc.globalAlpha = 0.42 + Math.sin(gameTime * 7 + gx) * 0.05 + Math.sin(gameTime * 12 + gy) * 0.03; lc.drawImage(ES_GLOW.p, x + 6 - 44, y - 6 - 44); }
+    else if (t === ES_PIRA) { lc.globalAlpha = 0.42 + Math.sin(gameTime * 7 + gx) * 0.05 + Math.sin(gameTime * 12 + gy) * 0.03; lc.drawImage(esPyreWarm() ? ES_GLOW.p : ES_GLOW.pc, x + 6 - 44, y - 6 - 44); }
     else { const b = Math.sin(gameTime * 1.7 + gx * 2.1) * 1.5; lc.globalAlpha = 0.26 + Math.sin(gameTime * 2.3 + gx) * 0.06; lc.drawImage(ES_GLOW.l, x + 6 - 14, y + 7 + b - 14); }
   }
   // a carved sun near a lit brazier holds a little of its warmth
@@ -469,13 +469,14 @@ HOOK.update.push(dt => {
   }
 });
 const ES_FIRE_WARM = ['#b8380c', '#ff7a1a', '#ffc23d', '#fff0b0', '#ffb84a'], ES_FIRE_COLD = ['#1c3a78', '#3a6ac0', '#7aa2dc', '#e6f0ff', '#b4ceff'];
+const esPyreWarm = () => typeof noxState !== 'undefined' && noxState.dead;
 // over the darkness: the fire of the braziers and pyres, the eyes (only where it is dark: light makes them go)
 HOOK.drawTop.push((cx, cy) => {
   if (!ESCURO || cy + VH < (ES_S0 - 6) * T) return;
   for (let i = 0; i < emitters.length; i += 3) {
     const t = emitters[i + 2]; if (t !== ES_BRASEIRO && t !== ES_PIRA) continue;
     const gx = emitters[i], gy = emitters[i + 1], X = gx * T - cx + 6, Y = gy * T - cy + (t === ES_PIRA ? 1 : 3), big = t === ES_PIRA, W = big ? 4 : 3, H = big ? 16 : 10;
-    const C = big ? ES_FIRE_WARM : ES_FIRE_COLD;   // the pyres burn the hero's warm fire; the braziers the wisps' cold blue
+    const C = big && esPyreWarm() ? ES_FIRE_WARM : ES_FIRE_COLD;   // everything burns the wisps' cold blue; the pyres, the true warm fire once the Nox is gone
     for (let k = -W; k <= W; k++) {
       const e = 1 - Math.abs(k) / (W + 1), h = Math.round(H * e * (0.6 + 0.4 * Math.abs(Math.sin(gameTime * (big ? 7 : 5) + k * 1.9 + gx * 0.7))) + Math.sin(gameTime * (big ? 13 : 9) + k + gy) * 1.2);
       if (h < 1) continue;
@@ -498,5 +499,5 @@ HOOK.drawTop.push((cx, cy) => {
   }
   lc.globalAlpha = 1;
 });
-Object.assign(ESART, { cg, cn, cells, dPix, spr, rimOut, disc, DRE, CINDER, COLD, VEIN, SOOT, SILVER, vApagada, vBreu, vVidro, vRaiz, vCasca, vPrimeva, vLavrada, vTijolo, esLB, esVis });
+Object.assign(ESART, { cg, cn, cells, dPix, spr, rimOut, disc, DRE, CINDER, COLD, VEIN, SOOT, SILVER, vApagada, vBreu, vVidro, vRaiz, vCasca, vPrimeva, vLavrada, vTijolo, esLB, esVis, PIRA, PIRA_QUENTE, ES_GLOW });
 }

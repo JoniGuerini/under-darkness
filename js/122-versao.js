@@ -7,8 +7,14 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.19.0';
+const VERSAO = '0.19.1';
 const NOVIDADES = [
+  { v: '0.19.1', data: '10/10/2026', titulo: 'As piras do Nox e a arte da Escuridão', itens: [
+    'As seis piras da sala do Nox agora acendem com lume-fátuo, como os braseiros (ajoelhado 1 s); tocha não acende mais. Elas ardem azuis durante a luta.',
+    'Ao lado de cada pira fria espera um lume-fátuo. Quando o Nox ou os apagadores apagam uma pira, o lume dela foge voando pela sala e pousa longe: é preciso ir buscá-lo para acender de novo. Se a luta acaba sem vitória, os lumes das piras acesas voltam para o lado delas.',
+    'Depois da vitória, as piras acendem sozinhas com fogo quente de verdade.',
+    'Nova arte na tela de início: A Escuridão. O herói ergue um lume-fátuo ao lado do único braseiro aceso, e do outro lado do poço sem fundo o Nox estende o braço para a chama; ao longe, a Rota dos Acendedores.'
+  ] },
   { v: '0.19.0', data: '10/10/2026', titulo: 'A Escuridão', itens: [
     'Nova camada, o fundo do mundo: A Escuridão (1860 a 2046 m), logo abaixo do Abismo. Dois poços saem do chão dos Templos do Caos e uma corrente desce até um Posto dos Acendedores com o único braseiro eterno da camada.',
     'Quatro faixas: A Borda Apagada, O Breu, As Raízes da Noite e O Fundo do Mundo. Ruínas dos Acendedores, Grandes Vãos com poços sem fundo, raízes do tamanho de torres, altares frios e os dois Selos do Fundo.',

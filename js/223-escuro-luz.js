@@ -13,8 +13,9 @@
      deixa acesas para sempre). O apagador e o Nox apagam na hora (esSnuff).
    - braseiros (Jonathan, 2026-10-10): um braseiro apagado acende com a tecla de usar e um lume-fátuo da bolsa (a
      chama azul que flutua pelo bioma: encostar nela a recolhe; o acendedor oco também solta). Acende azul e nenhum
-     monstro apaga; tocha não acende braseiro. A pira da sala do Nox pede uma tocha e o herói ajoelhado 1 s
-     (interrompe se ele andar, golpear ou apanhar), e o Nox a apaga.
+     monstro apaga; tocha não acende braseiro. A pira da sala do Nox também pede um lume-fátuo, com o herói ajoelhado
+     1 s (interrompe se ele andar, golpear ou apanhar), e é a única chama que o Nox e os apagadores apagam: o lume dela
+     foge pela sala (227).
    - o mapa que esquece: cada tile visto da camada ganha uma idade; com o herói aqui, tile que não está aceso envelhece
      1 por segundo e com 120 sai do mapa. A menos de 14 blocos de um braseiro aceso nunca envelhece.
    - o breu vivo: a cada 4 s ele cresce para um tile de ar escuro vizinho (dentro da tela, nunca em esKeep, nunca em
@@ -95,7 +96,7 @@ HOOK.update.push(() => {
   DARK.cap = ES_DARK0.cap;
 });
 
-/* ---- lighting a brazier: the use key and a torch; a pyre: kneeling 1 s ---- */
+/* ---- lighting a brazier: the use key and a wisp; a pyre: a wisp and kneeling 1 s ---- */
 const ES_KNEEL_T = 1;
 function esFindCold(pcx, pcy) {
   const tx0 = Math.floor(pcx / T), ty0 = Math.floor(pcy / T); let best = null, bd = 99;
@@ -105,14 +106,15 @@ function esFindCold(pcx, pcy) {
   }
   return best;
 }
-// a brazier takes a wisp (lume_fatuo) and burns cold blue for good; a pyre of the Nox's hall takes a torch
+// a brazier takes a wisp (lume_fatuo) and burns cold blue for good; a pyre of the Nox's hall takes one too (Jonathan,
+// 2026-10-10), and burns blue until he blows it out
 function esLight(tx, ty) {
-  const t = tileAt(tx, ty), pyre = t === ES_PIRA_FRIA, fuel = pyre ? 'tocha' : 'lume_fatuo';
+  const t = tileAt(tx, ty), pyre = t === ES_PIRA_FRIA;
   if (t !== ES_BRASEIRO_FRIO && !pyre) return false;
-  if (countItem(fuel) <= 0) { floatText(pl.x + pl.w / 2, pl.y - 8, pyre ? 'Sem tochas' : 'Precisa de um lume-fátuo', '#d9c7a3', 0.8); return false; }
-  removeItem(fuel, 1);
+  if (countItem('lume_fatuo') <= 0) { floatText(pl.x + pl.w / 2, pl.y - 8, 'Precisa de um lume-fátuo', '#d9c7a3', 0.8); return false; }
+  removeItem('lume_fatuo', 1);
   setTile(tx, ty, pyre ? ES_PIRA : ES_BRASEIRO);
-  burst((tx + 0.5) * T, ty * T + 3, pyre ? 22 : 14, pyre ? '#ffc060' : '#9ab8ec', 70, -60, 0.6, 1, true);
+  burst((tx + 0.5) * T, ty * T + 3, pyre ? 22 : 14, pyre ? '#b4ceff' : '#9ab8ec', 70, -60, 0.6, 1, true);
   sfx.esAcende(pyre);
   return true;
 }
@@ -129,7 +131,7 @@ function esLight(tx, ty) {
     if (c) {
       pressed.KeyE = false;
       if (c[2] === ES_BRASEIRO_FRIO) esLight(c[0], c[1]);   // the wisp goes in at once
-      else if (countItem('tocha') <= 0) floatText(pl.x + pl.w / 2, pl.y - 8, 'Sem tochas', '#d9c7a3', 0.8);
+      else if (countItem('lume_fatuo') <= 0) floatText(pl.x + pl.w / 2, pl.y - 8, 'Precisa de um lume-fátuo', '#d9c7a3', 0.8);
       else if (!pl.esKneel) { pl.esKneel = { x: c[0], y: c[1], t: ES_KNEEL_T, max: ES_KNEEL_T }; sfx.esRisca(); }
     }
   }
@@ -143,12 +145,12 @@ HOOK.update.push(() => {
   esCrouchWrapped = true;
   const _cw = crouchWanted; crouchWanted = function () { return _cw() || (!!pl.esKneel && pl.onGround && !pl.dead); };
 });
-// the kneel's bar over his head, a flame catching at the pyre
+// the kneel's bar over his head, the wisp's cold flame catching at the pyre
 HOOK.drawTop.push((cx, cy) => {
   const K = pl.esKneel; if (!K || pl.dead) return;
   const k = 1 - K.t / K.max, x = Math.round(pl.x + pl.w / 2 - cx) - 7, y = Math.round(pl.y - cy) - 7;
-  lc.fillStyle = '#140c10'; lc.fillRect(x - 1, y - 1, 16, 4); lc.fillStyle = '#3a1a08'; lc.fillRect(x, y, 14, 2); lc.fillStyle = '#ffb060'; lc.fillRect(x, y, Math.round(14 * k), 2);
-  if (Math.random() < 0.5) parts.push({ x: (K.x + 0.5) * T + rnd(-2, 2), y: K.y * T + 3, vx: rnd(-6, 6), vy: rnd(-30, -12), g: -10, life: 0.4, max: 0.4, col: Math.random() < 0.5 ? '#ff9a2a' : '#ffd27a', size: 1, glow: true });
+  lc.fillStyle = '#0a0c14'; lc.fillRect(x - 1, y - 1, 16, 4); lc.fillStyle = '#1c2a44'; lc.fillRect(x, y, 14, 2); lc.fillStyle = '#9ab8ec'; lc.fillRect(x, y, Math.round(14 * k), 2);
+  if (Math.random() < 0.5) parts.push({ x: (K.x + 0.5) * T + rnd(-2, 2), y: K.y * T + 3, vx: rnd(-6, 6), vy: rnd(-30, -12), g: -10, life: 0.4, max: 0.4, col: Math.random() < 0.5 ? '#7aa2dc' : '#e6f0ff', size: 1, glow: true });
 });
 
 /* ---- the light that hurts the shadow creatures; torches that burn out; the map that forgets; the living dark; the slabs ---- */
@@ -271,7 +273,7 @@ HOOK.drawTop.push((cx, cy) => {
 /* ---- sounds ---- */
 Object.assign(sfx, {
   esAcende(big) {
-    if (big) { noise(0.7, 0.12, 1400, 'bandpass', 0, 0.7); tone(110, 0.9, 'sine', 0.06, 30); tone(220, 1.2, 'triangle', 0.03, 0, 0.08); return; }
+    if (big) { tone(330, 1.8, 'sine', 0.05, -20); tone(495, 1.4, 'sine', 0.03, -30, 0.06); tone(110, 1.2, 'sine', 0.05, 20); noise(0.8, 0.05, 2400, 'bandpass', 0, 1.2); return; }   // a pyre: the same glass, deeper
     tone(660, 1.4, 'sine', 0.04, -40); tone(990, 1.1, 'sine', 0.025, -60, 0.06); tone(1320, 0.8, 'sine', 0.012, 0, 0.12); noise(0.6, 0.04, 3200, 'bandpass', 0, 1.5);   // the cold flame catching: glassy
   },
   esLume() { tone(1180, 0.35, 'sine', 0.03, 200); tone(1770, 0.25, 'sine', 0.015, 120, 0.05); },

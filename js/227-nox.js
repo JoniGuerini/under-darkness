@@ -8,9 +8,11 @@
    aparece uma figura alta e magra, sem rosto, feita de fumaça parada.
    - Ao entrar, o Muro de Sombra fecha as portas. Nox só toma dano com luz em cima (0,5 ou mais no centro dele); no
      escuro o golpe atravessa fumaça: sem número, sem sangue, um som oco. Ele mesmo não dá luz nenhuma.
-   - Acender uma pira: o herói se ajoelha 1 s com uma tocha na bolsa (223) e gasta a tocha. Na luz forte de uma pira
-     (0,6 ou mais) Nox queima: perde 1,5% da vida por segundo, encolhe e recua; ele não entra no círculo, apaga de longe.
-     Tocha posta na sala dura 20 s.
+   - Acender uma pira: o herói se ajoelha 1 s com um lume-fátuo na bolsa (223) e gasta o lume; a pira arde azul. Ao lado
+     de cada pira fria espera um lume (os seis dos Acendedores; pego, vai para o save como qualquer bloco). Pira que ele
+     ou os apagadores apagam solta o lume, que foge voando pela sala e pousa longe: é preciso ir buscá-lo para acender
+     de novo. Na luz forte de uma pira (0,6 ou mais) Nox queima: perde 1,5% da vida por segundo, encolhe e recua; ele
+     não entra no círculo, apaga de longe. Tocha posta na sala dura 20 s.
    - Fase 1 (100% a 60%): Braço de Breu (a borda pálida corre pelo chão 0,8 s, depois o braço varre: quem está no chão
      apanha; nas saliências, não). Sopro que Apaga (ele inspira e as chamas se curvam para ele 1 s; um cone que apaga
      piras e tochas e machuca). Anda até a pira acesa mais perto do herói para soprá-la.
@@ -18,9 +20,11 @@
      sobe por ali. Chama mariposas e 2 apagadores, que vão direto às piras.
    - Fase 3 (25% a 0): apaga todas as piras de uma vez. Noite Total: a cada 12 s as bordas da tela fecham por 2 s; quem
      não estiver no círculo de uma pira acesa toma 1,6 vezes o dano. Acender pira de novo é o único abrigo.
-   - Sair da sala, o portal ou morrer encerram a luta: as piras voltam a apagar, o muro afunda, a vida dele volta toda.
+   - Sair da sala, o portal ou morrer encerram a luta: as piras voltam a apagar (o lume de cada pira acesa volta para
+     o lado dela), o muro afunda, a vida dele volta toda.
    - O fim: ele fica pálido e fino e é puxado para dentro do chão, sem grito; dois segundos de silêncio; as seis piras
-     acendem sozinhas, de baixo para cima, cada uma com um tom grave; "A Escuridão recua". O mundo muda pouco e para
+     acendem sozinhas, de baixo para cima, cada uma com um tom grave, e agora com fogo quente de verdade (não mais o
+     azul do lume); "A Escuridão recua". O mundo muda pouco e para
      sempre (223: o piso de claridade de todas as camadas sobe um pouco, a Escuridão ganha a claridade de uma caverna
      funda, o breu vivo para de crescer).
    - A Última Brasa (acessório, nível do chefe): +4 de luz, a luz do herói fere as criaturas da sombra como um braseiro
@@ -60,12 +64,55 @@ DROPS.nox = NOX_DROPS.filter(([id]) => ITEMS[id]);
 function esDress() {
   const B = esBoss; if (!B) return;
   for (const [x, y] of B.pyres) tiles[y * WW + wrapX(x)] = noxState.dead ? ES_PIRA : ES_PIRA_FRIA;
+  // a wisp waiting beside each pyre, while he lives (the save keeps the ones taken)
+  B.lumes = B.pyres.map(([x, y]) => noxLumeSpot(wrapX(x), y));
+  if (!noxState.dead) for (const s of B.lumes) if (s) tiles[s[1] * WW + s[0]] = ES_LUME;
   // the Mural of the Kindlers all along the back wall: seen only when the pyres burn
   const M = PROP_DEFS.es_mural, Rl = PROP_DEFS.es_relevo;
   if (M) for (const k of [-22, -8, 8, 22]) { const V = M.vars[0], X = (B.cx + k) * T - (V.w >> 1), Y = (B.fy - 3) * T - V.h; addProp(M, 0, X, Y, []); }
   if (Rl) { const V = Rl.vars[0]; addProp(Rl, 0, B.cx * T - (V.w >> 1), (B.top + 7) * T, []); }
 }
 const noxPyreTiles = () => esBoss ? esBoss.pyres.map(([x, y]) => [wrapX(x), y]) : [];
+// the coals of a lit pyre: blue while a wisp burns in it, warm after the victory
+const noxPyreArt = () => { DECO[ES_PIRA] = noxState.dead ? ESART.PIRA_QUENTE : ESART.PIRA; };
+
+/* ---------- the hall's wisps: one waits beside each pyre; a pyre blown out lets its wisp fly off across the hall ---------- */
+const noxFlee = [];   // wisps in flight: { x0, y0, x1, y1, tx, ty, t, dur, trail } (pixels from, to; the tile where it settles)
+// beside a pyre, on the side toward the middle of the hall, at hand's height
+function noxLumeSpot(px, py) {
+  const B = esBoss, d = Math.sign(wdx(B.cx - px)) || 1;
+  for (const k of [2, 1, 3, -1, -2]) { const x = wrapX(px + d * k), y = py - 1; if (tileAt(x, y) === AIR && inEsHall(x, y, -1)) return [x, y]; }
+  return null;
+}
+// it settles there (or in the nearest free air), through setTile so the save keeps it
+function noxLumeLand(x, y) {
+  for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, -1], [2, 0], [-2, 0], [1, -1], [-1, -1]]) {
+    const X = wrapX(x + dx), Y = y + dy; if (tileAt(X, Y) !== AIR || !inEsHall(X, Y, 0)) continue;
+    setTile(X, Y, ES_LUME); burst((X + 0.5) * T, (Y + 0.5) * T, 8, '#b4ceff', 40, -20, 0.5, 1, true);
+    if (Math.abs((X + 0.5) * T - pl.x) < 260) sfx.esLume();
+    return;
+  }
+}
+// far from where it was (10+ tiles), over a floor or a ledge where the hero can reach it
+function noxLumeFlee(sx, sy) {
+  const B = esBoss, cand = [];
+  for (let y = B.top + 1; y < B.fy; y++) for (let k = 1; k < B.w - 1; k++) {
+    const x = wrapX(B.x0 + k); if (tileAt(x, y) !== AIR || !inEsHall(x, y, -1)) continue;
+    if (!SOLID[tileAt(x, y + 1)] && !SOLID[tileAt(x, y + 2)]) continue;
+    if (Math.hypot(wdx(x - sx), y - sy) < 10 || noxFlee.some(f => f.tx === x && f.ty === y)) continue;
+    cand.push([x, y]);
+  }
+  if (!cand.length) return noxLumeLand(sx, sy - 1);
+  const [tx, ty] = cand[(Math.random() * cand.length) | 0];
+  noxFlee.push({ x0: (sx + 0.5) * T, y0: sy * T - 4, x1: (tx + 0.5) * T, y1: (ty + 0.5) * T, tx, ty, t: 0, dur: 1.1 + Math.random() * 0.5, trail: [] });
+}
+const noxFleeLand = () => { for (const f of noxFlee.splice(0)) noxLumeLand(f.tx, f.ty); };
+// a pyre put out during the fight (his breath, the night, a snuffer) lets its wisp go
+{ const _sn = esSnuff; esSnuff = function (tx, ty) {
+  const x = wrapX(tx), pyre = tileAt(x, ty) === ES_PIRA && !!noxBoss && inEsHall(x, ty, 1);
+  const r = _sn(tx, ty); if (r && pyre) noxLumeFlee(x, ty);
+  return r;
+}; }
 function noxPyresSet(lit, keepDiff) {   // every pyre at once, through setTile (the lists in 223 follow); the save keeps them cold unless he is dead
   for (const [x, y] of noxPyreTiles()) { setTile(x, y, lit ? ES_PIRA : ES_PIRA_FRIA); if (!keepDiff) diffs.delete(y * WW + x); }
 }
@@ -106,8 +153,13 @@ function noxEndFight(won) {
   for (const m of enemies.slice()) if (m.esMinion && !m.dead) { burst(m.x + m.w / 2, m.y + m.h / 2, 6, '#0a0a12', 50, -30, 0.4); noxDrop(m); }
   noxFx.arm = noxFx.cone = noxFx.ring = noxFx.night = null;
   noxWalls(false);
-  if (!won) { if (e) noxDrop(e); noxPyresSet(false); return; }
-  noxState.dead = true; noxState.kills++;
+  noxFleeLand();
+  if (!won) {
+    if (e) noxDrop(e);
+    for (const [x, y] of noxPyreTiles()) if (tileAt(x, y) === ES_PIRA) { const s = noxLumeSpot(x, y); if (s) noxLumeLand(s[0], s[1]); }   // the wisps burning in them come back
+    noxPyresSet(false); return;
+  }
+  noxState.dead = true; noxState.kills++; noxPyreArt();
   // the first time: one of the layer's bases too (35%)
   const x = e ? e.x + e.w / 2 : esBoss.cx * T, y = esBoss.fy * T - 20;
   const bases = ['lamina_vidronegro', 'manto_breu', 'escudo_acendedor'].filter(id => ITEMS[id]);
@@ -268,7 +320,20 @@ HOOK.update.push(dt => {
   if (e && bossFight && bossFight.nox && !pl.dead && !noxInside(ptx, pty, 1)) { endBossFight(false); return; }
   if (noxFx.blow) { noxFx.blow.t += dt; if (noxFx.blow.t > 0.4) noxFx.blow = null; }
   if (noxFx.ring) noxFx.ring.t += dt;
+  // the fleeing wisps: a cold trail behind them (drawn below), and they settle when the flight ends
+  for (let i = noxFlee.length - 1; i >= 0; i--) {
+    const f = noxFlee[i]; f.t += dt;
+    if (f.t >= f.dur) { noxFlee.splice(i, 1); noxLumeLand(f.tx, f.ty); continue; }
+    for (const q of f.trail) q[2] += dt;
+    const [x, y] = noxFleeAt(f); f.trail.push([x + rnd(-1, 1), y + rnd(-1, 1), 0]);
+    while (f.trail.length && f.trail[0][2] > 0.45) f.trail.shift();
+  }
 });
+// where a fleeing wisp is: an arc up and over, easing in and out
+function noxFleeAt(f) {
+  const k = clamp(f.t / f.dur, 0, 1), e = k * k * (3 - 2 * k), u = 1 - e, mx = (f.x0 + f.x1) / 2, my = Math.min(f.y0, f.y1) - 30 - Math.abs(f.x1 - f.x0) * 0.15;
+  return [u * u * f.x0 + 2 * u * e * mx + e * e * f.x1, u * u * f.y0 + 2 * u * e * my + e * e * f.y1 + Math.sin(f.t * 14) * 1.5];
+}
 
 /* ---------- drawing: in the light a tall smoke figure (DRAW_E, so the dark hides it); over the dark the silhouette
    blacker than black, its pale flickering rim and the two star eyes (drawTop) ---------- */
@@ -315,6 +380,12 @@ HOOK.drawTop.push((cx, cy) => {
   const Bw = noxFx.blow;
   if (Bw) { const k = Bw.t / 0.4; lc.globalAlpha = 0.5 * (1 - k); lc.fillStyle = '#0a0a12'; for (let n = 0; n < 120; n++) { const d = Math.random() * Bw.r * (0.3 + k * 0.7), a = Bw.a + (Math.random() - 0.5) * 1; lc.fillRect(Math.round(Bw.x + Math.cos(a) * d - cx), Math.round(Bw.y + Math.sin(a) * d - cy), 2, 2); } }
   lc.globalAlpha = 1;
+  for (const f of noxFlee) {
+    for (const [qx, qy, a] of f.trail) { lc.globalAlpha = 1 - a / 0.45; lc.fillStyle = a < 0.15 ? '#e6f0ff' : a < 0.3 ? '#9ab8ec' : '#3a6ac0'; lc.fillRect(Math.round(qx - cx), Math.round(qy - cy), 1, 1); }
+    const [x, y] = noxFleeAt(f), X = Math.round(x - cx), Y = Math.round(y - cy);
+    if (ESART.ES_GLOW.l) { lc.globalAlpha = 0.5 + Math.sin(gameTime * 20) * 0.1; lc.drawImage(ESART.ES_GLOW.l, X - 14, Y - 14); }
+    lc.globalAlpha = 1; lc.fillStyle = '#7aa2dc'; lc.fillRect(X - 1, Y - 1, 3, 3); lc.fillStyle = '#e6f0ff'; lc.fillRect(X, Y - 1, 1, 2);
+  }
   const e = noxBoss;
   if (e && !e.dead && !e.hidden) {
     const L = noxLight(e), dark = 1 - clamp((L - 0.3) / 0.3, 0, 1), s = noxScale(e), Wd = 40 * s, H = 70 * s, fx = Math.round(e.x + e.w / 2 - cx), fy = Math.round(e.y + e.h - cy), x0 = fx - Wd / 2, y0 = fy - H, t = e.t;
@@ -344,7 +415,7 @@ HOOK.drawTop.push((cx, cy) => {
 // the breath drawn in: every flame in the hall leans toward him (sparks pulled across)
 HOOK.update.push(dt => {
   const e = noxBoss; if (!e || !noxFx.inhale) return;
-  for (const k of esLit) { if (Math.random() > dt * 10) continue; const x = (k % WW + 0.5) * T, y = ((k / WW) | 0) * T, dx = e.x + e.w / 2 - x, dy = e.y + 14 - y, d = Math.hypot(dx, dy) || 1; parts.push({ x, y, vx: dx / d * 90, vy: dy / d * 90, g: 0, life: 0.7, max: 0.7, col: '#ffb060', size: 1, glow: true }); }
+  for (const k of esLit) { if (Math.random() > dt * 10) continue; const x = (k % WW + 0.5) * T, y = ((k / WW) | 0) * T, dx = e.x + e.w / 2 - x, dy = e.y + 14 - y, d = Math.hypot(dx, dy) || 1; parts.push({ x, y, vx: dx / d * 90, vy: dy / d * 90, g: 0, life: 0.7, max: 0.7, col: '#9ab8ec', size: 1, glow: true }); }
 });
 
 /* ---------- sounds: the deep hum, the hollow blow, the breath, the pyres coming on ---------- */
@@ -368,11 +439,17 @@ Object.assign(sfx, {
 /* ---------- save ---------- */
 { const _mk = makeSave; makeSave = function () { const o = _mk(); o.nox = { dead: noxState.dead, kills: noxState.kills }; return o; }; }
 { const _nw = newWorld; newWorld = function (sd, sv) {
-  noxBoss = null; noxEnd = null; Object.assign(noxFx, { arm: null, cone: null, ring: null, night: null, blow: null, shrink: 0, inhale: 0 });
+  noxBoss = null; noxEnd = null; noxFlee.length = 0; Object.assign(noxFx, { arm: null, cone: null, ring: null, night: null, blow: null, shrink: 0, inhale: 0 });
   noxState.dead = !!(sv && sv.nox && sv.nox.dead); noxState.kills = (sv && sv.nox && sv.nox.kills) | 0;   // before the build: the dressing reads it
+  noxPyreArt();
   const r = _nw(sd, sv);
-  // the pyres as the fight left them are not kept: cold, or lit for good after the victory
-  if (esBoss) for (const [x, y] of noxPyreTiles()) { const i = y * WW + x; tiles[i] = noxState.dead ? ES_PIRA : ES_PIRA_FRIA; if (noxState.dead) diffs.set(i, ES_PIRA); else diffs.delete(i); }
+  // the pyres as the fight left them are not kept: cold, or lit for good after the victory (a wisp left burning in one
+  // when the game was closed mid-fight comes back beside it)
+  if (esBoss) for (const [x, y] of noxPyreTiles()) {
+    const i = y * WW + x, lit = tiles[i] === ES_PIRA;
+    tiles[i] = noxState.dead ? ES_PIRA : ES_PIRA_FRIA; if (noxState.dead) diffs.set(i, ES_PIRA); else diffs.delete(i);
+    if (lit && !noxState.dead) { const s = noxLumeSpot(x, y); if (s && tiles[s[1] * WW + s[0]] === AIR) { tiles[s[1] * WW + s[0]] = ES_LUME; diffs.set(s[1] * WW + s[0], ES_LUME); } }
+  }
   if (typeof esScan === 'function') esScan();
   return r;
 }; }

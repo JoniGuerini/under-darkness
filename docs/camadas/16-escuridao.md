@@ -145,7 +145,8 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 **Como se luta:**
 - Ao entrar, o Muro de Sombra (`ES_BARREIRA`) fecha as saídas e a luz do próprio herói cai para 0,3 (só o corpo dele aparece).
 - **Nox só toma dano com luz em cima dele** (0,5 ou mais no centro dele). No escuro, o golpe atravessa fumaça: sem número, sem sangue, com um som oco.
-- **Acender uma pira:** encostar nela e apertar a tecla de usar com uma tocha na bolsa. O herói se ajoelha por 1 s (pode ser interrompido) e gasta 1 tocha. Pira acesa tem `EMIT` 1,6: um círculo grande de luz.
+- **Acender uma pira:** encostar nela e apertar a tecla de usar com um lume-fátuo na bolsa. O herói se ajoelha por 1 s (pode ser interrompido) e gasta o lume; a pira arde azul. Pira acesa tem `EMIT` 1,6: um círculo grande de luz.
+- **Os seis lumes da sala:** ao lado de cada pira fria espera um lume-fátuo. Pira que o Nox ou os apagadores apagam solta o lume, que foge voando pela sala e pousa longe, em cima do chão ou de uma saliência; é preciso ir buscá-lo para acender de novo. Se a luta acaba sem vitória, o lume de cada pira acesa volta para o lado dela.
 - Na luz forte de uma pira (0,6 ou mais), Nox queima: perde 1,5% da vida por segundo, encolhe e recua. Ele não entra no círculo; apaga a pira de longe.
 - Tocha posta pelo herói na sala dura 20 s (fora daqui, 90 s) e serve para iluminar Nox de perto por um instante.
 
@@ -273,16 +274,17 @@ Fora da faixa, só ganchos: uma linha em `js/07-chunks-luz.js` (`ambAt` e `plLig
 
 ## Decisões (Jonathan, 2026-10-10)
 
-1. **Acender pira e braseiro gasta uma tocha.** Sim no começo; depois (mesmo dia) o braseiro mudou: ele acende só com um **lume-fátuo**, a chama azul que flutua pelo bioma (encostar nela a recolhe como item `lume_fatuo`; o acendedor oco também solta). O braseiro aceso com ela fica azul e nenhum monstro apaga; tocha não acende braseiro, e os monstros apagam só as tochas que o herói põe. A pira da sala do Nox continua com tocha, e o Nox continua apagando as piras.
+1. **Acender pira e braseiro gasta uma tocha.** Sim no começo; depois (mesmo dia) o braseiro mudou: ele acende só com um **lume-fátuo**, a chama azul que flutua pelo bioma (encostar nela a recolhe como item `lume_fatuo`; o acendedor oco também solta). O braseiro aceso com ela fica azul e nenhum monstro apaga; tocha não acende braseiro, e os monstros apagam só as tochas que o herói põe. Depois a pira da sala do Nox também passou para o lume-fátuo (ver o fim da ficha); o Nox continua apagando as piras.
 2. **O mapa esquece o que não está aceso.** Mantido, só nesta camada, com os braseiros acesos guardando o mapa em volta.
 3. **Matar o Nox clareia todas as camadas, pouco.** Mantido.
 4. **A luz do herói:** o herói não tem luz própria desde a 0.9.7 (só itens com +Luz), então o gancho `plLightK` não foi feito; a luz da camada é toda de tochas, braseiros, piras e das coisas frias da Escuridão.
 5. **Onde ela fica:** enquanto as camadas do meio não existem, a Escuridão fica logo abaixo do Abismo (11ª no registro de camadas, depois da Floresta Petrificada, da Fortaleza dos Anões e da Colmeia; 1860 a 2046 m) e os números dela seguem a posição: monstros 23 e 24, Nox no nível do chefe da posição + 2, o noctírio na forja no nível da posição. Quando as camadas 7 a 14 entrarem, tudo sobe sozinho.
 
-## Como ficou no jogo (0.15.0)
+## Como ficou no jogo (0.19.0; as piras com lume-fátuo e a arte do título na 0.19.1)
 
 - **Arquivos:** os de 220 a 229 da seção 15, com o efeito do Manto de Breu, a fornalha e as lojas no 226 e A Última Brasa no 227. Fora da faixa: a altura do mundo (`WH`, 01), o registro (129), o `worldLink` (87), o teleporte de teste (75), as pedras preciosas (117), o cenário de som `escuro` (97) e a wiki.
 - **O escuro:** `DARK.amb` do 07 cai a 0,008 na camada (um fio, para o herói ainda se achar); depois do Nox, 0,03 na camada e +0,015 nas outras.
 - **A laje de penumbra** é feita trocando dois blocos (`ES_PENUMBRA` e `ES_PENUMBRA_FIRME`) direto em `tiles`, sem passar pelo save, em vez de embrulhar `solidAt`. O breu vivo também é escrito direto em `tiles`.
-- **A pira** pede o herói ajoelhado 1 s (ele agacha); o braseiro acende na hora. A Rota dos Acendedores é achada por uma busca de caminho de cada Posto até a porta da sala do Nox.
+- **A pira** pede o herói ajoelhado 1 s (ele agacha) e um lume-fátuo, como o braseiro (decisão do Jonathan, 2026-10-10); o braseiro acende na hora. Ela arde azul durante a luta; o lume de pira apagada foge pela sala; depois da vitória as piras acendem com fogo quente. A Rota dos Acendedores é achada por uma busca de caminho de cada Posto até a porta da sala do Nox.
 - **Nox** não dá luz (o 07 acende todo chefe um pouco; o 227 desliga isso para ele). Na fase 2 ele fica debaixo do chão espelhado e sobe pelo anel; na 3 a Noite Total vem a cada 12 s.
+- **A arte da tela de início** (230-titulo-escuridao): o herói ergue um lume-fátuo ao lado do único braseiro aceso, numa laje lavrada com um pilar quebrado e o sol gravado; do outro lado do poço sem fundo, Nox estende o braço para a chama; ao longe, a Rota dos Acendedores.

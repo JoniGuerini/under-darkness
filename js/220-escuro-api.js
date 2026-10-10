@@ -18,8 +18,8 @@
      228-noctirio          o metal na forja (9 peças), os materiais e as três bases da camada
      229-escuro-save       nomes das zonas, o save (wg 15)
    Decisões do Jonathan (2026-10-10): a camada fica logo abaixo do Abismo (os números seguem a posição no 129); acender
-   braseiro e pira gasta uma tocha; o herói não tem luz própria (0.9.7), então a luz da camada é toda de tochas,
-   braseiros e piras. Carrega logo depois do 109-principe-caos e antes do 87 (o worldLink roda depois). */
+   braseiro e pira gasta um lume-fátuo (a chama azul do bioma; tocha não acende nenhum dos dois); o herói não tem luz
+   própria (0.9.7), então a luz da camada é toda de tochas, braseiros e piras. Carrega logo depois do 109-principe-caos e antes do 87 (o worldLink roda depois). */
 
 const ESCURO = true;
 const ES_D = 186;                                   // metros de camada
