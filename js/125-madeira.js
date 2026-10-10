@@ -8,9 +8,22 @@
    marcado com `alias`, e a wiki não o lista.
    O herói novo começa com o pior que existe: Espada de Madeira, Montante de Madeira (na mochila, 23-save)
    e o Escudo de Madeira de sempre. A madeira bate WOOD_K do dano de uma peça do nível 1.
+   A picareta inicial é a de pedra (mais lenta que a velha de ferro), e a bigorna faz uma picareta de cada metal (PICK_FORGE).
    Carrega depois do 110-infernita (a wiki também). */
 
 for (const id in ITEMS) { const it = ITEMS[id]; if (it.forged) it.name = it.name.replace(/ Forjad[oa]s?(?= de )/, ''); }
+
+/* ---- picaretas: uma por metal na bigorna, e a de pedra do herói novo ----
+   Cada metal cava mais rápido e bate mais forte que o anterior. A cabeça usa as cores do metal (as mesmas do elmo). */
+const PICK_FORGE = [[1.0, 6], [1.3, 8], [1.65, 10], [2.0, 13], [2.5, 16]];   // [mineração, dano] por metal, na ordem de METALS
+METALS.forEach((M, t) => {
+  const id = `f_picareta_${M.id}`, [mine, dmg] = PICK_FORGE[t] || PICK_FORGE[PICK_FORGE.length - 1];
+  ITEMS[id] = { name: `Picareta de ${M.name}`, slot: 'tool', rar: 0, forged: true, g: 1, dmg, mine, pal: { M: M.M, m: M.m, a: mixHex(M.m, M.M, 0.5), h: '#9a6a3c', H: '#5f3a20' }, desc: `Forjada na bigorna do Grimaldo com 3 barras de ${M.name.toLowerCase()}.` };
+  ITEM_G[id] = 1; RECIPES.push({ id, metal: t, bar: M.bar, n: 3 });
+});
+ITEMS.picareta_pedra = { name: 'Picareta de Pedra', slot: 'tool', rar: 0, g: 1, dmg: 4, mine: 0.75, pal: { M: '#b4aca0', m: '#5e5850', a: '#8a837a', h: '#9a6a3c', H: '#5f3a20' }, desc: 'Uma lasca de pedra amarrada num galho. Cava, mas devagar.' };
+ITEM_G.picareta_pedra = 1; BASE_INFO.picareta_pedra = [1];
+DEFAULT_EQ.tool = 'picareta_pedra';
 
 const SAME_AS_FORGED = {};
 {
