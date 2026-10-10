@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= o Montante do Eclipse: espada de duas mãos lendária =================
-   Uma peça única (ITEMS[id].legend, como a Presa da Mãe-Teia e o Coração do Caos). Todo herói novo começa com ela na
-   mochila (23-save); nenhum monstro solta.
+   Uma peça única (ITEMS[id].legend, como a Presa da Mãe-Teia e o Coração do Caos). Todo herói novo a encontra no
+   baú da vila, junto com o conjunto (o 132 põe lá); nenhum monstro solta.
    - Lâmina de obsidiana com as bordas acesas como a coroa de um eclipse, estrelas piscando por dentro e um disco
      negro com um anel de luz no lugar da guarda. O desenho na mão é repintado a cada quadro (ECL_ROWS), o ícone é parado.
    - Eclipse: a cada ECL.every golpes que acertam, explode um eclipse no alvo e todos os inimigos a ECL.r px dele

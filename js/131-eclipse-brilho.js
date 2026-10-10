@@ -17,7 +17,10 @@ const eclDraw = { on: false, pend: null, pos: null, boost: 0, t: -1, mote: 0, gl
 const eclMotes = [];   // star dust: single pixels over the dark (the game's glow parts pile up into a haze)
 const ECL_GL = { disc: glow(12, '#ffc860'), blade: glow(14, '#7a5ae0'), burst: glow(30, '#ffc860'), small: glow(7, '#ffc860') };
 const eclHeld = () => hb.sel === 0 && eqId('weapon') === ECL_ID && !pl.dead;
-const eclWearing = () => !pl.dead && ['head', 'body', 'feet'].some(k => equip[k] && ECL_SET.includes(equip[k].id));
+// any piece with lit parts (ITEMS[id].lit: the Eclipse, the Hora Parada of 133...) worn or held
+const eclWearing = () => !pl.dead && (['head', 'body', 'feet'].some(k => equip[k] && ITEMS[equip[k].id].lit) || hb.sel === 0 && equip.weapon && ITEMS[equip.weapon.id].lit);
+const ECL_SPOT_GL = {};
+const eclSpotGlow = col => ECL_SPOT_GL[col] || (ECL_SPOT_GL[col] = glow(7, col));
 const ECL_OV = mk(CW, CHT), ECL_OX = ECL_OV.getContext('2d'); ECL_OX.imageSmoothingEnabled = false;
 
 {
@@ -37,9 +40,13 @@ const ECL_OV = mk(CW, CHT), ECL_OX = ECL_OV.getContext('2d'); ECL_OX.imageSmooth
   compose = function (P) {
     const r = _compose(P);
     if (!eclDraw.on || !P || !P.body) return r;
-    const o = ECL_OX, ox = P.ox || 0, oy = P.oy || 0, it = P.front && P.front.item, pend = {};
+    const o = ECL_OX, ox = P.ox || 0, oy = P.oy || 0, it = P.front && P.front.item, pend = { spots: [] };
     o.clearRect(0, 0, CW, CHT);
-    const lay = (img, x, y, key) => { const em = img && ECL_EMIT.get(img); if (em) { o.drawImage(em, x, y); pend[key] = 1; } };
+    const lay = (img, x, y, key) => {
+      const em = img && ECL_EMIT.get(img); if (!em) return;
+      o.drawImage(em, x, y); pend[key] = 1;
+      for (const [u, v, col] of GEAR_SPOT.get(img) || []) pend.spots.push([x + u, y + v, col]);
+    };
     lay(P.legs, OX, OY + 18, 'legs'); lay(P.body, OX + ox, OY + oy, 'chest'); if (P.head) lay(P.head.img, OX + ox, OY + oy + P.head.oy, 'helm');
     if (pend.legs || pend.chest || pend.helm) {
       // whatever is drawn over the armour hides its light: the near arm and what it holds, the far arm in a two-hand grip, a raised shield
@@ -51,13 +58,14 @@ const ECL_OV = mk(CW, CHT), ECL_OX = ECL_OV.getContext('2d'); ECL_OX.imageSmooth
       if (P.shield && P.shield.top) o.drawImage(P.shield.img, Math.round(P.shield.cx - P.shield.img.width / 2), Math.round(P.shield.cy - P.shield.img.height / 2));
       o.globalCompositeOperation = 'source-over';
     }
-    if (it && it.img === eclLive.cv) {
+    const wem = it && (it.img === eclLive.cv ? eclLive.em : ECL_EMIT.get(it.img));
+    if (wem && P.front.hero) {
       const F = P.front, a = heroArm(F.hero, F.dark, F.ang, F.len);
       const hx = OX + ox + 7.5 + a.hx, hy = OY + oy + 10.5 + a.hy, px = it.px || 2.5, py = it.py || 11;
-      rotDraw(o, eclLive.em, hx, hy, px, py, it.ang);
-      Object.assign(pend, { sword: 1, hx: Math.round(hx), hy: Math.round(hy), px, py, ang: it.ang });
+      rotDraw(o, wem, hx, hy, px, py, it.ang);
+      Object.assign(pend, { wep: 1, sword: it.img === eclLive.cv ? 1 : 0, wspots: GEAR_SPOT.get(it.img) || [], hx: Math.round(hx), hy: Math.round(hy), px, py, ang: it.ang });
     }
-    if (pend.sword || pend.legs || pend.chest || pend.helm) eclDraw.pend = Object.assign(pend, { ox, oy, hoy: P.head ? P.head.oy : 0 });
+    if (pend.wep || pend.legs || pend.chest || pend.helm) eclDraw.pend = pend;
     return r;
   };
   const _drawComposite = drawComposite;
@@ -97,10 +105,10 @@ HOOK.drawGlow.push((cx, cy) => {
       lc.globalAlpha = (0.3 + 0.2 * b + pulse) * k; lc.drawImage(ECL_GL.disc, Math.round(dx) - 12, Math.round(dy) - 12);
       lc.globalAlpha = (0.18 + 0.2 * b + pulse) * k; lc.drawImage(ECL_GL.blade, Math.round(bx) - 14, Math.round(by) - 14);
     }
-    // the eclipse on the helmet's crest and on the chest
-    const spot = (qx, qy) => { const [x, y] = eclComp(qx, qy); lc.globalAlpha = (0.26 + 0.15 * b + pulse) * k; lc.drawImage(ECL_GL.small, Math.round(x) - 7, Math.round(y) - 7); };
-    if (P.helm) spot(OX + P.ox + 6, OY + P.oy + P.hoy + 1.5);
-    if (P.chest) spot(OX + P.ox + 3.5, OY + P.oy + 11);
+    // the small glows each piece asks for (GEAR_SPOT): the eclipse on the helmet's crest and on the chest, the crystals...
+    const spot = ([x, y], col) => { lc.globalAlpha = (0.26 + 0.15 * b + pulse) * k; lc.drawImage(eclSpotGlow(col), Math.round(x) - 7, Math.round(y) - 7); };
+    for (const [qx, qy, col] of P.spots) spot(eclComp(qx, qy), col);
+    if (P.wep) for (const [u, v, col] of P.wspots) spot(eclPoint(u, v), col);
   }
   for (const f of eclFx) {
     const k = f.t / 0.45, r = 6 + ECL.r * easeOut(k);

@@ -2,7 +2,7 @@
 
 /* ================= o Conjunto do Eclipse: elmo, peitoral e botas lendários (a espada é o js/130) =================
    Peças únicas (ITEMS[id].legend) no estilo do Montante do Eclipse: obsidiana, ouro e a coroa de luz de um eclipse.
-   Todo herói novo leva as três na mochila (23-save), junto com a espada.
+   Todo herói novo encontra as três no baú da vila (27-bau), junto com a espada.
    - Elmo do Eclipse: fechado, um sol eclipsado no alto e a fresta dos olhos acesa. No escuro, mais crítico.
    - Peitoral do Eclipse: placas de obsidiana com o eclipse no peito, estrelas e barra dourada. No escuro, menos dano.
    - Botas do Eclipse: faixa dourada no tornozelo com uma estrela acesa. No escuro, mais velocidade.
@@ -10,7 +10,7 @@
      que cura e atordoa (ECL_SET_B).
    "No escuro" é o mesmo da Penumbra: a luz no herói abaixo de ECL.dark (eclInDark do 130).
    As partes acesas de cada desenho ficam em ECL_EMIT (desenho -> camada acesa); o 131 as desenha por cima do escuro.
-   Embrulha heroHeadFor, heroBodyFor, heroLegsFor, makeIcon, recalc, hitEnemy, eclBurst, hurtPlayer, updatePlayer e
+   Embrulha newWorld, heroHeadFor, heroBodyFor, heroLegsFor, makeIcon, recalc, hitEnemy, eclBurst, hurtPlayer, updatePlayer e
    gearTipBody. Carrega logo depois do 130 (a wiki também). */
 
 const ECL_SET = [ECL_ID, 'elmo_eclipse', 'peitoral_eclipse', 'botas_eclipse'];
@@ -19,7 +19,9 @@ const ECL_SET_TXT = [
   [2, `No escuro, +${ECL_SET_B.dark2 * 100}% de dano`],
   [4, `Os eclipses vêm a cada ${ECL_SET_B.every4} golpes, curam ${ECL_SET_B.heal4 * 100}% da sua vida máxima e atordoam os inimigos atingidos por ${ECL_SET_B.stun4} s`]
 ];
-const ECL_EMIT = new WeakMap();
+// picture -> its lit layer, and picture -> small glows [u, v, colour] on it; the 131 draws both over the dark for any
+// piece with ITEMS[id].lit (this set and the 133 too)
+const ECL_EMIT = new WeakMap(), GEAR_SPOT = new WeakMap();
 
 // letras: o obsidiana · O sombra · q luz · g ouro · G ouro escuro · c C coroa (acesa) · D d disco · v fresta (acesa) · S estrela (acesa)
 const ECL_PAL = { o: '#3a2c52', O: '#1c1228', q: '#54426e', g: '#e0b048', G: '#8a6220', c: '#ffd27a', C: '#fff0c0', D: '#040208', d: '#2a2238', v: '#fff0c0', S: '#b8a8ff', b: '#8a6220', B: '#ffd27a' };
@@ -75,31 +77,37 @@ STAT_DEF.lgPasso = { t: 'No escuro, +X% de velocidade de movimento', pct: 1 };
 STAT_KEYS.push('lgVisao', 'lgSombra', 'lgPasso');
 Object.assign(ITEMS, {
   elmo_eclipse: {
-    name: 'Elmo do Eclipse', slot: 'head', rar: 4, def: 9, hp: 20, g: 0, start: true, art: ECL_HELM, oy: -3, pal: ECL_PAL,
+    name: 'Elmo do Eclipse', slot: 'head', rar: 4, def: 9, hp: 20, g: 0, start: true, lit: true, art: ECL_HELM, oy: -3, pal: ECL_PAL,
     legend: [['lgVisao', 0.12], ['critDmg', 0.25]],
     desc: 'Fechado como uma noite sem lua. Pela fresta, quem o veste enxerga onde a tocha não chega.'
   },
   peitoral_eclipse: {
-    name: 'Peitoral do Eclipse', slot: 'body', rar: 4, def: 13, hp: 30, g: 0, start: true,
+    name: 'Peitoral do Eclipse', slot: 'body', rar: 4, def: 13, hp: 30, g: 0, start: true, lit: true,
     pal: { r: '#2e2244', R: '#1c1430', D: '#120a1a', b: '#8a6220', B: '#ffd27a' },
     legend: [['lgSombra', 0.25]],
     desc: 'O sol apagado no peito ainda queima por dentro. A escuridão que chega perto dele se desvia.'
   },
   botas_eclipse: {
-    name: 'Botas do Eclipse', slot: 'feet', rar: 4, def: 6, spd: 0.08, g: 3, start: true,
+    name: 'Botas do Eclipse', slot: 'feet', rar: 4, def: 6, spd: 0.08, g: 3, start: true, lit: true,
     pal: { s: '#3a2c52', S: '#1c1228' },
     legend: [['lgPasso', 0.15], ['dodge', 0.05]],
     desc: 'Não fazem barulho nenhum na pedra. No escuro, parecem andar sozinhas.'
   }
 });
 for (const id of ECL_SET.slice(1)) { BASE_INFO[id] = [14]; ITEM_G[id] = ITEMS[id].g; }
+// every new hero finds the sword and the three pieces in the village chest (js/27-bau.js; the wiki has no chest); same test as 23-save for a new hero
+{ const _nw = newWorld; newWorld = function (sd, sv) {
+  const r = _nw(sd, sv);
+  if (typeof stash !== 'undefined' && !(sv && Array.isArray(sv.inv))) for (const id of ECL_SET) { const i = stash.indexOf(null); if (i >= 0) stash[i] = mkItem(id, 0); }
+  return r;
+}; }
 
 /* ---- the art on the hero ---- */
 {
   const _heroHeadFor = heroHeadFor, _heroBodyFor = heroBodyFor, _heroLegsFor = heroLegsFor, _makeIcon = makeIcon;
   heroHeadFor = function (id) {
     if (id !== 'elmo_eclipse') return _heroHeadFor(id);
-    return cached('hh:' + id, () => { const a = eclFlat(ECL_HELM); ECL_EMIT.set(a.img, a.em); return { img: a.img, oy: ITEMS[id].oy }; });
+    return cached('hh:' + id, () => { const a = eclFlat(ECL_HELM); ECL_EMIT.set(a.img, a.em); GEAR_SPOT.set(a.img, [[6, 1.5, '#ffc860']]); return { img: a.img, oy: ITEMS[id].oy }; });
   };
   // the plate body of 37, then the eclipse on the chest (left of the near arm, which hangs from column 7), gold on the shoulders and the hem, two stars
   const BODY_PX = [
@@ -112,7 +120,7 @@ for (const id of ECL_SET.slice(1)) { BASE_INFO[id] = [14]; ITEM_G[id] = ITEMS[id
     if (id !== 'peitoral_eclipse' || ECL_EMIT.has(b.img)) return b;
     const x = b.img.getContext('2d'), em = mk(b.img.width, b.img.height), ex = em.getContext('2d');
     for (const [i, j, ch] of BODY_PX) { x.fillStyle = ECL_PAL[ch]; x.fillRect(i, j, 1, 1); if (ECL_LIT.has(ch)) { ex.fillStyle = ECL_PAL[ch]; ex.fillRect(i, j, 1, 1); } }
-    ECL_EMIT.set(b.img, em);
+    ECL_EMIT.set(b.img, em); GEAR_SPOT.set(b.img, [[3.5, 11, '#ffc860']]);
     return b;
   };
   // every leg frame (the crouch ones of 89 too): the top of each boot turns gold, its front end a lit star
