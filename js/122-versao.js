@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.10.3';
+const VERSAO = '0.10.4';
 const NOVIDADES = [
+  { v: '0.10.4', data: '10/10/2026', titulo: 'Escuridão de verdade', itens: [
+    'Debaixo da terra o escuro é quase total: sem tocha não se vê quase nada. Cogumelos, cristais, lava e as velas da catedral continuam iluminando.'
+  ] },
   { v: '0.10.3', data: '10/10/2026', titulo: 'Cavernas no escuro', itens: [
     'As cavernas não têm mais tochas acesas por padrão: a luz é a das tochas que você leva.'
   ] },
