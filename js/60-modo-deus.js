@@ -1,7 +1,7 @@
 'use strict';
 /* modo deus, só para testes: F4 liga e desliga. Em Menu > Testes > Modo deus dá para ligar e desligar o modo
    e cada um dos efeitos dele: sem dano (o herói não perde vida), mana infinita, um golpe mata (qualquer alvo,
-   chefes inclusive) e luz total (o subterrâneo fica claro). Os efeitos começam todos ligados. Nada disso vai para
+   chefes inclusive) e luz total (o subterrâneo fica bem menos escuro, ainda com sombra). Os efeitos começam todos ligados. Nada disso vai para
    o save: todo jogo começa com o modo desligado. Enquanto ligado, aparece uma linha "Deus" no painel do canto superior direito.
    `modoDeus` (lido por outros arquivos para pular dano) quer dizer "o herói não toma dano agora": modo ligado e "Sem dano" ligado. */
 let deusOn = false;
@@ -58,12 +58,13 @@ let deusMenu = () => { };
   get() { return mana; }, set(v) { mana = deusFx('mana') ? Math.max(v, pl.maxMana) : v; } }); }
 // nenhum dano chega: quase toda perda de vida passa por rawDamage (10-combate); o resto (afogar, veneno, sangria, esporos) checa modoDeus
 { const _raw = rawDamage; rawDamage = function (d, kdir) { if (modoDeus) return; return _raw(d, kdir); }; }
-// luz total: enquanto computa a luz, o subterrâneo usa um piso de claridade alto (DARK fica no 07-chunks-luz)
+// luz total: o subterrâneo fica bem menos escuro, mas com sombra (piso de claridade mais alto no DARK do 07-chunks-luz)
+// e o herói ganha um brilho em volta, como uma tocha fraca, para a luz cair e sumir nas bordas
 { const _cl = computeLight; computeLight = function (cx, cy) {
   if (!deusFx('luz')) return _cl(cx, cy);
-  const a = DARK.amb, x = DARK.ex, c = DARK.cap;
-  DARK.amb = 0.85; DARK.ex = 1; DARK.cap = 1;
-  try { return _cl(cx, cy); } finally { DARK.amb = a; DARK.ex = x; DARK.cap = c; }
+  const a = DARK.amb, x = DARK.ex, c = DARK.cap, l = pl.light;
+  DARK.amb = 0.22; DARK.ex = 1.3; DARK.cap = 0.95; pl.light = Math.max(l || 0, 2);
+  try { return _cl(cx, cy); } finally { DARK.amb = a; DARK.ex = x; DARK.cap = c; pl.light = l; }
 }; }
 // um golpe, uma morte. Fica por fora de todos os outros embrulhos de hitEnemy, por isso vem no fim.
 // Respeita só os momentos em que o chefe não pode ser tocado (entrada, queda e volta do Rei Esqueleto);
