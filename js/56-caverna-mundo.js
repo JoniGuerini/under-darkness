@@ -299,7 +299,7 @@ function cvAfter() {
       else if (q < 0.045) put(x, y, SHROOM);
       else if (q < 0.085) put(x, y, CV_SEIXOS);
       else if (q < 0.091) put(x, y, BONES);
-      else if (q < 0.0945 && l === AIR && r === AIR) put(x, y, TORCH);
+      // sem tochas: ninguém acende tocha numa caverna natural (regra do Jonathan, 2026-10-10); a luz vem das tochas que o herói põe
     } else if (b === 1) {
       if (q < 0.05 && rockish && at(x, y - 1) === AIR) { put(x, y, CV_ESTALAGMITE); if (R3() < 0.4 && at(x, y - 2) === AIR && at(x, y - 3) === AIR) put(x, y - 1, CV_ESTALAGMITE); }
       else if (q < 0.08) put(x, y, CV_SEIXOS);

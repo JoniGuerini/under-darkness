@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.10.2';
+const VERSAO = '0.10.3';
 const NOVIDADES = [
+  { v: '0.10.3', data: '10/10/2026', titulo: 'Cavernas no escuro', itens: [
+    'As cavernas não têm mais tochas acesas por padrão: a luz é a das tochas que você leva.'
+  ] },
   { v: '0.10.2', data: '10/10/2026', titulo: 'Sem missões', itens: [
     'As missões do Caetano saíram do jogo por enquanto; ele continua no vilarejo para conversar.'
   ] },
