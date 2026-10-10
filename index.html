@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="css/camadas.css">
 <link rel="stylesheet" href="css/botoes.css">
 <link rel="stylesheet" href="css/hud-nivel-ouro.css">
+<link rel="stylesheet" href="css/cinto.css">
 <link rel="stylesheet" href="css/vigor.css">
 <link rel="stylesheet" href="css/agua.css">
 <link rel="stylesheet" href="css/portal.css">
@@ -36,18 +37,14 @@
 
 <div id="hud" hidden>
   <div class="world panel">
-    <div id="zone">Superfície</div>
-    <div class="row"><em>Profundidade</em><span id="hDepth">0 m</span></div>
     <div class="row"><span class="sun" id="hSun"></span><span id="hClock">08:00</span></div>
-    <div class="row"><em>Tochas</em><span id="hTorch">12</span><kbd>Q</kbd></div>
-    <div class="row"><em>Poções</em><span id="hPot">2</span><kbd>R</kbd></div>
   </div>
   <div id="help" class="panel">
     <div><span class="k">A</span><span class="k">D</span> andar · <span class="k">W</span> pular / subir corrente · <span class="k">S</span> descer</div>
     <div><span class="k">1</span>–<span class="k">0</span> item da barra <em>(ou rodinha)</em></div>
     <div><span class="k">Clique esq.</span> golpear · minerar · colocar bloco</div>
     <div><span class="k">Segurar dir.</span> levantar escudo <em>(ou Shift)</em></div>
-    <div><span class="k">E</span> conversar · abrir baú · <span class="k">Q</span> tocha · <span class="k">R</span> poção</div>
+    <div><span class="k">E</span> conversar · abrir baú · <span class="k">Q</span> tocha · <span class="k">R</span> poção · <span class="k">T</span> mana</div>
     <div><span class="k">Tab</span> mapa · <span class="k">I</span> inventário · <span class="k">C</span> atributos · <span class="k">P</span> talentos · <span class="k">Esc</span> pausa · <span class="k">F</span> tela cheia · <span class="k">M</span> som · <span class="k">H</span> esconder</div>
   </div>
   <div id="hbrow">
@@ -88,7 +85,7 @@
       <dt><kbd>Segurar direito</kbd></dt><dd><b>Levantar o escudo</b>. Bloqueia ataques pela frente</dd>
       <dt><kbd>E</kbd> / <kbd>Q</kbd></dt><dd><b>Conversar</b> com os moradores e <b>abrir baú</b> / <b>colocar tocha</b> onde o mouse aponta</dd>
       <dt><kbd>I</kbd> / <kbd>C</kbd></dt><dd><b>Inventário</b>: equipamento e mochila / <b>atributos</b> do personagem</dd>
-      <dt><kbd>R</kbd></dt><dd>Beber <b>poção</b></dd>
+      <dt><kbd>R</kbd> / <kbd>T</kbd></dt><dd>Beber <b>poção de vida</b> / <b>poção de mana</b></dd>
       <dt><kbd>Tab</kbd></dt><dd><b>Mapa</b> por cima da tela, com tudo que você já viu</dd>
     </dl>
     <p class="tip">Levante o escudo um instante antes do golpe inimigo para <b>aparar</b>: o inimigo fica atordoado e leva dano extra. Esqueletos não param de atacar quando apanham, então use o escudo.</p>
@@ -409,6 +406,7 @@
 <script src="js/118-cajado-andar.js"></script>
 <script src="js/94-janelas-atras.js"></script>
 <script src="js/120-personagens.js"></script>
+<script src="js/231-cinto.js"></script>
 <script src="js/24-boot.js"></script>
 <script src="js/26-rolagem.js"></script>
 <script src="js/28-fps.js"></script>

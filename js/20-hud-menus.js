@@ -14,12 +14,8 @@ function updateHUD() {
   const lowOrb = pl.hp / pl.maxHp < 0.3 && !pl.dead; if (hudCache.lowOrb !== lowOrb) { hudCache.lowOrb = lowOrb; $('orbHp').classList.toggle('low', lowOrb); }
   const need = xpNeed(pl.lvl); setT('hXp', `${Math.floor(pl.xp)} / ${need} XP`); setW('hXpFill', clamp(pl.xp / need, 0, 1) * 100);
   setT('hStats', fmtOuro(pl.gold));
-  const tx = clamp(Math.floor((pl.x + 4) / T), 0, WW - 1), ty = Math.floor((pl.y + pl.h) / T);
-  setT('zone', placeName(tx, ty)[0]);
-  setT('hDepth', `${Math.max(0, ty - surf[SPX])} m`);
   const h = hourNow(); setT('hClock', `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.floor((h % 1) * 6) * 10).padStart(2, '0')}`);
   const night = isNight(); if (hudCache.sun !== night) { hudCache.sun = night; $('hSun').className = night ? 'sun moon' : 'sun'; }
-  setT('hTorch', String(countItem('tocha'))); setT('hPot', String(countItem('pocao')));
   const low = pl.hp / pl.maxHp < 0.3 && !pl.dead; const lv = low ? (0.5 + Math.sin(gameTime * 5) * 0.25) : 0; const target = Math.max(lv, hurtVig).toFixed(2);
   if (hudCache.vig !== target) { hudCache.vig = target; $('lowhp').style.opacity = target; }
   paintHotbar();

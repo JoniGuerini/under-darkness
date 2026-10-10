@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.19.1';
+const VERSAO = '0.20.0';
 const NOVIDADES = [
+  { v: '0.20.0', data: '10/10/2026', titulo: 'HUD nova', itens: [
+    'O quadro do canto de cima mostra só o relógio do dia.',
+    'Casas próprias fora da barra de ação: poção de vida e tocha ao lado do globo de vida, poção de mana ao lado do globo de mana. Tochas e poções vão direto para elas e não ocupam mais a barra.',
+    'R bebe a poção de vida, T a de mana, Q põe tocha. Clicar na casa da poção também bebe. No inventário, as três casas ficam debaixo da barra para trocar qual poção fica nelas.'
+  ] },
   { v: '0.19.1', data: '10/10/2026', titulo: 'As piras do Nox e a arte da Escuridão', itens: [
     'As seis piras da sala do Nox agora acendem com lume-fátuo, como os braseiros (ajoelhado 1 s); tocha não acende mais. Elas ardem azuis durante a luta.',
     'Ao lado de cada pira fria espera um lume-fátuo. Quando o Nox ou os apagadores apagam uma pira, o lume dela foge voando pela sala e pousa longe: é preciso ir buscá-lo para acender de novo. Se a luta acaba sem vitória, os lumes das piras acesas voltam para o lado delas.',

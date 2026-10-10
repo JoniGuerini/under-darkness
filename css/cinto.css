@@ -1,0 +1,14 @@
+/* Cinto (js/231-cinto.js): casas de poção de vida e tocha ao lado do globo de vida, poção de mana ao lado do globo de mana.
+   No HUD a posição (left/right/bottom) vem do JS, colada nos globos. */
+.beltbox{position:absolute;display:flex;gap:6px;padding:6px;pointer-events:auto}
+.slot.belt:not(.full)::after{content:"";position:absolute;inset:5px;background:var(--ghost) center/contain no-repeat;image-rendering:pixelated;opacity:.18;pointer-events:none}
+.beltbox .slot.belt:active{transform:translateY(1px)}
+/* no inventário: a fileira do cinto debaixo da barra, vida e tocha à esquerda, mana à direita */
+.beltrow{display:flex;justify-content:space-between}
+.beltgrp{display:flex;gap:6px}
+/* canto de cima: só o relógio */
+#hud .world{min-width:0;padding:6px 12px}
+#hud .world .row{gap:10px}
+#hud .world #hClock{font-family:var(--font-title);font-size:24px;line-height:1;text-shadow:2px 2px 0 #000}
+#hud .world .sun{width:11px;height:11px}
+@media (max-width:560px){.beltbox{gap:3px;padding:4px}.beltbox .slot{width:38px;height:38px}.beltbox .slot img{width:30px;height:30px}}
