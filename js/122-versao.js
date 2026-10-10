@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.11.4';
+const VERSAO = '0.11.5';
 const NOVIDADES = [
+  { v: '0.11.5', data: '10/10/2026', titulo: 'Escuridão gradual', itens: [
+    'Ao entrar na caverna a escuridão chega aos poucos, ao longo da descida, em vez de trocar de uma vez de um bloco para o outro.'
+  ] },
   { v: '0.11.4', data: '10/10/2026', titulo: 'Pentagrama de pé', itens: [
     'No Trono do Caos, o pentagrama não flutua mais: agora é uma laje de pedra do caos em pé sobre um degrau, com o pentagrama entalhado e queimando, sangue escorrendo e velas no chão.',
     'Golpes e aparos empurram bem menos os inimigos: eles recuam um passo em vez de voar longe.'

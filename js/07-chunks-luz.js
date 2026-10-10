@@ -132,7 +132,7 @@ const CHUNK_MAX = 220, CHUNK_KEEP = 150;
 let LX0 = 0, LY0 = 0, LW = 0, LH = 0, LB = null, DB = null, lightCv = null, lightCx = null, lightImg = null, lightU = null;
 const emitters = [];
 let skyLight = 1;
-const DARK = { amb: 0.02, ex: 1.15, cap: 0.992 };   // a escuridão do subterrâneo (ajuste aqui)
+const DARK = { amb: 0.02, ex: 1.15, cap: 0.992, band: 18, rate: 0.6, k: -1, t: 0 };   // the underground darkness (tune here): band = tiles of fade below the ground, rate = how fast it follows you (per s)
 function computeLight(cx, cy) {
   const M = 12;
   const x0 = Math.floor(cx / T) - M, y0 = Math.floor(cy / T) - M;
@@ -178,8 +178,13 @@ function computeLight(cx, cy) {
   let fresh = 0;
   for (let gy = Math.max(0, vy0); gy <= Math.min(WH - 1, vy1); gy++) for (let gx = vx0; gx <= vx1; gx++) { const idx = gy * WW + wrapX(gx); if (!seen[idx] && LB[(gy - y0) * w + gx - x0] > 0.1) { seen[idx] = 1; fresh++; } }
   if (fresh) mapVer++;
-  const pty = (pl.y + pl.h / 2) / T, top = pty < surf[clamp(Math.floor((pl.x + 4) / T), 0, WW - 1)] + 6;
-  const amb = top ? 0.1 : DARK.amb, ex = top ? 1.45 : DARK.ex, cap = top ? 0.97 : DARK.cap;
+  // underground the dark is real (Jonathan, 2026-10-10: "a caverna tem que ser escura"): almost no ambient floor and a
+  // near-black ceiling, so only torches and things that glow show the way. The surface keeps its old curve.
+  // the change is progressive (2026-10-10): it fades in over DARK.band tiles below the ground and eases over time
+  const pty = (pl.y + pl.h / 2) / T, dep = pty - surf[clamp(Math.floor((pl.x + 4) / T), 0, WW - 1)] - 2;
+  const goal = sm3(clamp(dep / DARK.band, 0, 1)), now = performance.now(), sec = Math.min(0.1, (now - DARK.t) / 1000); DARK.t = now;
+  DARK.k = DARK.k < 0 ? goal : approach(DARK.k, goal, sec * DARK.rate);
+  const q = DARK.k, amb = lerp(0.1, DARK.amb, q), ex = lerp(1.45, DARK.ex, q), cap = lerp(0.97, DARK.cap, q);
   for (let k = 0; k < w * h; k++) { let a = 1 - Math.max(LB[k], amb); a = a <= 0 ? 0 : Math.pow(a, ex) * cap; lightU[k] = pack(4, 3, 10, (a * 255) | 0); }
   lightCx.putImageData(lightImg, 0, 0);
 }
