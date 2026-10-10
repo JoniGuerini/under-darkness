@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.20.1';
+const VERSAO = '0.20.2';
 const NOVIDADES = [
+  { v: '0.20.2', data: '10/10/2026', titulo: 'Carregando', itens: [
+    'Tela de carregamento enquanto o mundo é gerado.'
+  ] },
   { v: '0.20.1', data: '10/10/2026', titulo: 'Respirar', itens: [
     'O herói e os moradores do vilarejo, parados, respiram, balançam os braços de leve e piscam de vez em quando.'
   ] },
