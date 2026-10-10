@@ -119,9 +119,9 @@ function harvestHerb(tx, ty, src) {
 }
 // a picareta: o BLOCK_DROP já deixa uma; aqui só a chance de vir outra
 { const _bt = breakTile; breakTile = function (tx, ty) { const t = tileAt(tx, ty); _bt(tx, ty); if (HERB_OF[t] && Math.random() < 0.3) dropLoot((tx + 0.5) * T, (ty + 1) * T - 1, HERB_OF[t].id, 1, true); }; }
-// E perto de uma erva, quando não tem morador nem baú mais perto
+// E perto de uma erva, quando não tem morador mais perto
 { const _ud = updateDig; updateDig = function (dt) {
-  if (pressed.KeyE && state === 'play' && !pl.dead && !nearNpc() && !nearestChest()) {
+  if (pressed.KeyE && state === 'play' && !pl.dead && !nearNpc()) {   // (the loot chests are gone, 2026-10-10)
     const cx = pl.x + pl.w / 2, cy = pl.y + pl.h / 2, tx0 = Math.floor(cx / T), ty0 = Math.floor(cy / T); let best = null, bd = 1e9;
     for (let ty = ty0 - 2; ty <= ty0 + 2; ty++) for (let tx = tx0 - 3; tx <= tx0 + 3; tx++) {
       if (!HERB_OF[tileAt(tx, ty)]) continue;

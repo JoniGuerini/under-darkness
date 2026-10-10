@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.9.1';
+const VERSAO = '0.9.2';
 const NOVIDADES = [
+  { v: '0.9.2', data: '10/10/2026', titulo: 'Fim do travamento', itens: [
+    'Corrigido o travamento da tela que acontecia pouco depois de entrar nas cavernas.',
+    'As janelas da vila e das lojas não derrubam mais o FPS quando estão abertas.'
+  ] },
   { v: '0.9.1', data: '10/10/2026', titulo: 'Correções de desempenho', itens: [
     'O jogo libera as imagens das partes do mundo que ficaram longe, para o FPS não cair com o tempo de jogo.',
     'Painel de diagnóstico de desempenho na tecla F9.',

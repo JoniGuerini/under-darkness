@@ -251,7 +251,7 @@ Os Tomados guardam um pedaço da cor de antes (pele, roupa, pelo da mula) que va
 | `js/128-fungo-save.js` | `maeEsporo.dead`, objetos caídos |
 | `docs/fungo-spec.md` | a spec técnica depois de implementar |
 
-## 15. Decisões em aberto
+## 15. Decisões (Jonathan, 2026-10-10)
 
-1. **Na fase 3 da Mãe-Esporo a água cobre o chão: o fôlego do sistema comum vale lá dentro?** Recomendo sim, sem regra especial: as plataformas que sobram ficam sempre acima da água, então só se afoga quem fica no fundo.
-2. **A Mãe-Esporo deixa a parede morta para sempre, ou a gruta volta a crescer devagar (só visual)?** Recomendo morta para sempre: o herói vê que mudou o lugar.
+1. **Fôlego na luta da Mãe-Esporo:** vale o fôlego normal, sem regra especial. A água existe justamente para a mecânica de fôlego valer ali também.
+2. **A parede depois da morte:** fica morta para sempre (por enquanto), sem voltar a crescer.
