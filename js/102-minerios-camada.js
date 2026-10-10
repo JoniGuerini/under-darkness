@@ -6,7 +6,8 @@
      A Catedral     186 to 372 m    coal and iron
      Cavernas de Gelo 372 to 558 m  coal and gold
      A Mina         558 to 744 m    coal and cobalt
-     O Abismo       744 to 930 m    coal and infernite (110)
+     A Cidade       930 to 1116 m   coal and silver (138)
+     O Abismo       1116 to 1302 m  coal and infernite (110)
    Crystal was the mine's metal until Jonathan made it a gem (2026-10-09): it is still mined (rarer, in the mine's
    quartzite) and sold, but it does not melt; cobalt took its place at the forge (05 METALS, 18 FURN, the mine's
    MN_O_COBALTO block in 79/80, veins in 84). Saves holding crystal bars or forged crystal pieces get cobalt ones.

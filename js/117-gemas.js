@@ -118,6 +118,7 @@ const GEM_LAYERS = [
   { pos: 3, ok: t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO, pal: 'icRocha', host: IC_ROCHA, soils: IC_SOILS, own: GEM_SAFIRA },
   { pos: 4, ok: t => t === MN_FERROSA || t === MN_QUARTZITO, pal: 'mnFerrosa', host: MN_FERROSA, soils: MN_SOILS, own: MN_O_CRISTAL },
   { pos: layerPos('fungo'), ok: t => t === FG_XISTO || t === FG_TOMADA, pal: 'fgXisto', host: FG_XISTO, soils: FG_SOILS },
+  { pos: layerPos('cidade'), ok: t => t === CD_ATERRO || t === CD_LIMO, pal: 'cdAterro', host: CD_ATERRO, soils: CD_SOILS },
   { pos: layerPos('abismo'), ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI }
 ];
 // blocos novos: 157 em diante (uma pedra fora da sua camada de origem)

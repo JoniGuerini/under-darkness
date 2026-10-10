@@ -17,6 +17,7 @@
     { nome: 'Cavernas de Gelo', ok: typeof GELO !== 'undefined' && GELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[IC_ZONE0 + b], y0: IC_S0 + IC_BANDS[b], y1: IC_S0 + IC_BANDS[b + 1] })), entrada: () => icExits && icExits[0] && [icExits[0].x0 + 3, IC_S0 + 13] },
     { nome: 'Mina Abandonada', ok: typeof MINA !== 'undefined' && MINA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[MN_ZONE0 + b], y0: MN_S0 + MN_BANDS[b], y1: Math.min(WH - 8, MN_S0 + MN_BANDS[b + 1]) })), entrada: () => mnExits && mnExits[0] && [mnExits[0].x0 + 1, mnExits[0].fy - 2] },
     { nome: 'Minas Fúngicas', ok: typeof FUNGO !== 'undefined' && FUNGO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[FG_ZONE0 + b], y0: FG_S0 + FG_BANDS[b], y1: Math.min(WH - 8, FG_S0 + FG_BANDS[b + 1]) })), entrada: () => fungExits && fungExits[0] && [fungExits[0].x0 + 1, fungExits[0].fy - 2] },
+    { nome: 'Cidade Afundada', ok: typeof CIDADE !== 'undefined' && CIDADE, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[CD_ZONE0 + b], y0: CD_S0 + CD_BANDS[b], y1: Math.min(WH - 8, CD_S0 + CD_BANDS[b + 1]) })), entrada: () => cdLand && cdLand[0] && [cdLand[0].x0 + 6, cdLand[0].fy - 2] },
     { nome: 'O Abismo', ok: typeof ABISMO !== 'undefined' && ABISMO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AB_ZONE0 + b], y0: AB_S0 + AB_BANDS[b], y1: Math.min(WH - 8, AB_S0 + AB_BANDS[b + 1]) })), entrada: () => abExits && abExits[0] && [abExits[0].x0 + 1, abExits[0].fy - 2] }
   ].filter(L => L.ok);
 

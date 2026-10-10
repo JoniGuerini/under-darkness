@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.13.1';
+const VERSAO = '0.14.0';
 const NOVIDADES = [
+  { v: '0.14.0', data: '10/10/2026', titulo: 'A Cidade Afundada', itens: [
+    'Nova camada: A Cidade Afundada (930-1116 m), com ruas, casas, templos, cisternas, o Grande Poço, 10 monstros novos, o chefe O Sineiro Afogado e o metal prata.',
+    'O Abismo desceu para 1116-1302 m.',
+    'Corrigido: os cordões das quedas das Minas Fúngicas sumiam.'
+  ] },
   { v: '0.13.1', data: '10/10/2026', titulo: 'Água com volume', itens: [
     'A água tem volume: desce, se espalha e se nivela.'
   ] },

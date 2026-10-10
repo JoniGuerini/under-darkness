@@ -181,6 +181,35 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-1, 1), 0.7, 1500), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.45, 0.65);
       for (let i = 0; i < n; i++) nz(A, v, t + i * sp, 0.09, 0.05, 'lowpass', rnd(500, 800), 1, 0.005, 'pink', 260);
     },
+    door(A, o, t) {   // uma porta batendo longe, numa rua da Cidade Afundada
+      const v = voice(A, o, rnd(-1, 1), 0.9, 1800); nz(A, v, t, 0.18, 0.16, 'lowpass', 420, 1, 0.003, 'brown'); osc(A, v, t, 'triangle', rnd(70, 95), 50, 0.25, 0.07, 0.003);
+      if (Math.random() < 0.5) nz(A, v, t + rnd(0.15, 0.3), 0.1, 0.06, 'lowpass', 380, 1, 0.003, 'brown');
+    },
+    roofSteps(A, o, t) {   // alguém correndo num telhado lá em cima
+      const v = voice(A, o, rnd(-1, 1), 0.6, 2600), n = 5 + Math.floor(rnd(0, 6)), sp = rnd(0.16, 0.24);
+      for (let i = 0; i < n; i++) { nz(A, v, t + i * sp, 0.05, 0.06, 'bandpass', rnd(700, 1100), 2, 0.003, 'pink'); if (Math.random() < 0.3) nz(A, v, t + i * sp + 0.02, 0.03, 0.03, 'highpass', 3000, 1); }
+    },
+    coins(A, o, t) {   // moedas caindo no chão de pedra
+      const v = voice(A, o, rnd(-1, 1), 0.6, 7000), n = 3 + Math.floor(rnd(0, 5)); let tt = t;
+      for (let i = 0; i < n; i++) { const f = rnd(3200, 5200); osc(A, v, tt, 'sine', f, f * 0.98, 0.18, 0.02, 0.002); osc(A, v, tt, 'sine', f * 1.52, f * 1.5, 0.1, 0.01, 0.002); tt += rnd(0.04, 0.16) * (1 + i * 0.3); }
+    },
+    cough(A, o, t) {   // uma tosse abafada atrás de uma parede
+      const v = voice(A, o, rnd(-1, 1), 0.7, 1400), n = 1 + Math.floor(rnd(0, 3));
+      for (let i = 0; i < n; i++) nz(A, v, t + i * rnd(0.25, 0.4), 0.14, 0.07, 'bandpass', rnd(380, 600), 2.5, 0.006, 'pink', 260);
+    },
+    murmur(A, o, t) {   // uma voz falando baixo, sem palavras, do outro lado da porta
+      const v = voice(A, o, rnd(-1, 1), 0.8, 900), syl = 4 + Math.floor(rnd(0, 7)); let tt = t;
+      for (let i = 0; i < syl; i++) { const d = rnd(0.1, 0.24), f = rnd(110, 170); osc(A, v, tt, 'sawtooth', f, f * rnd(0.9, 1.1), d, 0.012, d * 0.3); nz(A, v, tt, d, 0.02, 'bandpass', rnd(400, 900), 4, d * 0.3, 'pink'); tt += d + rnd(0.03, 0.15); }
+    },
+    chant(A, o, t) {   // o culto: muitas vozes numa nota só, longe
+      const v = voice(A, o, rnd(-0.6, 0.6), 1, 1100), f = 98, d = rnd(5, 8);
+      for (let i = 0; i < 6; i++) osc(A, v, t + rnd(0, 0.6), 'sawtooth', f * (1 + rnd(-0.006, 0.006)), f * (1 + rnd(-0.006, 0.006)), d, 0.006, d * 0.35);
+      nz(A, v, t, d, 0.025, 'bandpass', 520, 5, d * 0.35, 'pink');
+    },
+    slap(A, o, t) {   // a água negra batendo nas colunas da cisterna
+      const v = voice(A, o, rnd(-1, 1), 0.7, 1500), n = 1 + Math.floor(rnd(0, 3));
+      for (let i = 0; i < n; i++) nz(A, v, t + i * rnd(0.3, 0.7), rnd(0.12, 0.25), 0.05, 'lowpass', rnd(350, 650), 1.2, 0.01, 'pink', 180);
+    },
     roar(A, o, t) {   // longe, alguma coisa grande ruge
       const v = voice(A, o, rnd(-1, 1), 0.9, 600), d = rnd(1.4, 2.4), f = rnd(48, 70);
       osc(A, v, t, 'sawtooth', f, f * 0.7, d, 0.1, d * 0.3); nz(A, v, t, d, 0.1, 'lowpass', 260, 1, d * 0.3, 'brown', 160);
@@ -221,6 +250,13 @@ const AMBI = (function () {
       rt: 1.4, damp: 0.75, wet: 0.25,
       beds: [['brown', 'lowpass', 70, 120, 0.7, 0.32, 0.45, 3.5], ['pink', 'lowpass', 200, 380, 0.7, 0.06, 0.14, 4], ['white', 'highpass', 4500, 6500, 0.5, 0.0, 0.035, 2, c => c.band === 1 ? 1 : 0.2]],
       ev: [[0.3, 'drip', c => c.band === 2 ? 1.8 : 0.7, true], [0.14, 'puff', c => c.band === 1 ? 1.5 : 1], [0.06, 'sog', c => c.band === 0 ? 1.2 : 0.5], [0.025, 'sigh', c => c.band === 3 ? 1.6 : 0.8], [0.02, 'wetStep'], [0.035, 'heart', c => c.band === 3 ? 1 : 0]]
+    },
+    cidade: {   // a cidade vazia: o eco mais longo do jogo, vento nos becos; perto do Poço o som some (c.calma)
+      rt: 5.5, damp: 0.3, wet: 0.6,
+      beds: [['brown', 'lowpass', 60, 100, 0.7, 0.3, 0.42, 4, c => c.calma], ['white', 'bandpass', 600, 1400, 3, 0.0, 0.05, 2.2, c => (c.band === 1 ? 1.2 : 0.6) * c.calma]],
+      ev: [[0.006, 'bell', c => c.calma], [0.03, 'door', c => (c.band === 1 ? 1.3 : 0.6) * c.calma], [0.025, 'roofSteps', c => (c.band === 1 ? 1.2 : 0.3) * c.calma], [0.02, 'coins', c => c.calma], [0.015, 'cough', c => c.calma],
+        [0.025, 'murmur', c => c.calma], [0.2, 'drip', c => (c.band === 0 ? 1.6 : 0.6) * c.calma, true], [0.12, 'slap', c => c.band === 0 ? 1 : 0], [0.06, 'creakWood', c => (c.band === 1 ? 1 : 0.2) * c.calma],
+        [0.2, 'chant', c => c.band === 2 ? c.calma : 0], [0.04, 'whistle', c => (c.band === 3 ? 0.4 : 1) * c.calma]]
     },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
@@ -277,7 +313,7 @@ if (typeof document !== 'undefined') (function () {
 
   // onde o herói está: qual cenário e qual faixa dele
   function where() {
-    const c = { name: 'vila', band: 0, night: false, vil: true };
+    const c = { name: 'vila', band: 0, night: false, vil: true, calma: 1 };
     try {
       if (typeof pl === 'undefined' || !pl || !surf) return c;
       const tx = Math.floor((pl.x + 4) / T), ty = Math.floor((pl.y + 10) / T), z = zoneAt(tx, ty);
@@ -286,8 +322,10 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
+      // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some
+      c.calma = 1; if (c.name === 'cidade' && typeof cdPoco !== 'undefined' && cdPoco) { const d = Math.hypot(wdx(tx - cdPoco.cx), Math.max(0, cdPoco.top - ty)); c.calma = Math.abs(wdx(tx - cdPoco.cx)) <= 6 && ty >= cdPoco.top ? 0.1 : Math.min(1, Math.max(0.1, (d - 4) / 12)); }
     } catch (e) { }
     return c;
   }

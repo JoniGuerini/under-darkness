@@ -50,6 +50,17 @@ const UDW_TXT = {
     gatuno: 'Goblin pequeno e rápido que anda em bando. Corre até o herói, corta a bolsa e foge com o ouro; matando ele, o ouro volta.',
     capataz: 'Goblin grande com um chicote de longo alcance. Estala o chicote sobre os goblins perto e eles ficam mais rápidos por alguns segundos.',
     reigoblin: 'Chefe da Mina Abandonada. Veja as fases abaixo.',
+    saqueador: 'Anda em dupla, com cuidado, e sobe escadas de corda como o herói. Corre primeiro para qualquer drop de monstro no chão e guarda; matando ele, solta o que pegou. Puxa o facão para trás e dá duas estocadas. Com pouca vida recua e bebe uma poção que cura 30%, uma vez.',
+    besteiro: 'Procura o ponto mais alto por perto (telhado, janela, passarela) e se abaixa atrás do parapeito. Ergue a besta, a ponta brilha e o virote sai reto e rápido; depois gira a manivela para recarregar, exposto. O virote fica cravado na parede 5 s e serve de degrau.',
+    armadilheiro: 'Corre na frente do herói para os corredores e becos e arma o caminho: estrepes que ferem e deixam lento e fios de sininhos que, tocados, soltam uma rede de cima (uma sombra quadrada avisa), deixam o herói sem atacar por 1,5 s e chamam os humanos perto. Depois vem com o porrete.',
+    telhadeiro: 'Atira um gancho no teto ou numa viga e passa balançando de um telhado a outro, quase nunca no chão. No balanço solta o gancho e cai em diagonal com duas adagas; a sombra dele no chão avisa antes.',
+    novicos: 'Procissão de 4 a 6 em fila, cada um com uma vela, seguindo o primeiro e cantando numa nota só. Erguem as velas, o canto sobe e correm todos de uma vez batendo com os castiçais. Matar o da frente desfaz a procissão: os outros fogem.',
+    pregador: 'Fica longe, sempre atrás dos outros humanos. Aponta e um anel escuro aparece em volta do herói: marcado por 6 s, os inimigos da camada dão 20% a mais nele e vão direto nele. Sozinho, joga um frasco de água do Poço em arco que deixa uma poça escura que deixa lento.',
+    penitente: 'Homem enorme que arrasta uma pedra de poço presa por corrente; anda devagar, não sobe escadas e não foge. Gira a pedra em volta dele por 3 s com o raio crescendo e depois fica tonto. Larga a pedra no chão e quebra o piso de tábua ou o telhado embaixo.',
+    emparedador: 'Pedreiro do culto com tijolos nas costas. Não persegue: corre para a passagem estreita mais perto entre o herói e a saída e ergue uma parede de argamassa fresca, uma fileira por vez (o contorno aparece antes). A parede quebra fácil e desmancha sozinha em 30 s. De perto, joga tijolos em arco.',
+    afogado: 'Anda no fundo da água sem boiar e sobe para a borda; fora da água é lento e pesado. Estica os braços pingando e agarra: perto da água, arrasta o herói 2 blocos para dentro e o prende 1 s (bater solta). Só nasce na água ou perto dela.',
+    boiante: 'Flutua no ar como se ainda estivesse debaixo da água, em braçadas lentas. Abre a boca, saem bolhas e vem um jato de água negra de 4 blocos que empurra e deixa o herói encharcado: pulo menor por 3 s.',
+    sineiro: 'Chefe da Cidade Afundada. Veja as fases abaixo.',
     sapo: 'Fica parado no escuro, só os olhos amarelos brilham. Pula atrás do herói em saltos compridos e, de longe, lança a língua: se pegar, puxa o herói para perto e morde.',
   },
   // fases do Rei Goblin (js/85-rei-goblin.js)
@@ -63,7 +74,13 @@ const UDW_TXT = {
     ['Fase 2', 'Abaixo de 60% da vida: rasga portais de onde saem diabretes e cães infernais, e gêiseres de lava estouram do chão (um anel brilha no chão antes).'],
     ['Fase 3', 'Abaixo de 25%: abre as asas e voa. Chovem meteoros na sala (uma sombra no chão avisa) e ele mergulha de espada sobre o herói; depois do mergulho fica um momento preso no chão.']
   ],
-  principeOnde: 'O Trono do Caos, um salão de 56 x 20 blocos no fundo do Abismo (cerca de 1112 m), do outro lado do mundo em relação às fendas, com um trono de ferro negro e osso cravejado de cristais do caos, braseiros e correntes. Ao entrar, grades do caos fecham todas as saídas; sair da sala ou morrer recomeça a luta. Fica salvo que ele morreu. Solta o Coração do Caos, acessório lendário.',
+  principeOnde: 'O Trono do Caos, um salão de 56 x 20 blocos no fundo do Abismo (cerca de 1298 m), do outro lado do mundo em relação às fendas, com um trono de ferro negro e osso cravejado de cristais do caos, braseiros e correntes. Ao entrar, grades do caos fecham todas as saídas; sair da sala ou morrer recomeça a luta. Fica salvo que ele morreu. Solta o Coração do Caos, acessório lendário.',
+  sineiroFases: [
+    ['Fase 1, o campanário.', 'Puxa a corda e o sino recua devagar antes de varrer um arco embaixo dele; segura a corda com as duas mãos e se inclina antes da badalada, um anel de som que corre pelo chão para os dois lados (pule); se sacode e cai água negra em gotas grossas, com um círculo no chão antes de cada uma. Aos 65% a viga range, solta poeira e o sino cai, quebrando o piso do campanário e o do 3º andar.'],
+    ['Fase 2, os andares (65%).', 'Sobe e desce pela corda do sino. Puxa o sino e o solta de novo, quebrando o pedaço de andar marcado por rachaduras e poeira; arranca o badalo e joga como um martelo (quica e volta pela corrente); a badalada abafada corre pelo chão e sobe e desce 4 blocos pelas paredes: fique no meio do andar. Aos 30% o último piso cede.'],
+    ['Fase 3, a Cisterna Funda (30%).', 'O sino meio afundado vira a ilha. Ele mergulha, bolhas mostram onde vai sair e sai agarrando e puxando para a água; bate no sino por baixo e uma onda empurra quem estiver na água ou no sino; a cada 20 s sobem 2 afogados das bordas.']
+  ],
+  sineiroOnde: 'A Torre do Sino, 20 x 50 blocos no Palácio do Sino, do outro lado do mundo em relação às descidas: o campanário no alto, na altura do Bairro do Poço, três andares com escadas de corda e, embaixo, a Cisterna Funda com 6 blocos de água negra. Entra-se pelo campanário, por uma ponte de telhados; a Grade do Campanário fecha a ponte e a porta de baixo. Sair, usar o portal ou morrer recomeça a luta e a torre volta inteira. Depois da morte, a corda do sino fica pendurada até a cisterna e dá para escalar. Fica salvo que ele morreu. Solta o Badalo do Sineiro, maça lendária.',
   rgOnde: 'A Oficina da Escavadeira, um salão de 48 x 16 blocos nas Fornalhas Esquecidas (cerca de 730 m), do outro lado do mundo em relação aos poços de descida, com um trono feito de vagonete, montes de saque e fornalhas. Ao entrar, grades de ferro fecham as saídas. Fica salvo que o rei morreu.',
   // fases do Yeti Ancestral (docs/biomas.md, parte 4, seção 7, e js/74-yeti-ancestral.js)
   yetiFases: [
@@ -136,18 +153,26 @@ const UDW_TXT = {
     { zona: 25, nome: 'Galerias Tomadas', de: 744, ate: 790, salas: 'galerias tortas da colônia de Ferroalto, casas de tijolo, a enfermaria lacrada, as câmaras de pouso no pé das duas descidas', carater: 'xisto úmido e rocha tomada pelo micélio, escoras tomadas, tábuas podres, fios pendentes, os últimos lampiões da colônia' },
     { zona: 26, nome: 'Bosque de Chapéus', de: 790, ate: 842, salas: 'salões enormes com cogumelos gigantes em escada', carater: 'húmus de esporo, troncos e chapéus de cogumelo que servem de plataforma, cogumelos-lanterna, cachos de esporos, luz ciano' },
     { zona: 27, nome: 'Grutas Alagadas', de: 842, ate: 894, salas: 'grutas largas com bacias de água parada e passarelas de tábua, túneis meio alagados', carater: 'lodo e xisto, ilhas de lodo, juncos de micélio na beira da água, gotejos de seiva' },
-    { zona: 28, nome: 'Coração do Micélio', de: 894, ate: 930, salas: 'câmaras redondas de carne ligadas por veias, a Gruta da Mãe, as duas câmaras de onde o Abismo desce', carater: 'carne de micélio pulsando, bolsas de esporo nas paredes, cordões de micélio, ossadas tomadas' }
+    { zona: 28, nome: 'Coração do Micélio', de: 894, ate: 930, salas: 'câmaras redondas de carne ligadas por veias, a Gruta da Mãe, as duas raízes-mestras que descem para a Cidade Afundada', carater: 'carne de micélio pulsando, bolsas de esporo nas paredes, cordões de micélio, ossadas tomadas' }
   ],
   fgMinerios: [['carvao', 744, 894], ['min_esporita', 744, 930]],
+  // faixas da Cidade Afundada (js/130-cidade-api.js: CD_BANDS; js/136-cidade-mundo.js) e os minérios dela (136: vein)
+  cdFaixas: [
+    { zona: 29, nome: 'Cisternas Altas', de: 930, ate: 976, salas: 'salões de cisterna com colunas e água negra, esgotos abobadados com canal, um aqueduto de arcos, as casas do guarda da cisterna no pé das duas raízes-mestras', carater: 'pedra com limo e aterro, colunas da cisterna, correntes, alga negra, goteiras, barcos de fundo chato, ossos com lodo, os primeiros afogados' },
+    { zona: 30, nome: 'Ruas Tortas', de: 976, ate: 1028, salas: 'ruas em ladeira de degraus, casas tortas de 2 e 3 andares, becos verticais, acampamentos dos saqueadores', carater: 'aterro, cantaria e tijolo, calçamento, telhados de ardósia que viram caminho, fachadas, lanternas, carroças tombadas, barricadas, fogueiras' },
+    { zona: 31, nome: 'Bairro do Poço', de: 1028, ate: 1080, salas: 'o templo do Poço, as casas do culto, o Grande Poço no centro', carater: 'cantaria e pedra do Poço, velas em fila, sininhos, oferendas, bancos do templo, estátuas sem rosto, procissões' },
+    { zona: 32, nome: 'Palácio do Sino', de: 1080, ate: 1116, salas: 'salões de mármore, adegas (duas são as descidas para o Abismo), a Torre do Sino', carater: 'mármore rachado e aterro, lustres caídos, fonte seca, carruagem afundada, vitrais rachados, retratos do rei com o rosto raspado' }
+  ],
+  cdMinerios: [['carvao', 930, 1110], ['min_prata', 930, 1116]],
   // faixas do Abismo (js/103-abismo-api.js: AB_BANDS; js/108-abismo-mundo.js) e os minérios dele (108: vein)
   abFaixas: [
-    { zona: 21, nome: 'Portões de Cinza', de: 930, ate: 976, salas: 'salões em ruína de tijolo infernal, os pés das duas fendas', carater: 'rocha de cinza e basalto, cinza caindo do teto, correntes penduradas, braseiros, caveiras, estátuas de demônio, portões arrombados' },
-    { zona: 22, nome: 'Rios de Fogo', de: 976, ate: 1028, salas: 'cavernas largas com um lago de lava e uma ponte de ferro negro', carater: 'basalto e obsidiana, crosta de lava brilhando, poças de lava, colunas de basalto, caldeirões, cachoeiras de lava, faíscas subindo' },
-    { zona: 23, nome: 'As Entranhas', de: 1028, ate: 1080, salas: 'câmaras redondas de carne', carater: 'carne viva e osso, tentáculos e ganchos no teto, sangue pingando, costelas, ovos, casulos, olhos e bocas nas paredes, um coração batendo' },
-    { zona: 24, nome: 'Trono do Caos', de: 1080, ate: 1116, salas: 'templos de tijolo infernal, o Trono do Caos', carater: 'pedra do caos e enxofre, runas e cristais roxos, altares, pentagramas, obeliscos, púlpitos, brasas roxas subindo' }
+    { zona: 21, nome: 'Portões de Cinza', de: 1116, ate: 1162, salas: 'salões em ruína de tijolo infernal, os pés das duas fendas', carater: 'rocha de cinza e basalto, cinza caindo do teto, correntes penduradas, braseiros, caveiras, estátuas de demônio, portões arrombados' },
+    { zona: 22, nome: 'Rios de Fogo', de: 1162, ate: 1214, salas: 'cavernas largas com um lago de lava e uma ponte de ferro negro', carater: 'basalto e obsidiana, crosta de lava brilhando, poças de lava, colunas de basalto, caldeirões, cachoeiras de lava, faíscas subindo' },
+    { zona: 23, nome: 'As Entranhas', de: 1214, ate: 1266, salas: 'câmaras redondas de carne', carater: 'carne viva e osso, tentáculos e ganchos no teto, sangue pingando, costelas, ovos, casulos, olhos e bocas nas paredes, um coração batendo' },
+    { zona: 24, nome: 'Trono do Caos', de: 1266, ate: 1302, salas: 'templos de tijolo infernal, o Trono do Caos', carater: 'pedra do caos e enxofre, runas e cristais roxos, altares, pentagramas, obeliscos, púlpitos, brasas roxas subindo' }
   ],
-  abMinerios: [['carvao', 930, 1116], ['min_infernita', 930, 1116]],
-  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas', portoes: 'Portões', rios: 'Rios de Fogo', bosque: 'Bosque', entranhas: 'Entranhas', trono: 'Trono' },
+  abMinerios: [['carvao', 1116, 1302], ['min_infernita', 1116, 1302]],
+  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas', portoes: 'Portões', rios: 'Rios de Fogo', bosque: 'Bosque', entranhas: 'Entranhas', trono: 'Trono', cisternas: 'Cisternas', ruas: 'Ruas', bairro: 'Bairro do Poço', palacio: 'Palácio' },
   // nome de cada bloco do mundo pela constante do jogo (03-blocos, 41/42 catedral, 52/53 cavernas). Os que viram item usam o nome do item.
   blocoNome: {
     DIRT: 'Terra', GRASS: 'Grama', STONE: 'Pedra', DEEP: 'Pedra funda', BEDROCK: 'Rocha-mãe (fundo do mundo)', LAVA: 'Lava', TRUNK: 'Tronco', LEAVES: 'Folhas',
@@ -169,6 +194,9 @@ const UDW_TXT = {
     AB_FERRO_NEGRO: 'Ferro negro', AB_TIJOLO: 'Tijolo infernal', AB_CAOS: 'Pedra do caos', AB_BARREIRA: 'Grade do Trono do Caos', AB_O_CARVAO: 'Veio de carvão no basalto', AB_O_INFERNITA: 'Veio de infernita',
     AB_CORRENTE: 'Corrente', AB_ESPINHOS: 'Espinhos', AB_BRASEIRO: 'Braseiro', AB_CHAMA: 'Chama', AB_CRANIOS: 'Crânios', AB_ESTALAG: 'Estalagmite de obsidiana', AB_TENTACULO: 'Tentáculo',
     AB_RUNA: 'Runa', AB_CRISTAL: 'Cristal do caos', AB_ESCADA: 'Escada de ferro negro', AB_GANCHO: 'Gancho', AB_COLUNA: 'Coluna de basalto',
+    FG_CORDAO: 'Cordão de micélio', CD_MADEIRAME: 'Madeirame', CD_O_CARVAO: 'Veio de carvão no aterro', CD_O_PRATA: 'Veio de prata', CD_BARREIRA: 'Grade do Campanário', CD_PAREDE_FRESCA: 'Parede Fresca',
+    CD_ESCADA: 'Escada de corda', CD_CORRENTE: 'Corrente de cisterna', CD_VELAS: 'Velas do culto', CD_LANTERNA: 'Lanterna de saqueador', CD_ALGA: 'Alga negra', CD_GOTEIRA: 'Goteira',
+    CD_OFERENDA: 'Oferenda', CD_TROUXA: 'Trouxa de saque', CD_OSSOS: 'Ossos com lodo', CD_PLACA: 'Placa de loja', CD_SININHOS: 'Sininhos do culto', CD_COLUNA: 'Coluna da cisterna',
     HB_SANGUE: 'Sanguinária', HB_LIRIO: 'Lírio-das-grutas', HB_LOSNA: 'Losna-da-cripta', HB_GEADA: 'Flor-de-geada', HB_BRASA: 'Raiz-de-brasa'
   },
   paredeNome: {
@@ -176,7 +204,8 @@ const UDW_TXT = {
     WCT_CRIPTA: 'Pedra de cripta', WCT_OSSARIO: 'Ossário', WCT_ARCADA: 'Arcada', WCT_MARMORE: 'Mármore', WCV_TERRA: 'Terra úmida', WCV_ROCHA: 'Rocha', WCV_CALCITA: 'Calcita',
     WCV_TEIA: 'Teia', WCV_XISTO: 'Xisto', WIC_CALC: 'Calcário congelado', WIC_ROCHA: 'Rocha gelada', WIC_GELO: 'Gelo azul', WIC_NEVE: 'Neve batida', WIC_NEGRO: 'Gelo negro',
     WMN_FERROSA: 'Rocha ferrosa', WMN_TABUADO: 'Tabuado', WMN_CAVADA: 'Rocha cavada', WMN_TIJOLO: 'Tijolo de fornalha', WMN_QUARTZITO: 'Quartzito',
-    WAB_CINZA: 'Rocha de cinza', WAB_BASALTO: 'Basalto', WAB_CARNE: 'Carne viva', WAB_TIJOLO: 'Tijolo infernal', WAB_CAOS: 'Pedra do caos'
+    WAB_CINZA: 'Rocha de cinza', WAB_BASALTO: 'Basalto', WAB_CARNE: 'Carne viva', WAB_TIJOLO: 'Tijolo infernal', WAB_CAOS: 'Pedra do caos',
+    WFG_CARNE: 'Carne de micélio', WCD_CANTARIA: 'Cantaria', WCD_TIJOLO: 'Reboco descascado', WCD_LIMO: 'Pedra com limo', WCD_MADEIRA: 'Tabuado das casas', WCD_MARMORE: 'Mármore'
   },
   apoio: { chao: 'No chão', teto: 'No teto', parede: 'Na parede de fundo', janela: 'Janela' },
 
@@ -192,9 +221,13 @@ const UDW_TXT = {
   catedralSom: 'Um salão enorme e vazio que ecoa: zumbido grave, sussurros sem palavras ao longe (mais nas Criptas), correntes balançando, vento assobiando nas janelas quebradas, gotas e, de vez em quando, um sino que ninguém toca.',
   cavernaSom: 'Ar parado e um ronco grave da rocha, gotas caindo em poças (perto e longe, com eco), pedrinhas rolando e a rocha gemendo lá no fundo. No Ninho, patinhas correndo de um lado ao outro; nas Fundações, correntes.',
   geloSom: 'Vento gelado uivando pelas fendas, o gelo estalando e rangendo devagar, cristais tilintando e gotas de degelo.',
-  abismo: 'A sexta camada, debaixo das Minas Fúngicas, de 930 a 1116 m: o inferno de onde vieram os demônios. Cinza, rios de fogo, paredes de carne que respiram e, no fundo, o trono de quem manda em tudo isso. O metal daqui é a infernita.',
-  abismoEntrada: 'Duas fendas abertas no chão das câmaras do fundo do Coração do Micélio, nas Minas Fúngicas: uma rachadura brilhando em volta da boca, um poço forrado de ferro negro e uma escada até um salão em ruína nos Portões de Cinza. Volta-se pela mesma escada.',
+  abismo: 'A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m: o inferno de onde vieram os demônios. Cinza, rios de fogo, paredes de carne que respiram e, no fundo, o trono de quem manda em tudo isso. O metal daqui é a infernita.',
+  abismoEntrada: 'Duas fendas abertas no chão de duas adegas do Palácio do Sino, na Cidade Afundada: uma rachadura brilhando em volta da boca, um poço forrado de ferro negro e uma escada até um salão em ruína nos Portões de Cinza. Volta-se pela mesma escada.',
   abismoSom: 'Um ronco grave e o fogo ao fundo; correntes balançando nos Portões; lava borbulhando e estalando nos Rios de Fogo; gotas de sangue e um coração batendo nas Entranhas; sussurros no Trono do Caos e, bem longe, alguma coisa grande rugindo.',
+  cidade: 'A sexta camada, debaixo das Minas Fúngicas, de 930 a 1116 m. Uma cidade inteira que a terra engoliu de uma vez, torta e meio alagada: as cisternas no alto, as ruas e casas no meio, o palácio e a torre do sino no fundo, e no meio do Bairro do Poço o Grande Poço, que já estava ali antes da cidade. É a única camada com gente viva: saqueadores atrás da prata e o culto do Poço. Eles sobem escadas, fogem, bebem poção, armam armadilhas e fecham passagens. Toda luz é feita por gente: velas, lanternas e fogueiras. O metal daqui é a prata.',
+  cidadeEntrada: 'As duas raízes-mestras do Coração do Micélio furam o teto abobadado de dois salões de cisterna: o cordão de micélio grosso pende do buraco até uma borda de pedra seca uns 25 blocos abaixo, com uma escada de corda dos saqueadores ao lado. No pé de cada uma, a casa do guarda da cisterna, de pedra seca e com uma lanterna acesa, onde nenhum monstro nasce. Volta-se pelo mesmo cordão.',
+  cidadeSom: 'Ar parado de cidade vazia, com o eco mais longo do jogo, e um vento que passa pelos becos. Ao longe, uma badalada grave e rara, uma porta batendo, passos correndo num telhado, moedas caindo, uma tosse, uma voz baixa sem palavras. Nas Cisternas, água negra batendo nas colunas; nas Ruas, madeira estalando; no Bairro, um canto de muitas vozes numa nota só, que some perto do Poço; no Palácio, eco de mármore.',
+  cidadeAgua: 'As cisternas, os esgotos, as partes baixas dos quarteirões e a Cisterna Funda da Torre do Sino têm água negra (a água do jogo, igual em todas as camadas, só mais escura). Dá para nadar; debaixo da água o fôlego dura 10 segundos e depois a vida cai. Equipamento pesado afunda o herói. O Grande Poço não é saída: desce até uma tampa preta que não quebra, e lá não há nada.',
   fungo: 'A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m. Antes dos mineiros do cobalto, a colônia de Ferroalto cavou aqui atrás da esporita, um metal verde-azulado que o micélio deixa na rocha, e acordou um fungo que tomou as galerias, os bichos e as pessoas. É a camada viva: a rocha, o chão, a água e a parede da chefe crescem e soltam esporos, e a luz é fria e vem dos próprios cogumelos. O metal daqui é a esporita.',
   fungoEntrada: 'Dois poços lacrados no chão de duas fornalhas da mina: um anel de tijolo de fornalha com a grade arrombada de baixo para cima, um poço forrado de micélio com uma escada da colônia e um cordão de micélio, até uma câmara de pouso de tábua onde nenhum monstro nasce. Volta-se pela mesma escada.',
   fungoSom: 'Ar úmido e abafado, quase sem eco: gotas caindo na água (mais nas Grutas), esporos estourando com um "puf", madeira encharcada cedendo, passos molhados ao longe e, de vez em quando, um suspiro longo e baixo. No Bosque, um chiado leve de esporos; no Coração, um pulso grave.',

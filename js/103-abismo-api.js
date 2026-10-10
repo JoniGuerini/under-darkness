@@ -1,7 +1,7 @@
 'use strict';
 
 /* ================= o Abismo: shared ids, bands and depths =================
-   The last layer (129-camadas: the sixth since 2026-10-10, under the fungal mines; docs/abismo-spec.md). The miners dug too deep: under the furnaces the
+   The last layer (129-camadas: the seventh since 2026-10-10, under the sunken city; docs/abismo-spec.md). The miners dug too deep: under the furnaces the
    rock turns hot, then soft, then red, and opens onto a world that is not this one: rivers of fire, bridges of
    black iron, cathedrals of living flesh and, at the bottom, the throne the Prince of Chaos sends his kind up from.
    It replaces the old crypt in the caves (the square room with imps, hounds, demons and the Carrasco), which is gone.
@@ -19,16 +19,17 @@
 const ABISMO = true;
 const AB_D = 186;                                   // metres of abyss
 // the abyss is always the last layer (129-camadas): it starts under whatever layer is above it, today the fungal mines (120)
-const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO;
-const AB_TOP = (AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // where the abyss starts, metres below the village floor (930)
+const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO, AB_CIDADE = typeof CIDADE !== 'undefined' && CIDADE;
+const AB_TOP = (AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // where the abyss starts, metres below the village floor (930)
 // band tops in metres below AB_TOP: Portões de Cinza, Rios de Fogo, As Entranhas, Trono do Caos, (bedrock)
 const AB_BANDS = [0, 46, 98, 150, 186];
 const AB_BAND_NAMES = ['portoes', 'rios', 'entranhas', 'trono'];
 const AB_ZONE0 = ZONE_NAMES.length;                 // zone ids 21..24 (108 pushes the names)
-let AB_S0 = AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)
+let AB_S0 = AB_CIDADE ? CD_S0 + CD_D : AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)
 // the layer right above: its first row and depth, its natural ground (the abyss's ash creeps into it), the rock its
 // last rows thin out into, and the halls the two rifts open from
-const abAbove = () => AB_FUNGO ? { S0: FG_S0, D: FG_D, soils: FG_SOILS, thin: FG_CARNE, thinW: WFG_CARNE, halls: fungDown, boss: fungBoss }
+const abAbove = () => AB_CIDADE ? { S0: CD_S0, D: CD_D, soils: CD_SOILS, thin: CD_ATERRO, thinW: WCD_TIJOLO, halls: cdDown, boss: cdBoss }
+  : AB_FUNGO ? { S0: FG_S0, D: FG_D, soils: FG_SOILS, thin: FG_CARNE, thinW: WFG_CARNE, halls: fungDown, boss: fungBoss }
   : { S0: MN_S0, D: MN_D, soils: MN_SOILS, thin: MN_ESCORIA, thinW: WMN_TIJOLO, halls: mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy), boss: mnBoss };
 
 // foreground blocks (solid): ash rock, basalt, obsidian, magma crust (glowing cracks), living flesh, packed bone,

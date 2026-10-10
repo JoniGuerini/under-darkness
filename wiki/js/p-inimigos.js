@@ -9,6 +9,7 @@
     if (t === 'rei') return { lvl: REI.lvl, hp: REI.hp, dmg: REI.dmg, xp: REI.xp, gold: 0 };
     if (t === 'yetiancestral') return { lvl: 9, hp: ET.yetiancestral.hp, dmg: ET.yetiancestral.dmg, xp: ET.yetiancestral.xp, gold: 0 };
     if (t === 'maeesporo') return { lvl: layerBossLvl('fungo'), hp: ET.maeesporo.hp, dmg: ET.maeesporo.dmg, xp: ET.maeesporo.xp, gold: 0 };
+    if (t === 'sineiro') return { lvl: layerBossLvl('cidade'), hp: ET.sineiro.hp, dmg: ET.sineiro.dmg, xp: ET.sineiro.xp, gold: 0 };
     if (t === 'principecaos') return { lvl: layerBossLvl('abismo'), hp: ET.principecaos.hp, dmg: ET.principecaos.dmg, xp: ET.principecaos.xp, gold: 0 };
     if (t === 'reigoblin') return { lvl: 10, hp: ET.reigoblin.hp, dmg: ET.reigoblin.dmg, xp: ET.reigoblin.xp, gold: 0 };
     if (t === 'maeteia') return { lvl: 4, hp: ET.maeteia.hp, dmg: ET.maeteia.dmg, xp: ET.maeteia.xp, gold: 0 };
@@ -17,7 +18,9 @@
     return { lvl, hp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) };
   };
   // where each level is found (caves 1 level every 50 m; every layer below starts 1 above the one over it, its second level from 93 m down; 30% are born a level higher, never past the layer's top)
-  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); for (const [top, d, lo] of [[CAVE_D, IC_TOP - CAVE_D, 5], [IC_TOP, IC_D, 7], typeof MN_TOP !== 'undefined' && [MN_TOP, MN_D, 9], typeof AB_TOP !== 'undefined' && [AB_TOP, AB_D, 11]].filter(Boolean)) { if (l === lo) o.push(`${top} a ${top + 92} m`); if (l === lo + 1) o.push(`${top + 93} a ${top + d - 1} m`); } return o.join(' e ') || '30% nascem um nível acima'; };
+  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); LAYERS.forEach((L, n) => { if (!n) return; const top = n * LAYER_D, lo = layerLo(L.id); if (l === lo) o.push(`${top} a ${top + 92} m`); if (l === lo + 1) o.push(`${top + 93} a ${top + LAYER_D - 1} m`); }); return o.join(' e ') || '30% nascem um nível acima'; };
+  // a camada de uma zona do CATH_SPAWN (1 a 4: as cavernas antigas, desligadas)
+  const zoneLayer = z => typeof CD_ZONE0 !== 'undefined' && z >= CD_ZONE0 ? 'cidade' : typeof FG_ZONE0 !== 'undefined' && z >= FG_ZONE0 ? 'fungo' : typeof AB_ZONE0 !== 'undefined' && z >= AB_ZONE0 ? 'abismo' : typeof MN_ZONE0 !== 'undefined' && z >= MN_ZONE0 ? 'mina' : z >= IC_ZONE0 ? 'gelo' : null;
   // onde cada um aparece: CATH_SPAWN (45) faixa por faixa
   UDW.spawnsOf = t => {
     const o = [];
@@ -30,7 +33,7 @@
     const D = ET[t], e = UDW.enemyAt(t, 1), sp = UDW.spawnsOf(t);
     return `<a class="ecard${UDW.ativos().has(t) ? '' : ' off'}" href="#/inimigo/${t}"><div class="eart">${UDW.enemyImg(t, D.boss ? 2 : 3)}</div><b>${E(D.name)}</b>
       <div class="mini"><span>Vida <b>${e.hp}</b></span><span>Dano <b>${e.dmg}</b></span><span>XP <b>${e.xp}</b></span></div>
-      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'yetiancestral' ? 'Trono de Gelo' : t === 'reigoblin' ? 'Oficina da Escavadeira' : t === 'principecaos' ? 'Trono do Caos' : t === 'maeesporo' || t === 'maebulbo' ? 'Gruta da Mãe' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
+      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'yetiancestral' ? 'Trono de Gelo' : t === 'reigoblin' ? 'Oficina da Escavadeira' : t === 'principecaos' ? 'Trono do Caos' : t === 'sineiro' ? 'Torre do Sino' : t === 'maeesporo' || t === 'maebulbo' ? 'Gruta da Mãe' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
   }
   // os monstros de cada bioma, faixa por faixa (CATH_SPAWN do 45 e do 56)
   // nível dos monstros numa faixa (o mesmo cálculo do layerLvl do 52 com o registro de camadas do 129: cada camada começa 1 acima do fim da de cima, sobe 1 a partir de 93 m)
@@ -44,6 +47,7 @@
     { id: 'gelo', nome: 'As Cavernas de Gelo', faixas: UDW_TXT.icFaixas, chefes: [['yetiancestral', 'Trono de Gelo, no Coração do Inverno']], extra: {} },
     { id: 'mina', nome: 'A Mina Abandonada', faixas: UDW_TXT.mnFaixas, chefes: [['reigoblin', 'Oficina da Escavadeira, nas Fornalhas Esquecidas']], extra: {} },
     { id: 'fungo', nome: 'As Minas Fúngicas', faixas: UDW_TXT.fgFaixas, chefes: [['maeesporo', 'Gruta da Mãe, no Coração do Micélio']], extra: { aguaviva: 'Nasce só na água das Grutas Alagadas e do Coração' } },
+    { id: 'cidade', nome: 'A Cidade Afundada', faixas: UDW_TXT.cdFaixas, chefes: [['sineiro', 'Torre do Sino, no Palácio do Sino']], extra: {} },
     { id: 'abismo', nome: 'O Abismo', faixas: UDW_TXT.abFaixas, chefes: [['principecaos', 'Trono do Caos, no fundo do Abismo']], extra: {} }
   ];
   function bioma(B) {
@@ -72,7 +76,7 @@
   UDW.pages.inimigo = {
     render(t) {
       const D = ET[t]; if (!D) return UDW.head('Inimigo não encontrado');
-      const A = UDW.ativos(), sp = UDW.spawnsOf(t), lv = D.boss ? [1] : sp.length && typeof AB_ZONE0 !== 'undefined' && sp.every(s => s.z >= AB_ZONE0) ? [10, 11, 12, 13] : sp.length && typeof MN_ZONE0 !== 'undefined' && sp.every(s => s.z >= MN_ZONE0) ? [8, 9, 10, 11] : sp.length && sp.every(s => s.z >= IC_ZONE0) ? [6, 7, 8, 9] : [1, 2, 3, 4, 5, 6];
+      const A = UDW.ativos(), sp = UDW.spawnsOf(t), zl = sp.length ? zoneLayer(sp[0].z) : null, lo = zl && sp.every(s => zoneLayer(s.z) === zl) ? layerLo(zl) : 0, lv = D.boss ? [1] : lo ? [lo - 1, lo, lo + 1, lo + 2] : [1, 2, 3, 4, 5, 6];
       let h = `<p class="volta"><a href="#/${D.boss ? 'chefes' : 'inimigos'}">← ${D.boss ? 'Chefes' : 'Inimigos'}</a></p>`;
       h += `<div class="etopo"><div class="eart big">${UDW.enemyImg(t, D.boss ? 4 : 6)}</div><div><h1>${E(D.name)}</h1>
         <div class="chips">${A.has(t) ? UDW.chip('No mundo', '#7fd36a') : UDW.chip('Desligado', '#8a7f70')}${flags(t).map(f => UDW.chip(f)).join('')}</div>
@@ -125,7 +129,12 @@
         <div class="stats">${UDW.stat(ET.maeesporo.hp, 'vida')}${UDW.stat(ET.maeesporo.dmg, 'dano')}${UDW.stat(ET.maeesporo.xp, 'XP')}${UDW.stat(layerBossLvl('fungo'), 'nível')}</div>
         <ol class="fases">${(UDW_TXT.maeFases || []).map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
         <h3>Solta</h3><div class="lista">${(DROPS.maeesporo || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
-      return UDW.head('Chefes') + T5 + T6 + T4 + T3 + T2 + rei;
+      const T7 = ET.sineiro ? `<section class="chefe"><div class="eart big">${UDW.enemyImg('sineiro', 2)}</div><div>
+        <h2>${E(ET.sineiro.name)} ${UDW.chip('No mundo', '#7fd36a')}</h2><p class="lead">${E(UDW_TXT.sineiroOnde || '')}</p>
+        <div class="stats">${UDW.stat(ET.sineiro.hp, 'vida')}${UDW.stat(ET.sineiro.dmg, 'dano')}${UDW.stat(ET.sineiro.xp, 'XP')}${UDW.stat(layerBossLvl('cidade'), 'nível')}</div>
+        <ol class="fases">${(UDW_TXT.sineiroFases || []).map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
+        <h3>Solta</h3><div class="lista">${(DROPS.sineiro || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
+      return UDW.head('Chefes') + T5 + T7 + T6 + T4 + T3 + T2 + rei;
     }
   };
 })();

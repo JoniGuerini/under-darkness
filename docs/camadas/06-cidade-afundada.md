@@ -197,7 +197,7 @@ A procissão conta como 1 no máximo. O afogado só nasce em água ou a até 4 b
 
 - **Bases temáticas** (nível 13, só caem aqui, como drop raro: cerca de 1% de cada monstro da cidade, 3% do penitente, e o Sineiro solta uma das três garantida na primeira morte): **Facão do Saqueador** (adaga; crítico maior pelas costas), **Capuz do Poço** (elmo; os inimigos demoram mais para notar o herói), **Couraça da Guarda da Cidade** (peitoral; a armadura da guarda antiga, com o brasão raspado).
 - **Sem baús:** a camada não tem baú nenhum (só o baú do vilarejo existe no jogo). O loot vem dos monstros, dos veios e do chefe.
-- **Missões do ancião (Caetano):** 3 novas: moedas afundadas, pérolas negras e uma barra de prata.
+- **Missões:** nenhuma (as missões saíram do jogo em 2026-10-10).
 
 ## 9. Luz e atmosfera
 
@@ -271,8 +271,8 @@ Os afogados são inchados e cinza-esverdeados, com a roupa da cidade colada no c
 | `js/139-cidade-save.js` | `sineiro.dead`, objetos caídos |
 | `docs/cidade-spec.md` | a spec técnica depois de implementar |
 
-## 15. Decisões em aberto
+## 15. Decisões (Jonathan, 2026-10-10)
 
-1. **O Grande Poço: dá para descer de corda até a tampa?** Recomendo sim: o herói chega à tampa preta, ouve o som sumir e não acha nada. O mistério fica para as camadas 15 e 16.
-2. **O saqueador pode pegar itens que o próprio herói soltou no chão, não só drops de monstro?** Recomendo só drops de monstro: perder um item do inventário irrita mais do que assusta.
-3. **A Parede Fresca do emparedador some sozinha em 30 s ou fica até alguém quebrar?** Recomendo 30 s: prende na luta, mas nunca deixa um caminho fechado para trás.
+1. **O Grande Poço:** dá para descer de corda até a tampa. O herói chega à tampa preta, o som some e não há nada lá. O mistério fica para as camadas 15 e 16.
+2. **O saqueador** só pega drop de monstro, nunca o que o herói soltou no chão.
+3. **A Parede Fresca** do emparedador desmancha sozinha em 30 s.

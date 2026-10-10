@@ -1,7 +1,7 @@
 'use strict';
 
 /* ================= constants & utils ================= */
-const T = 12, WW = 900, WH = 1202, CH = 16, SURF_BASE = 46;   // 1016 -> 1202 (2026-10-10): the fungal mines between the mine and the abyss; 830 -> 1016 (2026-10-09): the abyss under the mine; WH 240 -> 440 (2026-10-08): the caves above the cathedral; 440 -> 640 (2026-10-09): the ice caves under it; 640 -> 830 (2026-10-09): the mine under the ice
+const T = 12, WW = 900, WH = 1388, CH = 16, SURF_BASE = 46;   // 1202 -> 1388 (2026-10-10): the sunken city between the fungal mines and the abyss; 1016 -> 1202 (2026-10-10): the fungal mines between the mine and the abyss; 830 -> 1016 (2026-10-09): the abyss under the mine; WH 240 -> 440 (2026-10-08): the caves above the cathedral; 440 -> 640 (2026-10-09): the ice caves under it; 640 -> 830 (2026-10-09): the mine under the ice
 const GRAV = 980, MAXFALL = 430, DAY_LEN = 1440; // one full day = 24 real minutes (12 of day, 12 of night)
 const WSC = WW / 300;   // how many times wider than the original 300-tile world (2026-10-09: 3x); world-wide counts scale by it
 const SPX = WW >> 1, VIL_HALF = 34;   // the village spans this many tiles either side of the spawn

@@ -1,9 +1,9 @@
 'use strict';
 
-/* ================= biomas: as cavernas (52 a 57), a catedral (41 a 46), o gelo (69 a 74), a mina (79 a 86), as minas fúngicas (120 a 128), o abismo (103 a 111) e o documento de biomas ================= */
+/* ================= biomas: as cavernas (52 a 57), a catedral (41 a 46), o gelo (69 a 74), a mina (79 a 86), as minas fúngicas (120 a 128), a cidade afundada (130 a 139), o abismo (103 a 111) e o documento de biomas ================= */
 (() => {
   const E = UDW.esc, X = UDW_TXT;
-  const TABS = [['cavernas', 'Cavernas'], ['catedral', 'Catedral'], ['gelo', 'Gelo'], ['mina', 'Mina'], ['fungo', 'Fungo'], ['abismo', 'Abismo'], ['blocos', 'Blocos'], ['objetos', 'Objetos de cena'], ['documento', 'Documento de biomas'], ['regras', 'Regras de geração']];
+  const TABS = [['cavernas', 'Cavernas'], ['catedral', 'Catedral'], ['gelo', 'Gelo'], ['mina', 'Mina'], ['fungo', 'Fungo'], ['cidade', 'Cidade'], ['abismo', 'Abismo'], ['blocos', 'Blocos'], ['objetos', 'Objetos de cena'], ['documento', 'Documento de biomas'], ['regras', 'Regras de geração']];
   // nível dos monstros numa faixa (o mesmo cálculo do layerLvl do 52 com o registro de camadas do 129: cada camada começa 1 acima do fim da de cima, sobe 1 a partir de 93 m)
   const layerAt = m => LAYERS[Math.min(LAYERS.length, Math.floor(m / LAYER_D) + 1) - 1].id;
   const lvAt = m => m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : layerLo(layerAt(m)) + (m % LAYER_D >= 93 ? 1 : 0);
@@ -74,6 +74,22 @@
     h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.maeesporo ? ET.maeesporo.name : 'A Mãe-Esporo')}</a>: ${E(X.maeOnde || '')}</p>`;
     return h;
   }
+  function cidade() {
+    let h = `<p class="lead">${E(X.cidade)}</p><p><span class="rot">Entrada</span>${E(X.cidadeEntrada)}</p><p><span class="rot">Som</span>${E(X.cidadeSom)}</p><p><span class="rot">Água</span>${E(X.cidadeAgua)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.cdFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.cdMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.cdMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="bnav"><a href="#/biomas/blocos/cidade">Blocos da cidade afundada por faixa</a><a href="#/biomas/objetos/cidade">Objetos da cidade afundada por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.sineiro ? ET.sineiro.name : 'O Sineiro Afogado')}</a>: ${E(X.sineiroOnde || '')}</p>`;
+    return h;
+  }
   function abismo() {
     let h = `<p class="lead">${E(X.abismo)}</p><p><span class="rot">Entrada</span>${E(X.abismoEntrada)}</p><p><span class="rot">Som</span>${E(X.abismoSom)}</p><h2>Faixas</h2><div class="faixas">`;
     for (const f of X.abFaixas) {
@@ -118,14 +134,15 @@
     { id: 'gelo', nome: 'As Cavernas de Gelo', de: 372, ate: 558, parede: WIC_ROCHA, faixas: X.icFaixas.map((f, b) => ({ k: 'ic' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'mina', nome: 'A Mina Abandonada', de: 558, ate: 744, parede: WMN_FERROSA, faixas: X.mnFaixas.map((f, b) => ({ k: 'mn' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'fungo', nome: 'As Minas Fúngicas', de: 744, ate: 930, parede: WFG_XISTO, faixas: X.fgFaixas.map((f, b) => ({ k: 'fg' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
-    { id: 'abismo', nome: 'O Abismo', de: 930, ate: 1116, parede: WAB_BASALTO, faixas: X.abFaixas.map((f, b) => ({ k: 'ab' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    { id: 'cidade', nome: 'A Cidade Afundada', de: 930, ate: 1116, parede: WCD_CANTARIA, faixas: X.cdFaixas.map((f, b) => ({ k: 'cd' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    { id: 'abismo', nome: 'O Abismo', de: 1116, ate: 1302, parede: WAB_BASALTO, faixas: X.abFaixas.map((f, b) => ({ k: 'ab' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'superficie', nome: 'Superfície', parede: 1, faixas: [{ k: 'sup', nome: 'Vilarejo, campos e morros', de: null }] }
   ];
   function census() {
     if (UDW.censo) return UDW.censo;
     const C = { t: {}, w: {}, p: {}, n: SEEDS.length };
     const add = (o, id, k) => { (o[id] = o[id] || {})[k] = (o[id][k] || 0) + 1; };
-    const bandOf = (x, y) => y < surf[x] + 6 || y - CV_S0 < 6 ? 'sup' : y >= AB_S0 ? 'ab' + Math.max(0, Math.min(3, abyssBand(y))) : y >= FG_S0 ? 'fg' + Math.max(0, Math.min(3, fungoBand(y))) : y >= MN_S0 ? 'mn' + Math.max(0, Math.min(3, mineBand(y))) : y >= IC_S0 ? 'ic' + Math.max(0, Math.min(3, iceBand(y))) : y < CB_S0 ? 'cv' + Math.max(0, Math.min(3, caveBand(y))) : 'ct' + cathBand(y);
+    const bandOf = (x, y) => y < surf[x] + 6 || y - CV_S0 < 6 ? 'sup' : y >= AB_S0 ? 'ab' + Math.max(0, Math.min(3, abyssBand(y))) : y >= CD_S0 ? 'cd' + Math.max(0, Math.min(3, cidadeBand(y))) : y >= FG_S0 ? 'fg' + Math.max(0, Math.min(3, fungoBand(y))) : y >= MN_S0 ? 'mn' + Math.max(0, Math.min(3, mineBand(y))) : y >= IC_S0 ? 'ic' + Math.max(0, Math.min(3, iceBand(y))) : y < CB_S0 ? 'cv' + Math.max(0, Math.min(3, caveBand(y))) : 'ct' + cathBand(y);
     for (const sd of SEEDS) {
       generate(sd);
       for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
@@ -145,7 +162,7 @@
     for (const [o, src] of [[NOMES.t, X.blocoNome], [NOMES.w, X.paredeNome]]) for (const k in src) { try { o[/^\d+$/.test(k) ? +k : eval(k)] = src[k]; } catch (e) { } }
     return NOMES;
   }
-  const isOre = t => [COAL, COPPER, IRON, GOLD, CRYSTAL, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, MN_O_CARVAO, MN_O_COBALTO, IC_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, AB_O_CARVAO, AB_O_INFERNITA].includes(t);
+  const isOre = t => [COAL, COPPER, IRON, GOLD, CRYSTAL, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, MN_O_CARVAO, MN_O_COBALTO, IC_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, AB_O_CARVAO, AB_O_INFERNITA, FG_O_CARVAO, FG_O_ESPORITA, CD_O_CARVAO, CD_O_PRATA].includes(t);
   const kindT = t => isOre(t) ? 'Minérios' : SOLID[t] && BLOCKY[t] ? 'Terreno' : 'Decoração de um bloco';
   // uma linha da matriz: o quanto aparece em cada faixa, comparado com a faixa onde mais aparece
   function cells(row, B) {
@@ -201,14 +218,15 @@
 
   UDW.pages.biomas = {
     render(tab = 'cavernas', anchor) {
-      const sub = { cavernas: 'A primeira camada, logo debaixo do vilarejo.', catedral: 'A segunda camada, debaixo das cavernas.', gelo: 'A terceira camada, debaixo das criptas da catedral.', mina: 'A quarta camada, debaixo das Cavernas de Gelo.', fungo: 'A quinta camada, debaixo da Mina Abandonada.', abismo: 'A sexta camada, debaixo das Minas Fúngicas.', blocos: 'O que nasce em cada bioma, faixa por faixa.', objetos: 'Os objetos de cena de cada bioma, faixa por faixa.' };
-      let h = UDW.head(tab === 'cavernas' ? 'As Cavernas' : tab === 'catedral' ? 'A Catedral Abandonada' : tab === 'gelo' ? 'As Cavernas de Gelo' : tab === 'mina' ? 'A Mina Abandonada' : tab === 'fungo' ? 'As Minas Fúngicas' : tab === 'abismo' ? 'O Abismo' : 'Biomas', sub[tab] || '') + UDW.tabs('biomas', TABS, tab);
+      const sub = { cavernas: 'A primeira camada, logo debaixo do vilarejo.', catedral: 'A segunda camada, debaixo das cavernas.', gelo: 'A terceira camada, debaixo das criptas da catedral.', mina: 'A quarta camada, debaixo das Cavernas de Gelo.', fungo: 'A quinta camada, debaixo da Mina Abandonada.', cidade: 'A sexta camada, debaixo das Minas Fúngicas.', abismo: 'A sétima camada, debaixo da Cidade Afundada.', blocos: 'O que nasce em cada bioma, faixa por faixa.', objetos: 'Os objetos de cena de cada bioma, faixa por faixa.' };
+      let h = UDW.head(tab === 'cavernas' ? 'As Cavernas' : tab === 'catedral' ? 'A Catedral Abandonada' : tab === 'gelo' ? 'As Cavernas de Gelo' : tab === 'mina' ? 'A Mina Abandonada' : tab === 'fungo' ? 'As Minas Fúngicas' : tab === 'cidade' ? 'A Cidade Afundada' : tab === 'abismo' ? 'O Abismo' : 'Biomas', sub[tab] || '') + UDW.tabs('biomas', TABS, tab);
       if (tab === 'objetos' || tab === 'blocos') h += UDW.censo ? (tab === 'objetos' ? objetos() : blocos()) : '<p class="nota" id="censo">Gerando mundos para contar o que nasce em cada faixa...</p>';
       else if (tab === 'documento' || tab === 'regras') { const d = UDW_DOCS.find(x => x.id === (tab === 'documento' ? 'biomas' : 'regras-de-bioma')); h += UDW.docView(d); }
       else if (tab === 'catedral') h += catedral();
       else if (tab === 'gelo') h += gelo();
       else if (tab === 'mina') h += mina();
       else if (tab === 'fungo') h += fungo();
+      else if (tab === 'cidade') h += cidade();
       else if (tab === 'abismo') h += abismo();
       else h += cavernas();
       return h;
