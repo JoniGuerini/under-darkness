@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.22.0';
+const VERSAO = '0.22.1';
 const NOVIDADES = [
+  { v: '0.22.1', data: '10/10/2026', titulo: 'Cura da Marta', itens: [
+    'A Marta volta a curar sua vida e mana de graça.'
+  ] },
   { v: '0.22.0', data: '10/10/2026', titulo: 'Árvores', itens: [
     'As árvores cortadas da superfície voltam aos poucos: a cada 4 horas do jogo nasce uma árvore nova em algum lugar longe da vista, até o mundo ter de novo as árvores que tinha.'
   ] },

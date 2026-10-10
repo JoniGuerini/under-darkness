@@ -1,7 +1,7 @@
 'use strict';
 
 /* ================= Marta, a alquimista: o alambique e a botica =================
-   A Marta deixou de curar de graça: agora é alquimista e herborista. Na conversa: "Alquimia" abre o livro de receitas
+   A Marta é alquimista e herborista e continua curando de graça: "Curar vida e mana" enche as duas. "Alquimia" abre o livro de receitas
    dela (o mesmo livro de profissão da forja do Grimaldo, js/18-forja.js), "Comprar e vender" abre a botica.
    - O livro: receitas à esquerda em grupos (vida, mana e os elixires de cada camada) com busca e [N] = quantas dá para fazer;
      à direita a receita escolhida (efeito, ingredientes que você tem/precisa), o caldeirão, a barra, Fazer todos,
@@ -32,17 +32,23 @@ CHAT.curandeira = [
   'Cada camada lá embaixo tem a sua erva. Quanto mais fundo, mais forte o que dá para fazer com ela.',
   'Erva colhida volta a nascer, se você deixar a terra em paz um pouco.'
 ];
-{ const k = CHAT.taverneiro.findIndex(l => typeof l === 'string' && l.startsWith('A Marta cura')); if (k >= 0) CHAT.taverneiro[k] = 'A Marta largou as ataduras e agora vive no meio de frascos. Se a casa dela soltar fumaça verde, não entre.'; }
+// (a fala do Odo "A Marta cura de graça" continua valendo)
 
 /* ---- a botica ---- */
 Object.assign(MAT_VAL, { erva_sangue: 3, lirio_gruta: 5, losna: 8, flor_geada: 12, raiz_brasa: 16, frasco: 1, pocao_maior: 20, pocao_superior: 34, pocao_mana: 10, pocao_mana_maior: 20, elixir_pedra: 24, elixir_peconha: 24, elixir_regen: 24, elixir_antidoto: 28, elixir_espectral: 32, elixir_carnical: 32, elixir_clareza: 34, elixir_geada: 40, elixir_furia: 40, elixir_vida: 40, elixir_brasa: 48, elixir_polvora: 48 });
 { const c = SHOPS.curandeira, b = c.buys; c.title = 'Botica da Marta'; c.buys = id => b(id) || id === 'frasco' || !!ALQ[id] || HERBS.some(h => h.id === id); c.hint = c.hint.replace(/^Compra /, 'Compra ervas, frascos, poções, elixires, '); }
 { const _rs = restock; restock = function () { _rs(); stock.curandeira = [{ s: { id: 'pocao', n: 1 }, price: 30, inf: true }, { s: { id: 'pocao_mana', n: 1 }, price: 30, inf: true }, { s: { id: 'frasco', n: 1 }, price: 2, inf: true }]; }; }
 
-/* ---- a conversa: alambique e botica, sem cura ---- */
+/* ---- a conversa: alambique, cura de graça (vida e mana cheias) e botica ---- */
+function alqRestore(n) {
+  if (pl.hp >= pl.maxHp && pl.mana >= pl.maxMana) { talkMenu(n, 'Você está inteiro. Por enquanto.'); return; }
+  pl.hp = pl.maxHp; pl.mana = pl.maxMana; pl.manaPot = 0; sfx.potion();
+  burst(pl.x + pl.w / 2, pl.y + 10, 18, '#7dff8a', 50, -80, 0.8, 1, true); burst(pl.x + pl.w / 2, pl.y + 10, 10, '#7aa8ff', 40, -70, 0.7, 1, true);
+  talkMenu(n, pickLine(['Pronto. Tente voltar inteiro da próxima vez.', 'Bebe isso, tudo. Pronto, a cabeça clareou também.', 'Costurado e descansado. Agora vai.']));
+}
 { const _tm = talkMenu; talkMenu = function (n, text) {
   if (n.id !== 'curandeira') return _tm(n, text);
-  talkSay(text, [['Alquimia', () => openAlq(n), true], ['Comprar e vender', () => openShop(n)], ['Conversar', () => chat(n)], ['Até logo', closeTalk]]);
+  talkSay(text, [['Alquimia', () => openAlq(n), true], ['Curar vida e mana', () => alqRestore(n)], ['Comprar e vender', () => openShop(n)], ['Conversar', () => chat(n)], ['Até logo', closeTalk]]);
 }; }
 
 /* ---- a placa da casa: um frasco verde no lugar da cruz ---- */
