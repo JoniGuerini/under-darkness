@@ -7,7 +7,7 @@
    iron cauldrons boiling over a fire, a basalt basin brimming with lava, shards of obsidian, a broken bridge and a
    small lavafall on the back wall. In the Entranhas: giant ribs, a giant horned skull, flesh cocoons and demon
    eggs, butcher's hooks with meat, a pyre of bones, and in the walls a heart that beats, an eye that blinks and a
-   mouth full of teeth. In the Trono do Caos: sacrifice altars, a pentagram burning on the floor, an obelisk of
+   mouth full of teeth. In the Trono do Caos: sacrifice altars, a pentagram burning in a standing slab of chaos stone, an obelisk of
    runes, great chaos crystals, a profane book on its lectern, giant spikes, a horned skull with candles.
    Cages hang everywhere. The boss's throne is 109's. Same 7-tone ramps lit from the top left and dark rim as
    81-mina-objetos; registered with defProp (`abismo: true`), placed by abPlaceProps (called by 108) from
@@ -515,14 +515,31 @@ function sacrificeAltar(k) {   // 36 x 24: a slab of chaos stone on a carved bas
   else { skull(P, 13.5, 3.5, s, RP.osso, 4); for (let i = 0; i < 4; i++) P.line(17 + i * 2, 5, 19 + i * 2, 6, RP.osso, 3.8, 1); P.rect(24, 1, 4, 5, RP.latao, (i, j) => j === 0 ? 5 : 4.2 - i * 0.6); P.rect(25, 2, 2, 1, RP.sangue, () => 5); }   // bones and a chalice
   return P.done();
 }
-function pentagram() {   // 44 x 18: a pentagram burnt into the floor, seen from above the floor line, its lines glowing; a candle at every point
-  const P = painter(44, 18), s = 10981, cx = 22, cy = 11.5, rx = 20, ry = 5.4;
-  for (let y = 4; y < 18; y++) for (let x = 0; x < 44; x++) { const d = Math.hypot((x + 0.5 - cx) / (rx + 1.5), (y + 0.5 - cy) / (ry + 1)); if (d < 1) P.put(x, y, d > 0.88 ? RP.carvao : RP.sangue, (d > 0.88 ? 2.4 : 0.8) + cg(x, y, s) * 1.2); }   // the scorched stain
-  for (let a = 0; a < 6.3; a += 0.015) P.put(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, RP.runa, 3.4 + Math.sin(a) * 1);
-  const pts = []; for (let k = 0; k < 5; k++) { const a = Math.PI / 2 + k * Math.PI * 2 / 5; pts.push([cx + Math.cos(a) * rx * 0.97, cy + Math.sin(a) * ry * 0.97]); }   // point down: the profane way
-  for (let k = 0; k < 5; k++) { const [x0, y0] = pts[k], [x1, y1] = pts[(k + 2) % 5]; P.line(x0, y0, x1, y1, RP.runa, (t) => 4.6 - Math.abs(t - 0.5) * 1.2, 1); }
+function pentagram() {   // 40 x 42: a slab of chaos stone stood up on a low step, a pentagram carved deep in its face and burning; candles on the step and the floor
+  const P = painter(40, 42), s = 10981, cx = 20, cy = 17, R = 11.5;
+  // the step it stands on, wide and low, scorched where it meets the floor
+  P.box(1, 37, 38, 5, RP.caos, s, 3.2); P.rect(0, 37, 40, 1, RP.caos, (i) => 4.8 - i * 0.04);
+  for (let x = 0; x < 40; x++) if (hash2(x, 3, s) < 0.55) P.put(x, 41, RP.carvao, 1.6 + hash2(x, 4, s));
+  // the slab: a rough arch of chaos stone, lit from the top left, chipped at the rim
+  for (let y = 2; y < 37; y++) for (let x = 5; x < 35; x++) {
+    const ay = y < 12 ? Math.sqrt(Math.max(0, 1 - ((12 - y) / 10.5) ** 2)) * 15 : 15, dx = x + 0.5 - cx;
+    if (Math.abs(dx) > ay - (hash2(x, y, s + 1) < 0.08 ? 1 : 0)) continue;
+    const u = (dx + ay) / (2 * ay);
+    P.put(x, y, RP.caos, 4.1 - u * 2 + (u < 0.07 ? 0.9 : 0) + cg(x, y, s) * 0.5 + cn(x, y, 14, 18, s) * 0.6 - (y > 33 ? (y - 33) * 0.35 : 0));
+  }
+  // the circle and the star, cut in: a dark groove with the burning line inside it
+  const groove = (x, y) => { P.put(x, y + 1, RP.sombra, 0.6); P.put(x, y, RP.runa, 4.8); };
+  for (let a = 0; a < 6.3; a += 0.02) groove(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+  const pts = []; for (let k = 0; k < 5; k++) { const a = Math.PI / 2 + k * Math.PI * 2 / 5; pts.push([cx + Math.cos(a) * R * 0.96, cy + Math.sin(a) * R * 0.96]); }   // point down: the profane way
+  for (let k = 0; k < 5; k++) { const [x0, y0] = pts[k], [x1, y1] = pts[(k + 2) % 5], n = 40; for (let t = 0; t <= n; t++) groove(x0 + (x1 - x0) * t / n, y0 + (y1 - y0) * t / n); }
   for (const [x, y] of pts) P.put(x, y, RP.runa, 6);
-  for (const [x, y] of pts) candle(P, Math.round(x) - (x > cx ? 1 : 0), Math.round(y) - 1, 3 + (y < cy ? 1 : 0), s + x);
+  P.blob(cx, cy, 1.6, 1.6, RP.runa, s + 2, 5);   // the eye in the middle
+  for (const [gx, gy, k] of [[7, 30, 3], [29, 30, 5]]) glyph(P, gx, gy, k, RP.runa, 4.2);   // a rune each side under the circle
+  // blood run from the lower point down onto the step
+  for (let j = 0; j < 7; j++) P.put(cx + (j > 4 ? 1 : 0), 30 + j, RP.sangue, 5 - j * 0.3);
+  for (let x = cx - 3; x <= cx + 4; x++) P.put(x, 37, RP.sangue, 4 + hash2(x, 5, s));
+  // candles: two on the step at the foot of the slab, three on the floor in front
+  candle(P, 2, 36, 5, s + 3); candle(P, 36, 36, 4, s + 4); candle(P, 9, 36, 3, s + 5); candle(P, 30, 36, 6, s + 6);
   return P.done();
 }
 function runeObelisk() {   // 18 x 52: a tapering obelisk of chaos stone, a column of runes burning up its face
@@ -598,7 +615,7 @@ def('ab_pira', 'Pira de ossos', F, 'frente', ['entranhas', 'trono'], [bonePyre()
 // Trono do Caos
 { const [a0, w0] = wicked(() => sacrificeAltar(0)), [a1] = wicked(() => sacrificeAltar(1));
   def('ab_altar', 'Altar de sacrifício', F, 'frente', ['trono'], [a0, a1], { luz: [{ x: 18, y: 16, r: 0.5 }, { x: w0[0].x, y: w0[0].y, r: 0.35 }], chamas: w0, brilho: RUNE }); }
-{ const [cv, w] = wicked(pentagram); def('ab_pentagrama', 'Pentagrama', F, 'frente', ['trono'], [cv], { luz: [{ x: 22, y: 11, r: 0.85 }], chamas: w, brilho: RUNE }); }
+{ const [cv, w] = wicked(pentagram); def('ab_pentagrama', 'Pentagrama', F, 'frente', ['trono'], [cv], { luz: [{ x: 20, y: 17, r: 0.85 }], chamas: w, brilho: RUNE }); }
 def('ab_obelisco', 'Obelisco de runas', F, 'frente', ['trono'], [runeObelisk()], { luz: [{ x: 9, y: 22, r: 0.7 }], brilho: RUNE });
 def('ab_cristal', 'Cristal do caos', F, 'frente', ['trono'], [chaosCrystal(0), chaosCrystal(1)], { luz: [{ x: 12, y: 16, r: 0.85 }], brilho: CHAOS });
 { const [cv, w] = wicked(profaneLectern); def('ab_pulpito', 'Livro profano', F, 'frente', ['trono'], [cv], { luz: [{ x: 9, y: 8, r: 0.45 }], chamas: w, brilho: CHAOS }); }

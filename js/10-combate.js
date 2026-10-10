@@ -123,8 +123,10 @@ function hitEnemy(e, dir, mult = 1, melee = false) {
   e.hp -= dmg; e.flash = 0.1; e.showHp = 3.5;
   const D = ET[e.type];
   const poise = D.boss || (e.type === 'skeleton' && (e.state === 'wind' || e.state === 'swing')) || (e.type === 'guard' && (e.state === 'wind' || e.state === 'thrust'));
-  if (!poise) { e.vx = dir * 150 * D.kb * (melee ? pl.kb : 1); e.vy = D.fly ? -40 : -120 * D.kb; e.stun = Math.max(e.stun, 0.25); }
-  else e.vx = dir * 25;
+  // a blow only nudges it: a small step back and a little hop (heavier weapons and Empurrão add a bit, not a throw)
+  const kbW = melee ? 1 + (pl.kb - 1) * 0.35 : 1;
+  if (!poise) { e.vx = dir * 45 * D.kb * kbW; e.vy = D.fly ? -15 : -35 * D.kb; e.stun = Math.max(e.stun, 0.25); }
+  else e.vx = dir * 10;
   if (melee) {
     if (pl.stunCh && !poise && !D.boss && Math.random() < pl.stunCh) e.stun = Math.max(e.stun, 0.9);   // maces
     if (pl.lifeSteal > 0 && !pl.dead && pl.hp < pl.maxHp) { pl.lsAcc += dmg * pl.lifeSteal; if (pl.lsAcc >= 1) { const h = Math.floor(pl.lsAcc); pl.lsAcc -= h; pl.hp = Math.min(pl.maxHp, pl.hp + h); if (h >= 2) floatText(pl.x + pl.w / 2, pl.y - 6, '+' + h, '#7dff8a', 0.7); } }
@@ -273,7 +275,8 @@ function hurtPlayer(dmg, srcX, src, isProj) {
     pl.vx -= pl.facing * (parry ? 20 : 80);
     if (src && !isProj) {
       const D = ET[src.type];
-      src.vx = pl.facing * (parry ? 230 : 170) * D.kb; if (!D.fly) src.vy = -130 * D.kb;
+      const nudge = D.boss ? 0.3 : 1;   // a parry staggers it in place, it doesn't throw it across the room
+      src.vx = pl.facing * (parry ? 70 : 50) * D.kb * nudge; if (!D.fly) src.vy = -40 * D.kb * nudge;
       src.stun = parry ? 1.4 : 0.35; src.atkCD = Math.max(src.atkCD, parry ? 1.6 : 0.6);
       if (parry) src.parried = 1.5;
       if (src.type === 'skeleton') { src.state = 'walk'; src.sAng = 0.9; }

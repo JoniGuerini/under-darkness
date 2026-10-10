@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.11.3';
+const VERSAO = '0.11.4';
 const NOVIDADES = [
+  { v: '0.11.4', data: '10/10/2026', titulo: 'Pentagrama de pé', itens: [
+    'No Trono do Caos, o pentagrama não flutua mais: agora é uma laje de pedra do caos em pé sobre um degrau, com o pentagrama entalhado e queimando, sangue escorrendo e velas no chão.',
+    'Golpes e aparos empurram bem menos os inimigos: eles recuam um passo em vez de voar longe.'
+  ] },
   { v: '0.11.3', data: '10/10/2026', titulo: 'Luz do modo deus', itens: [
     'A Luz total do modo deus não apaga mais as sombras: o subterrâneo fica bem menos escuro, dá para jogar sem tocha, mas a escuridão continua nas bordas.'
   ] },
