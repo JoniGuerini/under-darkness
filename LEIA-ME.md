@@ -42,7 +42,7 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 | 08-estado-entrada | estado do jogador e do jogo, hotbar, teclado e mouse |
 | 09-audio | sons |
 | 10-combate | efeitos, tipos de inimigo, física, dano, loot |
-| 11-jogador | atualização do jogador, mineração, colocar blocos |
+| 11-jogador | atualização do jogador, mineração, colocar blocos e tochas. A tocha (Q ou tocha na barra) vai no bloco exato sob o mouse, sem limite de distância e sem precisar de linha de visão: dá para pôr num buraco dentro de uma parede. Precisa de um espaço vazio preso a algo (parede de fundo ou bloco ao lado/embaixo), fora do vilarejo, e gasta 1 tocha (pedido do Jonathan, 2026-10-10) |
 | 12-inimigos-ia | IA dos monstros, visão, pathfinding |
 | 13-cripta-chefe | o que sobrou da cripta antiga (removida em 2026-10-09): `bossFight`, `endBossFight()` base e `updateEnemies` |
 | 14-atualizacao | projéteis, hora do dia, update geral, câmera |
@@ -173,4 +173,5 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 - Antes de gravar, releia o arquivo atual; mexa só no trecho da sua tarefa.
 - O save fica no navegador (`localStorage`) e não depende dos arquivos.
 - Sem missões por enquanto (pedido do Jonathan, 2026-10-10): ele vai repensar como vão funcionar. Não recrie tarefas no Caetano nem listas `BOUNTIES` nas camadas novas.
+- Tocha sem limite (pedido do Jonathan, 2026-10-10): `placeTorch(tx, ty)` não olha distância nem linha de visão; não recoloque `REACH` nela. O custo é a própria tocha.
 - Nada de avisos/pop-ups no topo da tela (pedido do Jonathan): não recrie `#toasts` nem mostre mensagens em `toast()`; avise pelo próprio jogo (som, efeito, painel) quando precisar.

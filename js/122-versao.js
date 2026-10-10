@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.11.0';
+const VERSAO = '0.11.1';
 const NOVIDADES = [
+  { v: '0.11.1', data: '10/10/2026', titulo: 'Tocha onde o mouse aponta', itens: [
+    'A tocha vai exatamente onde o mouse aponta, sem limite de distância, até dentro de um buraco no meio da parede.'
+  ] },
   { v: '0.11.0', data: '10/10/2026', titulo: 'As Minas Fúngicas', itens: [
     'Camada nova debaixo da Mina, de 744 a 930 m: as galerias de uma colônia tomada por um fungo, com cogumelos do tamanho de torres, grutas alagadas e um coração de carne viva.',
     'Água de verdade: dá para nadar, o equipamento pesado afunda e o fôlego dura 10 segundos.',

@@ -188,7 +188,7 @@ function updateDig(dt) {
     if (pl.target.dig && inReach && pl.hintT <= 0) { pl.hintT = 2.5; floatText(pcx, pl.y - 10, pick ? 'Segure o clique esquerdo para minerar' : 'Para minerar, pegue a picareta (2)', '#ffd27a', 0.8); }
   }
   if (!pl.mining || !inReach || tx !== pl.digX || ty !== pl.digY) { pl.digT = 0; pl.digX = -1; }
-  if (pressed.KeyQ) placeTorch(tx, ty, inReach);
+  if (pressed.KeyQ) placeTorch(tx, ty);
 }
 function breakTile(tx, ty) {
   const t = tileAt(tx, ty); let wood = 0;
@@ -213,8 +213,9 @@ function breakTile(tx, ty) {
   }
   if (ORE_XP[t]) { floatText((tx + 0.5) * T, ty * T - 2, ORE_NAME[t], PCOL[t], 0.8); burst((tx + 0.5) * T, (ty + 0.5) * T, 6, PCOL[t], 60, 0, 0.5, 1, true); }
 }
-function placeTorch(tx, ty, inReach) {
-  if (!inReach) return false;
+// a torch goes exactly on the tile under the mouse: no reach limit and no line of sight (it can go into a pocket inside a wall)
+function placeTorch(tx, ty) {
+  if (ty < 1 || ty >= WH - 1) return false;
   if (inVillage(tx, ty)) { if (pl.hintT <= 0) { pl.hintT = 2; floatText(pl.x + pl.w / 2, pl.y - 8, 'O vilarejo já tem lanternas', '#d9c7a3', 0.8); } return false; }
   if (countItem('tocha') <= 0) { floatText(pl.x + pl.w / 2, pl.y - 8, 'Sem tochas', '#d9c7a3', 0.8); return false; }
   if (tileAt(tx, ty) !== AIR && tileAt(tx, ty) !== TUFT) return false;
@@ -240,7 +241,7 @@ function placeHeld(held) {
   const [wx, wy] = mouseWorld(), tx = Math.floor(wx / T), ty = Math.floor(wy / T);
   const pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
   const inReach = Math.hypot((tx + 0.5) * T - pcx, (ty + 0.5) * T - pcy) <= REACH;
-  if (held.s.id === 'tocha') return placeTorch(tx, ty, inReach);
+  if (held.s.id === 'tocha') return placeTorch(tx, ty);
   if (held.it.deco) { if (!inReach || !canPlaceDeco(tx, ty)) return false; setTile(tx, ty, held.it.deco); held.s.n--; if (held.s.n <= 0) inv[held.i] = null; invDirty = true; sfx.place(); return true; }
   if (!inReach || !canPlace(tx, ty)) return false;
   setTile(tx, ty, held.it.block);
