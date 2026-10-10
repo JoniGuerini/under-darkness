@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.13.0';
+const VERSAO = '0.13.1';
 const NOVIDADES = [
+  { v: '0.13.1', data: '10/10/2026', titulo: 'Água com volume', itens: [
+    'A água tem volume: desce, se espalha e se nivela.'
+  ] },
   { v: '0.13.0', data: '10/10/2026', titulo: 'A Hora Parada', itens: [
     'Conjunto da Hora Parada: Ponteiro (lança), Elmo, Couraça e Botas da Hora Parada, lendários, em latão, azul-noite e cristal ciano. Todo personagem novo já encontra as quatro peças no baú da vila.',
     'O Ponteiro é uma lança com a ponta de ponteiro de relógio. A cada 6 golpes o tempo para em volta do alvo: os inimigos ficam presos no lugar por 2 s, em sépia como uma foto antiga, com um relógio contando o tempo que falta. Cada golpe ainda ecoa um instante depois com 35% do dano.',
