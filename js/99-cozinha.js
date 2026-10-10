@@ -14,7 +14,16 @@
 
 const ck = { npc: null, built: false, sel: 'carne_assada', shut: {}, qty: 1, find: '', pot: null, dirty: true, eat: null, meal: null };
 const cookOpen = () => !!ck.npc && !$('cozinha').hidden;
-const ckMax = r => Math.min(...r.need.map(([id, n]) => Math.floor(reagHave(id) / n)));
+// combustível: madeira ou carvão, qualquer um dos dois (CK_FUEL, 98-cozinha-dados)
+const ckFuelHave = () => CK_FUEL.reduce((a, id) => a + reagHave(id), 0);
+const ckMax = r => Math.min(...r.need.map(([id, n]) => Math.floor(reagHave(id) / n)), r.fuel ? Math.floor(ckFuelHave() / r.fuel) : Infinity);
+// tira os ingredientes e o combustível de um prato e devolve a lista do que saiu, para reembolsar se o fogo for parado
+function ckTake(r) {
+  const out = r.need.map(([id, n]) => (reagTake(id, n), [id, n]));
+  let f = r.fuel || 0; for (const id of CK_FUEL) { const k = Math.min(f, reagHave(id)); if (k > 0) { reagTake(id, k); out.push([id, k]); f -= k; } }
+  return out;
+}
+const ckFuelRow = (need, have) => `<li class="${have >= need ? 'ok' : 'no'}"><span class="ri"><img src="${ICON[reagHave('madeira') || !reagHave('carvao') ? 'madeira' : 'carvao'].url}" alt=""></span><b>${have}/${need}</b><span>Madeira ou Carvão</span></li>`;
 
 /* ---------- sons: brasa chiando, caldeirão borbulhando, mastigar ---------- */
 const ckSfx = {
@@ -122,10 +131,10 @@ function backFromCook() {
 /* ---------- o fogo: um prato de cada vez; os ingredientes entram quando o prato vai ao fogo ---------- */
 function startCook(r, q, el) {
   if (q < 1 || ckMax(r) < 1) { bad(el); toast('Faltam ingredientes.'); return; }
-  for (const [id, n] of r.need) reagTake(id, n);
-  ck.pot = { r, left: q, done: 0, t: 0, tick: 0 }; ckSfx.start(r.g); ck.dirty = true; invDirty = true;
+  const taken = ckTake(r);
+  ck.pot = { r, left: q, done: 0, t: 0, tick: 0, taken }; ckSfx.start(r.g); ck.dirty = true; invDirty = true;
 }
-function stopCook(refund) { if (!ck.pot) return; if (refund) for (const [id, n] of ck.pot.r.need) reagGive(id, n); ck.pot = null; ck.dirty = true; invDirty = true; }
+function stopCook(refund) { if (!ck.pot) return; if (refund) for (const [id, n] of ck.pot.taken) reagGive(id, n); ck.pot = null; ck.dirty = true; invDirty = true; }
 function tickCook(dt) {
   const P = ck.pot; if (!P) return;
   if (!cookOpen()) { stopCook(true); return; }
@@ -136,7 +145,7 @@ function tickCook(dt) {
   toast(`O Odo preparou: ${ITEMS[r.id].name}`, 'gold');
   P.done++; P.left--; P.t = 0; ck.dirty = true; invDirty = true;
   if (P.left <= 0 || ckMax(r) < 1) { ck.pot = null; return; }
-  for (const [id, n] of r.need) reagTake(id, n);
+  P.taken = ckTake(r);
 }
 const _ckTickFurnace = tickFurnace;
 tickFurnace = function (dt) { _ckTickFurnace(dt); tickCook(dt); };
@@ -182,7 +191,7 @@ function refreshCook() {
   const r = CK_REC[ck.sel], it = ITEMS[r.id], max = ckMax(r), busy = !!P, verb = r.g === 'brasa' ? 'Assar' : 'Cozinhar';
   $('ckIcon').src = ICON[r.id].url; $('ckName').textContent = it.name;
   $('ckSub').textContent = `${r.g === 'brasa' ? 'Brasa' : 'Caldeirão'} · ${dec1(r.t)} s por prato`;
-  $('ckBody').innerHTML = `<p class="pdesc">${it.desc}</p><h5>Ingredientes</h5><ul class="preag">${r.need.map(([id, n]) => reagRow(id, n, reagHave(id))).join('')}</ul>`;
+  $('ckBody').innerHTML = `<p class="pdesc">${it.desc}</p><h5>Ingredientes</h5><ul class="preag">${r.need.map(([id, n]) => reagRow(id, n, reagHave(id))).join('')}${r.fuel ? ckFuelRow(r.fuel, ckFuelHave()) : ''}</ul>`;
   ck.qty = Math.max(1, Math.min(ck.qty, Math.max(1, max)));
   $('ckQty').value = ck.qty;
   const mk = $('btnCk'); mk.textContent = busy ? 'Parar' : verb; mk.classList.toggle('stop', busy); mk.disabled = !busy && max < 1;

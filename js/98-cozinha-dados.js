@@ -23,7 +23,7 @@ Object.assign(ICON_ART, {
 Object.assign(ITEMS, {
   carne_crua: { name: 'Carne Crua', rar: 0, stack: 99, icon: 'rawMeat', cook: 1, desc: 'Carne fresca de bicho do subterrâneo. Crua não presta: o Odo, na taverna, sabe o que fazer. Ingrediente.' },
   cogumelo: { name: 'Cogumelo das Grutas', rar: 0, stack: 99, icon: 'cookShroom', cook: 1, desc: 'Cresce na cabeça do fungo esporento. Cozido perde o veneno e ganha gosto de terra. Ingrediente.' },
-  carne_assada: { name: 'Carne Assada', rar: 1, stack: 20, icon: 'roastMeat', food: { hp: 10, mp: 0, t: 10, eat: 3 }, desc: 'Assada na brasa da taverna do Odo. Comer leva 3 segundos parado; depois recupera 10 de vida ao longo de 10 segundos.' },
+  carne_assada: { name: 'Carne Assada', rar: 1, stack: 20, icon: 'roastMeat', food: { hp: 8, mp: 0, t: 8, eat: 3 }, desc: 'Assada na brasa da taverna do Odo. Comer leva 3 segundos parado; depois recupera 8 de vida ao longo de 8 segundos.' },
   ensopado: { name: 'Ensopado de Cogumelos', rar: 1, stack: 20, icon: 'stewBowl', food: { hp: 14, mp: 15, t: 14, eat: 4 }, desc: 'O caldeirão do Odo: carne e cogumelos fervidos devagar. Comer leva 4 segundos parado; depois recupera 14 de vida e 15 de mana ao longo de 14 segundos.' }
 });
 Object.assign(MAT_VAL, { carne_crua: 3, cogumelo: 3, carne_assada: 10, ensopado: 16 });
@@ -35,9 +35,14 @@ for (const [k, id, ch, a, b] of [
   ['fungo', 'cogumelo', 0.75, 1, 2]
 ]) if (DROPS[k]) DROPS[k].push(a ? [id, ch, a, b] : [id, ch]);
 
-// as receitas, em grupos como o livro da forja: `t` = segundos no fogo por prato
+/* Regra da culinária (Jonathan, 2026-10-10):
+   - Preparar uma coisa crua é 1 para 1: 1 carne crua vira 1 carne assada (um frango vira um frango assado). Não se pede 2 crus para 1 pronto.
+   - Todo prato vai ao fogo, então toda receita gasta combustível: `fuel` unidades de madeira ou de carvão (qualquer um dos dois, `CK_FUEL`).
+   - Receitas que juntam vários ingredientes (o ensopado) pedem cada um na quantidade que faz sentido, mais o combustível. */
+const CK_FUEL = ['madeira', 'carvao'];   // na ordem em que o fogo gasta: madeira primeiro, carvão depois
+// as receitas, em grupos como o livro da forja: `t` = segundos no fogo por prato, `need` = ingredientes, `fuel` = combustível por prato
 const COZINHA = [
-  { k: 'brasa', name: 'Na brasa', items: [{ id: 'carne_assada', t: 3, need: [['carne_crua', 2]] }] },
-  { k: 'caldeirao', name: 'No caldeirão', items: [{ id: 'ensopado', t: 4.5, need: [['carne_crua', 1], ['cogumelo', 2]] }] }
+  { k: 'brasa', name: 'Na brasa', items: [{ id: 'carne_assada', t: 3, need: [['carne_crua', 1]], fuel: 1 }] },
+  { k: 'caldeirao', name: 'No caldeirão', items: [{ id: 'ensopado', t: 4.5, need: [['carne_crua', 1], ['cogumelo', 2]], fuel: 1 }] }
 ];
 const CK_REC = Object.fromEntries(COZINHA.flatMap(G => G.items.map(r => [r.id, Object.assign(r, { g: G.k })])));
