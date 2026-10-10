@@ -234,6 +234,30 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-1, 1), 0.7, 1500), n = 1 + Math.floor(rnd(0, 3));
       for (let i = 0; i < n; i++) nz(A, v, t + i * rnd(0.3, 0.7), rnd(0.12, 0.25), 0.05, 'lowpass', rnd(350, 650), 1.2, 0.01, 'pink', 180);
     },
+    longDrip(A, o, t) {   // a Escuridão: uma gota que ecoa tempo demais
+      const v = voice(A, o, rnd(-0.8, 0.8), 1.4, 2400), f = rnd(900, 1500);
+      osc(A, v, t, 'sine', f, f * 0.6, 0.08, 0.05, 0.002); osc(A, v, t + 0.9, 'sine', f * 0.98, f * 0.6, 0.06, 0.012, 0.002); osc(A, v, t + 1.9, 'sine', f * 0.96, f * 0.6, 0.05, 0.005, 0.002);
+    },
+    breath(A, o, t) {   // um fôlego longe, de alguma coisa grande, que para quando o herói para (c.mov)
+      const v = voice(A, o, rnd(-1, 1), 0.9, 700), d = rnd(1.4, 2.2);
+      nz(A, v, t, d, 0.05, 'bandpass', 420, 1.2, d * 0.45, 'pink', 260); nz(A, v, t + d * 0.9, d * 0.8, 0.035, 'bandpass', 360, 1.2, d * 0.3, 'pink', 220);
+    },
+    pitStone(A, o, t) {   // uma pedra caindo num poço que nunca bate no fundo (O Breu)
+      const v = voice(A, o, rnd(-0.7, 0.7), 1.2, 3000), n = 4 + Math.floor(rnd(0, 4)); let tt = t;
+      for (let i = 0; i < n; i++) { nz(A, v, tt, 0.04, 0.05 * Math.pow(0.6, i), 'bandpass', rnd(1400, 2400) * Math.pow(0.85, i), 3, 0.002); tt += rnd(0.25, 0.5) * (1 + i * 0.25); }
+    },
+    fibers(A, o, t) {   // fibras rangendo e apertando (As Raízes da Noite)
+      const v = voice(A, o, rnd(-1, 1), 0.6, 1600), d = rnd(0.8, 1.6), f = rnd(140, 220);
+      osc(A, v, t, 'sawtooth', f, f * rnd(1.1, 1.4), d, 0.018, d * 0.5); nz(A, v, t, d, 0.025, 'bandpass', rnd(600, 1100), 6, d * 0.4, 'pink');
+    },
+    hum(A, o, t) {   // um tom grave quase inaudível que para quando um braseiro acende perto (O Fundo do Mundo)
+      const v = voice(A, o, 0, 0.8, 300), d = rnd(4, 6);
+      osc(A, v, t, 'sine', 38, 37, d, 0.09, d * 0.4); osc(A, v, t, 'sine', 57, 56, d, 0.03, d * 0.4);
+    },
+    coldWind(A, o, t) {   // vento frio pelas frestas (A Borda Apagada)
+      const v = voice(A, o, rnd(-1, 1), 0.7, 3600), d = rnd(2, 3.4);
+      nz(A, v, t, d, 0.045, 'bandpass', rnd(1100, 1700), 6, d * 0.45, 'white', rnd(1500, 2400));
+    },
     roar(A, o, t) {   // longe, alguma coisa grande ruge
       const v = voice(A, o, rnd(-1, 1), 0.9, 600), d = rnd(1.4, 2.4), f = rnd(48, 70);
       osc(A, v, t, 'sawtooth', f, f * 0.7, d, 0.1, d * 0.3); nz(A, v, t, d, 0.1, 'lowpass', 260, 1, d * 0.3, 'brown', 160);
@@ -300,6 +324,13 @@ const AMBI = (function () {
       ev: [[0.9, 'wings', c => c.band === 3 ? 1.6 : 1, false], [0.12, 'wings', c => c.band >= 2 ? 1 : 0.3, true], [0.06, 'skitter'], [0.08, 'waxCrack', c => c.band === 2 ? 1.6 : 0.8], [0.07, 'plop', c => c.band === 1 ? 1.4 : 0.6],
         [0.05, 'chew', c => c.band === 1 || c.band === 3 ? 1 : 0.4], [0.03, 'buzzBy'], [0.04, 'creakWood', c => c.band === 0 ? 1 : 0], [0.02, 'chains', c => c.band === 0 ? 0.6 : 0], [0.04, 'heart', c => c.band === 3 ? 1 : 0], [0.1, 'drip', c => c.band === 1 ? 0.6 : 0.3, true]]
     },
+    escuro: {   // quase silêncio: ruído marrom muito baixo, um eco enorme e pouco som direto (tudo parece longe); perto de um
+      // braseiro aceso, o estalo do fogo (c.fogo), o único som acolhedor; na sala do Nox, nada de cenário (c.calma 0)
+      rt: 5, damp: 0.25, wet: 0.8,
+      beds: [['brown', 'lowpass', 40, 70, 0.7, 0.18, 0.26, 5, c => c.calma], ['white', 'bandpass', 900, 1600, 5, 0.0, 0.02, 3, c => (c.band === 0 ? 1 : 0.3) * c.calma]],
+      ev: [[0.08, 'longDrip', c => c.calma], [0.06, 'breath', c => c.mov * c.calma], [0.05, 'pitStone', c => c.band === 1 ? c.calma : 0], [0.08, 'fibers', c => c.band === 2 ? c.calma : 0],
+        [0.07, 'hum', c => c.band === 3 && !c.fogo ? c.calma : 0], [0.06, 'coldWind', c => c.band === 0 ? c.calma : 0], [6, 'pop', c => c.fogo ? 1 : 0], [0.012, 'groan', c => c.calma]]
+    },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
@@ -355,7 +386,7 @@ if (typeof document !== 'undefined') (function () {
 
   // onde o herói está: qual cenário e qual faixa dele
   function where() {
-    const c = { name: 'vila', band: 0, night: false, vil: true, calma: 1 };
+    const c = { name: 'vila', band: 0, night: false, vil: true, calma: 1, mov: 0, fogo: false };
     try {
       if (typeof pl === 'undefined' || !pl || !surf) return c;
       const tx = Math.floor((pl.x + 4) / T), ty = Math.floor((pl.y + 10) / T), z = zoneAt(tx, ty);
@@ -364,10 +395,13 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
       c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some
+      // a Escuridão: o herói andando (o fôlego longe para quando ele para), um braseiro aceso perto, a sala do Nox em silêncio
+      c.mov = typeof pl !== 'undefined' && Math.abs(pl.vx) > 15 ? 1 : 0; c.fogo = false;
+      if (c.name === 'escuro') { c.fogo = typeof esNearLit === 'function' && esNearLit(tx, ty, 6); if (typeof inEsHall === 'function' && inEsHall(tx, ty, 2)) { c.calma = 0; return c; } }
       c.calma = 1; if (c.name === 'cidade' && typeof cdPoco !== 'undefined' && cdPoco) { const d = Math.hypot(wdx(tx - cdPoco.cx), Math.max(0, cdPoco.top - ty)); c.calma = Math.abs(wdx(tx - cdPoco.cx)) <= 6 && ty >= cdPoco.top ? 0.1 : Math.min(1, Math.max(0.1, (d - 4) / 12)); }
     } catch (e) { }
     return c;

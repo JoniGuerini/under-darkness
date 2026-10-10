@@ -38,7 +38,7 @@ Cada camada traz um metal novo para a forja, na ordem da descida (regra de [regr
 | [ ] | 13 | **A Cidade dos Antigos** | uma civilização mais velha que tudo, com geometria impossível, máquinas que ainda funcionam e uma estrela caída | construtos e vigias dos Antigos, chefe O Arquiteto | Ferro Estelar, da estrela caída |
 | [ ] | 14 | **Os Salões do Pesadelo** | o lugar onde o sonho vira real: corredores que se repetem, espelhos e portas para lugares que não existem | as coisas do pesadelo, chefe O Rosto Sem Nome | Onirita: metal que só existe enquanto alguém sonha com ele |
 | [ ] | 15 | **O Abismo** (existe, hoje é a 5ª) | o Inferno: portões de cinza, rios de fogo, entranhas e o trono do caos | demônios, chefe O Príncipe do Caos | Infernita |
-| [ ] | 16 | **A Escuridão** (a decidir) | o fundo do mundo e a origem da escuridão que sobe por todas as camadas; quase sem luz, onde o mapa é o próprio perigo | o que a Escuridão gera; chefe final a decidir | a decidir (proposta: Noctírio) |
+| [x] | 16 | **A Escuridão** (existe, hoje logo abaixo do Abismo) | o fundo do mundo e a origem da escuridão que sobe por todas as camadas; quase sem luz, onde o mapa é o próprio perigo ([ficha](camadas/16-escuridao.md)) | o que a Escuridão gera, chefe Nox, Aquele Que Apaga | Noctírio |
 
 ---
 
@@ -55,4 +55,4 @@ Cada camada traz um metal novo para a forja, na ordem da descida (regra de [regr
 
 - **O tamanho do mundo.** Hoje cada camada tem 186 m. Com 16 camadas o mundo passa de 1.016 para cerca de 3.000 blocos de altura. Antes de implementar, é preciso medir memória e tempo de geração, ou gerar cada camada só quando o herói chega nela.
 - **O caminho de volta.** Com tantas camadas, o teleporte do vilarejo precisa de uma parada por camada ou por ato.
-- **A camada 16.** O nome, o chefe final e se ela tem metal ou se o prêmio é só o fim do jogo.
+- **A camada 16.** Decidido e feito (2026-10-10): A Escuridão, o chefe Nox e o noctírio (ficha em [camadas/16-escuridao.md](camadas/16-escuridao.md)). Ela fica sempre logo abaixo do Abismo, como a última camada, e os números dela (níveis, forja, pedras) seguem a posição no registro de camadas (`js/129-camadas.js`).

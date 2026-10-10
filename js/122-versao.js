@@ -7,8 +7,19 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.18.0';
+const VERSAO = '0.19.0';
 const NOVIDADES = [
+  { v: '0.19.0', data: '10/10/2026', titulo: 'A Escuridão', itens: [
+    'Nova camada, o fundo do mundo: A Escuridão (1860 a 2046 m), logo abaixo do Abismo. Dois poços saem do chão dos Templos do Caos e uma corrente desce até um Posto dos Acendedores com o único braseiro eterno da camada.',
+    'Quatro faixas: A Borda Apagada, O Breu, As Raízes da Noite e O Fundo do Mundo. Ruínas dos Acendedores, Grandes Vãos com poços sem fundo, raízes do tamanho de torres, altares frios e os dois Selos do Fundo.',
+    'Aqui a luz é tudo: quase não há claridade, as tochas viram tocha morta em 90 s e a Rota dos Acendedores (braseiros apagados) leva até o chefe. Luz forte queima as criaturas da sombra.',
+    'Lume-fátuo: a chama azul que flutua pelo bioma. Encoste nela para pegar e use num braseiro (tecla de usar) para acendê-lo com uma luz azul que nenhum monstro apaga. Tocha não acende braseiro; os monstros apagam só as tochas que você põe.',
+    'O mapa da camada esquece o que não está aceso; o breu vivo cresce no escuro e fecha passagens; a laje de penumbra só segura quem pisa com luz em cima dela.',
+    '10 monstros novos: o Apagador, a Boca do Breu, a Mariposa Negra, o Vigia Sem Olhos, o Colosso de Breu, o Rastro, a Mortalha, o Ouvinte, o Acendedor Oco e a Mão do Fundo.',
+    'Chefe: Nox, Aquele Que Apaga, no Escuro Total. Só toma dano com luz em cima; acenda as seis piras dos Acendedores (ajoelhado, com uma tocha cada) enquanto ele tenta apagá-las. Matá-lo deixa o mundo inteiro um pouco menos escuro e solta A Última Brasa.',
+    'Novo metal: o noctírio, com as 9 peças na bigorna. Bases novas: Lâmina de Vidro Negro, Manto de Breu e Escudo dos Acendedores.',
+    'O mundo foi refeito por causa da camada nova; nível, itens, ouro e o baú da vila continuam.'
+  ] },
   { v: '0.18.0', data: '10/10/2026', titulo: 'Telas de início', itens: [
     'A tela de início sorteia uma arte a cada abertura: a descida do poço e uma cena de cada camada (Cavernas, Catedral, Gelo, Mina, Minas Fúngicas e Abismo).'
   ] },

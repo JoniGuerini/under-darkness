@@ -4,8 +4,9 @@
    A lista das camadas debaixo do vilarejo, de cima para baixo (docs/camadas/00-geral.md, seção 2). A posição de cada
    uma na lista decide os números que dependem da profundidade: o nível dos monstros, o do chefe, o nível de item do
    metal na forja e a linha da tabela de pedras preciosas (117). Camada nova entra na lista no lugar dela; o Abismo
-   fica sempre por último até as 16 existirem (decisão do Jonathan, 2026-10-10), então os números dele seguem a
-   posição. Cada gerador continua dono da sua faixa de linhas (o S0 de cada um começa onde a de cima termina).
+   fica abaixo de todas as camadas do meio e a Escuridão (220 a 229), o fundo do mundo, sempre logo abaixo dele
+   (decisões do Jonathan, 2026-10-10), então os números dos dois seguem a posição. Cada gerador continua dono da sua
+   faixa de linhas (o S0 de cada um começa onde a de cima termina).
    Carrega logo depois do 01-base. */
 
 const LAYERS = [
@@ -18,7 +19,8 @@ const LAYERS = [
   { id: 'floresta', nome: 'A Floresta Petrificada' },
   { id: 'anoes', nome: 'A Fortaleza dos Anões' },
   { id: 'colmeia', nome: 'A Colmeia' },
-  { id: 'abismo', nome: 'O Abismo' }
+  { id: 'abismo', nome: 'O Abismo' },
+  { id: 'escuro', nome: 'A Escuridão' }   // o fundo do mundo: fica sempre logo abaixo do Abismo (Jonathan, 2026-10-10)
 ];
 const LAYER_D = 186;   // metros de cada camada
 // posição da camada (1 = as Cavernas), 0 se ela não existe

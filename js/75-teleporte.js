@@ -21,7 +21,8 @@
     { nome: 'Floresta Petrificada', ok: typeof FLORESTA !== 'undefined' && FLORESTA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[FP_ZONE0 + b], y0: FP_S0 + FP_BANDS[b], y1: Math.min(WH - 8, FP_S0 + FP_BANDS[b + 1]) })), entrada: () => fpLand && fpLand[0] && [fpLand[0].x0 + 6, fpLand[0].fy - 2] },
     { nome: 'Fortaleza dos Anões', ok: typeof ANOES !== 'undefined' && ANOES, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AN_ZONE0 + b], y0: AN_S0 + AN_BANDS[b], y1: Math.min(WH - 8, AN_S0 + AN_BANDS[b + 1]) })), entrada: () => anLand && anLand[0] && [anLand[0].x0 + 6, anLand[0].fy - 2] },
     { nome: 'A Colmeia', ok: typeof COLMEIA !== 'undefined' && COLMEIA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[CM_ZONE0 + b], y0: CM_S0 + CM_BANDS[b], y1: Math.min(WH - 8, CM_S0 + CM_BANDS[b + 1]) })), entrada: () => cmLand && cmLand[0] && [cmLand[0].x0 + 6, cmLand[0].fy - 2] },
-    { nome: 'O Abismo', ok: typeof ABISMO !== 'undefined' && ABISMO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AB_ZONE0 + b], y0: AB_S0 + AB_BANDS[b], y1: Math.min(WH - 8, AB_S0 + AB_BANDS[b + 1]) })), entrada: () => abExits && abExits[0] && [abExits[0].x0 + 1, abExits[0].fy - 2] }
+    { nome: 'O Abismo', ok: typeof ABISMO !== 'undefined' && ABISMO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AB_ZONE0 + b], y0: AB_S0 + AB_BANDS[b], y1: Math.min(WH - 8, AB_S0 + AB_BANDS[b + 1]) })), entrada: () => abExits && abExits[0] && [abExits[0].x0 + 1, abExits[0].fy - 2] },
+    { nome: 'A Escuridão', ok: typeof ESCURO !== 'undefined' && ESCURO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[ES_ZONE0 + b], y0: ES_S0 + ES_BANDS[b], y1: Math.min(WH - 8, ES_S0 + ES_BANDS[b + 1]) })), entrada: () => esLand && esLand[0] && [esLand[0].x0 + 5, esLand[0].fy - 2] }
   ].filter(L => L.ok);
 
   // everything open that can be walked to from the village (no jumping rules: open space joined to the surface)

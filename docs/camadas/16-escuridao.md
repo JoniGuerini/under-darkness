@@ -178,7 +178,7 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 | `po_breu` | Pó de Breu | apagaluz, rastro, mortalha | alquimista |
 | `asa_mariposa` | Asa de Mariposa Negra | traca | curandeira |
 | `nucleo_breu` | Núcleo de Breu | colosso, vigia sem olhos | ferreiro |
-| `lume_frio` | Lume Frio | acendedor oco | curandeira |
+| `lume_fatuo` | Lume-Fátuo (acende os braseiros) | flutuando pelo bioma, acendedor oco | curandeira |
 
 - **Bases temáticas** (nível 33, só caem aqui, como drop raro de monstro e do chefe): `lamina_vidronegro` (Lâmina de Vidro Negro, espada, rápida e com crítico alto), `manto_breu` (Manto de Breu, peitoral, defesa e esquiva no escuro), `escudo_acendedor` (Escudo dos Acendedores, escudo com uma lanterna presa: +2 de luz).
 - **Sem baús.** Os baús de loot saíram do jogo (só fica o baú do vilarejo). As bases temáticas caem só como drop raro: `lamina_vidronegro` do rastro e do apagador (1,5%), `manto_breu` da mortalha e do colosso (1,5%), `escudo_acendedor` do acendedor oco (2%). O Nox solta uma das três com 35% de chance.
@@ -271,8 +271,18 @@ Fora da faixa, só ganchos: uma linha em `js/07-chunks-luz.js` (`ambAt` e `plLig
 
 ---
 
-## Decisões em aberto
+## Decisões (Jonathan, 2026-10-10)
 
-1. **Acender pira e braseiro gasta uma tocha?** Recomendo que sim: faz da tocha o recurso da camada e dá peso à escolha de qual acender.
-2. **O mapa esquecer o que não está aceso não é cruel demais?** Recomendo manter, só nesta camada, com os braseiros acesos guardando o mapa em volta: é o que faz do mapa o perigo.
-3. **Matar o Nox clareia todas as camadas?** Recomendo que sim, mas pouco (ambiente mínimo de 0,09 para 0,12): é o fim que o nome do jogo pede, sem estragar o clima das outras.
+1. **Acender pira e braseiro gasta uma tocha.** Sim no começo; depois (mesmo dia) o braseiro mudou: ele acende só com um **lume-fátuo**, a chama azul que flutua pelo bioma (encostar nela a recolhe como item `lume_fatuo`; o acendedor oco também solta). O braseiro aceso com ela fica azul e nenhum monstro apaga; tocha não acende braseiro, e os monstros apagam só as tochas que o herói põe. A pira da sala do Nox continua com tocha, e o Nox continua apagando as piras.
+2. **O mapa esquece o que não está aceso.** Mantido, só nesta camada, com os braseiros acesos guardando o mapa em volta.
+3. **Matar o Nox clareia todas as camadas, pouco.** Mantido.
+4. **A luz do herói:** o herói não tem luz própria desde a 0.9.7 (só itens com +Luz), então o gancho `plLightK` não foi feito; a luz da camada é toda de tochas, braseiros, piras e das coisas frias da Escuridão.
+5. **Onde ela fica:** enquanto as camadas do meio não existem, a Escuridão fica logo abaixo do Abismo (11ª no registro de camadas, depois da Floresta Petrificada, da Fortaleza dos Anões e da Colmeia; 1860 a 2046 m) e os números dela seguem a posição: monstros 23 e 24, Nox no nível do chefe da posição + 2, o noctírio na forja no nível da posição. Quando as camadas 7 a 14 entrarem, tudo sobe sozinho.
+
+## Como ficou no jogo (0.15.0)
+
+- **Arquivos:** os de 220 a 229 da seção 15, com o efeito do Manto de Breu, a fornalha e as lojas no 226 e A Última Brasa no 227. Fora da faixa: a altura do mundo (`WH`, 01), o registro (129), o `worldLink` (87), o teleporte de teste (75), as pedras preciosas (117), o cenário de som `escuro` (97) e a wiki.
+- **O escuro:** `DARK.amb` do 07 cai a 0,008 na camada (um fio, para o herói ainda se achar); depois do Nox, 0,03 na camada e +0,015 nas outras.
+- **A laje de penumbra** é feita trocando dois blocos (`ES_PENUMBRA` e `ES_PENUMBRA_FIRME`) direto em `tiles`, sem passar pelo save, em vez de embrulhar `solidAt`. O breu vivo também é escrito direto em `tiles`.
+- **A pira** pede o herói ajoelhado 1 s (ele agacha); o braseiro acende na hora. A Rota dos Acendedores é achada por uma busca de caminho de cada Posto até a porta da sala do Nox.
+- **Nox** não dá luz (o 07 acende todo chefe um pouco; o 227 desliga isso para ele). Na fase 2 ele fica debaixo do chão espelhado e sobe pelo anel; na 3 a Noite Total vem a cada 12 s.

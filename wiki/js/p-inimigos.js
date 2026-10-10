@@ -9,6 +9,7 @@
     if (t === 'rei') return { lvl: REI.lvl, hp: REI.hp, dmg: REI.dmg, xp: REI.xp, gold: 0 };
     if (t === 'yetiancestral') return { lvl: 9, hp: ET.yetiancestral.hp, dmg: ET.yetiancestral.dmg, xp: ET.yetiancestral.xp, gold: 0 };
     if (t === 'maeesporo') return { lvl: layerBossLvl('fungo'), hp: ET.maeesporo.hp, dmg: ET.maeesporo.dmg, xp: ET.maeesporo.xp, gold: 0 };
+    if (t === 'nox') return { lvl: NOX_L, hp: ET.nox.hp, dmg: ET.nox.dmg, xp: ET.nox.xp, gold: 0 };
     if (t === 'sineiro') return { lvl: layerBossLvl('cidade'), hp: ET.sineiro.hp, dmg: ET.sineiro.dmg, xp: ET.sineiro.xp, gold: 0 };
     if (t === 'cervo') return { lvl: layerBossLvl('floresta'), hp: ET.cervo.hp, dmg: ET.cervo.dmg, xp: ET.cervo.xp, gold: 0 };
     if (t === 'rainha') return { lvl: layerBossLvl('colmeia'), hp: ET.rainha.hp, dmg: ET.rainha.dmg, xp: ET.rainha.xp, gold: 0 };
@@ -23,7 +24,7 @@
   // where each level is found (caves 1 level every 50 m; every layer below starts 1 above the one over it, its second level from 93 m down; 30% are born a level higher, never past the layer's top)
   const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); LAYERS.forEach((L, n) => { if (!n) return; const top = n * LAYER_D, lo = layerLo(L.id); if (l === lo) o.push(`${top} a ${top + 92} m`); if (l === lo + 1) o.push(`${top + 93} a ${top + LAYER_D - 1} m`); }); return o.join(' e ') || '30% nascem um nível acima'; };
   // a camada de uma zona do CATH_SPAWN (1 a 4: as cavernas antigas, desligadas)
-  const zoneLayer = z => typeof CM_ZONE0 !== 'undefined' && typeof COLMEIA !== 'undefined' && z >= CM_ZONE0 && z < CM_ZONE0 + 4 ? 'colmeia' : typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' && z >= AN_ZONE0 && z < AN_ZONE0 + 4 ? 'anoes' : typeof FP_ZONE0 !== 'undefined' && z >= FP_ZONE0 && z < FP_ZONE0 + 4 ? 'floresta' : typeof CD_ZONE0 !== 'undefined' && z >= CD_ZONE0 ? 'cidade' : typeof FG_ZONE0 !== 'undefined' && z >= FG_ZONE0 ? 'fungo' : typeof AB_ZONE0 !== 'undefined' && z >= AB_ZONE0 ? 'abismo' : typeof MN_ZONE0 !== 'undefined' && z >= MN_ZONE0 ? 'mina' : z >= IC_ZONE0 ? 'gelo' : null;;
+  const zoneLayer = z => typeof ES_ZONE0 !== 'undefined' && typeof ESCURO !== 'undefined' && z >= ES_ZONE0 && z < ES_ZONE0 + 4 ? 'escuro' : typeof CM_ZONE0 !== 'undefined' && typeof COLMEIA !== 'undefined' && z >= CM_ZONE0 && z < CM_ZONE0 + 4 ? 'colmeia' : typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' && z >= AN_ZONE0 && z < AN_ZONE0 + 4 ? 'anoes' : typeof FP_ZONE0 !== 'undefined' && z >= FP_ZONE0 && z < FP_ZONE0 + 4 ? 'floresta' : typeof CD_ZONE0 !== 'undefined' && z >= CD_ZONE0 ? 'cidade' : typeof FG_ZONE0 !== 'undefined' && z >= FG_ZONE0 ? 'fungo' : typeof AB_ZONE0 !== 'undefined' && z >= AB_ZONE0 ? 'abismo' : typeof MN_ZONE0 !== 'undefined' && z >= MN_ZONE0 ? 'mina' : z >= IC_ZONE0 ? 'gelo' : null;;
   // o peso de um monstro numa tabela de spawn, somando se ele aparece mais de uma vez (a zona 33 lista as sementes duas vezes)
   const wOf = (tab, t) => tab.reduce((n, r) => n + (r[0] === t ? r[1] : 0), 0);
   // onde cada um aparece: CATH_SPAWN (45) faixa por faixa
@@ -38,7 +39,7 @@
     const D = ET[t], e = UDW.enemyAt(t, 1), sp = UDW.spawnsOf(t);
     return `<a class="ecard${UDW.ativos().has(t) ? '' : ' off'}" href="#/inimigo/${t}"><div class="eart">${UDW.enemyImg(t, D.boss ? 2 : 3)}</div><b>${E(D.name)}</b>
       <div class="mini"><span>Vida <b>${e.hp}</b></span><span>Dano <b>${e.dmg}</b></span><span>XP <b>${e.xp}</b></span></div>
-      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'yetiancestral' ? 'Trono de Gelo' : t === 'reigoblin' ? 'Oficina da Escavadeira' : t === 'principecaos' ? 'Trono do Caos' : t === 'sineiro' ? 'Torre do Sino' : t === 'cervo' ? 'Clareira dos Troncos Gigantes' : t === 'autoforja' || t === 'afparte' ? 'A Grande Forja' : t === 'rainha' || t === 'rainhasaco' ? 'A esfera da Rainha' : t === 'larva' ? 'Ovos e favos reais quebrados' : t === 'maeesporo' || t === 'maebulbo' ? 'Gruta da Mãe' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
+      <small>${sp.length ? sp.map(s => s.nome).join(', ') : t === 'rei' ? 'Sala do trono' : t === 'maeteia' ? 'Câmara do Ninho' : t === 'yetiancestral' ? 'Trono de Gelo' : t === 'reigoblin' ? 'Oficina da Escavadeira' : t === 'principecaos' ? 'Trono do Caos' : t === 'sineiro' ? 'Torre do Sino' : t === 'nox' ? 'O Escuro Total' : t === 'cervo' ? 'Clareira dos Troncos Gigantes' : t === 'autoforja' || t === 'afparte' ? 'A Grande Forja' : t === 'rainha' || t === 'rainhasaco' ? 'A esfera da Rainha' : t === 'larva' ? 'Ovos e favos reais quebrados' : t === 'maeesporo' || t === 'maebulbo' ? 'Gruta da Mãe' : t === 'filhote' ? 'Ovos da Mãe-Teia' : 'Cavernas desligadas'}</small></a>`;
   }
   // os monstros de cada bioma, faixa por faixa (CATH_SPAWN do 45 e do 56)
   // nível dos monstros numa faixa (o mesmo cálculo do layerLvl do 52 com o registro de camadas do 129: cada camada começa 1 acima do fim da de cima, sobe 1 a partir de 93 m)
@@ -56,7 +57,8 @@
     { id: 'floresta', nome: 'A Floresta Petrificada', faixas: UDW_TXT.fpFaixas, chefes: [['cervo', 'Clareira dos Troncos Gigantes, na Clareira dos Gigantes']], extra: {} },
     { id: 'anoes', nome: 'A Fortaleza dos Anões', faixas: UDW_TXT.anFaixas, chefes: [['autoforja', 'A Grande Forja, nas Forjas de Runas']], extra: {} },
     { id: 'colmeia', nome: 'A Colmeia', faixas: UDW_TXT.cmFaixas, chefes: [['rainha', 'A esfera de favos, no Berçário']], extra: { rainhasaco: 'Só aparece na luta com a Rainha, quando ela solta o abdômen' } },
-    { id: 'abismo', nome: 'O Abismo', faixas: UDW_TXT.abFaixas, chefes: [['principecaos', 'Trono do Caos, no fundo do Abismo']], extra: {} }
+    { id: 'abismo', nome: 'O Abismo', faixas: UDW_TXT.abFaixas, chefes: [['principecaos', 'Trono do Caos, no fundo do Abismo']], extra: {} },
+    { id: 'escuro', nome: 'A Escuridão', faixas: UDW_TXT.esFaixas, chefes: [['nox', 'O Escuro Total, no Fundo do Mundo']], extra: { maofundo: 'Nasce só nos poços sem fundo dos Grandes Vãos', traca: 'Vem em bandos de 5 a 8' } }
   ];
   function bioma(B) {
     const zs = B.faixas.map(f => ({ ...f, sp: CATH_SPAWN[f.zona] })), seen = [];
@@ -157,7 +159,12 @@
         <div class="stats">${UDW.stat(ET.rainha.hp, 'vida')}${UDW.stat(ET.rainha.dmg, 'dano')}${UDW.stat(ET.rainha.xp, 'XP')}${UDW.stat(layerBossLvl('colmeia'), 'nível')}</div>
         <ol class="fases">${(UDW_TXT.rainhaFases || []).map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
         <h3>Solta</h3><div class="lista">${(DROPS.rainha || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
-      return UDW.head('Chefes') + T5 + T10 + T9 + T8 + T7 + T6 + T4 + T3 + T2 + rei;
+      const T11 = ET.nox ? `<section class="chefe"><div class="eart big">${UDW.enemyImg('nox', 2)}</div><div>
+        <h2>${E(ET.nox.name)} ${UDW.chip('No mundo', '#7fd36a')}</h2><p class="lead">${E(UDW_TXT.noxOnde || '')}</p>
+        <div class="stats">${UDW.stat(ET.nox.hp, 'vida')}${UDW.stat(ET.nox.dmg, 'dano')}${UDW.stat(ET.nox.xp, 'XP')}${UDW.stat(NOX_L, 'nível')}</div>
+        <ol class="fases">${(UDW_TXT.noxFases || []).map(([f, t]) => `<li><b>${f}</b> ${E(t)}</li>`).join('')}</ol>
+        <h3>Solta</h3><div class="lista">${(DROPS.nox || []).map(r => UDW.item(r[0], { n: r[2] ? `${r[2]}–${r[3]}` : 0 })).join('')}</div></div></section>` : '';
+      return UDW.head('Chefes') + T11 + T5 + T10 + T9 + T8 + T7 + T6 + T4 + T3 + T2 + rei;
     }
   };
 })();
