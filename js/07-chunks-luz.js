@@ -155,7 +155,8 @@ function computeLight(cx, cy) {
     }
   }
   const addL = (wx, wy, v) => { const i = Math.floor(wx / T) - x0, j = Math.floor(wy / T) - y0; if (i >= 0 && j >= 0 && i < w && j < h) { const k = j * w + i; if (LB[k] < v) LB[k] = v; } };
-  if (!pl.dead) { const pv = 0.86 + 0.08 * (pl.light || 0); addL(pl.x + pl.w / 2, pl.y + 4, pv); addL(pl.x + pl.w / 2, pl.y + pl.h - 4, pv); }
+  // o herói não tem luz própria (Jonathan, 2026-10-10): só itens com +Luz
+  if (!pl.dead && pl.light > 0) { const pv = 0.7 + 0.08 * pl.light; addL(pl.x + pl.w / 2, pl.y + 4, pv); addL(pl.x + pl.w / 2, pl.y + pl.h - 4, pv); }
   for (const o of projs) if (o.kind !== 'arrow') addL(o.x, o.y, 0.6);
   villageLights((x, y, v) => addL(x, y, v));
   propLights(addL, x0, y0, w, h);
