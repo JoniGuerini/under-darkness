@@ -367,7 +367,3 @@ Object.assign(CATH_SPAWN, {
 Object.assign(MAT_VAL, { po_gargula: 9, pagina_profana: 12, garra_carnical: 6, gancho: 18 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'pagina_profana'; c.hint = c.hint.replace(/\.$/, '') + ', páginas profanas.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || ['po_gargula', 'garra_carnical', 'gancho'].includes(id); f.hint = f.hint.replace(/\.$/, '') + ', pó de gárgula, garras e ganchos.'; }
-BOUNTIES.push(
-  [3, 'po_gargula', 5, 'Pó de gárgula. O Grimaldo diz que aço temperado com ele não enferruja nunca.', 'Aço de pedra'],
-  [3, 'pagina_profana', 3, 'Páginas profanas. O Caetano quer queimar todas, uma por uma, rezando.', 'Fogueira de páginas']
-);

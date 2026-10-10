@@ -17,14 +17,6 @@
 
 IC_SOILS[IC_O_CARVAO] = 1; MN_HOST[IC_O_CARVAO] = 1;   // the ice's coal block (69, 70) counts as ice soil and as filler the mine may cut
 
-Object.assign(ORE_WHERE, {
-  carvao: 'Veios pretos em todas as camadas',
-  min_cobre: 'Minério das Cavernas',
-  min_ferro: 'Minério da Catedral',
-  min_ouro: 'Minério das Cavernas de Gelo',
-  min_cobalto: 'Minério da Mina Abandonada',
-  min_cristal: 'Pedra preciosa, rara, da Mina Abandonada'
-});
 
 /* ---------- the save: worlds with every ore everywhere are remade ---------- */
 let oreNews = false;

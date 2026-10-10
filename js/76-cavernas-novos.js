@@ -349,7 +349,3 @@ Object.assign(CATH_SPAWN, {
 Object.assign(MAT_VAL, { esporo: 5, pata_centopeia: 3, polvora: 10 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'esporo' || id === 'pata_centopeia'; c.hint = c.hint.replace(/\.$/, '') + ', esporos e patas de centopeia.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || id === 'polvora'; f.hint = f.hint.replace(/\.$/, '') + ' e pólvora.'; }
-BOUNTIES.push(
-  [1, 'esporo', 6, 'Esporos luminosos. A Marta jura que o xarope deles tira tosse de mineiro.', 'Xarope de esporo'],
-  [2, 'polvora', 4, 'Pólvora dos goblins. O Grimaldo quer abrir um veio de ferro sem quebrar a picareta.', 'Pólvora para o veio']
-);

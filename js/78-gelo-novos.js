@@ -335,7 +335,3 @@ Object.assign(CATH_SPAWN, {
 Object.assign(MAT_VAL, { olho_sincelo: 14, ponta_arpao: 12, presa_javali: 8, galhada: 24 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'olho_sincelo' || id === 'galhada'; c.hint = c.hint.replace(/\.$/, '') + ', olhos de sincelo e galhadas.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || id === 'ponta_arpao' || id === 'presa_javali'; f.hint = f.hint.replace(/\.$/, '') + ', arpões e presas de javali.'; }
-BOUNTIES.push(
-  [3, 'presa_javali', 5, 'Presas de javali. Viram cabo de faca, e faca nunca é demais.', 'Cabos de faca'],
-  [3, 'galhada', 2, 'Galhadas de wendigo. Ninguém acredita que você viu um. Prove.', 'Prova do wendigo']
-);

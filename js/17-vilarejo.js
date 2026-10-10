@@ -588,7 +588,7 @@ const SHOPS = {
   curandeira: { title: 'Ervas da Marta', buys: id => ['gel', 'asa', 'olho', 'ectoplasma', 'brasa', 'cranio', 'carne', 'pocao'].includes(id), hint: 'Compra gel, asas, carne, olhos, ectoplasma, brasas e crânios.' },
   taverneiro: { title: 'Taverna do Odo', buys: id => ['madeira', 'carvao', 'tocha', 'candelabro'].includes(id), hint: 'Vende carvão para a sua fornalha. Compra madeira e carvão para a lareira, tochas e candelabros.' }
 };
-let shopDay = -1, stock = {}, talkNpc = null, shopNpc = null, sellArm = null, chatIdx = {}, bounty = null, villageNews = false, lastVil = null;
+let shopDay = -1, stock = {}, talkNpc = null, shopNpc = null, sellArm = null, chatIdx = {}, villageNews = false, lastVil = null;
 const dayNow = () => Math.floor(worldTime / DAY_LEN);
 const tierNow = () => pl.lvl >= 12 ? 3 : pl.lvl >= 6 ? 2 : 1;
 function restock() {
@@ -640,7 +640,7 @@ const HELLO = {
   anciao: ['Ah, mais um que desce. Sente, escute um velho.', 'Os ossos me dizem que você voltou de longe.', 'Fique um pouco. A pressa é o que mais mata lá embaixo.']
 };
 function talkSay(text, opts) {
-  $('talkText').textContent = text; hideQuest();
+  $('talkText').textContent = text;
   const box = $('talkOpts'); box.innerHTML = '';
   opts.forEach(([label, fn, main], i) => { const b = document.createElement('button'); b.type = 'button'; b.className = main ? '' : 'ghost'; b.textContent = label; b.addEventListener('click', () => { sfx.select(); fn(); }); box.appendChild(b); });
 }
@@ -649,7 +649,6 @@ function talkMenu(n, text) {
   if (n.id === 'curandeira') o.push(['Curar ferimentos', () => heal(n), true]);
   if (n.id === 'ferreiro') o.push(['Fornalha e bigorna', () => openForge(n), true]);
   if (SHOPS[n.id]) o.push([n.id === 'taverneiro' ? 'Comprar carvão, tochas e velas' : 'Comprar e vender', () => openShop(n), n.id !== 'curandeira' && n.id !== 'ferreiro']);
-  if (n.id === 'anciao') { o.push([bountyLabel(), () => bountyTalk(n), true]); }
   o.push([n.id === 'taverneiro' ? 'Ouvir boatos' : 'Conversar', () => chat(n)]);
   o.push(['Até logo', closeTalk]);
   talkSay(text, o);
@@ -662,49 +661,6 @@ function heal(n) {
   if (pl.hp >= pl.maxHp) { talkMenu(n, 'Você está inteiro. Por enquanto.'); return; }
   pl.hp = pl.maxHp; sfx.potion(); burst(pl.x + pl.w / 2, pl.y + 10, 18, '#7dff8a', 50, -80, 0.8, 1, true);
   talkMenu(n, pickLine(['Pronto. Tente voltar inteiro da próxima vez.', 'Feito. Não precisa agradecer, só não morra.', 'Costurado. Fica uma cicatriz bonita.']));
-}
-function newBounty() {
-  const t = tierNow(), last = bounty && bounty.id, pool = BOUNTIES.filter(b => b[0] <= t && b[0] >= t - 1 && b[1] !== last), b = pool[Math.floor(Math.random() * pool.length)];
-  bounty = { id: b[1], n: b[2], txt: b[3], title: b[4], gold: Math.round(MAT_VAL[b[1]] * b[2] * 2 + 20 * b[0]), xp: Math.max(12, Math.round(xpNeed(pl.lvl) * 0.35)) };
-}
-const BOUNTIES = [
-  [1, 'osso', 8, 'Ossos para o ossuário da capela velha. Os mortos daqui merecem descanso.', 'O ossuário da capela'],
-  [1, 'gel', 10, 'Gel de gosma. A Marta faz unguento com isso, e meus joelhos agradecem.', 'Unguento para os joelhos'],
-  [1, 'asa', 6, 'Asas de morcego. Para um estudo. Não pergunte qual.', 'Um estudo sobre asas'],
-  [1, 'min_cobre', 10, 'Cobre para o sino da capela, que rachou no último inverno.', 'O sino rachado'],
-  [1, 'carne', 6, 'Carne podre. Serve de isca para manter os lobos longe dos rebanhos.', 'Isca para os lobos'],
-  [2, 'min_ferro', 10, 'Ferro para o Grimaldo forjar uma grade nova para o poço.', 'Uma grade para o poço'],
-  [2, 'olho', 3, 'Olhos sombrios. Quero entender o que nos observa lá de baixo.', 'O que nos observa'],
-  [2, 'ectoplasma', 4, 'Ectoplasma. Os espectros guardam memórias, e eu quero ler algumas.', 'Memórias de espectro'],
-  [2, 'osso', 20, 'Mais ossos. Muitos mais. O ossuário é grande.', 'O ossuário é grande'],
-  [3, 'min_ouro', 6, 'Ouro bruto. A vila precisa atravessar o inverno.', 'Ouro para o inverno'],
-  [3, 'min_cristal', 4, 'Cristal das profundezas. Ele canta, sabia? Quero ouvir de perto.', 'O cristal que canta'],
-  [3, 'cranio', 4, 'Crânios em brasa. Quero saber que fogo os mantém acordados.', 'O fogo dos crânios'],
-  [3, 'chifre', 3, 'Chifres de demônio. A prova de que a cripta está sendo limpa.', 'Prova de limpeza'],
-  [3, 'brasa', 5, 'Brasas infernais. Fogo que não apaga aquece muita casa.', 'Fogo que não apaga']
-];
-// the elder's task as a quest card: his words above, then what to bring, how many you have, where it drops, and the pay
-function bountyQuest() {
-  const have = countItem(bounty.id), ready = have >= bounty.n, b = BOUNTIES.find(r => r[1] === bounty.id && r[2] === bounty.n);
-  return {
-    kind: 'Tarefa do ancião', title: bounty.title || (b && b[4]) || ITEMS[bounty.id].name, state: ready ? 'ready' : 'open',
-    goals: [{ icon: bounty.id, name: `Trazer ${ITEMS[bounty.id].name.toLowerCase()}`, have, need: bounty.n, where: whereFrom(bounty.id) }],
-    rewards: [{ icon: 'ouro', text: goldTxt(bounty.gold) }, { icon: 'xp', text: `${bounty.xp} de experiência` }],
-    note: ready ? 'Você já tem tudo. Entregue ao Caetano.' : `Faltam ${bounty.n - have}. O que você trouxer fica na mochila até entregar.`
-  };
-}
-function bountyLabel() { if (!bounty) return 'Tarefa'; const h = Math.min(countItem(bounty.id), bounty.n); return h >= bounty.n ? 'Tarefa · pronta' : `Tarefa · ${h}/${bounty.n}`; }
-function bountyTalk(n) {
-  if (!bounty) newBounty();
-  const q = bountyQuest(), back = ['Voltar', () => talkMenu(n, pickLine(HELLO.anciao))];
-  if (q.state === 'ready') {
-    talkSay(`${bounty.txt} Vejo que você trouxe.`, [['Entregar', () => {
-      removeItem(bounty.id, bounty.n); pl.gold += bounty.gold; gainXP(bounty.xp); sfx.coin(); sfx.chest();
-      toast(`Tarefa cumprida: +${goldTxt(bounty.gold)} · +${bounty.xp} XP`, 'gold');
-      bounty = null; saveGame(); talkMenu(n, 'Obrigado. A vila não esquece quem ajuda. Volte quando quiser outra tarefa.');
-    }, true], back]);
-  } else talkSay(bounty.txt, [back]);
-  showQuest(q);
 }
 function openTalk(n) {
   if (state !== 'play' || pl.dead) return;

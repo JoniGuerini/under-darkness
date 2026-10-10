@@ -604,12 +604,6 @@ Object.assign(sfx, {
 Object.assign(MAT_VAL, { engrenagem: 12, pepita: 16, nucleo_minerio: 22, oleo_lampiao: 10 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'oleo_lampiao'; c.hint = c.hint.replace(/\.$/, '') + ' e óleo de lampião.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || ['engrenagem', 'pepita', 'nucleo_minerio'].includes(id); f.hint = f.hint.replace(/\.$/, '') + ', engrenagens, pepitas e núcleos de minério.'; }
-BOUNTIES.push(
-  [4, 'pepita', 5, 'Pepitas de ouro da mina velha. Se os goblins roubaram, os goblins devolvem.', 'O ouro da mina'],
-  [4, 'engrenagem', 4, 'Engrenagens dos carrinhos de lá de baixo. O Grimaldo quer ver como os antigos faziam.', 'Ferro que gira'],
-  [4, 'nucleo_minerio', 2, 'O coração de um golem de minério. Dizem que ainda está quente. Traga com luva.', 'Um coração de pedra']
-);
-Object.assign(ORE_WHERE, { min_cristal: 'Pedra preciosa, rara, da Mina Abandonada', min_ouro: 'Minério do fundo das cavernas, da catedral, do gelo e da mina', min_ferro: 'Minério das cavernas, abaixo de 35 m, do gelo e da rocha ferrosa da mina', carvao: 'Veios pretos em todas as cavernas e na mina, ou com o Odo' });
 
 /* ---------- the save: worlds from before the mine are remade; level, items, gold and the chest stay ---------- */
 let mineNews = false;

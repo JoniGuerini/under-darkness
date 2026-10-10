@@ -540,9 +540,3 @@ FURN.min_infernita = { bar: 'barra_infernita', n: 6, t: 10 };
 Object.assign(MAT_VAL, { min_infernita: 40, barra_infernita: 260, essencia_demoniaca: 30, asa_couro: 14, olho_demonio: 26, enxofre: 8 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || ['essencia_demoniaca', 'asa_couro'].includes(id); c.hint = c.hint.replace(/\.$/, '') + ', essência demoníaca e asas de couro.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || ['min_infernita', 'barra_infernita', 'enxofre', 'olho_demonio'].includes(id); f.hint = f.hint.replace(/\.$/, '') + ', infernita, enxofre e olhos de demônio.'; }
-BOUNTIES.push(
-  [3, 'essencia_demoniaca', 4, 'Essência dos demônios do Abismo. A Marta diz que, fervida com sal, vira uma tinta que espanta o mal.', 'Tinta contra o mal'],
-  [3, 'olho_demonio', 3, 'Olhos de demônio. Quero saber o que eles enxergam lá embaixo. Em um pote fechado, por favor.', 'O que eles veem'],
-  [3, 'min_infernita', 5, 'Infernita. O Grimaldo jura que dá para forjar com ela, se o fogo for quente o bastante.', 'O metal do fundo']
-);
-Object.assign(ORE_WHERE, { min_infernita: 'Minério do Abismo' });

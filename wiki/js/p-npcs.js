@@ -1,6 +1,6 @@
 'use strict';
 
-/* ================= moradores do vilarejo (NPCS, SHOPS, CHAT, HELLO e BOUNTIES do 17-vilarejo) ================= */
+/* ================= moradores do vilarejo (NPCS, SHOPS, CHAT e HELLO do 17-vilarejo) ================= */
 (() => {
   const E = UDW.esc;
   const HOUSE = { ferreiro: 'forge', curandeira: 'cottage', taverneiro: 'tavern', anciao: 'elder', maga: 'torre', encantador: 'oficina' };
@@ -45,12 +45,6 @@
           <details><summary>Falas</summary><ul class="falas">${[...(HELLO[n.id] || []), ...(CHAT[n.id] || [])].map(l => `<li>"${E(line(l))}"</li>`).join('')}</ul></details>
           </div><div class="casa">${UDW.villageImg(HOUSE[n.id], 1)}</div></section>`;
         if (n.id === 'ferreiro') h += `<div class="sub"><h3>Mercadoria do dia <label>com o herói no nível <select id="lojaLv">${[1, 6, 12].map(l => `<option${l === lvlLoja ? ' selected' : ''}>${l}</option>`).join('')}</select></label> <button id="lojaGo" type="button">Sortear outro dia</button></h3><div id="lojaOut"></div></div>`;
-        if (n.id === 'anciao') {
-          h += `<div class="sub"><h3>Tarefas</h3><p class="nota">O ancião dá uma por vez, do nível do herói ou um abaixo (nível 1 a 5: lista 1; 6 a 11: listas 1 e 2; 12+: listas 2 e 3). Paga em ouro e 35% da experiência que falta para o próximo nível.</p>`
-            + UDW.table([{ t: 'Lista', cls: 'n' }, { t: 'Tarefa' }, { t: 'Trazer' }, { t: 'Ouro', cls: 'n' }],
-              BOUNTIES.map(b => { const g = Math.round(MAT_VAL[b[1]] * b[2] * 2 + 20 * b[0]); return { cells: [b[0], `<b>${E(b[4])}</b><small>${E(b[3])}</small>`, UDW.item(b[1], { n: b[2] }), g], keys: [b[0], b[4], ITEMS[b[1]].name, g] }; }))
-            + `</div>`;
-        }
       }
       return h;
     },

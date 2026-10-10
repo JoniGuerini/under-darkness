@@ -109,8 +109,6 @@
       if (fromF.length) h += `<h3>Fundido na fornalha</h3><p>${fromF.map(k => `${FURN[k].n} ${UDW.item(k)}`).join('')} + 1 ${UDW.item('carvao')}</p>`;
       const b = UDW.buyers(id);
       h += `<h3>Venda</h3><p>${gear ? `Uma base comum vale ${sellPrice(s)} de ouro na venda (a loja cobra ${gearValue(s)}). Raridade e nível do item mudam o preço.` : MAT_VAL[id] ? `${MAT_VAL[id]} de ouro cada${b.length ? `, para ${b.map(npcName).join(', ')}` : ''}.` : 'Ninguém compra.'}</p>`;
-      const bt = BOUNTIES.filter(r => r[1] === id);
-      if (bt.length) h += `<h3>Tarefas do ancião</h3><ul class="fl">${bt.map(r => `<li><span>${E(r[4])}</span><b>${r[2]}</b></li>`).join('')}</ul>`;
       h += `</div></div>`;
       if (gear && !it.legend) {
         // o que pode sair nesta base

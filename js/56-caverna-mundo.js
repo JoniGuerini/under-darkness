@@ -463,13 +463,6 @@ HOOK.drawGlow.push((cx, cy) => {
 Object.assign(MAT_VAL, { pele_rato: 2, seda: 2, glandula: 8, quitina: 9 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || ['pele_rato', 'seda', 'glandula'].includes(id); c.hint = 'Compra gel, asas, carne, olhos, ectoplasma, brasas, crânios, seda, peles de rato e glândulas.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || id === 'quitina'; f.hint = f.hint.replace('chifres e presas', 'chifres, presas e quitina'); }
-BOUNTIES.push(
-  [1, 'pele_rato', 6, 'Peles de rato. Viram forro de bota para o inverno, e o inverno vem.', 'Forro para as botas'],
-  [1, 'seda', 8, 'Seda de aranha. A Marta costura ferida com ela, e não arrebenta nunca.', 'Linha que não arrebenta'],
-  [2, 'glandula', 4, 'Glândulas de peçonha. Com cuidado: a Marta tira delas um antídoto.', 'O antídoto da Marta'],
-  [2, 'quitina', 4, 'Placas de quitina. O Grimaldo quer ver se servem de armadura.', 'Casca de besouro']
-);
-Object.assign(ORE_WHERE, { min_cobre: 'Minério das Grutas e das Galerias', min_ferro: 'Minério das cavernas, abaixo de 35 m', min_ouro: 'Minério do fundo das cavernas e da catedral', carvao: 'Veios pretos em todas as cavernas, ou com o Odo' });
 
 /* ---------- the save: worlds from before the caves are remade; level, items, gold and the chest stay ---------- */
 let caveNews = false;

@@ -139,13 +139,6 @@ for (const L of GEM_LAYERS) {
   });
 }
 
-Object.assign(ORE_WHERE, {
-  gema_topazio: 'Pedra preciosa, a mais comum: em todas as camadas, quase só ela no começo',
-  gema_esmeralda: 'Pedra preciosa, rara nas Cavernas e um pouco mais comum a cada camada',
-  gema_safira: 'Pedra preciosa, das Cavernas de Gelo para baixo',
-  min_cristal: 'Pedra preciosa, muito rara, só bem fundo',
-  gema_rubi: 'A pedra preciosa mais rara, só nas camadas mais fundas'
-});
 Object.assign(MAT_VAL, { gema_topazio: 12, gema_esmeralda: 20, gema_safira: 30, gema_rubi: 70 });
 
 /* ---- espalhar as pedras: aglomerados de 1 ou 2 blocos dentro da rocha de cada camada; a pedra sai da tabela da camada ---- */

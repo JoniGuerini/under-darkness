@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.10.1';
+const VERSAO = '0.10.2';
 const NOVIDADES = [
+  { v: '0.10.2', data: '10/10/2026', titulo: 'Sem missões', itens: [
+    'As missões do Caetano saíram do jogo por enquanto; ele continua no vilarejo para conversar.'
+  ] },
   { v: '0.10.1', data: '10/10/2026', titulo: 'Retratos nítidos', itens: [
     'Os retratos dos moradores na conversa foram repintados e ficaram nítidos, sem borrão.'
   ] },

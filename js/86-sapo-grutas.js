@@ -118,6 +118,4 @@ Object.assign(sfx, {
 /* ---------- o vilarejo: a pólvora agora vem da mina; nas cavernas, peles de sapo ---------- */
 Object.assign(MAT_VAL, { pele_sapo: 5 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'pele_sapo'; c.hint = c.hint.replace(/\.$/, '') + ' e peles de sapo.'; }
-{ const k = BOUNTIES.findIndex(b => b[1] === 'polvora' && b[0] === 2); if (k >= 0) BOUNTIES[k] = [2, 'pele_sapo', 4, 'Peles de sapo das grutas. A Marta faz um unguento que ninguém quer saber como.', 'O unguento da Marta']; }
-BOUNTIES.push([4, 'polvora', 6, 'Pólvora dos goblins da mina. O Grimaldo quer abrir um veio de ferro sem quebrar a picareta.', 'Pólvora para o veio']);
 ITEMS.polvora.desc = 'Um saquinho dos goblins da mina. Longe da forja. Material.';

@@ -468,12 +468,6 @@ HOOK.update.push(dt => {
 Object.assign(MAT_VAL, { pelo_yeti: 14, presa_lobo: 6, essencia_gelida: 12, lasca_eterna: 20 });
 { const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || ['presa_lobo', 'essencia_gelida', 'pelo_yeti'].includes(id); c.hint = c.hint.replace(/\.$/, '') + ', presas de lobo, pelos de yeti e essência gélida.'; }
 { const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || id === 'lasca_eterna'; f.hint = f.hint.replace(/\.$/, '') + ' e gelo eterno.'; }
-BOUNTIES.push(
-  [3, 'pelo_yeti', 4, 'Pelo de yeti. O inverno lá em cima nunca foi tão frio quanto o que você descreve lá embaixo.', 'Casacos para o inverno'],
-  [3, 'presa_lobo', 6, 'Presas de lobo da geada. O Grimaldo diz que dão boas pontas de flecha. Eu digo que dão bons amuletos.', 'Presas brancas'],
-  [3, 'essencia_gelida', 3, 'Essência gélida, num frasco bem fechado. Quero saber o que acordou o inverno lá no fundo.', 'Um frasco de inverno']
-);
-Object.assign(ORE_WHERE, { min_cristal: 'Minério da cripta da catedral e do gelo negro das Cavernas de Gelo', min_ouro: 'Minério do fundo das cavernas, da catedral e do gelo', min_ferro: 'Minério das cavernas, abaixo de 35 m, e do gelo' });
 
 /* ---------- the save: worlds from before the ice are remade; level, items, gold and the chest stay ---------- */
 let iceNews = false;
