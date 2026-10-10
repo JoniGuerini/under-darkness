@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.17.0';
+const VERSAO = '0.18.0';
 const NOVIDADES = [
+  { v: '0.18.0', data: '10/10/2026', titulo: 'Telas de início', itens: [
+    'A tela de início sorteia uma arte a cada abertura: a descida do poço e uma cena de cada camada (Cavernas, Catedral, Gelo, Mina, Minas Fúngicas e Abismo).'
+  ] },
   { v: '0.17.0', data: '10/10/2026', titulo: 'A Colmeia', itens: [
     'Camada 9, A Colmeia (1488 a 1674 m): cera, favos e âmbar com anões presos, 10 insetos novos, a chefe A Rainha e a ambrita.',
     'O Abismo desceu para 1674 a 1860 m e continua sendo a última camada.'

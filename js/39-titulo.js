@@ -1,9 +1,10 @@
 'use strict';
 /* tela de título "Under Darkness": a primeira coisa que aparece ao abrir o jogo.
-   A arte (480x270) vem do 126-titulo-descida: o poço do vilarejo descendo pelas camadas até a Escuridão,
-   com os efeitos dela numa camada pequena por cima, só enquanto o título está aberto.
-   A arte antiga (castelo em ruína, abismo e cavaleiro com capa) continua guardada aqui em paintTitleArt;
-   ela volta sozinha se o 126 sair do index.html.
+   A arte (480x270) é sorteada a cada abertura entre as de TITLE_ARTS (126-titulo-descida e uma por camada: 128 Cavernas, 135 Catedral, 136 Gelo, 137 Mina, 138 Minas Fúngicas, 139 Abismo;
+   cada arquivo se põe na lista), sem repetir a da vez anterior ('ud-titulo-arte'). Os efeitos de cada arte rodam
+   numa camada pequena por cima, só enquanto o título está aberto.
+   A arte antiga (castelo em ruína, abismo e cavaleiro com capa) continua guardada aqui em paintTitleArt, fora do sorteio;
+   ela volta sozinha se a lista ficar vazia.
    O nome é desenhado com a fonte do jogo e sombreado em pixel art (latão envelhecido).
    Menu no canto inferior esquerdo: Continuar (só com save), Novo jogo, Opções, Sair.
    Opções abre a mesma tela de opções do menu de pausa (40-opcoes).
@@ -377,7 +378,16 @@ function paintTitleLogo() {
   document.body.appendChild(root);
   $('menu').hidden = true;
 
-  const art = typeof paintTitleArtDescida === 'function' ? paintTitleArtDescida() : paintTitleArt();
+  const art = (() => {
+    const pool = typeof TITLE_ARTS !== 'undefined' ? TITLE_ARTS : [];
+    if (!pool.length) return paintTitleArt();
+    let last = null; try { last = localStorage.getItem('ud-titulo-arte'); } catch (e) { }
+    let want = null; try { want = new URLSearchParams(location.search).get('arte'); } catch (e) { }   // ?arte=Cavernas abre essa (para testar)
+    const forced = want && pool.find(f => f.name.toLowerCase() === ('paintTitleArt' + want).toLowerCase());
+    const opts = pool.length > 1 ? pool.filter(f => f.name !== last) : pool, pick = forced || opts[(Math.random() * opts.length) | 0];
+    try { localStorage.setItem('ud-titulo-arte', pick.name); } catch (e) { }
+    return pick();
+  })();
   $('ttArt').getContext('2d').drawImage(art.canvas, 0, 0);
   function drawLogo() {
     const lg = paintTitleLogo();

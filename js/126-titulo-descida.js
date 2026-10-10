@@ -4,7 +4,7 @@
    cada vez mais escura. O poço do vilarejo desce por todas elas; o herói vai descendo na corda, com a lanterna.
    Pintada uma vez (480x270, 39-titulo). Por quadro só mexem coisas pequenas, na camada de efeitos:
    a corda e o herói balançando, a luz da lanterna tremendo, poeira caindo no poço, esporos, brasas e os olhos lá no fundo.
-   A arte antiga (castelo e cavaleiro) continua no 39-titulo como paintTitleArt. */
+   A arte antiga (castelo e cavaleiro) continua no 39-titulo como paintTitleArt. Entra no sorteio pela lista TITLE_ARTS. */
 function paintTitleArtDescida() {
   const W = TITLE_W, H = TITLE_H;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -433,3 +433,4 @@ function paintTitleArtDescida() {
   }
   return { canvas: cv, frame };
 }
+var TITLE_ARTS = TITLE_ARTS || []; TITLE_ARTS.push(paintTitleArtDescida);
