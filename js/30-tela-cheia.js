@@ -14,6 +14,3 @@ function reenterFull(e) {
 }
 addEventListener('pointerdown', reenterFull, true);
 addEventListener('keydown', reenterFull, true);
-addEventListener('focus', () => {
-  if (wantFull && !fullEl()) showBanner('Tela cheia', 'clique ou aperte uma tecla para voltar');
-});

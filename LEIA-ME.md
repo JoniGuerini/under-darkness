@@ -49,7 +49,7 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 | 17-vilarejo | vilarejo, NPCs, preços, conversas, recompensas |
 | 18-forja | fornalha e bigorna; os materiais vêm da mochila e do baú do vilarejo (93-reagentes) |
 | 19-loja | a loja de todos os moradores, em forma de vitrine: à esquerda as prateleiras (uma tábua por tipo de mercadoria, cada peça num nicho com a cor da raridade e a etiqueta de preço; até 4 peças, nichos grandes), à direita o balcão com a peça escolhida num pedestal sob a luz (raios girando nas raras), os números dela, quantidade (no que não acaba) e o botão Comprar. Clique escolhe, passar o mouse mostra no balcão, botão direito ou duplo clique compram (Shift compra 5). Vender: arrastar ou largar um item seu na janela (o balcão vira a balança com o preço) ou Shift + botão direito na mochila. Sem textos de dica. O visual fica em `css/vitrine.css`, com as cores e texturas da casa de cada morador |
-| 20-hud-menus | HUD, menus, pausa, tela cheia, morte |
+| 20-hud-menus | HUD, menus, pausa, tela cheia, morte. `toast()` não mostra nada: os avisos no topo da tela foram removidos de vez (o tutorial do começo também); a função fica vazia só para os chamadores não quebrarem |
 | 21-inventario | tela de inventário |
 | 22-ficha | ficha de atributos (C), tooltips, arrastar itens |
 | 23-save | salvar e carregar |
@@ -157,3 +157,4 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 - Arquivo novo: crie em `js/` e acrescente o `<script>` no HTML na posição certa.
 - Antes de gravar, releia o arquivo atual; mexa só no trecho da sua tarefa.
 - O save fica no navegador (`localStorage`) e não depende dos arquivos.
+- Nada de avisos/pop-ups no topo da tela (pedido do Jonathan): não recrie `#toasts` nem mostre mensagens em `toast()`; avise pelo próprio jogo (som, efeito, painel) quando precisar.

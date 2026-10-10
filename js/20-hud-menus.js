@@ -45,11 +45,8 @@ function selectHB(i) {
   el.classList.add('show'); clearTimeout(hbNameTO); hbNameTO = setTimeout(() => el.classList.remove('show'), 1500);
   paintHotbar();
 }
-function toast(msg, cls = '', color = '') {
-  const box = $('toasts'); const d = document.createElement('div'); d.className = 'toast panel ' + cls; d.textContent = msg; if (color) d.style.color = color; box.appendChild(d);
-  while (box.children.length > 3) box.firstChild.remove();
-  setTimeout(() => d.classList.add('out'), 3400); setTimeout(() => d.remove(), 4000);
-}
+// avisos no topo da tela removidos de vez (pedido do Jonathan, 2026-10-10): toast() não mostra nada; fica só para os chamadores não quebrarem
+function toast() { }
 let bannerTO = 0;
 function showBanner(t, sub) { const b = $('banner'); b.textContent = t; const s = document.createElement('small'); s.textContent = sub; b.appendChild(s); b.classList.add('show'); clearTimeout(bannerTO); bannerTO = setTimeout(() => b.classList.remove('show'), 2600); }
 function pauseGame() { state = 'pause'; $('pause').hidden = false; resetNewBtn(); saveGame(); $('btnResume').focus(); }

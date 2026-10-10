@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.9.3';
+const VERSAO = '0.9.4';
 const NOVIDADES = [
+  { v: '0.9.4', data: '10/10/2026', titulo: 'Tela limpa', itens: [
+    'Os avisos que apareciam no alto da tela foram removidos.'
+  ] },
   { v: '0.9.3', data: '10/10/2026', titulo: 'Começo de madeira', itens: [
     'O herói começa com espada, montante e escudo de madeira.',
     'As receitas da forja perderam o "Forjado": agora é só Espada de Cobre, Montante de Ferro e assim por diante.'

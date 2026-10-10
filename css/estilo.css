@@ -43,11 +43,6 @@ body{font-family:var(--font-ui);-webkit-font-smoothing:antialiased;font-synthesi
 #help.min{opacity:.55}
 #help .k,kbd{display:inline-block;min-width:1.5em;padding:0 5px;margin-right:2px;text-align:center;background:#2a2230;border:1px solid #000;box-shadow:inset 0 -2px 0 #120e16;border-radius:2px;font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--parch);line-height:1.5}
 #help em{font-style:normal;color:var(--dim)}
-#toasts{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:grid;gap:6px;justify-items:center;width:min(520px,calc(100vw - 32px))}
-.toast{padding:8px 14px;font-size:14px;font-weight:500;line-height:1.4;text-align:center;animation:toastIn .25s ease-out both}
-.toast.gold{color:#ffe7a8;box-shadow:inset 0 0 0 2px var(--ember),0 3px 0 rgba(0,0,0,.45)}
-.toast.out{opacity:0;transition:opacity .5s}
-@keyframes toastIn{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
 #banner{position:absolute;left:0;right:0;top:24%;text-align:center;font-family:var(--font-title);font-size:clamp(40px,7vw,76px);color:var(--parch);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .8s;padding-inline:16px}
 #banner.show{opacity:1}
 #banner small{display:block;font-family:var(--font-ui);font-size:14px;font-weight:600;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;margin-top:4px}
@@ -74,8 +69,7 @@ body{font-family:var(--font-ui);-webkit-font-smoothing:antialiased;font-synthesi
 #bossbar .bn span{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
 .bar.bossb{height:14px}
 .bar.bossb>i{background:linear-gradient(#ff8a7a 0 28%,#b0202a 28% 72%,#5a0c14 72%)}
-#hud.boss #toasts{top:calc(92px + env(safe-area-inset-top,0px))}
-@media (max-width:1100px){#bossbar{top:calc(104px + env(safe-area-inset-top,0px))}#hud.boss #toasts{top:calc(184px + env(safe-area-inset-top,0px))}}
+@media (max-width:1100px){#bossbar{top:calc(104px + env(safe-area-inset-top,0px))}}
 @media (max-width:860px){#help{bottom:calc(150px + env(safe-area-inset-bottom,0px))}}
 @media (max-width:560px){#hotbar,#hbName{left:50%;right:auto;transform:translateX(-50%)}#hotbar{gap:3px;padding:4px}#hotbar .slot{width:38px;height:38px}#hotbar .slot img{width:30px;height:30px}#hotbar .slot:nth-child(2){margin-right:4px}#hbName{bottom:calc(82px + env(safe-area-inset-bottom,0px))}#hotbar{bottom:calc(28px + env(safe-area-inset-bottom,0px))}#xpbar{width:calc(100vw - 32px)}}
 
@@ -164,7 +158,7 @@ button.sm{font-size:13px;padding:6px 12px}
 .ghost-drag img{width:48px;height:48px;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.5))}
 @media (max-width:560px){.grid{grid-template-columns:repeat(5,48px)}.slot{width:48px;height:48px}.slot img{width:38px;height:38px}#dollCv{width:144px;height:132px}.dollbox{min-height:150px}}
 @media (max-width:560px){.keys{grid-template-columns:1fr}.keys dt{text-align:left}.world{min-width:0}#help{display:none}}
-@media (prefers-reduced-motion:reduce){.toast{animation:none}#banner{transition:none}}
+@media (prefers-reduced-motion:reduce){#banner{transition:none}}
 /* ===== forge: a profession book, recipes on the left and the chosen one on the right ===== */
 #forge{padding-block:10px}
 #forge .forgep{box-sizing:border-box;width:min(900px,100%);height:min(640px,calc(100dvh - 20px));display:flex;flex-direction:column;gap:12px;padding:14px 16px 16px;border:20px solid #000;border-image:var(--tx-frame) 10 / 20px stretch;box-shadow:0 10px 0 rgba(0,0,0,.5),0 0 60px rgba(0,0,0,.6)}

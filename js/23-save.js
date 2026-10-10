@@ -34,7 +34,7 @@ function newWorld(sd, sv) {
     furnace = { ore: ok(f && f.ore, id => !!FURN[id]), fuel: ok(f && f.fuel, id => id === 'carvao'), out: ok(f && f.out, id => /^barra_/.test(id)), on: !!(f && f.on), t: f && +f.t || 0, made: 0, goal: f && f.goal | 0 }; forgeDirty = true; }
   if (sv && sv.p) { pl.lvl = Math.max(1, sv.p.lvl | 0); pl.xp = Math.max(0, +sv.p.xp || 0); pl.kills = sv.p.kills | 0; worldTime = +sv.wt || 0;
     // saves from the old 7-minute day (started at 08:00): keep the day count and the hour of day
-    if (!sv.dl) { const od = 420, d = Math.floor(worldTime / od), h = (8 + (worldTime % od) / od * 24) % 24; worldTime = d * DAY_LEN + ((h - 18 + 24) % 24) / 24 * DAY_LEN; } tutorialStep = TUTORIAL.length; }
+    if (!sv.dl) { const od = 420, d = Math.floor(worldTime / od), h = (8 + (worldTime % od) / od * 24) % 24; worldTime = d * DAY_LEN + ((h - 18 + 24) % 24) / 24 * DAY_LEN; } }
   if (sv && Array.isArray(sv.inv)) {
     sv.inv.forEach((q, i) => { if (!sv.hbv && i >= 6) i += 2;   // old saves: 6 hotbar slots, the backpack started at 6
       if (i < INV_N && Array.isArray(q) && ITEMS[q[0]]) inv[i] = ITEMS[q[0]].slot ? loadGear(q[0], q[2], q[3], q[4]) : { id: q[0], n: clamp(q[1] | 0, 1, stackMax(q[0])) }; });

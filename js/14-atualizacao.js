@@ -75,7 +75,6 @@ function update(dt) {
   zoneCheck -= dt;
   if (zoneCheck <= 0 && !pl.dead) { zoneCheck = 0.5; const ztx = Math.floor((pl.x + 4) / T), zty = Math.floor((pl.y + 10) / T), z = zoneAt(ztx, zty), iv = inVillage(ztx, zty) && z === 0; if (z !== lastZone || iv !== lastVil) { if (lastZone !== -1) { const [a, b] = placeName(ztx, zty); showBanner(a, b); } lastZone = z; lastVil = iv; } }
   saveTimer -= dt; if (saveTimer <= 0) { saveTimer = 12; saveGame(); }
-  tutorial(dt);
   updateCamera(dt);
 }
 function idleUpdate(dt) {
@@ -94,15 +93,3 @@ function updateCamera(dt) {
   cam.y = clamp(cam.y, 0, WH * T - VH);
   shk.m = Math.max(0, shk.m - dt * 18); shk.x = (Math.random() - 0.5) * shk.m; shk.y = (Math.random() - 0.5) * shk.m;
 }
-const TUTORIAL = [
-  [1.5, 'Você está no vilarejo, o único lugar seguro. Aperte E perto dos moradores para conversar'],
-  [5, 'Clique com o botão esquerdo para golpear com a espada'],
-  [9, 'Segure o botão direito para levantar o escudo'],
-  [13, 'Escudo erguido no instante do golpe = APARAR (atordoa o inimigo)'],
-  [17, 'Aperte 2 (ou gire a rodinha) para pegar a picareta e segure o clique esquerdo para minerar'],
-  [21, 'Aperte 1 para voltar à espada · Q coloca uma tocha'],
-  [24, 'Passando a placa à direita do vilarejo, uma caverna desce até as profundezas.'],
-  [32, 'Aperte I para abrir o inventário e ver seu equipamento'],
-  [40, 'Aperte Tab para abrir o mapa de tudo que você já explorou']
-];
-function tutorial(dt) { if (tutorialStep >= TUTORIAL.length) return; tutorialT += dt; if (tutorialT >= TUTORIAL[tutorialStep][0]) { toast(TUTORIAL[tutorialStep][1]); tutorialStep++; } }
