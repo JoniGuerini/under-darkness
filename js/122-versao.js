@@ -7,8 +7,16 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.11.5';
+const VERSAO = '0.12.0';
 const NOVIDADES = [
+  { v: '0.12.0', data: '10/10/2026', titulo: 'O Eclipse', itens: [
+    'Conjunto do Eclipse: Elmo, Peitoral e Botas do Eclipse, lendários, em obsidiana e ouro com partes acesas que brilham no escuro. Todo personagem novo já começa com as três peças na mochila.',
+    'No escuro o conjunto acorda: o elmo dá mais crítico, o peitoral reduz o dano recebido e as botas dão mais velocidade.',
+    'Bônus de conjunto (a espada conta): com 2 peças, +10% de dano no escuro; com as 4, o eclipse vem a cada 3 golpes, cura 5% da vida e atordoa os inimigos atingidos por 1 s.',
+    'Espada de duas mãos lendária nova, o Montante do Eclipse: lâmina de obsidiana com as bordas acesas, estrelas por dentro e um sol eclipsado no lugar da guarda. Todo personagem novo já começa com ela na mochila.',
+    'A cada 4 golpes que acertam, um eclipse explode no alvo e atinge todos os inimigos em volta. No escuro ela bate 30% mais forte, e o dano crítico sobe 50%.',
+    'As bordas da lâmina brilham no escuro, soltam poeira de estrela e deixam um rastro dourado a cada golpe.'
+  ] },
   { v: '0.11.5', data: '10/10/2026', titulo: 'Escuridão gradual', itens: [
     'Ao entrar na caverna a escuridão chega aos poucos, ao longo da descida, em vez de trocar de uma vez de um bloco para o outro.'
   ] },

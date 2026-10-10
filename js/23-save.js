@@ -42,7 +42,7 @@ function newWorld(sd, sv) {
     // saves from before the hotbar: hand out the pickaxe once
     if (!sv.eq || !('tool' in sv.eq)) { if (!inv.some(q => q && ITEMS[q.id].slot === 'tool')) equip.tool = mkItem('picareta_ferro', 0); toolNews = true; }
     gearNews = !sv.gear && !!sv.p;
-  } else { addItem('tocha', sv && sv.p && sv.p.torches != null ? Math.max(0, sv.p.torches | 0) : 12); if (ITEMS.montante_madeira) { const i = inv.indexOf(null, HB_BAG); if (i >= 0) inv[i] = mkItem('montante_madeira', 0); } toolNews = !!(sv && sv.p); }   // every new hero also carries a wooden two-handed sword (js/125-madeira.js)
+  } else { addItem('tocha', sv && sv.p && sv.p.torches != null ? Math.max(0, sv.p.torches | 0) : 12); for (const id of ['montante_madeira', 'montante_eclipse', 'elmo_eclipse', 'peitoral_eclipse', 'botas_eclipse']) if (ITEMS[id]) { const i = inv.indexOf(null, HB_BAG); if (i >= 0) inv[i] = mkItem(id, 0); } toolNews = !!(sv && sv.p); }   // every new hero also carries a wooden two-handed sword (js/125-madeira.js) and the Montante do Eclipse (js/130)
   recalc(); buildLook(); pl.hp = pl.maxHp; pl.mana = pl.maxMana;
   const [x, y] = spawnPoint(); pl.x = x; pl.y = y;
   if (sv && sv.p && isFinite(sv.p.x) && isFinite(sv.p.y) && !rectSolid(sv.p.x, sv.p.y, pl.w, pl.h)) { pl.x = sv.p.x; pl.y = sv.p.y; pl.hp = clamp(+sv.p.hp || pl.maxHp, 1, pl.maxHp); }

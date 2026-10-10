@@ -34,9 +34,11 @@
 
   UDW.pages.lendarios = {
     render() {
-      const L = AFFIXES.filter(a => a.tier === 4), U = Object.keys(ITEMS).filter(id => ITEMS[id].legend);
+      const L = AFFIXES.filter(a => a.tier === 4), U = Object.keys(ITEMS).filter(id => ITEMS[id].legend && !ITEMS[id].start), S = Object.keys(ITEMS).filter(id => ITEMS[id].legend && ITEMS[id].start);
+      const box = ids => `<div class="rolls">${ids.map(id => `<a href="#/item/${id}" class="semlinha">${UDW.tipBox(UDW.white(id))}</a>`).join('')}</div>`;
       let h = UDW.head('Lendários', 'Os modificadores lendários mudam o jeito de lutar. As peças únicas dos chefes têm propriedades fixas.');
-      h += `<h2>Únicos de chefe</h2><div class="rolls">${U.map(id => `<a href="#/item/${id}" class="semlinha">${UDW.tipBox(UDW.white(id))}</a>`).join('')}</div>`;
+      h += `<h2>Únicos de chefe</h2>` + box(U);
+      if (S.length) h += `<h2>Únicos iniciais</h2><p>Todo personagem novo já começa com estas peças na mochila.</p>` + box(S);
       h += `<h2>Modificadores lendários</h2><div class="lendas">${L.map(a => `<div class="lenda"><b>${E(a.name)}</b><span class="fxs">${UDW.affixText(a, 6)}</span><p class="flavor">"${E(a.flavor || '')}"</p><small>Aparece em: ${[...a.where].map(s => UDW.SLOT[s].toLowerCase()).join(', ')}</small></div>`).join('')}</div><p class="nota">Valores para o nível de item 6.</p>`;
       return h;
     }

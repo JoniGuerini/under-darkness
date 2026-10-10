@@ -18,8 +18,8 @@
   UDW.buyers = id => Object.keys(SHOPS).filter(k => { try { return SHOPS[k].buys(id); } catch (e) { return false; } });
   UDW.origins = id => {
     const o = [], it = ITEMS[id], A = UDW.ativos();
-    if (Object.values(DEFAULT_EQ).includes(id)) o.push(['Inicial', '#7fd36a']);
-    if (it.legend) o.push(['Chefe', '#ff9a3c']);
+    if (Object.values(DEFAULT_EQ).includes(id) || it.start) o.push(['Inicial', '#7fd36a']);
+    if (it.legend && !it.start) o.push(['Chefe', '#ff9a3c']);
     const d = UDW.dropsOf(id).filter(x => !ET[x.t].boss && x.t !== 'rei');
     if (d.length) o.push(['Monstros', d.some(x => A.has(x.t)) ? '#c4b596' : '#5e5548']);
     if (it.slot && UDW.shopTiers(id).length) o.push(['Loja', '#62a8ff']);
@@ -95,7 +95,8 @@
       let h = `<div class="itemtopo"><div class="bigic">${UDW.icon(id, 96)}</div><div>${UDW.tipBox(s)}</div><div class="fontes">`;
       // de onde vem
       const d = UDW.dropsOf(id), A = UDW.ativos();
-      if (it.legend) { const b = Object.keys(DROPS).find(t => DROPS[t].some(r => r[0] === id)); h += `<h3>Chefe</h3><p>${b && ET[b] ? `<a href="#/chefes">${E(ET[b].name)}</a> sempre solta` : 'Item único de chefe'}${b && !A.has(b) ? ' <em>(desligado no mundo atual)</em>' : ''}.</p>`; }
+      if (it.start) h += `<h3>Inicial</h3><p>Todo personagem novo já começa com esta peça na mochila.</p>`;
+      else if (it.legend) { const b = Object.keys(DROPS).find(t => DROPS[t].some(r => r[0] === id)); h += `<h3>Chefe</h3><p>${b && ET[b] ? `<a href="#/chefes">${E(ET[b].name)}</a> sempre solta` : 'Item único de chefe'}${b && !A.has(b) ? ' <em>(desligado no mundo atual)</em>' : ''}.</p>`; }
       const dn = d.filter(x => !ET[x.t].boss && x.t !== 'rei');
       if (dn.length) h += `<h3>Cai de</h3><ul class="fl">${dn.map(x => `<li><a href="#/inimigo/${x.t}">${UDW.enemyImg(x.t, 1)}${E(ET[x.t].name)}</a><b>${UDW.pct(x.p, 2)}</b>${A.has(x.t) ? '' : '<em>desligado</em>'}</li>`).join('')}</ul>`;
       const ct = UDW.shopTiers(id);
