@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.9.7';
+const VERSAO = '0.9.8';
 const NOVIDADES = [
+  { v: '0.9.8', data: '10/10/2026', titulo: 'Retrato limpo', itens: [
+    'Na forja e na cozinha, o retrato da peça sendo feita mostra só o ícone do item, sem a arte de fundo.'
+  ] },
   { v: '0.9.7', data: '10/10/2026', titulo: 'Sem luz própria', itens: [
     'O herói não brilha mais sozinho no escuro: a luz vem das tochas e dos itens com +Luz.'
   ] },

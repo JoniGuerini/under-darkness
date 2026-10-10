@@ -21,6 +21,7 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 - `css/tema-maga.css`: as cores e texturas da janela da Aurélia, a maga (js/91-maga.js); o resto do visual é o kit da Marta e do Odo em `css/temas-npc.css`.
 - `css/cozinha.css`: a janela da cozinha do Odo (js/99-cozinha.js), com as texturas da taverna e as cores do kit do Odo.
 - `css/encantador.css`: o livro de encantamento do Teodoro (js/118-encantador.js), no kit dos moradores; `css/tema-encantador.css` tem as cores e texturas da oficina dele.
+- `css/retrato-limpo.css`: o retrato redondo da peça que está sendo feita, na forja e na cozinha, mostra só o ícone do item, sem a fornalha ou a panela pintadas atrás. Carrega por último.
 - `css/alquimia.css`: o livro de alquimia da Marta (js/96-alquimista.js), vestido com o kit da casa dela, e os ícones dos elixires ativos no HUD (js/95-alquimia-uso.js).
 - `css/vitrine.css`: a janela da loja (js/19-loja.js), igual para todos os moradores; as cores e texturas vêm do tema da casa de quem vende (`--k-*` do kit, `--smith-*` do Grimaldo). Só a peça no pedestal e os raios das raras se mexem, por transform.
 - `css/camadas.css`: desempenho. As partes que mudam com o mouse (listas, detalhe, tooltip, slots) ganham camada própria (`will-change:transform`), assim passar o mouse não redesenha a parede texturizada da janela. Janela nova com fundo pesado: ponha as partes vivas aqui. Nada de `filter`, `mask` ou `background-position` animado em coisa que se mexe ou recebe hover.
