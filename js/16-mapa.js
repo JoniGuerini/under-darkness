@@ -90,13 +90,13 @@ function drawMap() {
       sc.drawImage(m.cv, x, y, MCH * MS, MCH * MS);
     }
   }
-  // chests and the altar stay marked, they're what you go looking for
+  // the altar stays marked
   sc.globalAlpha = 1;
   for (let j = 0; j < rows; j++) {
     const ty = oy + j; if (ty < 0 || ty >= WH) continue;
     for (let i = 0; i < cols; i++) {
       const tx = ox + i, kk = ty * WW + wrapX(tx); if (!seen[kk]) continue;
-      const t = tiles[kk], col = t === CHEST ? '#ffd23f' : t === ALTAR ? '#ff3a2a' : null; if (!col) continue;
+      const t = tiles[kk], col = t === ALTAR ? '#ff3a2a' : null; if (!col) continue;
       const d = Math.max(3, Math.round(MS * 0.5)), x = Math.round(W / 2 + (tx + 0.5 - px) * MS - d / 2), y = Math.round(H / 2 + (ty + 0.5 - py) * MS - d / 2);
       sc.fillStyle = '#0a0810'; sc.fillRect(x - 1, y - 1, d + 2, d + 2); sc.fillStyle = col; sc.fillRect(x, y, d, d);
     }

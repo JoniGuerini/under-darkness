@@ -2,9 +2,8 @@
 
 /* ================= escolas de raio e gelo em jogo (dados e ícones em js/114-escolas-dados.js) =================
    O que é comum às duas escolas e os quatro feitiços novos de raio. Os de gelo ficam em js/116-gelo.js.
-   - Jogo novo: o herói já começa sabendo os cinco de raio (com o Arco Voltaico) e os cinco de gelo (com a Nevasca),
-     no lugar dos pergaminhos lacrados do Arco e da Nevasca. Saves antigos não mudam.
-   - Pergaminhos dos feitiços novos: botão direito identifica, botão direito de novo aprende (como os de fogo).
+   - Jogo novo começa sem feitiço: eles saem dos pergaminhos de escola que a Aurélia vende e identifica (js/120-121).
+   - Os pergaminhos de um feitiço só (saves antigos): botão direito identifica, botão direito de novo aprende.
    - Todo golpe passa por hitEnemy com `escRoll` marcado: dano de ESC, vezes (1 + pl.spellPct), número na cor do elemento.
      Só fere o que o feitiço toca de fato: o risco do raio, o anel, a bola, a lasca.
    - Passo do Trovão teleporta o herói; a Essência Estática (chave pararaios) fica parada no ar e pulsa choques em quem chega perto.
@@ -24,7 +23,7 @@ sfx.rzCast = function () { noise(0.12, 0.1, 3800, 'highpass', 0, 1); tone(880, 0
 sfx.rzThunder = function () { noise(0.08, 0.3, 5000, 'highpass', 0, 0.8); noise(0.9, 0.3, 160, 'lowpass', 0.04, 0.6); tone(55, 0.6, 'sawtooth', 0.05, -20, 0.05); };
 sfx.rzZap = function () { noise(0.06, 0.08, 4200, 'bandpass', 0, 2); tone(1400 + Math.random() * 600, 0.05, 'square', 0.015, -500); };
 
-/* ---- jogo novo: as duas escolas já aprendidas ---- */
+/* ---- jogo novo e saves antigos ---- */
 {
   const _newWorld = newWorld;
   const RZ_OLD = { feitico_esfera: 'feitico_pararaios', feitico_nova_raio: 'feitico_passo', perg_esfera: 'perg_pararaios', perg_nova_raio: 'perg_passo', perg_selado_esfera: 'perg_selado_pararaios', perg_selado_nova_raio: 'perg_selado_passo' };
@@ -33,17 +32,6 @@ sfx.rzZap = function () { noise(0.06, 0.08, 4200, 'bandpass', 0, 2); tone(1400 +
     if (sv && Array.isArray(sv.inv)) for (const q of sv.inv) if (Array.isArray(q) && RZ_OLD[q[0]]) q[0] = RZ_OLD[q[0]];
     _newWorld(sd, sv);
     for (const a of [rzStrikes, rzLances, rzDashes, rzCores]) a.length = 0;
-    if (sv && Array.isArray(sv.inv)) return;
-    // o Arco e a Nevasca, que vinham lacrados, já vêm aprendidos no mesmo lugar
-    for (const [seal, spell] of [['perg_selado', 'feitico_arco'], ['perg_selado_n', 'feitico_nevasca']]) {
-      const i = inv.findIndex(q => q && q.id === seal); if (i >= 0) inv[i] = mkItem(spell);
-    }
-    for (const id of [...ESC_SCHOOL.raio, ...ESC_SCHOOL.gelo]) {
-      if (!ITEMS[id] || inv.some(q => q && q.id === id)) continue;
-      let i = inv.findIndex((q, j) => !q && j < HB_BAG); if (i < 0) i = inv.findIndex(q => !q);
-      if (i >= 0) inv[i] = mkItem(id);
-    }
-    invDirty = true; if (typeof hudCache !== 'undefined') hudCache.hb = null;
   };
 }
 

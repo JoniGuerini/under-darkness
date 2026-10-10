@@ -150,7 +150,7 @@
     if (typeof portalUnderMouse === 'function' && portalUnderMouse()) return 'mao';   // portal aberto: js/29-portal.js
     for (const e of enemies) if (!e.dead && wx >= e.x - 2 && wx <= e.x + e.w + 2 && wy >= e.y - 2 && wy <= e.y + e.h + 2) return 'espada';
     const tg = pl.target;
-    if (tg && tg.dig && tg.inReach && tg.pick && !tg.chest) return 'picareta';
+    if (tg && tg.dig && tg.inReach && tg.pick) return 'picareta';
     return 'seta';
   }
   function pickKind() {

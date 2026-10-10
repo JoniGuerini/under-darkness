@@ -178,7 +178,8 @@ const DROPS = {
   skeleton: [['osso', 0.7, 1, 3], ['pocao', 0.1], ['cutelo', 0.07], ['escudo_ferro', 0.05], ['elmo_ferro', 0.04], ['cota', 0.035], ['botas_ferro', 0.03], ['espada_osso', 0.03], ['escudo_osso', 0.025], ['machado_ferro', 0.03], ['lanca_ferro', 0.03], ['elmo_osso', 0.03], ['couraca_osso', 0.02], ['botas_osso', 0.02], ['maca_osso', 0.02]],
   lurker: [['olho', 0.6], ['pocao', 0.15], ['espada_ouro', 0.05], ['escudo_ouro', 0.04], ['elmo_ouro', 0.04], ['manto', 0.04], ['pedra_lunar', 0.04], ['lamina_cristal', 0.03], ['adaga_cristal', 0.03], ['lanca_cristal', 0.03], ['maca_ouro', 0.03], ['machado_ouro', 0.02]]
 };
-const CHEST_LOOT = {
+// the gear the smith Grimaldo can stock, by depth tier (was the loot-chest table; random chests removed 2026-10-10)
+const SHOP_GEAR = {
   1: ['capuz', 'botas_couro', 'cutelo', 'escudo_ferro', 'anel_vida', 'amuleto', 'adaga_ferro', 'machado_ferro', 'maca_ferro', 'lanca_ferro', 'broquel'],
   2: ['elmo_ferro', 'cota', 'espada_osso', 'escudo_osso', 'botas_ferro', 'espada_ouro', 'anel_vida', 'adaga_osso', 'maca_osso', 'lanca_osso', 'elmo_osso', 'couraca_osso', 'botas_osso', 'escudo_torre', 'anel_vampiro', 'anel_furia', 'amuleto_vento', 'picareta_ouro'],
   3: ['elmo_ouro', 'manto', 'escudo_ouro', 'lamina_cristal', 'pedra_lunar', 'espada_ouro', 'adaga_cristal', 'machado_ouro', 'maca_ouro', 'lanca_cristal', 'armadura_placas', 'escudo_espinhos', 'anel_espinhos', 'talisma_ossos', 'lanterna_fantasma', 'picareta_cristal', 'elmo_chifres']

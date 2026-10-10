@@ -362,7 +362,7 @@ function plantHerbs() {
   }
   for (let y = surf[SPX] + 8; y < WH - 4; y++) for (let x = 0; x < WW; x++) {   // embaixo: chão firme de bloco cheio com dois de ar em cima
     const i = y * WW + x; if (tiles[i] !== AIR || tiles[i - WW] !== AIR) continue;
-    const dn = tiles[i + WW]; if (!SOLID[dn] || !BLOCKY[dn] || dn === CHEST || cover.has(i) || cover.has(i - WW)) continue;
+    const dn = tiles[i + WW]; if (!SOLID[dn] || !BLOCKY[dn] || cover.has(i) || cover.has(i - WW)) continue;
     if (y < surf[x] + 8 || hall(x, y)) continue;
     const L = alqLayer(y); if (L > 0) cand[L].push(i);
   }

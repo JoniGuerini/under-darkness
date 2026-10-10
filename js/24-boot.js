@@ -34,7 +34,7 @@ function startPlaying() {
   if (villageNews) { villageNews = false; setTimeout(() => toast('Novidade: a superfície agora é segura e tem um vilarejo com ferreiro, curandeira, taverneiro e ancião. Aperte E perto deles para conversar, comprar e vender.', 'gold'), 3600); }
   if (cathNews) { cathNews = false; setTimeout(() => toast('Novidade: debaixo do vilarejo agora há uma catedral soterrada. O mundo foi refeito para ela; seu nível, itens e ouro continuam.', 'gold'), 900); }
   if (mapNews) { mapNews = false; setTimeout(() => toast('Novidade: aperte Tab para abrir o mapa de tudo que você já explorou.', 'gold'), toolNews ? 5600 : 1600); }
-  if (toolNews) { toolNews = false; setTimeout(() => toast('Novidade: aperte 2 (ou gire a rodinha) para pegar a picareta e segure o clique esquerdo para minerar. O E agora só abre baús.', 'gold'), 1600); }
+  if (toolNews) { toolNews = false; setTimeout(() => toast('Novidade: aperte 2 (ou gire a rodinha) para pegar a picareta e segure o clique esquerdo para minerar.', 'gold'), 1600); }
 }
 function start(hot) {
   comp = mk(CW, CHT); cctx = comp.getContext('2d', { willReadFrequently: true }); cctx.imageSmoothingEnabled = false;
@@ -58,7 +58,7 @@ function start(hot) {
   addEventListener('beforeunload', saveGame);
   try { window.claude?.hot?.snapshot?.(() => ({ save: makeSave() })); } catch (e) { }
   requestAnimationFrame(t => { last = t; frame(t); });
-  window.__game = { pl, enemies, get state() { return state; }, set state(v) { state = v; }, keys, mouse, tiles: () => tiles, surf: () => surf, spawnEnemy, startPlaying, hurtPlayer, gainXP, addItem, equip, get inv() { return inv; }, openInv, closeInv, NPCS, openTalk, closeTalk, get stock() { return stock; }, inVillage, get wt() { return worldTime; }, set wt(v) { worldTime = v; }, dropLoot, loot, openChest, quickAction, moveItem, sortInv, recalc, hb, selectHB, rollItem, mkItem, itemName, itemStats, addInst, dropGear, ITEMS, get mapOpen() { return mapOpen; }, get seen() { return seen; }, get bossFight() { return bossFight; }, endBossFight, makeSave, newWorld, get target() { return pl.target; }, tileAt, setTile };
+  window.__game = { pl, enemies, get state() { return state; }, set state(v) { state = v; }, keys, mouse, tiles: () => tiles, surf: () => surf, spawnEnemy, startPlaying, hurtPlayer, gainXP, addItem, equip, get inv() { return inv; }, openInv, closeInv, NPCS, openTalk, closeTalk, get stock() { return stock; }, inVillage, get wt() { return worldTime; }, set wt(v) { worldTime = v; }, dropLoot, loot, quickAction, moveItem, sortInv, recalc, hb, selectHB, rollItem, mkItem, itemName, itemStats, addInst, dropGear, ITEMS, get mapOpen() { return mapOpen; }, get seen() { return seen; }, get bossFight() { return bossFight; }, endBossFight, makeSave, newWorld, get target() { return pl.target; }, tileAt, setTile };
 }
 const boot = d => start(d || {});
 if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});

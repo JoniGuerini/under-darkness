@@ -36,7 +36,7 @@ function inAbHall(tx, ty, m = 0) { const B = abBoss; if (!B) return false; const
 // the hall with its shell (floor, roof, walls): what nothing may break while he fights (diggers keep out of it always)
 function abGuard(tx, ty) { const B = abBoss; if (!B) return false; return Math.abs(wdx(wrapX(tx) - B.cx)) <= (B.w >> 1) + 3 && ty >= B.top - 8 && ty <= B.fy + 2; }
 function prDrop(m) { const k = enemies.indexOf(m); if (k >= 0) enemies.splice(k, 1); m.dead = true; }
-const PR_SHELL = t => SOLID[t] && t !== BEDROCK && t !== AB_BARREIRA && t !== CHEST && t !== CHEST_OPEN && t !== AB_O_INFERNITA && t !== AB_O_CARVAO;
+const PR_SHELL = t => SOLID[t] && t !== BEDROCK && t !== AB_BARREIRA && t !== AB_O_INFERNITA && t !== AB_O_CARVAO;
 function abDress() {
   const B = abBoss; if (!B) return;
   prDressed = true;

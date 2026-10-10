@@ -137,14 +137,12 @@ function drawWorldUI(cx, cy) {
   const x = tg.tx * T - cx, y = tg.ty * T - cy;
   const hh = heldBag();
   if (hh && hh.it.deco && tg.inReach && canPlaceDeco(tg.tx, tg.ty)) { lc.globalAlpha = 0.55; lc.drawImage(SPR.deco[hh.it.deco], x, y); lc.globalAlpha = 1; }
-  if (hh && hh.it.block && tg.inReach && !tg.chest) {
+  if (hh && hh.it.block && tg.inReach) {
     const t0 = tileAt(tg.tx, tg.ty);
     if (canPlace(tg.tx, tg.ty)) { lc.globalAlpha = 0.5 + Math.sin(gameTime * 6) * 0.1; lc.drawImage(SPR.block[hh.it.block], x, y); lc.globalAlpha = 0.6; lc.strokeStyle = '#fff'; lc.lineWidth = 1; lc.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); lc.globalAlpha = 1; }
     else if (t0 === AIR || t0 === TUFT || t0 === FLOWER) { lc.globalAlpha = 0.55; lc.strokeStyle = '#ff6a5a'; lc.lineWidth = 1; lc.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); lc.globalAlpha = 1; }
   }
-  const nc = pl.nearChest;
-  if (nc) { lc.globalAlpha = 0.6 + Math.sin(gameTime * 6) * 0.3; lc.strokeStyle = '#ffd27a'; lc.lineWidth = 1; lc.strokeRect(nc[0] * T - cx - 0.5, nc[1] * T - cy - 0.5, T + 1, T + 1); lc.globalAlpha = 1; }
-  if (!tg.chest && tg.dig && tg.inReach && tg.pick) { lc.globalAlpha = mouse.l ? 0.85 : 0.35; lc.strokeStyle = '#fff'; lc.lineWidth = 1; lc.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); lc.globalAlpha = 1; }
+  if (tg.dig && tg.inReach && tg.pick) { lc.globalAlpha = mouse.l ? 0.85 : 0.35; lc.strokeStyle = '#fff'; lc.lineWidth = 1; lc.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); lc.globalAlpha = 1; }
   if (pl.digX === tg.tx && pl.digY === tg.ty && pl.digT > 0) { const t = tileAt(tg.tx, tg.ty); const n = Math.floor(CRACK.length * Math.min(1, pl.digT / DIG[t])); lc.fillStyle = '#0d0a10'; for (let i = 0; i < n; i++) lc.fillRect(x + CRACK[i][0], y + CRACK[i][1], 1, 1); }
 }
 function render() {
@@ -175,7 +173,6 @@ function render() {
     else if (t === SHROOM) { lc.globalAlpha = 0.22; lc.drawImage(SPR.glow.shroom, x - 16, y - 13); }
     else if (t === CRYSTAL) { lc.globalAlpha = 0.16 + Math.sin(gameTime * 2 + gx) * 0.05; lc.drawImage(SPR.glow.crystal, x - 16, y - 16); }
     else if (t === LAVA && tileAt(gx, gy - 1) !== LAVA && (gx & 1)) { lc.globalAlpha = 0.28; lc.drawImage(SPR.glow.lava, x - 22, y - 28); }
-    else if (t === CHEST) { lc.globalAlpha = 0.2 + Math.sin(gameTime * 3 + gx) * 0.06; lc.drawImage(SPR.glow.chest, x - 14, y - 12); }
   }
   for (const o of projs) { if (o.kind === 'arrow') continue; lc.globalAlpha = 0.85; lc.drawImage(o.kind === 'fire' && o.owner === 'enemy' ? SPR.glow.fire : o.owner === 'enemy' ? SPR.glow.orb : SPR.glow.orbP, Math.round(o.x) - cx - 11, Math.round(o.y) - cy - 11); }
   for (const o of orbs) { lc.globalAlpha = 0.7; lc.drawImage(SPR.glow.xp, Math.round(o.x) - cx - 6, Math.round(o.y) - cy - 6); }
@@ -234,13 +231,6 @@ function render() {
     sc.globalAlpha = 1;
   }
   drawNpcLabels(cx, cy);
-  // chest hint
-  const tg = pl.target;
-  const nc = pl.nearChest;
-  if (state === 'play' && nc && !pl.dead) {
-    sc.font = `700 ${Math.round(S * 3.4)}px "Rubik", system-ui, sans-serif`; sc.textAlign = 'center'; sc.textBaseline = 'middle';
-    const x = ((nc[0] + 0.5) * T - cx) * S, y = (nc[1] * T - cy - 7) * S; sc.lineWidth = Math.max(3, S); sc.strokeStyle = '#120d12'; sc.strokeText('E  abrir baú', x, y); sc.fillStyle = '#ffd27a'; sc.fillText('E  abrir baú', x, y);
-  }
   // enemy level tags
   sc.font = `600 ${Math.round(S * 3.1)}px "Rubik", system-ui, sans-serif`; sc.textAlign = 'center';
   if (mapOpen && state === 'play') drawMap();

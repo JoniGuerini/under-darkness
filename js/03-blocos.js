@@ -1,13 +1,13 @@
 'use strict';
 
 /* ================= tiles ================= */
-const AIR = 0, DIRT = 1, GRASS = 2, STONE = 3, DEEP = 4, COPPER = 5, IRON = 6, GOLD = 7, CRYSTAL = 8, BEDROCK = 9, LAVA = 10, TRUNK = 11, LEAVES = 12, TORCH = 13, SHROOM = 14, TUFT = 15, FLOWER = 16, CHEST = 17, CHEST_OPEN = 18, BONES = 19, PLANK = 20, CRYPT = 21, CANDLE = 22, CHAIN = 23, WEB = 24, BANNER = 25, GATE = 26, URN = 27, ALTAR = 28, COAL = 29;
-const NT = 192;   // tile ids: 30-53 cathedral, 54-73 caves (js/52-caverna-api.js), 74-93 ice (69), 94-117 mine (79), 118-122 herbs (94), 123 ice coal, 128-152 abyss (103), 153-156 gems (117)
+const AIR = 0, DIRT = 1, GRASS = 2, STONE = 3, DEEP = 4, COPPER = 5, IRON = 6, GOLD = 7, CRYSTAL = 8, BEDROCK = 9, LAVA = 10, TRUNK = 11, LEAVES = 12, TORCH = 13, SHROOM = 14, TUFT = 15, FLOWER = 16, BONES = 19, PLANK = 20, CRYPT = 21, CANDLE = 22, CHAIN = 23, WEB = 24, BANNER = 25, GATE = 26, URN = 27, ALTAR = 28, COAL = 29;
+const NT = 192;   // tile ids 17 and 18 were the loot chests (removed 2026-10-10), leave them unused; tile ids: 30-53 cathedral, 54-73 caves (js/52-caverna-api.js), 74-93 ice (69), 94-117 mine (79), 118-122 herbs (94), 123 ice coal, 128-152 abyss (103), 153-156 gems (117)
 const SOLID = new Uint8Array(NT), BLOCKY = new Uint8Array(NT), EMIT = new Float32Array(NT), DIG = new Float32Array(NT), ORE_XP = new Uint8Array(NT);
 [DIRT, GRASS, STONE, DEEP, COPPER, IRON, GOLD, CRYSTAL, BEDROCK, PLANK, CRYPT, COAL].forEach(t => { SOLID[t] = 1; BLOCKY[t] = 1; });
 SOLID[GATE] = 1;
 BLOCKY[LEAVES] = 1; BLOCKY[LAVA] = 1;
-EMIT[TORCH] = 1.0; EMIT[CANDLE] = 0.85; EMIT[ALTAR] = 0.55; EMIT[SHROOM] = 0.55; EMIT[CRYSTAL] = 0.62; EMIT[LAVA] = 0.95; EMIT[CHEST] = 0.14;
+EMIT[TORCH] = 1.0; EMIT[CANDLE] = 0.85; EMIT[ALTAR] = 0.55; EMIT[SHROOM] = 0.55; EMIT[CRYSTAL] = 0.62; EMIT[LAVA] = 0.95;
 DIG[DIRT] = 0.26; DIG[GRASS] = 0.26; DIG[STONE] = 0.55; DIG[DEEP] = 0.8; DIG[COPPER] = 0.7; DIG[IRON] = 0.85; DIG[GOLD] = 1.0; DIG[CRYSTAL] = 1.1; DIG[COAL] = 0.6;
 DIG[TRUNK] = 0.45; DIG[PLANK] = 0.45; DIG[CRYPT] = 1.2; DIG[CANDLE] = 0.1; DIG[CHAIN] = 0.1; DIG[WEB] = 0.03; DIG[BANNER] = 0.08; DIG[URN] = 0.03; DIG[LEAVES] = 0.08; DIG[TORCH] = 0.05; DIG[SHROOM] = 0.05; DIG[TUFT] = 0.03; DIG[FLOWER] = 0.03; DIG[BONES] = 0.04;
 ORE_XP[COPPER] = 3; ORE_XP[IRON] = 5; ORE_XP[GOLD] = 9; ORE_XP[CRYSTAL] = 14; ORE_XP[COAL] = 1;
@@ -331,15 +331,6 @@ const TRUNK_TOP = [
   "..odmmlmdo.."
 ];
 DECO[TRUNK] = [TRUNK_BARK, TRUNK_KNOT, TRUNK_TOP].map(rows => rowsT(rows, TRUNK_P));
-const CHEST_ROWS = ["............", "............", "............", "..oooooooo..", ".oWwwwwwwWo.", ".oWwwwwwwWo.", ".oyyyyyyyyo.", ".oWwwYYwwWo.", ".oWwwkkwwWo.", ".oWwwwwwwWo.", ".oWWWWWWWWo.", ".oooooooooo."];
-const CHEST_OPEN_ROWS = ["..oooooooo..", ".oWwwwwwwWo.", ".oyyyyyyyyo.", ".oooooooooo.", ".oggGgggGgo.", ".oddddddddo.", ".oyyyyyyyyo.", ".oWwwwwwwWo.", ".oWwwwwwwWo.", ".oWwwwwwwWo.", ".oWWWWWWWWo.", ".oooooooooo."];
-const CHEST_PALS = [
-  { o: '#1e120a', W: '#6e4424', w: '#94603a', y: '#c89a3a', Y: '#fff0a0', k: '#2a1a10', g: '#f0c43a', G: '#fff3a0', d: '#120a06' },
-  { o: '#141418', W: '#5a5f68', w: '#7c828c', y: '#b8c0ca', Y: '#ffffff', k: '#22242a', g: '#f0c43a', G: '#fff3a0', d: '#0a0a0e' },
-  { o: '#2a1c04', W: '#a87808', w: '#d8a830', y: '#fff0a0', Y: '#ffffff', k: '#5a3a04', g: '#ff8a8a', G: '#fff3a0', d: '#1a1004' }
-];
-DECO[CHEST] = CHEST_PALS.map(p => rowsT(CHEST_ROWS, p));
-DECO[CHEST_OPEN] = CHEST_PALS.map(p => rowsT(CHEST_OPEN_ROWS, p));
 DECO[CANDLE] = [rowsT(ART_CANDLE, ART_CANDLE_P), rowsT(ART_CANDLE2, ART_CANDLE2_P)];
 DECO[CHAIN] = [rowsT(ART_CHAIN, ART_CHAIN_P), rowsT(ART_CHAIN_END, ART_CHAIN_END_P)];
 DECO[BANNER] = [rowsT(ART_BANNER_T, ART_BANNER_T_P), rowsT(ART_BANNER_B, ART_BANNER_B_P)];

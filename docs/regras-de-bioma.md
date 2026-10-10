@@ -89,7 +89,7 @@ Rodar pelo menos 8 sementes e conferir por código:
 
 Desde 2026-10-09 o mundo tem 900 blocos de largura (`WW`), três vezes os 300 de antes. `WSC` (em `js/01-base.js`) diz quantas vezes ele é mais largo que o original.
 
-- Tudo que existe "por mundo" multiplica por `WSC`: salas, câmaras, galerias, poços, túneis entre faixas, veios de minério, baús, tentativas e passes de alcance.
+- Tudo que existe "por mundo" multiplica por `WSC`: salas, câmaras, galerias, poços, túneis entre faixas, veios de minério, tentativas e passes de alcance.
 - O que é único continua único: a sala do chefe e as duas descidas de cada camada.
 - Ruído que dá a volta no mundo (`depthNz`) já corrige sozinho; o tamanho dos detalhes não muda.
 - Laços que comparam todos com todos (O(n²) ou pior) ficam três vezes mais caros ou piores: evite.

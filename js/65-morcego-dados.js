@@ -1,8 +1,7 @@
 'use strict';
 
 /* ================= Forma de Morcego, o segundo feitiço: os dados =================
-   Funciona como o Arco Voltaico (js/63-arco-dados.js): um herói novo começa com mais um pergaminho não identificado;
-   botão direito identifica, botão direito de novo aprende, e o feitiço fica na barra. Com ele na mão, o clique esquerdo
+   Escola de Metamorfose, da qual é o único feitiço por enquanto. O feitiço sai do pergaminho de escola que a Aurélia vende e identifica (js/120-121). Com ele na mão, o clique esquerdo
    gasta mana e o herói vira um morcego que voa livre, batendo as asas, por alguns segundos; depois volta a ser gente.
    Este arquivo só tem os dados (itens, números, ícones e o desenho do morcego) e carrega logo depois de 63-arco-dados,
    para a wiki ver também. As regras (aprender, transformar, voar, desenhar) ficam em js/66-morcego.js. */

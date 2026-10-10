@@ -16,7 +16,7 @@
         tunnel), the bridges over them, and the veins (coal, and infernite, the abyss's own metal)
      5. everything reachable from the rifts, then the dressing: hell brick round the ruins and temples, crust and
         obsidian round the lava, basalt columns, ladders at every drop too deep to jump back up (chains in the
-        Entranhas), chains, braziers, flames, skulls, spikes, tendrils, hooks, runes, crystals, chests and props
+        Entranhas), chains, braziers, flames, skulls, spikes, tendrils, hooks, runes, crystals and props
    Then the boss hall (109's abDress) and the climb back out (abClimbFix); 87's worldLink runs after all of it.
    Also here: the far layer, the zones (21..24) and their names, spawn tables, monster levels, glows, ash and
    sparks, the furnace recipe for infernite, the village's shops and the elder's tasks, and the save (111: wg 8,
@@ -386,28 +386,14 @@ function abAfter() {
     else { if (q < 0.012 || (dn === AB_TIJOLO && q < 0.05)) put(x, y, AB_RUNA); else if (q < 0.035) put(x, y, AB_CRISTAL); else if (q < 0.043) put(x, y, AB_BRASEIRO); else if (q < 0.053) put(x, y, AB_CRANIOS); }
   }
 
-  // ---------- 6. chests: three per band, far apart ----------
-  const chests = [];
-  for (let b = 0; b < 4; b++) {
-    let n = 0;
-    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
-      const x = (R3() * WW) | 0, y = S0 + mb(AB_BANDS[b]) + 2 + ((R3() * Math.max(1, mb(AB_BANDS[b + 1] - AB_BANDS[b]) - 4)) | 0);
-      if (y >= YB - 2 || at(x, y) !== AIR || !abSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)] || inBoss(x, y, 2) || abKeep.has(I(x, y))) continue;
-      if (chests.some(([a, c]) => Math.abs(wdx(a - x)) < 30 && Math.abs(c - y) < 25)) continue;
-      chests.push([x, y]); put(x, y, CHEST); n++;
-    }
-  }
-  abChestSpots = chests;
-
   // ---------- 7. the big props ----------
   if (typeof abPlaceProps === 'function') abPlaceProps();
 }
 
-/* ---------- climbing back out: from the deep places (the boss hall, every chest, every temple and flesh chamber) the
+/* ---------- climbing back out: from the deep places (the boss hall, every temple and flesh chamber) the
    hero must be able to get back up to the rifts. A walk-and-jump search (three blocks of jump, ladders and chains
    climbed, never through lava); where it tops out under open air that leads up to somewhere to stand, a ladder goes
    in, and the search runs again. Same as the mine's mnClimbFix. ---------- */
-let abChestSpots = [];
 function abClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = AB_S0, YB = Math.min(WH - 8, S0 + AB_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => { const t = tiles[I(x, y)]; return t === AB_ESCADA || t === AB_CORRENTE || t === CHAIN; };
@@ -445,7 +431,6 @@ function abClimbFix() {
   };
   const starts = [];
   if (abBoss) starts.push([abBoss.cx - 8, abBoss.fy - 1], [abBoss.cx + 8, abBoss.fy - 1]);
-  for (const [x, y] of abChestSpots) starts.push([x, y]);
   for (const c of abChambers) if (c.kind === 'templo' || c.kind === 'carne' || c.kind === 'lago') starts.push([Math.round(c.cx), Math.round(c.cy)]);
   let fixes = 0;
   for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }

@@ -332,19 +332,6 @@ function cvAfter() {
     }
   }
 
-  // ---------- 5. chests: up to 12, three per band, far apart ----------
-  const chests = [];
-  for (let b = 0; b < 4; b++) {
-    let n = 0;
-    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
-      const x = (R3() * WW) | 0, y = S0 + CV_BANDS[b] + 2 + ((R3() * (CV_BANDS[b + 1] - CV_BANDS[b] - 4)) | 0);
-      if (y >= YB - 2 || y < surf[x] + 10 || at(x, y) !== AIR || !caveSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)]) continue;
-      if (cvBoss && Math.abs(wdx(x - cvBoss.cx)) < cvBoss.w / 2 + 2 && y <= cvBoss.fy && y >= cvBoss.top) continue;
-      if (chests.some(([a, c]) => Math.abs(wdx(a - x)) < 30 && Math.abs(c - y) < 25)) continue;
-      chests.push([x, y]); put(x, y, CHEST); n++;
-    }
-  }
-
   // ---------- 6. the big props ----------
   cvPlaceProps();
 }

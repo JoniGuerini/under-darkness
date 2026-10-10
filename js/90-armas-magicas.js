@@ -167,10 +167,10 @@ for (const id of MAGIC_IDS) { const it = ITEMS[id]; it.g = it.kind === 'wand' ? 
 const isTome = id => !!(id && ITEMS[id] && ITEMS[id].tome);
 const isMagicItem = id => !!(id && ITEMS[id] && (ITEMS[id].tome || (ITEMS[id].slot === 'weapon' && KIND[ITEMS[id].kind] && KIND[ITEMS[id].kind].magic)));
 
-// onde aparecem fora da loja da maga: baús, como as outras armas
-CHEST_LOOT[1].push('varinha_salgueiro', 'tomo_couro');
-CHEST_LOOT[2].push('cajado_freixo', 'varinha_osso', 'tomo_osso');
-CHEST_LOOT[3].push('cajado_cristal', 'varinha_cristal', 'tomo_prata');
+// onde aparecem fora da loja da maga: na loja do Grimaldo, como as outras armas
+SHOP_GEAR[1].push('varinha_salgueiro', 'tomo_couro');
+SHOP_GEAR[2].push('cajado_freixo', 'varinha_osso', 'tomo_osso');
+SHOP_GEAR[3].push('cajado_cristal', 'varinha_cristal', 'tomo_prata');
 
 /* ---- os números ---- */
 {

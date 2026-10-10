@@ -594,7 +594,7 @@ const tierNow = () => pl.lvl >= 12 ? 3 : pl.lvl >= 6 ? 2 : 1;
 function restock() {
   shopDay = dayNow();
   const t = tierNow(), pick = a => a[Math.floor(Math.random() * a.length)], gear = [];
-  for (let k = 0; k < 10; k++) { const tier = clamp(t - (Math.random() < 0.35 ? 1 : 0), 1, 3); const s = rollItem(pick(CHEST_LOOT[tier]), tier + (Math.random() < 0.25 ? 1 : 0), 'shop'); gear.push({ s, price: itemValue(s) }); }
+  for (let k = 0; k < 10; k++) { const tier = clamp(t - (Math.random() < 0.35 ? 1 : 0), 1, 3); const s = rollItem(pick(SHOP_GEAR[tier]), tier + (Math.random() < 0.25 ? 1 : 0), 'shop'); gear.push({ s, price: itemValue(s) }); }
   gear.sort((a, b) => ITEMS[a.s.id].slot.localeCompare(ITEMS[b.s.id].slot) || a.price - b.price);
   stock.ferreiro = gear;
   stock.curandeira = [{ s: { id: 'pocao', n: 1 }, price: 30, inf: true }];
@@ -610,7 +610,7 @@ const CHAT = {
     'Machado empurra longe, lança mantém a distância, adaga é rápida e maça atordoa. Escolha conforme o bicho.',
     (CAVERNA ? 'Primeiro vem terra e rocha, depois o ninho das aranhas. Mais embaixo ainda, pedra branca e uma catedral inteira enterrada nela.' : 'Pedra branca debaixo da vila, e uma catedral inteira enterrada nela. Quem diria.'),
     'Troco a mercadoria todo dia. O que não estiver bom hoje pode estar amanhã.',
-    'Quanto mais fundo o baú, melhor o que tem dentro. E melhor o que eu consigo te vender depois.'
+    'Quanto mais fundo você desce, melhor o que eu consigo te vender depois.'
   ],
   curandeira: [
     'Gel de gosma e asa de morcego viram unguento. Ectoplasma... prefiro não contar o que vira.',

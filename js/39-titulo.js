@@ -363,10 +363,15 @@ function paintTitleLogo() {
     <h1 class="logo"><canvas id="ttLogo" role="img" aria-label="Under Darkness"></canvas></h1>
     <nav class="tmenu" id="ttMain" aria-label="Menu principal">
       <button type="button" id="ttCont">Continuar</button>
+      <button type="button" id="ttLoad">Carregar</button>
       <button type="button" id="ttNew">Novo jogo</button>
+      <button type="button" id="ttNews">Novidades</button>
       <button type="button" id="ttOpt">Opções</button>
       <button type="button" id="ttQuit">Sair</button>
     </nav>
+    <nav class="tmenu" id="ttChars" aria-label="Personagens" hidden></nav>
+    <section class="tnews" id="ttNewsBox" aria-label="Novidades" hidden><h2>Novidades</h2><div class="tnlist" id="ttNewsList"></div><nav class="tmenu"><button type="button" class="back" id="ttNewsBack">Voltar</button></nav></section>
+    <div class="tver" id="ttVer"></div>
     <div id="ttBye" hidden><canvas id="ttByeLogo" aria-hidden="true"></canvas></div>`;
   document.body.appendChild(root);
   $('menu').hidden = true;
@@ -424,13 +429,14 @@ function paintTitleLogo() {
   function fxStart() { if (!fxOn) { fxOn = true; fxLast = 0; requestAnimationFrame(fxFrame); } }
   requestAnimationFrame(fxFrame);
 
-  /* menu */
-  const hasSave = () => !$('btnNewMenu').hidden;
-  const btnCont = $('ttCont'), btnNew = $('ttNew');
-  let armed = false;
+  /* menu: os personagens vêm do 120-personagens (charList, charNew, charLoad, charDelete) */
+  const btnCont = $('ttCont'), btnLoad = $('ttLoad'), btnNew = $('ttNew'), navMain = $('ttMain'), navChars = $('ttChars');
+  const newsBox = $('ttNewsBox');
+  const navNow = () => !newsBox.hidden ? newsBox.querySelector('.tmenu') : navChars.hidden ? navMain : navChars;
   function mainUI() {
-    btnCont.hidden = !hasSave();
-    armed = false; btnNew.textContent = 'Novo jogo'; btnNew.classList.remove('warn');
+    const any = charList().length > 0;
+    btnCont.hidden = !any; btnLoad.hidden = !any;
+    navChars.hidden = true; newsBox.hidden = true; navMain.hidden = false;
   }
   function play(fn) {
     initAudio();
@@ -438,14 +444,55 @@ function paintTitleLogo() {
     setTimeout(() => { fxOn = false; root.hidden = true; root.classList.remove('out'); }, 260);
     fn();
   }
-  btnCont.addEventListener('click', () => play(startPlaying));
-  btnNew.addEventListener('click', () => {
+  function playChar(id) { play(() => { if (id !== charCur || !tiles) charLoad(id); startPlaying(); }); }
+  btnCont.addEventListener('click', () => { const id = charCur != null ? charCur : chars.last; if (id != null) playChar(id); });
+  btnNew.addEventListener('click', () => play(() => { charNew(); startPlaying(); }));
+
+  // carregar: a lista de personagens, cada um com Excluir (pede um segundo clique)
+  function charsUI(focusId) {
+    const list = charList();
+    if (!list.length) { mainUI(); navMain.querySelector('button:not([hidden])').focus(); return; }
+    navMain.hidden = true; navChars.hidden = false; navChars.textContent = '';
+    const h = document.createElement('h2'); h.textContent = 'Personagens'; navChars.appendChild(h);
+    for (const c of list) {
+      const row = document.createElement('div'); row.className = 'crow';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'cpick'; b.dataset.id = c.id;
+      b.innerHTML = `${charName(c)}<small>Nível ${c.lvl} · ${typeof fmtOuro === 'function' ? fmtOuro(c.gold) : c.gold} de ouro</small>`;
+      b.addEventListener('click', () => playChar(c.id));
+      const d = document.createElement('button'); d.type = 'button'; d.className = 'cdel'; d.textContent = 'Excluir';
+      let armed = false;
+      d.addEventListener('click', () => {
+        if (!armed) { armed = true; d.textContent = 'Confirmar'; d.classList.add('warn'); return; }
+        const i = list.indexOf(c); charDelete(c.id);
+        const next = list[i + 1] || list[i - 1]; charsUI(next && next.id);
+      });
+      d.addEventListener('blur', () => { armed = false; d.textContent = 'Excluir'; d.classList.remove('warn'); });
+      row.append(b, d); navChars.appendChild(row);
+    }
+    const back = document.createElement('button'); back.type = 'button'; back.className = 'back'; back.textContent = 'Voltar';
+    back.addEventListener('click', () => { mainUI(); btnLoad.focus(); });
+    navChars.appendChild(back);
+    for (const b of navChars.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
+    (navChars.querySelector(`.cpick[data-id="${focusId}"]`) || navChars.querySelector('.cpick')).focus();
+  }
+  btnLoad.addEventListener('click', () => { initAudio(); charsUI(); });
+
+  // novidades: as notas de cada versão (121-versao); a opção fica marcada até a versão atual ser vista
+  const btnNews = $('ttNews');
+  $('ttVer').textContent = 'Versão ' + VERSAO;
+  const newsSeen = () => { try { return localStorage.getItem('ud-versao-vista') === VERSAO; } catch (e) { return true; } };
+  btnNews.classList.toggle('new', !newsSeen());
+  $('ttNewsList').innerHTML = NOVIDADES.map((n, i) => `<article${i ? '' : ' class="cur"'}><h3>${n.v}<span>${n.titulo}</span><small>${n.data}</small></h3><ul>${n.itens.map(t => `<li>${t}</li>`).join('')}</ul></article>`).join('');
+  let newsScroll = false;
+  btnNews.addEventListener('click', () => {
     initAudio();
-    if (!hasSave()) { play(startPlaying); return; }
-    if (!armed) { armed = true; btnNew.textContent = 'Apagar o jogo salvo?'; btnNew.classList.add('warn'); return; }
-    play(() => $('btnNewMenu').click());
+    navMain.hidden = true; newsBox.hidden = false; $('ttNewsList').scrollTop = 0;
+    if (!newsScroll && typeof customScroll === 'function') { newsScroll = true; try { customScroll($('ttNewsList')); } catch (e) { } }
+    try { localStorage.setItem('ud-versao-vista', VERSAO); } catch (e) { }
+    btnNews.classList.remove('new');
+    $('ttNewsBack').focus();
   });
-  btnNew.addEventListener('blur', () => { if (armed) setTimeout(() => { if (document.activeElement !== btnNew) mainUI(); }, 0); });
+  $('ttNewsBack').addEventListener('click', () => { mainUI(); btnNews.focus(); });
 
   // opções: a tela completa do 40-opcoes, a mesma do menu de pausa
   $('ttOpt').addEventListener('click', () => { initAudio(); openOpts('title'); });
@@ -457,14 +504,17 @@ function paintTitleLogo() {
     try { window.close(); } catch (e) { }
     setTimeout(() => { if (window.closed) return; fxOn = false; $('ttBye').hidden = false; root.classList.add('bye'); }, 150);
   });
-  function backFromBye() { if ($('ttBye').hidden) return; $('ttBye').hidden = true; root.classList.remove('bye'); fxStart(); mainUI(); $('ttMain').querySelector('button:not([hidden])').focus(); }
+  function backFromBye() { if ($('ttBye').hidden) return; $('ttBye').hidden = true; root.classList.remove('bye'); fxStart(); mainUI(); navMain.querySelector('button:not([hidden])').focus(); }
   $('ttBye').addEventListener('pointerdown', e => { e.preventDefault(); setTimeout(backFromBye, 0); });
   addEventListener('keydown', e => { if (!root.hidden && !$('ttBye').hidden) { e.preventDefault(); backFromBye(); } }, true);
 
   // teclado: setas sobem e descem, Esc volta das opções
   addEventListener('keydown', e => {
     if (root.hidden || !$('ttBye').hidden || optsOpen()) return;
-    const nav = $('ttMain');
+    if (e.code === 'Escape' && !navChars.hidden) { e.preventDefault(); e.stopPropagation(); mainUI(); btnLoad.focus(); return; }
+    if (e.code === 'Escape' && !newsBox.hidden) { e.preventDefault(); e.stopPropagation(); mainUI(); btnNews.focus(); return; }
+    if (!newsBox.hidden && (e.code === 'ArrowDown' || e.code === 'ArrowUp' || e.code === 'KeyS' || e.code === 'KeyW')) { e.preventDefault(); e.stopPropagation(); $('ttNewsList').scrollTop += (e.code === 'ArrowDown' || e.code === 'KeyS' ? 60 : -60); return; }
+    const nav = navNow();
     const list = [...nav.querySelectorAll('button:not([hidden])')];
     let i = list.indexOf(document.activeElement);
     if (e.code === 'ArrowDown' || e.code === 'KeyS') { e.preventDefault(); list[(i + 1) % list.length].focus(); }
@@ -473,20 +523,30 @@ function paintTitleLogo() {
   }, true);
   for (const b of root.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
 
-  // menu de pausa: "Tela de início" salva e volta para esta tela
+  // menu de pausa: "Tela de início" salva e volta para esta tela; "Excluir personagem" apaga o atual e volta para ela
+  function toTitle() {
+    $('pause').hidden = true; $('hud').hidden = true; state = 'menu';
+    root.hidden = false; $('ttBye').hidden = true; root.classList.remove('bye', 'out');
+    fxStart(); mainUI();
+    navMain.querySelector('button:not([hidden])').focus();
+  }
   const bt = document.createElement('button');
   bt.id = 'btnTitle'; bt.className = 'ghost'; bt.type = 'button'; bt.textContent = 'Tela de início';
   $('pause').querySelector('.actions').appendChild(bt);
-  bt.addEventListener('click', () => {
-    saveGame();
-    $('pause').hidden = true; $('hud').hidden = true; state = 'menu';
-    $('btnNewMenu').hidden = false;
-    root.hidden = false; $('ttBye').hidden = true; root.classList.remove('bye', 'out');
-    fxStart(); mainUI();
-    root.querySelector('#ttMain button:not([hidden])').focus();
+  bt.addEventListener('click', () => { saveGame(); toTitle(); });
+  const bd = document.createElement('button');
+  bd.id = 'btnDelChar'; bd.className = 'ghost warn'; bd.type = 'button';
+  let delArmed = false;
+  const delReset = () => { delArmed = false; bd.textContent = 'Excluir personagem'; };
+  delReset();
+  $('btnNew').after(bd);
+  bd.addEventListener('click', () => {
+    if (!delArmed) { delArmed = true; bd.textContent = 'Confirmar exclusão'; return; }
+    delReset(); if (charCur != null) charDelete(charCur); toTitle();
   });
+  bd.addEventListener('blur', delReset);
 
   mainUI();
-  root.querySelector('#ttMain button:not([hidden])').focus();
+  navMain.querySelector('button:not([hidden])').focus();
   window.__title = { root, art };
 })();

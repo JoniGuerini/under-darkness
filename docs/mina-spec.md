@@ -34,11 +34,11 @@ A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m. A ficha do bioma 
 2. Cavernas naturais (autômato esparso) e o trabalho dos mineiros: galerias retas em níveis fixos, poços com escadas (os largos com plataformas nos Poços), salões do acampamento, salões das fornalhas e a oficina do chefe (48 x 16), ligados por túneis.
 3. Dois poços antigos descem do chão do Coração do Inverno até a primeira galeria, com escada inteira (volta-se pela mesma escada).
 4. Limpeza (bolsões pequenos, ilhas soltas) e veios: carvão, cobalto e cristal (pedra preciosa, mais rara) em toda a camada (um metal por camada, `js/102-minerios-camada.js`).
-5. Alcance a partir dos dois poços e o acabamento: tábuas onde a galeria cruza caverna, vigas, escoras, trilhos, lampiões, escadas em todo desnível de 5 blocos ou mais, tijolo e escória nas fornalhas, cordas, baús e objetos.
+5. Alcance a partir dos dois poços e o acabamento: tábuas onde a galeria cruza caverna, vigas, escoras, trilhos, lampiões, escadas em todo desnível de 5 blocos ou mais, tijolo e escória nas fornalhas, cordas e objetos.
 
 ## 4. Subida garantida
 
-`mnClimbFix` faz uma busca andando e pulando (pulo de 3 blocos, escadas sobem) a partir da oficina do chefe, de cada baú e de cada salão do acampamento e das fornalhas. Se não chega aos poços de saída, põe uma escada do chão alcançado até a borda mais alta que falta, ou corta o piso de tábua acima. Testado em 8 sementes: dá para voltar de todos os pontos sem cavar.
+`mnClimbFix` faz uma busca andando e pulando (pulo de 3 blocos, escadas sobem) a partir da oficina do chefe e de cada salão do acampamento e das fornalhas. Se não chega aos poços de saída, põe uma escada do chão alcançado até a borda mais alta que falta, ou corta o piso de tábua acima. Testado em 8 sementes: dá para voltar de todos os pontos sem cavar.
 
 ## 5. Chefe
 

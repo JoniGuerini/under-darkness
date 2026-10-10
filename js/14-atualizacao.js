@@ -62,11 +62,10 @@ function update(dt) {
   updateVillage(dt);
   runHooks(HOOK.update, dt);
   spawnTimer -= dt; if (spawnTimer <= 0) { spawnTimer = 1.1 + Math.random() * 1.6; trySpawn(); }
-  // ambient: lava bubbles, torch embers and smoke, chest sparkle
+  // ambient: lava bubbles, torch embers and smoke
   for (let i = 0; i < emitters.length; i += 3) {
     const t = emitters[i + 2], ex = emitters[i] * T, ey = emitters[i + 1] * T;
     if (t === LAVA) { if (Math.random() < dt * 0.25 && tileAt(emitters[i], emitters[i + 1] - 1) === AIR) burst(ex + T / 2, ey, 2, '#ffb444', 30, 200, 0.6, 1, true); }
-    else if (t === CHEST) { if (Math.random() < dt * 0.7) parts.push({ x: ex + rnd(2, T - 2), y: ey + rnd(4, T - 2), vx: 0, vy: -8, g: 0, life: 0.6, max: 0.6, col: '#ffe9a0', size: 1, glow: true }); }
     else if (t === CANDLE) { if (Math.random() < dt * 0.9) parts.push({ x: ex + 6 + rnd(-4, 4), y: ey + 1, vx: rnd(-2, 2), vy: rnd(-12, -6), g: -2, life: rnd(0.8, 1.3), max: 1.3, col: '#141018', size: 1, smoke: true }); }
     else if (t === TORCH) {
       if (Math.random() < dt * 0.8) parts.push({ x: ex + 6, y: ey + 2, vx: rnd(-6, 6), vy: rnd(-26, -12), g: -10, life: 0.7, max: 0.7, col: '#ffb444', size: 1, glow: true });
@@ -101,8 +100,8 @@ const TUTORIAL = [
   [9, 'Segure o botão direito para levantar o escudo'],
   [13, 'Escudo erguido no instante do golpe = APARAR (atordoa o inimigo)'],
   [17, 'Aperte 2 (ou gire a rodinha) para pegar a picareta e segure o clique esquerdo para minerar'],
-  [21, 'Aperte 1 para voltar à espada · Q coloca uma tocha · E abre baús'],
-  [24, 'Passando a placa à direita do vilarejo, uma caverna desce até as profundezas. Tem um baú lá embaixo.'],
+  [21, 'Aperte 1 para voltar à espada · Q coloca uma tocha'],
+  [24, 'Passando a placa à direita do vilarejo, uma caverna desce até as profundezas.'],
   [32, 'Aperte I para abrir o inventário e ver seu equipamento'],
   [40, 'Aperte Tab para abrir o mapa de tudo que você já explorou']
 ];

@@ -11,8 +11,8 @@
    - Hidra: uma serpente de fogo brota do chão e cospe bolas de fogo sozinha no inimigo mais perto (até 2 ao mesmo tempo).
    Todo fogo põe o alvo para queimar (dano a cada meio segundo). Bichos de fogo levam metade e não queimam;
    bichos de frio levam 50% a mais.
-   Herói novo já começa com os cinco feitiços aprendidos (pedido do Jonathan). Os pergaminhos continuam existindo: botão direito identifica, botão direito
-   de novo aprende. A Aurélia (js/91-maga.js) também vende os cinco já identificados.
+   Herói novo começa sem feitiço. O feitiço sai do pergaminho de escola que a Aurélia vende e identifica (js/120-121): sai um dos cinco, sorteado. Os pergaminhos de um feitiço só
+   ficaram para saves antigos (botão direito identifica, botão direito de novo aprende).
    Este arquivo só tem os dados (elementos, números, itens e ícones) e carrega depois de 90-armas-magicas, para a wiki
    ver também. As regras com o jogo rodando ficam em js/113-fogo.js. */
 

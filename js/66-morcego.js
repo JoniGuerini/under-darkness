@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= Forma de Morcego: as regras (dados, ícones e desenho em js/65-morcego-dados.js) =================
-   - Jogo novo: um segundo pergaminho lacrado vem na barra, ao lado do do Arco Voltaico.
-   - Na mochila, botão direito identifica; botão direito de novo aprende e o feitiço vai para a barra.
+   - O feitiço sai do pergaminho de escola de Metamorfose (js/120-121).
+   - Saves antigos: na mochila, botão direito identifica; botão direito de novo aprende e o feitiço vai para a barra.
    - Com o feitiço na mão, clique esquerdo: o herói some numa nuvem de fumaça e vira um morcego por BAT.dur segundos.
      WASD ou setas (e Espaço para subir) voam em qualquer direção, sem gravidade, batendo as asas. O morcego é pequeno
      (BAT.w x BAT.h) e passa por buracos de um bloco; não ataca, não minera, não usa escudo. Clicar de novo com o
@@ -18,15 +18,12 @@ sfx.batPoof = function () { noise(0.35, 0.2, 900, 'lowpass', 0, 0.8); noise(0.18
 sfx.batBack = function () { noise(0.3, 0.18, 700, 'lowpass', 0, 0.8); tone(180, 0.18, 'triangle', 0.06, -60, 0.03); };
 sfx.batFlap = function () { noise(0.07, 0.045, 520, 'bandpass', 0, 1.6); };
 
-/* ---- jogo novo: o segundo pergaminho lacrado na barra ---- */
+/* ---- jogo novo: ninguém começa morcego ---- */
 {
   const _newWorld = newWorld;
   newWorld = function (sd, sv) {
     batEnd(true);
     _newWorld(sd, sv);
-    if (sv && Array.isArray(sv.inv)) return;
-    let i = inv.findIndex((q, k) => !q && k < HB_BAG); if (i < 0) i = inv.findIndex(q => !q);
-    if (i >= 0) { inv[i] = mkItem('perg_selado_m'); invDirty = true; if (typeof hudCache !== 'undefined') hudCache.hb = null; }
   };
 }
 
@@ -77,7 +74,7 @@ function batStart() {
   for (let k = 0; k < T && !rectFree(pl.x, pl.y, pl.w, pl.h); k++) pl.y -= 1;
   pl.vy = Math.min(pl.vy, -40); pl.onGround = false; pl.climb = false;
   pl.atkT = -1; pl.trail.length = 0; pl.mining = false; pl.shieldOn = false; pl.shieldK = 0; pl.jumpBuf = 0; pl.atkBuf = 0;
-  pl.target = null; pl.nearChest = null; pl.nearNpc = null;
+  pl.target = null; pl.nearNpc = null;
   batPoof(cx, cy); sfx.batPoof();
 }
 // a caixa do herói, com o mesmo centro do morcego, onde couber (primeiro no lugar, depois um pouco acima ou abaixo)
@@ -129,7 +126,7 @@ function updateBat(dt) {
   pl.invuln -= dt; pl.hurtFlash -= dt;
   if (pl.mana < pl.maxMana) pl.mana = Math.min(pl.maxMana, pl.mana + dt * 2.2);
   if (pl.regenB > 0 && gameTime - pl.lastHurt > 4 && pl.hp < pl.maxHp) { pl.regen += dt * pl.regenB; if (pl.regen >= 1) { const k = Math.floor(pl.regen); pl.hp = Math.min(pl.maxHp, pl.hp + k); pl.regen -= k; } }
-  pl.target = null; pl.nearChest = null; pl.nearNpc = null;
+  pl.target = null; pl.nearNpc = null;
 
   // o tempo: no fim volta a ser gente, se couber; clicar de novo com o feitiço na mão volta antes
   batSt.t -= dt;

@@ -31,7 +31,7 @@ A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m. É o inferno de Und
    - Entranhas: **câmaras redondas de carne**, túneis tortos (minhoca larga), ganchos e tentáculos no teto.
    - Trono do Caos: **templos** (salões quadrados com degraus e altar) e a **sala do chefe, o Trono do Caos** (56 x 20), do outro lado do mundo em relação às fendas.
 4. Correntes penduradas (escaláveis, como as da catedral) e escadas de ferro negro em todo desnível de 5 blocos ou mais, para dar para voltar sem cavar.
-5. Limpeza (bolsões e ilhas), veios de minério (carvão e **infernita**), alcance a partir das fendas, decoração de 1 bloco, baús e objetos.
+5. Limpeza (bolsões e ilhas), veios de minério (carvão e **infernita**), alcance a partir das fendas, decoração de 1 bloco e objetos (sem baús de loot desde 2026-10-10).
 6. Subida garantida (`abClimbFix`, como o `mnClimbFix` da mina) e o `worldLink` do 87 roda depois.
 
 Lava: o bloco `LAVA` (10) que já existe (queima quem encosta). Nunca no caminho obrigatório: só no fundo das cavernas grandes, sempre com ponte ou borda por cima.

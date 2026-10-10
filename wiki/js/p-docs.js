@@ -9,8 +9,10 @@
   };
   UDW.pages.docs = {
     render(id, anchor) {
-      const d = UDW_DOCS.find(x => x.id === id) || UDW_DOCS[0];
-      return UDW.head('Documentos') + UDW.tabs('docs', UDW_DOCS.map(x => [x.id, x.titulo]), d.id) + UDW.docView(d);
+      const d = UDW_DOCS.find(x => x.id === id) || UDW_DOCS[0], top = d.grupo || d.id, sub = UDW_DOCS.filter(x => x.grupo === top);
+      // documents with a grupo (the layer cards under "As 16 camadas") get a second row of tabs under their parent
+      return UDW.head('Documentos') + UDW.tabs('docs', UDW_DOCS.filter(x => !x.grupo).map(x => [x.id, x.titulo]), top)
+        + (sub.length ? UDW.tabs('docs', [[top, 'Mapa'], ...sub.map(x => [x.id, x.titulo])], d.id) : '') + UDW.docView(d);
     },
     after(root, id, anchor) { if (anchor && $(anchor)) setTimeout(() => $(anchor).scrollIntoView(), 20); }
   };

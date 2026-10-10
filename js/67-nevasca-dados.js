@@ -1,8 +1,7 @@
 'use strict';
 
 /* ================= Nevasca, o terceiro feitiço: os dados =================
-   Funciona como o Arco Voltaico (js/63-arco-dados.js): um herói novo começa com mais um pergaminho não identificado;
-   botão direito identifica, botão direito de novo aprende, e o feitiço fica na barra. Com ele na mão, o clique esquerdo
+   Escola de gelo. O feitiço sai do pergaminho de escola que a Aurélia vende e identifica (js/120-121), e fica na barra. Com ele na mão, o clique esquerdo
    gasta mana e abre uma nuvem de neve onde está o mouse: por alguns segundos caem dela fragmentos de gelo que ferem,
    resfriam (o inimigo fica lento) e, com golpes seguidos, congelam o inimigo num bloco de gelo. Chefes só resfriam.
    Este arquivo só tem os dados (itens, números e ícones) e carrega logo depois de 65-morcego-dados, para a wiki ver também.

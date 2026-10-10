@@ -152,7 +152,7 @@ function killEnemy(e) {
 }
 const loot = [];
 // soft = a mined block: it just hops out of its hole instead of flying
-function dropGear(x, y, id, z, chest) { loot.push({ x, y, vx: rnd(-45, 45), vy: rnd(-150, -85), id, n: 1, item: rollItem(id, z, chest), t: 0, rest: false }); }
+function dropGear(x, y, id, z) { loot.push({ x, y, vx: rnd(-45, 45), vy: rnd(-150, -85), id, n: 1, item: rollItem(id, z), t: 0, rest: false }); }
 function dropLoot(x, y, id, n = 1, soft = false) { if (ITEMS[id] && n > 0) loot.push({ x, y, vx: soft ? rnd(-22, 22) : rnd(-45, 45), vy: soft ? rnd(-85, -45) : rnd(-150, -85), id, n, t: 0, rest: false }); }
 // how generous monsters are, on top of each table: gear is rare, potions and torches uncommon, materials about half the time
 // (bosses always pay out in full)
@@ -162,21 +162,12 @@ function rollDrops(e) {
   for (const [id, ch, a, b] of DROPS[e.type]) {
     const it = ITEMS[id], k = e.boss ? 1 : it.slot ? DROP_RATE.gear * lm : (it.use || id === 'tocha') ? DROP_RATE.use : DROP_RATE.mat;
     if (Math.random() >= ch * k) continue;
-    if (it.slot) dropGear(cx, cy, id, lootZone(Math.floor(cx / T), Math.floor(cy / T)), false);
+    if (it.slot) dropGear(cx, cy, id, lootZone(Math.floor(cx / T), Math.floor(cy / T)));
     else dropLoot(cx, cy, id, a ? a + Math.floor(Math.random() * ((b || a) - a + 1)) : 1);
   }
   if (e.type !== 'slime' && !e.boss && Math.random() < 0.06) dropLoot(cx, cy, 'tocha', 1);
   if (e.boss) dropLoot(cx, cy, 'ouro', 250 + Math.floor(Math.random() * 100));
   else if (Math.random() < 0.55) dropLoot(cx, cy, 'ouro', Math.max(1, Math.round((e.gold || e.xp) * rnd(0.5, 1))));
-}
-function openChest(tx, ty) {
-  setTile(tx, ty, CHEST_OPEN);
-  const zz = lootZone(tx, ty), z = Math.min(3, zz), x = (tx + 0.5) * T, y = (ty + 1) * T - 1, pick = a => a[Math.floor(Math.random() * a.length)];
-  // a chest may hold a piece of gear, not always (rarity odds: js/48-itemizacao.js)
-  if (Math.random() < CHEST_GEAR) dropGear(x, y, pick(CHEST_LOOT[z]), zz, true);
-  if (Math.random() < 0.35) dropLoot(x, y, 'pocao', 1); dropLoot(x, y, 'tocha', 1 + Math.floor(Math.random() * 2));
-  dropLoot(x, y, 'ouro', Math.round((6 + Math.random() * 10) * zz));
-  burst(x, y, 16, '#ffd27a', 90, 100, 0.6, 1, true); floatText(x, y - 8, 'Baú aberto!', '#ffd27a', 1); sfx.chest(); shake(1.5);
 }
 function pickupMsg(id, n, item) {
   const it = ITEMS[id];

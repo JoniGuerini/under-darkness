@@ -160,14 +160,12 @@ for (const a of AFFIXES) {
 }
 const TIER_WEIGHT = [0, 65, 25, 9, 1];
 // rarity odds by where the item comes from: [pobre, comum, incomum, raro, épico, lendário]
-// (lowered 2026-10-08, Jonathan: a chest near the top must not give blue or purple. Épico only from depth 2, Lendário from depth 3)
+// (Épico only from depth 2, Lendário from depth 3)
 const RARITY_ODDS = {
   monster: [25, 48, 21, 5, 0.9, 0.1],
-  chest: [12, 48, 30, 8, 1.8, 0.2],
   forge: [0, 100, 0, 0, 0, 0],   // the forge makes white pieces only (2026-10-09): modifiers come from the enchanter (118)
   shop: [0, 45, 42, 11, 2, 0]
 };
-const CHEST_GEAR = 0.55;   // chance that a chest holds gear at all
 // how deep a spot is, 1..4, for loot: the old caves (1-3) or the layers' bands (Átrio 1, Nave 2, Claustro 3, Criptas and deeper 4)
 function lootZone(tx, ty) { const z = zoneAt(tx, ty); return clamp(z >= 5 ? z - 4 : z, 1, 4); }
 
@@ -231,12 +229,12 @@ function rollRarity(z, src) {
   if (b < 1) o[4] = 0; if (b < 2) o[5] = 0;   // no purple at the first depth, no orange before the third
   return pickW(o.map((w, i) => [i - 1, w]));
 }
-// src: 'monster' (default), 'chest', 'forge' or 'shop'; `true` means chest (the old signature). z = zone depth 1..4
+// src: 'monster' (default), 'forge' or 'shop'. z = zone depth 1..4
 function rollItem(id, z, src) {
   if (ITEMS[id].legend) return mkItem(id);
-  src = src === true ? 'chest' : src || 'monster';
+  src = src || 'monster';
   const L0 = baseInfo(id).L, zz = clamp(z || 1, 1, 4);
-  const il = clamp(L0 + (src === 'forge' ? 0 : src === 'shop' ? Math.floor(Math.random() * 2) : Math.floor(Math.random() * (zz + (src === 'chest' ? 1 : 0)))), 1, 12);
+  const il = clamp(L0 + (src === 'forge' ? 0 : src === 'shop' ? Math.floor(Math.random() * 2) : Math.floor(Math.random() * zz)), 1, 12);
   const rar = rollRarity(zz, src);
   return mkItem(id, rar, rollMods(id, rar, il), il);
 }

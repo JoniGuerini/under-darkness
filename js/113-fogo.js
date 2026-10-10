@@ -2,7 +2,8 @@
 
 /* ================= os feitiços de fogo em jogo (dados, números e ícones em js/112-fogo-dados.js) =================
    - Jogo novo: os cinco feitiços de fogo já aprendidos vão para a barra (o que não couber vai para a mochila).
-   - Botão direito identifica, botão direito de novo aprende (o mesmo caminho do Arco Voltaico, js/64).
+   - Os feitiços saem do pergaminho de escola de fogo, que a Aurélia vende e identifica (js/120-121). Os pergaminhos
+     de um feitiço só (saves antigos): botão direito identifica, botão direito de novo aprende (como o Arco, js/64).
    - Com o feitiço na mão, o clique esquerdo lança na direção do mouse; o Inferno sopra enquanto o botão estiver apertado.
    - Todo golpe de fogo passa por hitEnemy com `fogoRoll` marcado: o dano vem de FOGO, cresce com o dano de feitiço
      das armas mágicas (pl.spellPct, js/92) e os números saem laranja. Golpes contínuos (sopro, parede, queimadura)
@@ -24,18 +25,12 @@ sfx.fgBoom = function (big) { noise(big ? 0.75 : 0.4, big ? 0.34 : 0.24, 320, 'l
 sfx.fgBreath = function () { noise(0.18, 0.07, 600 + Math.random() * 500, 'bandpass', 0, 0.6); };
 sfx.fgSpit = function () { noise(0.12, 0.1, 1300, 'bandpass', 0, 1); tone(330, 0.09, 'triangle', 0.03, -160); };
 
-/* ---- jogo novo: os cinco feitiços já aprendidos ---- */
+/* ---- jogo novo: nada de fogo no ar (os feitiços vêm dos pergaminhos de escola, js/121) ---- */
 {
   const _newWorld = newWorld;
   newWorld = function (sd, sv) {
     _newWorld(sd, sv);
     for (const a of [fgBalls, fgBolts, fgWalls, fgMeteors, fgHydras, fgFlames, fgBooms]) a.length = 0;
-    if (sv && Array.isArray(sv.inv)) return;
-    for (const [k] of FOGO_LIST) {
-      let i = inv.findIndex((q, j) => !q && j < HB_BAG); if (i < 0) i = inv.findIndex(q => !q);
-      if (i >= 0) inv[i] = mkItem('feitico_' + k);
-    }
-    invDirty = true; if (typeof hudCache !== 'undefined') hudCache.hb = null;
   };
 }
 

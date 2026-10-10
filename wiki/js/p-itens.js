@@ -13,7 +13,7 @@
     return Math.min(1, ch * k);
   };
   UDW.dropsOf = id => { const o = []; for (const t in DROPS) for (const r of DROPS[t]) if (r[0] === id && ET[t]) o.push({ t, r, p: UDW.dropRate(t, r) }); return o.sort((a, b) => b.p - a.p); };
-  UDW.chestTiers = id => Object.keys(CHEST_LOOT).filter(k => CHEST_LOOT[k].includes(id)).map(Number);
+  UDW.shopTiers = id => Object.keys(SHOP_GEAR).filter(k => SHOP_GEAR[k].includes(id)).map(Number);
   UDW.recipeOf = id => RECIPES.find(r => r.id === id);
   UDW.buyers = id => Object.keys(SHOPS).filter(k => { try { return SHOPS[k].buys(id); } catch (e) { return false; } });
   UDW.origins = id => {
@@ -22,8 +22,7 @@
     if (it.legend) o.push(['Chefe', '#ff9a3c']);
     const d = UDW.dropsOf(id).filter(x => !ET[x.t].boss && x.t !== 'rei');
     if (d.length) o.push(['Monstros', d.some(x => A.has(x.t)) ? '#c4b596' : '#5e5548']);
-    if (UDW.chestTiers(id).length) o.push(['Baú', '#e9c64a']);
-    if (it.slot && UDW.chestTiers(id).length) o.push(['Loja', '#62a8ff']);
+    if (it.slot && UDW.shopTiers(id).length) o.push(['Loja', '#62a8ff']);
     if (UDW.recipeOf(id)) o.push(['Forja', '#f0a83c']);
     return o;
   };
@@ -87,7 +86,7 @@
   const ORE_ITEM_REV = {}; for (const t in ORE_ITEM) ORE_ITEM_REV[ORE_ITEM[t]] = +t;
 
   /* ---- a página de um item ---- */
-  const SRC = [['monster', 'Monstro'], ['chest', 'Baú'], ['shop', 'Loja'], ['forge', 'Forja']];
+  const SRC = [['monster', 'Monstro'], ['shop', 'Loja'], ['forge', 'Forja']];
   let rollSrc = 'monster', rollZ = 2;
   UDW.pages.item = {
     render(id) {
@@ -99,8 +98,8 @@
       if (it.legend) { const b = Object.keys(DROPS).find(t => DROPS[t].some(r => r[0] === id)); h += `<h3>Chefe</h3><p>${b && ET[b] ? `<a href="#/chefes">${E(ET[b].name)}</a> sempre solta` : 'Item único de chefe'}${b && !A.has(b) ? ' <em>(desligado no mundo atual)</em>' : ''}.</p>`; }
       const dn = d.filter(x => !ET[x.t].boss && x.t !== 'rei');
       if (dn.length) h += `<h3>Cai de</h3><ul class="fl">${dn.map(x => `<li><a href="#/inimigo/${x.t}">${UDW.enemyImg(x.t, 1)}${E(ET[x.t].name)}</a><b>${UDW.pct(x.p, 2)}</b>${A.has(x.t) ? '' : '<em>desligado</em>'}</li>`).join('')}</ul>`;
-      const ct = UDW.chestTiers(id);
-      if (ct.length) h += `<h3>Baús</h3><p>Lista de baús ${ct.map(t => `<b>${t}</b>`).join(', ')} (de 3). ${gear ? 'A loja do Grimaldo sorteia a mercadoria das mesmas listas.' : ''}</p>`;
+      const ct = UDW.shopTiers(id);
+      if (ct.length && gear) h += `<h3>Loja</h3><p>A loja do Grimaldo pode ter esta peça (lista ${ct.map(t => `<b>${t}</b>`).join(', ')} de 3).</p>`;
       const rc = UDW.recipeOf(id);
       if (rc) h += `<h3>Forja</h3><p>Bigorna do Grimaldo: ${UDW.item(rc.bar, { n: rc.n })} em ${N(anvilTime(rc), 1)} s.</p>`;
       if (FURN[id]) h += `<h3>Fornalha</h3><p>${FURN[id].n} deste + 1 ${UDW.item('carvao')} viram 1 ${UDW.item(FURN[id].bar)} em ${N(FURN[id].t, 1)} s.</p>`;

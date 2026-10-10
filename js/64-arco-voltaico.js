@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= Arco Voltaico: as regras (dados e ícones em js/63-arco-dados.js) =================
-   - Jogo novo: o pergaminho lacrado já vem na barra.
-   - Na mochila, botão direito no pergaminho lacrado identifica; botão direito no identificado aprende: o pergaminho some
+   - Jogo novo começa sem feitiço (pergaminhos de escola: js/120-121).
+   - Saves antigos: na mochila, botão direito no pergaminho lacrado identifica; botão direito no identificado aprende: o pergaminho some
      e no lugar dele fica o feitiço, sempre que possível num espaço da barra.
    - Com o feitiço na mão, o clique esquerdo (ou segurar) lança o raio na direção do mouse. Ele procura o inimigo mais
      perto da mira, depois salta para o vizinho mais próximo que ainda não levou, até ARC.jumps vezes, sem atravessar
@@ -17,17 +17,6 @@ const arcs = [];
 sfx.arc = function () { noise(0.22, 0.22, 3800, 'highpass', 0, 0.7); noise(0.09, 0.18, 1400, 'bandpass', 0.03, 2); tone(1400, 0.16, 'sawtooth', 0.05, -1100); tone(90, 0.12, 'square', 0.05, -30, 0.02); };
 sfx.zap = function () { noise(0.07, 0.14, 2600, 'bandpass', 0, 1.2); tone(900 + Math.random() * 300, 0.05, 'square', 0.03, -500); };
 sfx.learn = function () { [659, 988, 1318].forEach((f, i) => tone(f, 0.24, 'triangle', 0.06, 0, i * 0.08)); noise(0.3, 0.08, 4200, 'highpass', 0.1); };
-
-/* ---- jogo novo: o pergaminho lacrado na barra ---- */
-{
-  const _newWorld = newWorld;
-  newWorld = function (sd, sv) {
-    _newWorld(sd, sv);
-    if (sv && Array.isArray(sv.inv)) return;
-    let i = inv.findIndex((q, k) => !q && k < HB_BAG); if (i < 0) i = inv.findIndex(q => !q);
-    if (i >= 0) { inv[i] = mkItem('perg_selado'); invDirty = true; if (typeof hudCache !== 'undefined') hudCache.hb = null; }
-  };
-}
 
 /* ---- identificar e aprender (botão direito na mochila) ---- */
 function arcLearn(i) {

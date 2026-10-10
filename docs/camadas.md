@@ -1,6 +1,6 @@
 # As 16 camadas de Under Darkness
 
-Passo 1 do planejamento: o mapa com o nome e a temática de cada camada, da primeira (As Cavernas) até a décima sexta. Nada disto está implementado além das camadas marcadas como **existe**. O passo 2 é a ficha de implementação de cada camada (no formato da Parte 1 de [biomas.md](biomas.md)). O passo 3 é o roadmap.
+Passo 1 do planejamento: o mapa com o nome e a temática de cada camada, da primeira (As Cavernas) até a décima sexta. Nada disto está implementado além das camadas marcadas como **existe**. O passo 2 é a ficha de implementação de cada camada (no formato da Parte 1 de [biomas.md](biomas.md)). O passo 3 é o roadmap. As fichas do passo 2 estão na pasta [camadas/](camadas/00-geral.md), começando pelas regras gerais.
 
 Para validar, troque `[ ]` por `[x]` (aprovado) ou `[-]` (trocar) em cada camada.
 

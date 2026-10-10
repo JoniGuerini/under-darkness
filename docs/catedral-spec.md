@@ -91,7 +91,7 @@ A **parede de fundo** é sempre bem mais escura que o bloco da frente (o jogo in
 | 46 | `CT_TEIA` | Teia grossa | teia de canto mais densa (2 variações, espelhadas) |
 | 47–49 | livres | — | para o que a thread de blocos achar que falta (ex.: gotejo de cera, corrente de sino) — avise a líder o ID que usou |
 
-Reaproveitamos sem mudar: `CHAIN` (escalável, serve de corda de sino), `CANDLE`, `WEB`, `BONES`, `BANNER`, `URN`, `CHEST`, `TORCH`.
+Reaproveitamos sem mudar: `CHAIN` (escalável, serve de corda de sino), `CANDLE`, `WEB`, `BONES`, `BANNER`, `URN`, `TORCH`. (O `CHEST` saiu em 2026-10-10 com os baús de loot.)
 
 ### 3.3 Paredes de fundo (`walls[]`, valores 5..10) → `WMAT[id] = [paleta, bake(fn)]`
 

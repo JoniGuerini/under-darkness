@@ -12,7 +12,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
   const KEYS = [
     [['A', 'D'], 'Andar'], [['W'], 'Pular e subir corrente'], [['S'], 'Descer'],
     [['1', '0'], 'Item da barra (ou rodinha do mouse)', '–'], [['Clique esquerdo'], 'Golpear, minerar e colocar bloco'],
-    [['Botão direito'], 'Levantar o escudo (ou Shift)'], [['E'], 'Conversar e abrir baú'], [['Q'], 'Colocar tocha'],
+    [['Botão direito'], 'Levantar o escudo (ou Shift)'], [['E'], 'Conversar e abrir o baú da vila'], [['Q'], 'Colocar tocha'],
     [['R'], 'Beber poção'], [['Tab'], 'Mapa'], [['I'], 'Inventário'], [['C'], 'Atributos'], [['P'], 'Talentos'],
     [['Esc'], 'Menu'], [['F'], 'Tela cheia'], [['M'], 'Ligar e desligar o som'], [['H'], 'Mostrar atalhos na tela'], [['F3'], 'FPS']];
   const keyList = KEYS.map(([k, t, sep]) => `<div class="okey"><span class="kk">${k.map(x => `<kbd>${x}</kbd>`).join(sep ? `<i>${sep}</i>` : ' ')}</span><span>${t}</span></div>`).join('');

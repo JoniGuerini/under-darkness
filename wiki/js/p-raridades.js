@@ -3,7 +3,7 @@
 /* ================= raridades, chances de sorteio e lendários ================= */
 (() => {
   const E = UDW.esc;
-  const SRC = { monster: 'Monstro', chest: 'Baú', forge: 'Forja', shop: 'Loja' };
+  const SRC = { monster: 'Monstro', forge: 'Forja', shop: 'Loja' };
   // chance de cada raridade por origem e profundidade: roda o rollRarity do próprio jogo muitas vezes
   let cache = null;
   function odds() {
@@ -21,8 +21,7 @@
       h += `<h2>Regras</h2><ul class="regras">
         <li>A raridade é a do modificador mais forte. Um item com um modificador raro e um incomum é Raro.</li>
         <li>O modificador da raridade sorteada é garantido. Em 40% das vezes a outra posição (prefixo ou sufixo) ganha um também, da mesma raridade ou menor.</li>
-        <li>O nível do item é o da base mais um bônus que depende da profundidade (monstro e baú) ou de 0 a 1 (loja). A forja usa o nível da base e entrega a peça sempre branca; os modificadores dela vêm do encantador, com as chances da pedra usada (veja Moradores).</li>
-        <li>Baú: só ${UDW.pct(CHEST_GEAR, 0)} dos baús trazem equipamento.</li>
+        <li>O nível do item é o da base mais um bônus que depende da profundidade (monstro) ou de 0 a 1 (loja). A forja usa o nível da base e entrega a peça sempre branca; os modificadores dela vêm do encantador, com as chances da pedra usada (veja Moradores).</li>
         <li>Chance geral de um monstro soltar cada equipamento da sua tabela: ${UDW.pct(DROP_RATE.gear, 0)} do valor escrito, +10% por nível do monstro.</li></ul>`;
       h += `<h2>Pesos escritos no jogo</h2>` + UDW.table([{ t: 'Origem' }, ...RS.map(r => ({ t: `<span style="color:${RAR_COL[r]}">${RAR[r]}</span>`, cls: 'n' }))],
         Object.keys(w).map(s => ({ cells: [SRC[s] || s, ...w[s].map(v => String(v).replace('.', ','))], keys: [s, ...w[s]] })));

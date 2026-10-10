@@ -4,7 +4,8 @@
    Uma moradora nova, inspirada na Akara do Diablo 2: mora numa torre de pedra no fim da rua, depois da casa do ancião,
    e é quem vende o que é mágico.
    - Vende cajados, varinhas e tomos (js/90-armas-magicas.js), sorteados todo dia como a mercadoria do Grimaldo,
-     e os pergaminhos dos feitiços que já existem (Arco Voltaico, Forma de Morcego, Nevasca), só os que o herói ainda não conhece.
+     e um pergaminho lacrado de cada escola de magia (js/120-pergaminhos-dados.js), que ela mesma identifica (js/121).
+     Some da prateleira a escola que o herói já sabe inteira.
    - Compra itens mágicos. O Grimaldo deixa de vender cajado, varinha e tomo: isso agora é com ela.
    - A torre entra no VIL_BUILD entre a casa do ancião e a placa das cavernas (a placa vai um pouco mais para a direita).
    - As janelas de conversa e de loja usam o mesmo kit da Marta e do Odo (css/temas-npc.css), com a pedra azulada e
@@ -90,21 +91,16 @@ HELLO.maga = ['Entre devagar. Os livros não gostam de vento.', 'Sinto magia em 
 CHAT.maga = [
   'Um cajado pede as duas mãos, mas devolve em dobro quando o feitiço sai. A varinha deixa a outra mão livre para um tomo.',
   'Tomo não segura golpe. Quem carrega um confia que o inimigo não vai chegar perto.',
-  'Copiei esses pergaminhos à mão, à luz de vela. Lido uma vez, o feitiço fica em você e o papel vira cinza.',
+  'Cada lacre guarda um feitiço da escola dele. Qual, nem eu sei antes de abrir. Traga que eu abro.',
   'A mana volta sozinha, devagar. Um bom tomo faz caber mais dela em você.',
   'O Caetano acha que magia é coisa de monge. Os monges cavaram fundo demais justamente porque não sabiam nenhuma.'
 ];
 
 /* ---- a loja ---- */
-SHOPS.maga = { title: 'Torre da Aurélia', buys: id => isMagicItem(id), hint: 'Vende cajados, varinhas, tomos e pergaminhos de feitiço. Compra itens mágicos.' };
-// os pergaminhos já identificados: lidos com o botão direito, ensinam na hora (js/64, 66 e 68)
-const MAGA_SCROLLS = [['perg_arco', 'feitico_arco', 60], ['perg_morcego', 'feitico_morcego', 80], ['perg_nevasca', 'feitico_nevasca', 100]];
-// os cinco de fogo (js/112-fogo-dados.js)
-if (typeof FOGO_LIST !== 'undefined') for (const [k, price] of [['bola', 70], ['inferno', 90], ['parede', 90], ['meteoro', 120], ['hidra', 110]]) MAGA_SCROLLS.push(['perg_' + k, 'feitico_' + k, price]);
-// os quatro novos de raio e os quatro novos de gelo (js/114-escolas-dados.js)
-if (typeof ESC_LIST !== 'undefined') for (const [k, price] of [['relampago', 90], ['lanca_raio', 70], ['passo', 90], ['pararaios', 100], ['lanca_gelo', 70], ['nova_gelo', 90], ['estacas', 90], ['orbe', 120]]) MAGA_SCROLLS.push(['perg_' + k, 'feitico_' + k, price]);
+SHOPS.maga = { title: 'Torre da Aurélia', buys: id => isMagicItem(id), hint: 'Vende cajados, varinhas, tomos e pergaminhos de escola. Compra itens mágicos.' };
+// um pergaminho lacrado por escola (js/120-pergaminhos-dados.js); `all` falso tira as escolas que o herói já sabe inteiras
+const magaScrolls = all => (typeof SCHOOLS === 'undefined' ? [] : SCHOOLS).filter(sc => ITEMS[sc.scroll] && (all || typeof schoolDone !== 'function' || !schoolDone(sc.k))).map(sc => ({ s: { id: sc.scroll, n: 1 }, price: sc.price, inf: true }));
 const MAGA_LOOT = { 1: ['varinha_salgueiro', 'tomo_couro', 'cajado_freixo'], 2: ['varinha_osso', 'tomo_osso', 'cajado_osso'], 3: ['varinha_cristal', 'tomo_prata', 'cajado_cristal'] };
-const magaScrolls = all => MAGA_SCROLLS.filter(([p, f]) => ITEMS[p] && (all || !inv.some(q => q && q.id === f))).map(([p, , price]) => ({ s: { id: p, n: 1 }, price, inf: true }));
 {
   const _restock = restock;
   restock = function () {
@@ -118,7 +114,7 @@ const magaScrolls = all => MAGA_SCROLLS.filter(([p, f]) => ITEMS[p] && (all || !
     gear.sort((a, b) => ITEMS[a.s.id].slot.localeCompare(ITEMS[b.s.id].slot) || a.price - b.price);
     stock.maga = magaScrolls(true).concat(gear);
   };
-  // ao abrir a loja, só os pergaminhos dos feitiços que o herói ainda não aprendeu
+  // ao abrir a loja, só os pergaminhos das escolas que ainda têm feitiço novo para o herói
   const _openShop = openShop;
   openShop = function (n) {
     if (n && n.id === 'maga') { if (dayNow() !== shopDay || !stock.ferreiro) restock(); stock.maga = magaScrolls(false).concat((stock.maga || []).filter(g => !g.inf)); }

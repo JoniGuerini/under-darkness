@@ -34,7 +34,7 @@ Nível dos monstros: 6 + 1 a cada 60 m (até 8), 30% vêm 1 nível acima. Loot: 
 3. As descidas: em duas salas das Criptas mais baixas, longe uma da outra, o chão se abre numa fenda de 9 blocos que desce até uma gruta com chão garantido a 386 m. Degraus de 3 blocos a cada 3 fileiras, alternando os lados, de baixo até a sala: dá para voltar pulando. Os degraus e o chão debaixo deles ficam fora da decoração e dos túneis (`icLedge`); objetos da cripta que perderam o chão saem (`icPruneProps`).
 4. Minérios: carvão (bloco 123, `IC_O_CARVAO`) na rocha e ouro na rocha e no gelo negro, em toda a camada. Um metal por camada (`js/102-minerios-camada.js`).
 5. Alcance garantido a partir das descidas: cada bolsão que sobrar ganha um túnel até a parte alcançada.
-6. Acabamento: lagos de gelo no chão dos Salões, neve no chão dos Covis, geada nas paredes e tetos das Fendas, veios de gelo que brilham no gelo azul e negro (só parede e teto), colunas de gelo nos Salões (chão ao teto), sincelos em corrente, estalagmites, cristais, montinhos de neve, ossos, crânios e cacos nas Fendas, 12 baús (3 por faixa), objetos grandes por último.
+6. Acabamento: lagos de gelo no chão dos Salões, neve no chão dos Covis, geada nas paredes e tetos das Fendas, veios de gelo que brilham no gelo azul e negro (só parede e teto), colunas de gelo nos Salões (chão ao teto), sincelos em corrente, estalagmites, cristais, montinhos de neve, ossos, crânios e cacos nas Fendas, objetos grandes por último.
 
 ## 4. Gelo escorregadio
 

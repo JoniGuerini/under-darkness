@@ -19,7 +19,7 @@ function worldLink() {
   flood(I(SPX, surf[SPX] - 2));
   const sacred = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) ||
     (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || (typeof inAbHall === 'function' && inAbHall(x, y, -3)) || inVillage(x, y);
-  const keepT = t => t === BEDROCK || t === CHEST || t === CHEST_OPEN || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA) ||
+  const keepT = t => t === BEDROCK || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA) ||
     (typeof AB_BARREIRA !== 'undefined' && t === AB_BARREIRA) || t === LAVA;
   const kept = i => (typeof icLedge !== 'undefined' && icLedge.has(i)) || (typeof mnKeep !== 'undefined' && mnKeep.has(i)) || (typeof abKeep !== 'undefined' && abKeep.has(i));   // the fissure steps, the shafts' timbers, the rifts and bridges
   const dig = (x, y) => { const i = I(x, y); if (y < 2 || y >= WH - 4 || keepT(tiles[i]) || kept(i) || sacred(W1(x), y)) return; if (SOLID[tiles[i]]) tiles[i] = AIR; };

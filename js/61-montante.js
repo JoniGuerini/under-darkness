@@ -91,9 +91,9 @@ for (const id in ITEMS) if (ITEMS[id].kind === 'greatsword') { ITEM_G[id] = 0; I
 DROPS.skeleton.push(['montante_ferro', 0.02]);
 DROPS.guard.push(['montante_osso', 0.02]);
 DROPS.lurker.push(['montante_cristal', 0.02]);
-CHEST_LOOT[1].push('montante_ferro');
-CHEST_LOOT[2].push('montante_ferro', 'montante_osso');
-CHEST_LOOT[3].push('montante_ouro', 'montante_cristal');
+SHOP_GEAR[1].push('montante_ferro');
+SHOP_GEAR[2].push('montante_ferro', 'montante_osso');
+SHOP_GEAR[3].push('montante_ouro', 'montante_cristal');
 
 // the bigger blade hits harder per second (see TWO_HAND_DPS)
 {

@@ -26,7 +26,7 @@ function blendPick(nb, px, py, X, Y, X0, Y0) {
 // which variation of a one-block decoration shows at (gx, gy)
 function decoSprite(t, gx, gy, arr) {
   const pk = DECO_PICK[t]; if (pk) return pk(gx, gy, arr);
-  return t === CHEST || t === CHEST_OPEN ? arr[gy < Z1 ? 0 : gy < Z2 ? 1 : 2] : t === TRUNK ? arr[tileAt(gx, gy - 1) === LEAVES ? 2 : hash2(gx, gy, seed + 3) < 0.45 ? 1 : 0] : t === CHAIN ? arr[tileAt(gx, gy + 1) === CHAIN ? 0 : 1] : t === BANNER ? arr[tileAt(gx, gy - 1) === BANNER ? 1 : 0] : t === WEB ? arr[solidAt(gx - 1, gy) ? 0 : 1] : arr[(hash2(gx, gy, seed) * arr.length) | 0];
+  return t === TRUNK ? arr[tileAt(gx, gy - 1) === LEAVES ? 2 : hash2(gx, gy, seed + 3) < 0.45 ? 1 : 0] : t === CHAIN ? arr[tileAt(gx, gy + 1) === CHAIN ? 0 : 1] : t === BANNER ? arr[tileAt(gx, gy - 1) === BANNER ? 1 : 0] : t === WEB ? arr[solidAt(gx - 1, gy) ? 0 : 1] : arr[(hash2(gx, gy, seed) * arr.length) | 0];
 }
 function renderChunk(cx, cy, cv) {
   const ctx = cv.getContext('2d'), SZ = CH * T, img = ctx.createImageData(SZ, SZ), buf = new Uint32Array(img.data.buffer);

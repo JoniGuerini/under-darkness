@@ -125,7 +125,7 @@
     return NOMES;
   }
   const isOre = t => [COAL, COPPER, IRON, GOLD, CRYSTAL, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, MN_O_CARVAO, MN_O_COBALTO, IC_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, AB_O_CARVAO, AB_O_INFERNITA].includes(t);
-  const kindT = t => t === CHEST || t === CHEST_OPEN ? 'Baús' : isOre(t) ? 'Minérios' : SOLID[t] && BLOCKY[t] ? 'Terreno' : 'Decoração de um bloco';
+  const kindT = t => isOre(t) ? 'Minérios' : SOLID[t] && BLOCKY[t] ? 'Terreno' : 'Decoração de um bloco';
   // uma linha da matriz: o quanto aparece em cada faixa, comparado com a faixa onde mais aparece
   function cells(row, B) {
     const vs = B.faixas.map(f => row[f.k] || 0), mx = Math.max(...vs);
@@ -148,7 +148,7 @@
       const ws = Object.keys(C.w).map(Number).filter(w => tot(C.w[w], B) / C.n >= 3).sort((a, b) => tot(C.w[b], B) - tot(C.w[a], B));
       h += `<h2 id="${B.id}">${E(B.nome)}</h2>`;
       const linhas = [];
-      for (const g of ['Terreno', 'Minérios', 'Decoração de um bloco', 'Baús']) {
+      for (const g of ['Terreno', 'Minérios', 'Decoração de um bloco']) {
         const gs = ts.filter(t => kindT(t) === g); if (!gs.length) continue;
         linhas.push(`<tr class="grupo"><td colspan="${B.faixas.length + 1}">${g}</td></tr>`);
         for (const t of gs) { const d = BLOCK_DROP[t];

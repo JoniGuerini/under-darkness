@@ -27,7 +27,7 @@ const STAT_HELP = {
   'Arma': 'A arma que está na sua mão. Troque no inventário (tecla I).',
   'Mana máxima': 'O total de mana: 25. Por enquanto a mana ainda não é usada.',
   'Inimigos derrotados': 'Quantos inimigos você já derrotou neste mundo.',
-  'Ouro': 'Dinheiro para comprar no vilarejo. Cai dos inimigos e dos baús, e você ganha vendendo o que traz das cavernas.',
+  'Ouro': 'Dinheiro para comprar no vilarejo. Cai dos inimigos, e você ganha vendendo o que traz das cavernas.',
   'Próximo nível': 'Quanta experiência falta para subir de nível.'
 };
 function charTipAt(t) {

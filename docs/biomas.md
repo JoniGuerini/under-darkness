@@ -67,7 +67,7 @@ Os objetos maiores que um bloco, pintados uma vez e "assados" na imagem do mundo
 
 ### 8. Loot e economia
 - **Itens de bloco** que o bioma dá para construir.
-- **Baús**: quantos, onde, o que trazem.
+- **Baús**: não tem. Os baús de loot foram tirados do jogo (Jonathan, 2026-10-10); só o baú da vila existe. Bases temáticas vêm de drop raro de monstro e do chefe.
 - **Drops** dos monstros e materiais exclusivos do bioma (usados na forja, em missões ou na loja).
 - **Itens únicos**: lendários ou bases de equipamento temáticas (ligar com a itemização do GDD).
 
@@ -161,7 +161,7 @@ Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas 
 | [ ] | Seixos | chão de todas | |
 | [ ] | Casulo pequeno | teto do Ninho | pendurado |
 | [ ] | Fios de teia | cantos do Ninho | |
-| [ ] | Reaproveitados | | tocha (Grutas), ossos, teia, crânios (Ninho), baú |
+| [ ] | Reaproveitados | | tocha (Grutas), ossos, teia, crânios (Ninho) |
 
 ### Paredes de fundo
 | | Parede | Onde |
@@ -261,7 +261,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 7 primeiros vêm do `js/55-
 
 ## 8. Loot e economia
 - **Itens de bloco:** terra úmida, argila, rocha, calcita, cascalho, xisto. A teia sólida solta seda.
-- **Baús:** até 12, nas grutas e câmaras, longe uns dos outros.
+- **Baús:** nenhum (tirados do jogo em 2026-10-10).
 - **Materiais novos (a Marta e o Caetano compram):** Pele de Rato, Seda de Aranha, Glândula de Peçonha, Placa de Quitina.
 - **Drops de equipamento:** peças simples (capuz, botas de couro, túnica, adaga e maça de ferro, broquel), raras.
 - **Raridade pela profundidade real:** Grutas e Galerias contam como profundidade 1 (sem roxo nem laranja), Ninho e Fundações como 2. Na catedral: Átrio e Nave 2, Claustro 3, Criptas 4.
@@ -290,7 +290,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 7 primeiros vêm do `js/55-
 | `js/53-caverna-blocos.js` | texturas dos blocos, paredes, camada distante e decorações; minérios na rocha da caverna; itens de bloco |
 | `js/54-caverna-objetos.js` | os objetos de cena |
 | `js/55-caverna-bichos.js` | gosma e morcego repintados, rato, aranhas, besouro, filhote: arte, IA, drops, materiais |
-| `js/56-caverna-mundo.js` | geração das cavernas, transição, descidas, decoração, baús, objetos, zonas, nível e loot por profundidade, save |
+| `js/56-caverna-mundo.js` | geração das cavernas, transição, descidas, decoração, objetos, zonas, nível e loot por profundidade, save |
 | `js/57-mae-teia.js` | a chefe: câmara, luta, drop |
 | `docs/caverna-spec.md` | a parte técnica |
 
@@ -369,7 +369,7 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 | [ ] | Crânios | chão do claustro e criptas | pilha pequena |
 | [ ] | Velas derretidas | chão | **luz**, chama animada |
 | [ ] | Teia grossa | cantos do teto | |
-| [ ] | Reaproveitados | | tocha (átrio), vela, ossos, urna, teia, estandarte curto, corrente, baú |
+| [ ] | Reaproveitados | | tocha (átrio), vela, ossos, urna, teia, estandarte curto, corrente |
 
 ### Paredes de fundo
 | | Parede | Onde |
@@ -476,7 +476,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/44-morto
 
 ## 8. Loot e economia
 - **Itens de bloco:** 11 (calcário, cantaria, laje, mosaico, mármore, mármore negro, friso, pilastra, tijolo velho, ardósia, pedra da cripta). Ossário solta osso.
-- **Baús:** até 16 espalhados pelas salas, longe uns dos outros.
+- **Baús:** nenhum (tirados do jogo em 2026-10-10).
 - **Drops:** os de cada monstro (carne, poção, peças de equipamento, raramente anéis).
 - **Único:** a Coroa do Rei Esqueleto.
 
@@ -566,7 +566,7 @@ Ficha feita em 2026-10-09 a pedido do Jonathan ("um bioma de gelo, cavernas de g
 | [ ] | Cristal pendente | teto do Coração | **luz fria** azul, pendurado |
 | [ ] | Montinho de neve | chão dos Covis e das Fendas | |
 | [ ] | Ossos congelados | chão dos Covis | |
-| [ ] | Reaproveitados | | crânios e lápides (Fendas), baú |
+| [ ] | Reaproveitados | | crânios e lápides (Fendas) |
 
 ### Paredes de fundo
 | | Parede | Onde |
@@ -668,7 +668,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/72-gelo-
 
 ## 8. Loot e economia
 - **Itens de bloco:** permafrost, rocha gelada, neve, gelo, gelo azul, gelo negro.
-- **Baús:** até 12, nas grutas e tocas, longe uns dos outros.
+- **Baús:** nenhum (tirados do jogo em 2026-10-10).
 - **Materiais novos (a Marta e o Caetano compram):** Pelo de Yeti, Presa de Lobo, Essência Gélida (do espírito), Lasca de Gelo Eterno (da sentinela).
 - **Raridade:** a camada inteira conta como profundidade 4 (a mais alta), como as Criptas.
 - **Único:** o Manto do Yeti Ancestral.
@@ -696,7 +696,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/72-gelo-
 | `js/70-gelo-blocos.js` | texturas, paredes, camada distante, decoração, minérios no gelo, itens de bloco, gelo escorregadio |
 | `js/71-gelo-objetos.js` | os objetos de cena |
 | `js/72-gelo-bichos.js` | yeti, lobo, espírito, verme, sentinela, gosma gelada: arte, IA, drops, materiais |
-| `js/73-gelo-mundo.js` | geração, descidas das criptas, decoração, baús, objetos, zonas, nível e loot, save |
+| `js/73-gelo-mundo.js` | geração, descidas das criptas, decoração, objetos, zonas, nível e loot, save |
 | `js/74-yeti-ancestral.js` | o chefe: Trono de Gelo, luta, drop |
 | `docs/gelo-spec.md` | a parte técnica |
 
@@ -903,7 +903,7 @@ Lampiões, fogueiras, fornalhas e brasas dão luz quente; poeira caindo e brasas
 
 ## 8. Loot e economia
 - Itens de bloco: xisto, tábua, viga, argila.
-- Baús e **vagonetes saqueáveis** com minério e ferramentas.
+- **Vagonetes saqueáveis** com minério e ferramentas (sem baús: tirados do jogo em 2026-10-10).
 - Materiais novos: **Esporita** (minério), **Esporo** (drop, poção nova), **Couro de toupeira**.
 - Bases de equipamento temáticas: picareta de mineiro (ferramenta e arma), capacete com lanterna, botas de borracha de seiva.
 

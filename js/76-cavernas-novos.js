@@ -229,7 +229,7 @@ function gbThrow(e) {
   gbBombs.push({ x: ox, y: oy, vx: (tx - ox) / t, vy: (ty - oy - 0.5 * GB_G * t * t) / t, fuse: 1.7, dmg: e.dmg, spin: 0 });
   sfx.pswing && sfx.pswing();
 }
-const GB_SAFE = t => DIG[t] > 0 && DIG[t] <= 1.2 && t !== CHEST && t !== CHEST_OPEN && t !== TORCH;
+const GB_SAFE = t => DIG[t] > 0 && DIG[t] <= 1.2 && t !== TORCH;
 const gbHall = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) || (typeof inThroneHall === 'function' && inThroneHall(x, y, -3));
 function gbBoom(b) {
   const R = 30;

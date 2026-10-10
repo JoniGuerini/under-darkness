@@ -4,7 +4,7 @@
    Pedido do Jonathan (2026-10-09): as peças da forja saem brancas (48, RARITY_ODDS.forge) e os modificadores vêm daqui.
    O herói leva uma peça e uma pedra preciosa (117-gemas) ao encantador, que sorteia modificadores novos com as chances
    da pedra (GEMS[].odds) e a tabela de modificadores de sempre (AFFIXES do 48). Encantar de novo troca os modificadores.
-   O que cai de monstro e de baú continua vindo sorteado.
+   O que cai de monstro continua vindo sorteado.
    - A oficina dele fica à esquerda da forja. O vilarejo ganha 13 blocos de chão plano desse lado (encFlatten, antes da
      catedral ser montada, só pela semente) e `inVillage` passa a cobrir esse pedaço, para ninguém cavar debaixo da casa.
    - Na conversa, "Encantar" abre o livro de profissão no modelo da forja e da alquimia (.prof em estilo.css): à esquerda

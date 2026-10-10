@@ -174,31 +174,16 @@ function pickImpact(sx, sy, aim) {
   const dmg = pl.pickDmg || 4;
   for (const e of enemies) if (!e.dead && overlap(box, e) && clearPath(pl, e)) hitEnemy(e, pl.facing, dmg / pl.dmg);
 }
-// the closest closed chest within about two blocks of the hero
-function nearestChest() {
-  if (pl.dead) return null;
-  const pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2, tx0 = Math.floor(pcx / T), ty0 = Math.floor(pcy / T);
-  let best = null, bd = 1e9;
-  for (let ty = ty0 - 3; ty <= ty0 + 3; ty++) for (let tx = tx0 - 3; tx <= tx0 + 3; tx++) {
-    if (tileAt(tx, ty) !== CHEST) continue;
-    const dx = (tx + 0.5) * T - pcx, dy = (ty + 0.5) * T - pcy;
-    if (Math.abs(dx) > 30 || Math.abs(dy) > 26) continue;
-    const d = dx * dx + dy * dy; if (d < bd) { bd = d; best = [tx, ty]; }
-  }
-  return best;
-}
 function updateDig(dt) {
   const [wx, wy] = mouseWorld(); const tx = Math.floor(wx / T), ty = Math.floor(wy / T);
   const pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
   const inReach = Math.hypot((tx + 0.5) * T - pcx, (ty + 0.5) * T - pcy) <= REACH;
   const t = tileAt(tx, ty), pick = hb.sel === 1 && !!equip.tool;
-  pl.target = { tx, ty, inReach, dig: DIG[t] > 0 && ty < WH - 1, chest: t === CHEST, pick };
-  pl.nearChest = nearestChest(); pl.nearNpc = nearNpc();
+  pl.target = { tx, ty, inReach, dig: DIG[t] > 0 && ty < WH - 1, pick };
+  pl.nearNpc = nearNpc();
   pl.hintT -= dt;
   if (pressed.KeyE) {
     if (pl.nearNpc) { openTalk(pl.nearNpc); return; }
-    if (pl.nearChest) { openChest(pl.nearChest[0], pl.nearChest[1]); pl.nearChest = null; return; }
-    if (t === CHEST && inReach) { openChest(tx, ty); return; }
     // E used to dig; point old habits to the pickaxe
     if (pl.target.dig && inReach && pl.hintT <= 0) { pl.hintT = 2.5; floatText(pcx, pl.y - 10, pick ? 'Segure o clique esquerdo para minerar' : 'Para minerar, pegue a picareta (2)', '#ffd27a', 0.8); }
   }
@@ -212,7 +197,7 @@ function breakTile(tx, ty) {
     while (q.length && n < 260) { const [x, y] = q.pop(); const k = y * WW + x; if (seen.has(k)) continue; seen.add(k); const tt = tileAt(x, y); if (tt !== TRUNK && tt !== LEAVES) continue; if (t === LEAVES && tt === TRUNK) continue; setTile(x, y, AIR); n++; if (tt === TRUNK) wood++; if (n % 3 === 0) burst((x + 0.5) * T, (y + 0.5) * T, 2, PCOL[tt], 40, 300, 0.4); q.push([x + 1, y], [x - 1, y], [x, y - 1], [x, y + 1]); }
   } else setTile(tx, ty, AIR);
   if (tileAt(tx, ty - 1) === URN || tileAt(tx, ty - 1) === CANDLE) breakTile(tx, ty - 1);
-  const above = tileAt(tx, ty - 1); if (above === TUFT || above === FLOWER || above === SHROOM || above === BONES || above === CHEST || above === CHEST_OPEN) { if (above === CHEST) openChest(tx, ty - 1); setTile(tx, ty - 1, AIR); }
+  const above = tileAt(tx, ty - 1); if (above === TUFT || above === FLOWER || above === SHROOM || above === BONES) setTile(tx, ty - 1, AIR);
   burst((tx + 0.5) * T, (ty + 0.5) * T, 8, PCOL[t] || '#888', 70, 380, 0.5);
   sfx.dug();
   const lx = (tx + 0.5) * T, ly = (ty + 1) * T - 1;

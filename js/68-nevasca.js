@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= Nevasca: as regras (dados e ícones em js/67-nevasca-dados.js) =================
-   - Jogo novo: um terceiro pergaminho lacrado vem na barra, ao lado dos outros dois.
-   - Na mochila, botão direito identifica; botão direito de novo aprende e o feitiço vai para a barra.
+   - O feitiço sai do pergaminho de escola de gelo (js/120-121).
+   - Saves antigos: na mochila, botão direito identifica; botão direito de novo aprende e o feitiço vai para a barra.
    - Com o feitiço na mão, clique esquerdo (ou segurar) abre uma nuvem de neve sobre o ponto do mouse (até NEV.reach do
      herói). A nuvem fica logo abaixo do teto, no máximo NEV.h acima da mira, e por NEV.dur segundos despeja fragmentos
      de gelo numa faixa de 2*NEV.r de largura, inclinados pelo vento. Cada fragmento para no primeiro bloco ou no primeiro
@@ -29,15 +29,12 @@ sfx.nevClink = function () { tone(2300 + Math.random() * 1500, 0.045, 'triangle'
 sfx.nevFreeze = function () { noise(0.22, 0.12, 3400, 'highpass', 0, 0.8); tone(1900, 0.14, 'triangle', 0.04, -1100); tone(620, 0.1, 'square', 0.02, -200, 0.03); };
 sfx.nevShatter = function () { noise(0.2, 0.14, 2200, 'bandpass', 0, 1.4); [2900, 3700, 2500].forEach((f, i) => tone(f, 0.05, 'triangle', 0.02, -400, i * 0.035)); };
 
-/* ---- jogo novo: o terceiro pergaminho lacrado na barra ---- */
+/* ---- jogo novo: sem neve no ar ---- */
 {
   const _newWorld = newWorld;
   newWorld = function (sd, sv) {
     nevs.length = 0; nevShards.length = 0; nevCD = 0;
     _newWorld(sd, sv);
-    if (sv && Array.isArray(sv.inv)) return;
-    let i = inv.findIndex((q, k) => !q && k < HB_BAG); if (i < 0) i = inv.findIndex(q => !q);
-    if (i >= 0) { inv[i] = mkItem('perg_selado_n'); invDirty = true; if (typeof hudCache !== 'undefined') hudCache.hb = null; }
   };
 }
 

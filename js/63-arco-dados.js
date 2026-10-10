@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= Arco Voltaico, o primeiro feitiço (para teste): os dados =================
-   Um herói novo começa com um pergaminho não identificado. Botão direito identifica; botão direito de novo lê o
-   pergaminho, que some e vira o feitiço, um item que fica na barra (3 a 0). Com ele na mão, o clique esquerdo solta
+   O feitiço sai do pergaminho de escola que a Aurélia vende e identifica (js/120-121); o feitiço é um item que fica na barra (3 a 0).
+   Os pergaminhos de um feitiço só (perg_selado, perg_arco) ficaram para saves antigos: botão direito identifica e aprende. Com ele na mão, o clique esquerdo solta
    um raio azul que salta de inimigo em inimigo e gasta mana.
    Este arquivo só tem os dados (itens, números e ícones) e carrega logo depois de 61-montante, para a wiki ver também.
    As regras que precisam do jogo rodando (identificar, aprender, lançar, desenhar o raio) ficam em js/64-arco-voltaico.js. */

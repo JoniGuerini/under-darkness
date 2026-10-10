@@ -16,7 +16,7 @@
      5. everything reachable from the two shafts, then the dressing: plank floors where a gallery crosses a cave,
         beams where its roof opens, timber sets (posts floor to roof under a capping beam), rails, lanterns, the
         ladders and scaffolds, brick and slag in the furnaces, plank floors in the camp, ropes, tools, stones,
-        skull stakes, embers, chests, and the props
+        skull stakes, embers, and the props
    Also here: the far layer, the zones (17..20) and their names, spawn tables, monster levels, glows, dust and
    embers, distant picks, the village's shops and the elder's tasks for the new materials, and the save (wg 5:
    older worlds are remade, the hero keeps level, items and gold). */
@@ -377,28 +377,14 @@ function mnAfter() {
     else { if (q < 0.05 && (dn === MN_ESCORIA || dn === MN_TIJOLO)) put(x, y, MN_BRASA); else if (q < 0.065) put(x, y, MN_PEDRAS); else if (q < 0.072) put(x, y, MN_FERRAMENTA); }
   }
 
-  // ---------- 6. chests: up to 12, three per band, far apart ----------
-  const chests = [];
-  for (let b = 0; b < 4; b++) {
-    let n = 0;
-    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
-      const x = (R3() * WW) | 0, y = S0 + mb(MN_BANDS[b]) + 2 + ((R3() * Math.max(1, mb(MN_BANDS[b + 1] - MN_BANDS[b]) - 4)) | 0);
-      if (y >= YB - 2 || at(x, y) !== AIR || !mnSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)] || inBoss(x, y, 2)) continue;
-      if (chests.some(([a, c]) => Math.abs(wdx(a - x)) < 30 && Math.abs(c - y) < 25)) continue;
-      chests.push([x, y]); put(x, y, CHEST); n++;
-    }
-  }
-  mnChestSpots = chests;
-
   // ---------- 7. the big props ----------
   mnPlaceProps();
 }
 
 /* ---------- props: on mine floors, under its roofs, against its walls ---------- */
-/* ---------- climbing back out: from the deep places (the boss hall, every chest, every furnace hall) the hero must be
+/* ---------- climbing back out: from the deep places (the boss hall, every furnace hall) the hero must be
    able to get back up to the shafts. A walk-and-jump search (three blocks of jump, ladders climbed); where it tops
    out under open air that leads up to somewhere to stand, a ladder goes in, and the search runs again. ---------- */
-let mnChestSpots = [];
 // the shaft mouths last of all: whatever the ice's own clean-up packed back into the gap between the grotto and the
 // collar is dug out again, and the ladder runs right up into the grotto
 function mnExitClear() {
@@ -487,7 +473,6 @@ function mnClimbFix() {
   };
   const starts = [];
   if (mnBoss) starts.push([mnBoss.cx - 6, mnBoss.fy - 1]);
-  for (const [x, y] of mnChestSpots) starts.push([x, y]);
   for (const c of mnChambers) if (c.kind === 'fornalha' || c.kind === 'acampamento') starts.push([Math.round(c.cx), Math.round(c.cy)]);
   let fixes = 0;
   for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }

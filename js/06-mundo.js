@@ -212,17 +212,6 @@ function generate(sd) {
       tiles[i] = TORCH; break;
     }
   }
-  // treasure chests on cave floors (one near the first cave)
-  const chestAt = [];
-  const tryChest = (x, y) => {
-    if (x < 4 || x >= WW - 4 || y < 2 || y >= WH - 16 || !floorOk(x, y)) return false;
-    if (chestAt.some(([cx, cy]) => Math.abs(cx - x) < 10 && Math.abs(cy - y) < 7)) return false;
-    tiles[y * WW + x] = CHEST; chestAt.push([x, y]); return true;
-  };
-  if (entrance.length > 6) { const [ex, ey] = entrance[Math.floor(entrance.length * 0.6)]; for (let r = 0; r < 8; r++) { let ok = false; for (let y = ey - 2; y < ey + 6 && !ok; y++) ok = tryChest(ex + r, y) || tryChest(ex - r, y); if (ok) break; } }
-  for (let k = 0; k < 6000 * WSC && chestAt.length < 36 * WSC; k++) { const x = 4 + Math.floor(R() * (WW - 8)); tryChest(x, Math.floor(surf[x] + 16 + R() * (WH - surf[x] - 34))); }
-  // then thin them out to a few, far apart (done without the random stream, so the rest of the world comes out the same)
-  { const keep = []; for (const c of chestAt) { if (keep.length < 14 * WSC && !keep.some(([kx, ky]) => Math.abs(wdx(kx - c[0])) < 24 && Math.abs(ky - c[1]) < 14)) keep.push(c); else tiles[c[1] * WW + c[0]] = AIR; } }
 
   // the abandoned cathedral replaces the caves under the village (js/45-catedral-mundo.js); the cave code above stays for later
   if (CATEDRAL) buildCathedral();

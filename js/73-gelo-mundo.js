@@ -11,7 +11,7 @@
      4. clean-up: tiny pockets filled, floating islands removed; ore veins (iron, gold, crystal in black ice)
      5. everything reachable from the two fissures, then the dressing: frozen lakes, snow on the den floors, frost
         on the fissure walls, glowing seams in the blue ice, ice columns in the halls, icicles, crystals, bones,
-        chests, and the props
+        and the props
    Also here: the far layer, the zones (13..16) and their names, spawn tables, monster levels and loot by depth,
    the slippery ice under the hero's feet, glows, the village's shops and the elder's tasks for the new
    materials, and the save (wg 4: older worlds are remade, the hero keeps level, items and gold). */
@@ -320,19 +320,6 @@ function icAfter() {
       if (q < 0.045 && icy) put(x, y, IC_CRISTAL);
       else if (q < 0.075 && icy && at(x, y - 1) === AIR) put(x, y, IC_ESTALAG);
       else if (q < 0.085) put(x, y, IC_OSSOS);
-    }
-  }
-
-  // ---------- 5. chests: up to 12, three per band, far apart ----------
-  const chests = [];
-  for (let b = 0; b < 4; b++) {
-    let n = 0;
-    for (let tries = 0; tries < 3000 * WSC && n < 3 * WSC; tries++) {
-      const x = (R3() * WW) | 0, y = S0 + mb(IC_BANDS[b]) + 2 + ((R3() * Math.max(1, mb(IC_BANDS[b + 1] - IC_BANDS[b]) - 4)) | 0);
-      if (y >= YB - 2 || at(x, y) !== AIR || !iceSolid(at(x, y + 1)) || at(x, y - 1) !== AIR || !walls[I(x, y)]) continue;
-      if (icBoss && Math.abs(wdx(x - icBoss.cx)) < icBoss.w / 2 + 2 && y <= icBoss.fy && y >= icBoss.top) continue;
-      if (chests.some(([a, c]) => Math.abs(wdx(a - x)) < 30 && Math.abs(c - y) < 25)) continue;
-      chests.push([x, y]); put(x, y, CHEST); n++;
     }
   }
 

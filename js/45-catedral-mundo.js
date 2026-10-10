@@ -282,11 +282,10 @@ function buildCathedral() {
     flood();
   }
 
-  // ---------- 10. tile dressing: candles, bones, webs, roots, chests ----------
+  // ---------- 10. tile dressing: candles, bones, webs, roots (no loot chests since 2026-10-10) ----------
   const R3 = mulberry32(seed ^ 0xd3c0);
   const floorOk = (x, y) => tiles[I(x, y)] === AIR && SOLID[tiles[I(x, y + 1)]] && tiles[I(x, y + 1)] !== CT_ESCOMBRO && tiles[I(x, y - 1)] === AIR;
   const ceilOk = (x, y) => tiles[I(x, y)] === AIR && SOLID[tiles[I(x, y - 1)]] && tiles[I(x, y + 1)] === AIR;
-  const chests = [];
   for (const Rm of cathRooms) {
     const B = Rm.band, put = (x, y, t) => { tiles[I(x, y)] = t; };
     const n = Math.max(1, Math.round(Rm.w / 9));
@@ -304,9 +303,7 @@ function buildCathedral() {
     if (B === 0) for (let k = 0; k < 4; k++) { const x = Rm.x0 + ((R3() * Rm.w) | 0), y = Rm.ceil[x - Rm.x0]; if (ceilOk(x, y)) { const len = 1 + ((R3() * 2) | 0); for (let j = 0; j < len && tiles[I(x, y + j)] === AIR; j++) put(x, y + j, CT_RAIZ); } }
     if (B === 1 && Rm.h > 14 && R3() < 0.6) { const x = Rm.x0 + 2 + ((R3() * (Rm.w - 4)) | 0), y = Rm.ceil[x - Rm.x0]; if (ceilOk(x, y)) { put(x, y, BANNER); put(x, y + 1, BANNER); } }
     if (R3() < 0.35) { const x = Rm.x0 + 1 + ((R3() * (Rm.w - 2)) | 0), y = Rm.ceil[x - Rm.x0]; if (ceilOk(x, y)) for (let j = 0, len = 1 + ((R3() * 3) | 0); j < len && tiles[I(x, y + j)] === AIR; j++) put(x, y + j, CHAIN); }
-    if (Rm.w >= 8 && R3() < 0.5) { const x = Rm.x0 + 1 + ((R3() * (Rm.w - 2)) | 0); if (floorOk(x, Rm.fy - 1) && !chests.some(([a, b]) => Math.abs(W1(a - x + WW / 2) - WW / 2) < 30 && Math.abs(b - Rm.fy) < 20)) chests.push([x, Rm.fy - 1]); }
   }
-  for (const [x, y] of chests.slice(0, 16 * WSC)) tiles[I(x, y)] = CHEST;
 
   // ---------- 10b. columns run from floor to vault; trees only stand on soil ----------
   for (let x = 0; x < WW; x++) for (let y = 1; y < WH - 1; y++) {

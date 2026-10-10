@@ -33,7 +33,7 @@ Nível dos monstros: 1 + 1 a cada 50 m (até 4); na catedral começa no 2 e sobe
 4. Duas grutas de saída nas Fundações (`caveExits`); a 45 constrói a escadaria em ruína de cada uma até o átrio. Três bocas naturais.
 5. Limpeza: bolsões de ar minúsculos e ilhas de rocha soltas (< 24 blocos).
 6. Minérios: carvão e cobre, 6–186 m. Um metal por camada (`js/102-minerios-camada.js`).
-7. Depois da catedral: o portal de pedra se desfaz em terra, gruta no fim da escada, alcance garantido a partir da entrada (túneis de ligação), forro só em parede e teto, decoração, 12 baús, objetos.
+7. Depois da catedral: o portal de pedra se desfaz em terra, gruta no fim da escada, alcance garantido a partir da entrada (túneis de ligação), forro só em parede e teto, decoração, objetos.
 
 ## 4. A Mãe-Teia
 
