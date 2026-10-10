@@ -24,7 +24,7 @@ A camada 12, de 2046 a 2232 m, debaixo do Covil do Dragão e em cima da Cidade d
 | 56 | Leito do Último | 2196 a 2232 | osso esponjoso, rocha fóssil, bronze titânico | o osso fica poroso e quente, lascas da foice cravadas, o Leito do Titã |
 
 - **Constantes:** `TT_D = 186`, `TT_BANDS = [0, 46, 98, 150, 186]`, `TT_ZONE0 = 53`, `titanBand(ty)`, topo e `TT_S0` pelo registro `LAYERS`.
-- **Nível dos monstros:** 24 + 1 a cada 60 m (até 26), 30% vêm 1 nível acima.
+- **Nível dos monstros:** 25 na metade de cima da camada e 26 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 26, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada (vinda do Covil):** as duas descidas dos **Tubos Frios** saem do Leito de Ouro do Covil (`dgExits`): tubos de lava antigos e frios que caem quase na vertical. A escada de cravos dos kobolds vai até a metade; dali para baixo continua uma **escada de ossos amarrados** com tendão, feita pelos catadores. O tubo atravessa a rocha fóssil e sai pela **órbita de um crânio de titã** enterrado no teto do Campo das Costelas: o herói desce pela escada de dentro do crânio e sai pelo buraco do olho. Volta-se pela mesma escada.
 - **Câmara de pouso:** dentro do próprio crânio de entrada, no chão da caixa craniana: 16 x 6, plano, 2 lamparinas de tutano, sem monstro num raio de 20 blocos (`ttSafe`).
 - **Saída (para a Cidade dos Antigos):** duas **Fendas Retas** no Leito do Último, longe uma da outra e do Leito do Titã. É onde o osso repousa sobre uma pedra lisa e reta demais: a rocha fóssil racha e mostra, embaixo, uma superfície de cantos perfeitos. Desce-se por um **tendão pendurado** (`TT_TENDAO`, escala como corda) uns 30 blocos até o que a camada 13 decidir pôr ali. Gravadas em `ttExits`.
@@ -149,14 +149,14 @@ Nenhum deles mergulha do teto, voa em zigue-zague, cava em arco ou anda em matil
 
 ## 8. Loot e economia (`js/198-adamantita.js` e 195)
 
-- **Metal:** **Adamantita**, o metal da foice de Cronos. `min_adamantita` → `barra_adamantita`, **8 minérios por barra**. Nível da forja **22**. A bigorna ganha as 9 peças de adamantita: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Na arte, aço cinza-esverdeado com o fio quase branco.
+- **Metal:** **Adamantita**, o metal da foice de Cronos. `min_adamantita` → `barra_adamantita`, **8 minérios por barra**. Nível da forja **23**. A bigorna ganha as 9 peças de adamantita: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Na arte, aço cinza-esverdeado com o fio quase branco.
 - **Carvão:** linhito na rocha fóssil.
 - **Materiais próprios:**
   - `tutano` (Tutano de Titã): dos nascidos e do bloco. A Marta compra; serve para a alquimia.
   - `dente_tita` (Dente de Titã): do esmalte e dos ciclopes. O Grimaldo compra.
   - `tendao` (Tendão Seco): dos catadores e do tendão pendurado. O Grimaldo compra; usado em cordas.
   - `olho_ciclope` (Olho de Ciclope): raro, do ciclope. O alquimista compra.
-- **Bases temáticas** (só caem aqui, nível de item 24, como drop raro): **Maça de Fêmur** (maça, atordoa mais; cai do ciclope e do catador), **Escudo de Omoplata** (escudo, defesa alta e aparo largo; cai do hecatônquiro e da mão do enterrado), **Elmo de Crânio de Nascido** (elmo, +vida; cai da titânide e do ciclope). O Último Titã solta uma das três garantida, além do lendário.
+- **Bases temáticas** (só caem aqui, nível de item 25, como drop raro): **Maça de Fêmur** (maça, atordoa mais; cai do ciclope e do catador), **Escudo de Omoplata** (escudo, defesa alta e aparo largo; cai do hecatônquiro e da mão do enterrado), **Elmo de Crânio de Nascido** (elmo, +vida; cai da titânide e do ciclope). O Último Titã solta uma das três garantida, além do lendário.
 - **Sem baús:** a camada não tem baús de loot (só o baú do vilarejo existe no jogo). Barras e minério vêm dos veios e dos monstros.
 - **Missões do ancião:** 3 (tendões, dentes de titã, uma lasca da foice trazida do Leito).
 

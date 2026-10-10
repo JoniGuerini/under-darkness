@@ -33,7 +33,7 @@ A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m. A ficha do bioma 
 1. Rocha por faixa; o gelo negro afina nas primeiras linhas e a rocha ferrosa sobe um pouco no fundo do gelo.
 2. Cavernas naturais (autômato esparso) e o trabalho dos mineiros: galerias retas em níveis fixos, poços com escadas (os largos com plataformas nos Poços), salões do acampamento, salões das fornalhas e a oficina do chefe (48 x 16), ligados por túneis.
 3. Dois poços antigos descem do chão do Coração do Inverno até a primeira galeria, com escada inteira (volta-se pela mesma escada).
-4. Limpeza (bolsões pequenos, ilhas soltas) e veios: carvão, cobalto e cristal (pedra preciosa, mais rara) em toda a camada (um metal por camada, `js/102-minerios-camada.js`).
+4. Limpeza (bolsões pequenos, ilhas soltas) e veios: carvão e cobalto em toda a camada; as pedras preciosas vêm do `js/117-gemas.js`, pela tabela de pedras por camada (um metal por camada, `js/102-minerios-camada.js`).
 5. Alcance a partir dos dois poços e o acabamento: tábuas onde a galeria cruza caverna, vigas, escoras, trilhos, lampiões, escadas em todo desnível de 5 blocos ou mais, tijolo e escória nas fornalhas, cordas e objetos.
 
 ## 4. Subida garantida

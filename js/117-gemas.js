@@ -1,26 +1,23 @@
 'use strict';
 
-/* ================= pedras preciosas: uma por camada (2026-10-09) =================
+/* ================= pedras preciosas (2026-10-09; distribuição por camada 2026-10-10) =================
    As peças da forja saem brancas; quem põe modificadores nelas é o encantador (118-encantador), com uma destas pedras.
-   Não são minérios: não vão para a fornalha. Ficam soltas na rocha de cada camada, mais raras que o metal dela.
-     As Cavernas        Topázio        na rocha das cavernas
-     A Catedral         Esmeralda      no calcário
-     Cavernas de Gelo   Safira         na rocha gelada
-     A Mina             Cristal Bruto  (já existia: 79, 80, 84)
-     O Abismo           Rubi           no basalto
-   Blocos 153 a 156. As pedras entram depois de o mundo estar pronto (embrulha buildCathedral, como as ervas do 94),
+   Não são minérios: não vão para a fornalha. Ficam soltas na rocha, mais raras que o metal da camada.
+   Topázio, Esmeralda, Safira, Cristal Bruto (o min_cristal) e Rubi, da mais comum para a mais rara.
+   Desde 2026-10-10 as 5 pedras aparecem em todas as camadas, cada uma com uma chance que cresce com a profundidade
+   (GEM_SHARE). Blocos 153 a 156 e 157 a 167 (a mesma pedra sobre a rocha de outra camada). As pedras entram depois de o mundo estar pronto (embrulha buildCathedral, como as ervas do 94),
    só pela semente, então mundos salvos também ganham as suas.
    GEMS diz a ordem e as chances de cada raridade no encantador. Carrega depois do 111 (a wiki também). */
 
 const GEM_TOPAZIO = 153, GEM_ESMERALDA = 154, GEM_SAFIRA = 155, GEM_RUBI = 156;
 
-// a pedra, a camada, as chances [incomum, raro, épico, lendário] no encantador
+// a pedra, onde aparece, as chances [incomum, raro, épico, lendário] no encantador
 const GEMS = [
-  { id: 'gema_topazio', layer: 'Cavernas', odds: [85, 15, 0, 0] },
-  { id: 'gema_esmeralda', layer: 'Catedral', odds: [55, 38, 7, 0] },
-  { id: 'gema_safira', layer: 'Cavernas de Gelo', odds: [30, 48, 20, 2] },
-  { id: 'min_cristal', layer: 'Mina Abandonada', odds: [15, 45, 34, 6] },
-  { id: 'gema_rubi', layer: 'O Abismo', odds: [5, 35, 47, 13] }
+  { id: 'gema_topazio', layer: 'Todas, a mais comum', odds: [85, 15, 0, 0] },
+  { id: 'gema_esmeralda', layer: 'Todas, rara no começo', odds: [55, 38, 7, 0] },
+  { id: 'gema_safira', layer: 'Do Gelo para baixo', odds: [30, 48, 20, 2] },
+  { id: 'min_cristal', layer: 'Muito rara, só bem fundo', odds: [15, 45, 34, 6] },
+  { id: 'gema_rubi', layer: 'A mais rara, só no fundo', odds: [5, 35, 47, 13] }
 ];
 const GEM_OF = Object.fromEntries(GEMS.map(g => [g.id, g]));
 
@@ -97,38 +94,71 @@ ORE_PAINT[GEM_RUBI] = function (L, s) {
 };
 // the host rock is replayed from its baked texture (the painters of 42, 53 and 70 live inside blocks)
 const fromBaked = t => { const B = MAT[t][1]; return (x, y) => { const k = y * TP + x; if (B.v[k] === -9) { MATX = B.x[k]; return -9; } return B.v[k]; }; };
-// [bloco, item, paleta e textura da rocha, mancha em volta, dureza, cor no mapa, luz, nome]
-const GEM_BLOCKS = [
-  [GEM_TOPAZIO, 'gema_topazio', 'cvRocha', fromBaked(CV_ROCHA), '#c07a12', 0.75, '#eaa62a', 0.32, 'Topázio'],
-  [GEM_ESMERALDA, 'gema_esmeralda', 'calcario', fromBaked(CT_CALCARIO), '#18864a', 0.9, '#2ab86a', 0.36, 'Esmeralda'],
-  [GEM_SAFIRA, 'gema_safira', 'icRocha', fromBaked(IC_ROCHA), '#1e4cc4', 1.05, '#3a74ec', 0.4, 'Safira'],
-  [GEM_RUBI, 'gema_rubi', 'abBasalto', fromBaked(AB_BASALTO), '#b8182c', 1.25, '#e83048', 0.44, 'Rubi']
+// cada pedra: [bloco dela na camada de origem, item, mancha em volta, dureza, cor no mapa, luz, nome]
+const GEM_KINDS = [
+  [GEM_TOPAZIO, 'gema_topazio', '#c07a12', 0.75, '#eaa62a', 0.32, 'Topázio'],
+  [GEM_ESMERALDA, 'gema_esmeralda', '#18864a', 0.9, '#2ab86a', 0.36, 'Esmeralda'],
+  [GEM_SAFIRA, 'gema_safira', '#1e4cc4', 1.05, '#3a74ec', 0.4, 'Safira'],
+  [MN_O_CRISTAL, 'min_cristal', '#8a4ae8', DIG[CRYSTAL], PCOL[CRYSTAL], EMIT[CRYSTAL], 'Cristal'],
+  [GEM_RUBI, 'gema_rubi', '#b8182c', 1.25, '#e83048', 0.44, 'Rubi']
 ];
-for (const [t, item, p, fn, tint, dig, col, emit, name] of GEM_BLOCKS) {
-  ORE_HALO[t] = { pal: [p, tint, 0.38, 0.12], shade: 0.35 };
-  MAT[t] = [PALS[p], bakeOre(t, fn)]; SOLID[t] = 1; BLOCKY[t] = 1; BLEND[t] = 1;
-  DIG[t] = dig; ORE_XP[t] = ORE_XP[CRYSTAL]; ORE_NAME[t] = name; PCOL[t] = col; ORE_ITEM[t] = item; EMIT[t] = emit;
+/* Distribuição por camada (Jonathan, 2026-10-10): as 5 pedras aparecem em todas as camadas, cada uma com a sua chance.
+   No começo quase tudo é topázio; descendo, as melhores vão ficando menos raras. O rubi nunca vira comum.
+   Linha = posição da camada (1 a 16), colunas = topázio, esmeralda, safira, cristal, rubi (em %). Tabela também em docs/camadas/00-geral.md. */
+const GEM_SHARE = [null,
+  [97, 3, 0, 0, 0], [90, 10, 0, 0, 0], [82, 16, 2, 0, 0], [72, 22, 6, 0, 0],
+  [62, 27, 10, 1, 0], [52, 30, 15, 3, 0], [43, 31, 20, 6, 0], [35, 30, 24, 10, 1],
+  [28, 28, 27, 14, 3], [22, 26, 28, 19, 5], [17, 23, 29, 23, 8], [14, 21, 28, 27, 10],
+  [11, 18, 28, 30, 13], [9, 16, 27, 32, 16], [7, 14, 26, 35, 18], [6, 12, 25, 37, 20]];
+// as camadas de hoje: posição, a rocha que recebe as pedras (teste do bloco, teste da zona), paleta e textura dessa rocha, onde marcar o solo.
+// Cada pedra ganha um bloco próprio em cada rocha (o mesmo desenho sobre a rocha da camada); o da camada de origem é o bloco de sempre.
+const GEM_LAYERS = [
+  { pos: 1, ok: t => t === CV_ROCHA || t === CV_XISTO, pal: 'cvRocha', host: CV_ROCHA, soils: CV_SOILS, own: GEM_TOPAZIO },
+  { pos: 2, ok: t => t === CT_CALCARIO || t === CT_CALC_TERRA, zone: z => z >= 5 && z <= 8, pal: 'calcario', host: CT_CALCARIO, own: GEM_ESMERALDA },   // the caves' lowest band has limestone too
+  { pos: 3, ok: t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO, pal: 'icRocha', host: IC_ROCHA, soils: IC_SOILS, own: GEM_SAFIRA },
+  { pos: 4, ok: t => t === MN_FERROSA || t === MN_QUARTZITO, pal: 'mnFerrosa', host: MN_FERROSA, soils: MN_SOILS, own: MN_O_CRISTAL },
+  { pos: 5, ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI }
+];
+// blocos novos: 157 em diante (uma pedra fora da sua camada de origem)
+let gemNextId = 157;
+for (const L of GEM_LAYERS) {
+  L.tiles = GEM_KINDS.map(([base, item, tint, dig, col, emit, name], g) => {
+    if (!GEM_SHARE[L.pos][g]) return 0;
+    let t = base;
+    if (base !== L.own) {
+      t = gemNextId++;
+      ORE_PAINT[t] = ORE_PAINT[base === MN_O_CRISTAL ? CRYSTAL : base];
+    }
+    if (t !== MN_O_CRISTAL) {
+      ORE_HALO[t] = { pal: [L.pal, tint, 0.38, 0.12], shade: 0.35 };
+      MAT[t] = [PALS[L.pal], bakeOre(t, fromBaked(L.host))]; SOLID[t] = 1; BLOCKY[t] = 1; BLEND[t] = 1;
+    }
+    DIG[t] = dig; ORE_XP[t] = ORE_XP[CRYSTAL]; ORE_NAME[t] = name; PCOL[t] = col; ORE_ITEM[t] = item; EMIT[t] = emit;
+    if (L.soils) L.soils[t] = 1;
+    return t;
+  });
 }
-CV_SOILS[GEM_TOPAZIO] = 1; IC_SOILS[GEM_SAFIRA] = 1; AB_SOILS[GEM_RUBI] = 1;
 
-Object.assign(ORE_WHERE, { gema_topazio: 'Pedra preciosa, rara, das Cavernas', gema_esmeralda: 'Pedra preciosa, rara, da Catedral', gema_safira: 'Pedra preciosa, rara, das Cavernas de Gelo', gema_rubi: 'Pedra preciosa, rara, do Abismo' });
+Object.assign(ORE_WHERE, {
+  gema_topazio: 'Pedra preciosa, a mais comum: em todas as camadas, quase só ela no começo',
+  gema_esmeralda: 'Pedra preciosa, rara nas Cavernas e um pouco mais comum a cada camada',
+  gema_safira: 'Pedra preciosa, das Cavernas de Gelo para baixo',
+  min_cristal: 'Pedra preciosa, muito rara, só bem fundo',
+  gema_rubi: 'A pedra preciosa mais rara, só nas camadas mais fundas'
+});
 Object.assign(MAT_VAL, { gema_topazio: 12, gema_esmeralda: 20, gema_safira: 30, gema_rubi: 70 });
 
-/* ---- espalhar as pedras: aglomerados de 1 ou 2 blocos dentro da rocha de cada camada ---- */
-const GEM_HOST = [
-  [GEM_TOPAZIO, t => t === CV_ROCHA || t === CV_XISTO],
-  [GEM_ESMERALDA, t => t === CT_CALCARIO || t === CT_CALC_TERRA, z => z >= 5 && z <= 8],   // the caves' lowest band has limestone too
-  [GEM_SAFIRA, t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO],
-  [GEM_RUBI, t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS]
-];
+/* ---- espalhar as pedras: aglomerados de 1 ou 2 blocos dentro da rocha de cada camada; a pedra sai da tabela da camada ---- */
 function placeGems() {
-  const R = mulberry32(seed ^ 0x6e3a5), W1 = x => (x + WW) % WW, want = 36 * WSC, got = GEM_HOST.map(() => 0);
+  const R = mulberry32(seed ^ 0x6e3a5), W1 = x => (x + WW) % WW, want = 36 * WSC, got = GEM_LAYERS.map(() => 0);
   for (let k = 0; k < 900000 && got.some(n => n < want); k++) {
     const x = (R() * WW) | 0, y = surf[x] + 10 + ((R() * (WH - surf[x] - 16)) | 0), i = y * WW + x, t = tiles[i];
-    const h = GEM_HOST.findIndex(([, ok]) => ok(t)); if (h < 0 || got[h] >= want) continue;
-    const [g, ok, zone] = GEM_HOST[h]; if (zone && !zone(zoneAt(x, y))) continue;
-    tiles[i] = g; got[h]++;
-    if (R() < 0.45) { const d = (R() * 4) | 0, nx = W1(x + (d === 0 ? 1 : d === 1 ? -1 : 0)), ny = y + (d === 2 ? 1 : d === 3 ? -1 : 0), j = ny * WW + nx; if (ok(tiles[j])) tiles[j] = g; }
+    const h = GEM_LAYERS.findIndex(L => L.ok(t)); if (h < 0 || got[h] >= want) continue;
+    const L = GEM_LAYERS[h]; if (L.zone && !L.zone(zoneAt(x, y))) continue;
+    const sh = GEM_SHARE[L.pos], tot = sh.reduce((a, b) => a + b, 0); let r = R() * tot, g = 0;
+    while (r >= sh[g]) { r -= sh[g]; g++; }
+    const gt = L.tiles[g]; tiles[i] = gt; got[h]++;
+    if (R() < 0.45) { const d = (R() * 4) | 0, nx = W1(x + (d === 0 ? 1 : d === 1 ? -1 : 0)), ny = y + (d === 2 ? 1 : d === 3 ? -1 : 0), j = ny * WW + nx; if (L.ok(tiles[j])) tiles[j] = gt; }
   }
 }
 { const _bc = buildCathedral; buildCathedral = function () { _bc(); try { placeGems(); } catch (err) { console.error(err); } }; }

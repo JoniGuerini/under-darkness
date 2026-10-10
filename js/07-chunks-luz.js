@@ -114,10 +114,19 @@ function drawChunks(cx, cy) {
       const key = j * 64 + i; let ch = chunks.get(key);
       if (!ch) { ch = { c: mk(P, P), dirty: true }; chunks.set(key, ch); }
       if (ch.dirty) { renderChunk(i, j, ch.c); ch.dirty = false; }
+      ch.u = chunkTick;
       lc.drawImage(ch.c, px, j * P - cy);
     }
   }
+  // the world is huge now (900 x 1016 tiles, ~3600 chunk images): keep only the ones seen lately, or the video
+  // memory fills up as you explore and the frame rate sinks until the screen freezes (2026-10-10)
+  if (++chunkTick % 60 === 0 && chunks.size > CHUNK_MAX) {
+    const old = [...chunks].sort((a, b) => a[1].u - b[1].u);
+    for (let k = 0; k < old.length - CHUNK_KEEP; k++) { old[k][1].c.width = old[k][1].c.height = 0; chunks.delete(old[k][0]); }
+  }
 }
+let chunkTick = 0;
+const CHUNK_MAX = 220, CHUNK_KEEP = 150;
 
 /* ================= lighting ================= */
 let LX0 = 0, LY0 = 0, LW = 0, LH = 0, LB = null, DB = null, lightCv = null, lightCx = null, lightImg = null, lightU = null;

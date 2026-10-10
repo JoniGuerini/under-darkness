@@ -23,12 +23,12 @@ Com o registro `LAYERS` (seção 2 do [00-geral.md](00-geral.md)), o Abismo vira
 
 - `AB_TOP` e `AB_S0` deixam de somar a mina e passam a ler o registro. `AB_BANDS` (0, 46, 98, 150, 186), as zonas 21 a 24 e os ids 128 a 152 não mudam.
 - **Enquanto as camadas 5 a 14 não existem**, o Abismo é sempre o último da lista (seção 7 do 00-geral). Ele desce sozinho a cada camada nova que entra: não tem número de metro escrito em lugar nenhum.
-- **Os números de nível também saem da posição**, para valer no meio do caminho: monstros de 2n a 2n+2, forja 2n−2, bases 2n, chefe 2n+3 (n = posição). Na posição 15 isso dá exatamente a tabela do 00-geral: 30 a 32, forja 28, bases 30, chefe 33. Na posição 6, por exemplo, dá 12 a 14 e chefe 15.
+- **Os números de nível também saem da posição**, para valer no meio do caminho: monstros de 2n+1 a 2n+2, forja 2n−1, bases 2n+1, chefe 2n+3 (n = posição). Na posição 15 isso dá exatamente a tabela do 00-geral: 31 a 32, forja 29, bases 31, chefe 33. Na posição 5, onde ele está hoje, dá 11 a 12 e chefe 13.
 
-## 2. Monstros: nível 30 a 32
+## 2. Monstros: nível 31 a 32
 
-Em `js/108-abismo-mundo.js`, perto da linha 490, o `spawnEnemy` embrulhado faz `lvl = 10 + min(2, floor(d / 60))`, com 30% vindo 1 acima. Muda só a base:
-- `10` vira o nível inicial da camada no registro (30 na posição 15). Fica `30 + min(2, floor(d / 60))`: 30 nos Portões de Cinza, 31 nos Rios de Fogo e nas Entranhas, 32 no fundo; até 33 com os 30% de sorte.
+Em `js/108-abismo-mundo.js`, perto da linha 490, o `spawnEnemy` embrulhado faz hoje `lvl = 11 + min(1, floor(d / 93))`, com 30% vindo 1 acima sem passar de 12. Muda só a base:
+- `11` vira o nível inicial da camada no registro (31 na posição 15). Fica `31 + min(1, floor(d / 93))`: 31 na metade de cima (Portões de Cinza e Rios de Fogo), 32 na metade de baixo; os 30% de sorte nunca passam de 32.
 - As fórmulas de vida (×1,3 por nível), dano (×1,2 por nível), XP e ouro continuam as mesmas, só com o nível novo. Um Demônio Brutamontes de nível 31 fica com 10 vezes a vida base, como qualquer monstro de nível 31 das outras camadas.
 - As tabelas de spawn (`CATH_SPAWN` das zonas 21 a 24) e os máximos (9 e 10) não mudam.
 
@@ -47,12 +47,12 @@ Em `js/109-principe-caos.js`, `PR = { hp: 1400, dmg: 30, lvl: 12 }` vira, pela f
 - **Coração do Caos** (`coracao_caos`): `BASE_INFO.coracao_caos = [10]` vira `[33]`, o nível do chefe.
 - Fases (60% e 25%), ataques, avisos e a chave de save (`principe.dead`) não mudam.
 
-## 4. A infernita na forja: nível 28 e 9 minérios por barra
+## 4. A infernita na forja: nível 29 e 9 minérios por barra
 
-- `js/110-infernita.js`: `FORGE_ILVL.push(7)` vira 28. O texto da barra ("Fundida de 6 minérios") vira 9.
+- `js/110-infernita.js`: `FORGE_ILVL.push(7)` vira 29. O texto da barra ("Fundida de 6 minérios") vira 9.
 - `js/108-abismo-mundo.js`: `FURN.min_infernita = { n: 6 }` vira `n: 9`. Os preços em `MAT_VAL` (minério 40, barra 260) sobem junto com a curva de preço das camadas novas (o valor final fica para a tabela de economia do roadmap).
 - **Cuidado com a ordem dos metais.** Hoje `FORGE_ILVL` é uma lista na mesma ordem de `METALS`, e o 110 carrega antes dos arquivos 120 a 219. Com as camadas novas, a infernita entraria na bigorna antes da esporita. Proposta: cada metal guarda o próprio nível (`M.il`) e a posição da camada; `baseInfo` lê `METALS[t].il`, e a bigorna ordena pela posição. Assim nenhuma camada depende da ordem de carregamento.
-- **O teto de nível de item.** `mkItem` e `rollItem` (`js/48-itemizacao.js`) prendem o nível em 1 a 12, e `rollRarity` prende a profundidade em 1 a 4. Se a preparação ainda não tiver aberto esse teto (até 40), a infernita de nível 28 sai como 12. É uma linha em cada função, mas tem que estar pronta antes.
+- **O teto de nível de item.** `mkItem` e `rollItem` (`js/48-itemizacao.js`) prendem o nível em 1 a 12, e `rollRarity` prende a profundidade em 1 a 4. Se a preparação ainda não tiver aberto esse teto (até 40), a infernita de nível 29 sai como 12. É uma linha em cada função, mas tem que estar pronta antes.
 
 ## 5. Os itens antigos de demônio sobem de nível
 
@@ -60,17 +60,17 @@ Pela regra do 00-geral (bases temáticas no nível do primeiro monstro, lendári
 
 | Item | Hoje | Depois | Quem solta |
 |---|---|---|---|
-| `elmo_chifres` (Elmo de Chifres) | 5 | 30 | diabrete, brutamontes, cultista, gárgula |
-| `machado_chifre` (Machado de Chifre) | 5 | 30 | brutamontes, gárgula, salamandra |
-| `grevas_demonio` (Grevas Demoníacas) | 6 | 30 | cão, brutamontes, rastejador, salamandra |
-| `escudo_infernal` (Escudo Infernal) | 6 | 30 | brutamontes |
+| `elmo_chifres` (Elmo de Chifres) | 5 | 31 | diabrete, brutamontes, cultista, gárgula |
+| `machado_chifre` (Machado de Chifre) | 5 | 31 | brutamontes, gárgula, salamandra |
+| `grevas_demonio` (Grevas Demoníacas) | 6 | 31 | cão, brutamontes, rastejador, salamandra |
+| `escudo_infernal` (Escudo Infernal) | 6 | 31 | brutamontes |
 | `lamina_infernal` (Lâmina Infernal, lendária) | 7 | 31 | brutamontes, alma penada, cultista, o Príncipe |
 | `coracao_infernal` (Coração Infernal, lendário) | 7 | 31 | o Príncipe |
 | `coracao_caos` (Coração do Caos, lendário) | 10 | 33 | o Príncipe |
 
 O que precisa de ajuste junto:
-- **Itens que caem em outras camadas.** `grevas_demonio` também cai do yeti e do wendigo (`js/72`, `js/78`) No nível 30 elas quebrariam o gelo: saem dessas listas e viram `botas_ferro` no yeti e no wendigo. (O `elmo_chifres` estava no `CHEST_LOOT[3]`, mas os baús de loot já saíram do jogo inteiro.)
-- **Itens genéricos que os demônios soltam** (`anel_vampiro`, `anel_furia`, `lanterna_fantasma`, `montante_ouro`) ficam no nível de hoje e **saem** das tabelas de drop do Abismo: no nível 30 eles seriam lixo.
+- **Itens que caem em outras camadas.** `grevas_demonio` também cai do yeti e do wendigo (`js/72`, `js/78`) No nível 31 elas quebrariam o gelo: saem dessas listas e viram `botas_ferro` no yeti e no wendigo. (O `elmo_chifres` estava no `CHEST_LOOT[3]`, mas os baús de loot já saíram do jogo inteiro.)
+- **Itens genéricos que os demônios soltam** (`anel_vampiro`, `anel_furia`, `lanterna_fantasma`, `montante_ouro`) ficam no nível de hoje e **saem** das tabelas de drop do Abismo: no nível 31 eles seriam lixo.
 - **Lendários que o jogador já tem.** `mkItem` ignora o nível salvo de um lendário e lê `BASE_INFO` de novo. Sem cuidado, quem já tem a Lâmina Infernal no nível 7 acorda com ela no nível 31. Proposta: o lendário passa a guardar o nível com que caiu, e só os novos nascem no nível novo.
 
 ## 6. A entrada: das Fornalhas para os Salões do Pesadelo
@@ -143,9 +143,9 @@ As 3 missões do Abismo (essência demoníaca, olhos de demônio, infernita) est
 | Arquivo | O que muda |
 |---|---|
 | `js/103-abismo-api.js` | `AB_TOP` e `AB_S0` pelo registro; `AB_BAND_NAMES` com `templos`; `abDown` (as descidas para a 16) |
-| `js/108-abismo-mundo.js` | `AB_S0` pelo registro; as fendas pelas descidas da camada 14; transição com a camada 14; as duas descidas para a 16; nome da zona 24; nível 30 a 32; `FURN` com 9; preços; drops genéricos fora |
+| `js/108-abismo-mundo.js` | `AB_S0` pelo registro; as fendas pelas descidas da camada 14; transição com a camada 14; as duas descidas para a 16; nome da zona 24; nível 31 a 32; `FURN` com 9; preços; drops genéricos fora |
 | `js/109-principe-caos.js` | `PR` nível 33 (3500 / 67); lacaios nível 32; `ab_fenda` no lugar do trono; entrada pela Fenda; gêiser da costura; a Fenda apaga quando ele morre; `BASE_INFO.coracao_caos` 33 |
-| `js/110-infernita.js` | nível 28 (`M.il`), texto de 9 minérios |
+| `js/110-infernita.js` | nível 29 (`M.il`), texto de 9 minérios |
 | `js/111-abismo-save.js` | sem semente nova; refaz só as posições que mudaram; o Príncipe volta; lendários guardam o nível |
 | `js/48-itemizacao.js` | `BASE_INFO` dos itens de demônio; `baseInfo` lê `METALS[t].il`; teto de nível (se a preparação não fez) |
 | `js/72-gelo-bichos.js`, `js/78-gelo-novos.js` | `grevas_demonio` sai do gelo |

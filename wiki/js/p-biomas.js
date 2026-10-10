@@ -4,15 +4,18 @@
 (() => {
   const E = UDW.esc, X = UDW_TXT;
   const TABS = [['cavernas', 'Cavernas'], ['catedral', 'Catedral'], ['gelo', 'Gelo'], ['mina', 'Mina'], ['abismo', 'Abismo'], ['blocos', 'Blocos'], ['objetos', 'Objetos de cena'], ['documento', 'Documento de biomas'], ['regras', 'Regras de geração']];
-  // nível dos monstros numa faixa (o mesmo cálculo do spawnEnemy do 56 e do 73)
-  const lvAt = m => typeof AB_TOP !== 'undefined' && m >= AB_TOP ? 10 + Math.min(2, Math.floor((m - AB_TOP) / 60)) : typeof MN_TOP !== 'undefined' && m >= MN_TOP ? 8 + Math.min(2, Math.floor((m - MN_TOP) / 60)) : m >= IC_TOP ? 6 + Math.min(2, Math.floor((m - IC_TOP) / 60)) : m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : Math.min(6, 2 + Math.floor((m - CAVE_D) / 45));
+  // nível dos monstros numa faixa (o mesmo cálculo do layerLvl do 52: cada camada começa 1 acima do fim da de cima, sobe 1 a partir de 93 m)
+  const lvAt = m => { const L = [[CAVE_D, 5], [IC_TOP, 7], [typeof MN_TOP !== 'undefined' ? MN_TOP : 1e9, 9], [typeof AB_TOP !== 'undefined' ? AB_TOP : 1e9, 11]].filter(c => m >= c[0]).pop(); return L ? L[1] + (m - L[0] >= 93 ? 1 : 0) : 1 + Math.min(3, Math.floor(m / 50)); };
+  // o mais alto da camada: os 30% de sorte nunca passam dele
+  const lvTop = m => m < CAVE_D ? 4 : lvAt([IC_TOP, typeof MN_TOP !== 'undefined' ? MN_TOP : 1e9, typeof AB_TOP !== 'undefined' ? AB_TOP : 1e9, 1e9].find(t => t > m) - 1);
+  const lvTxt = f => { const a = lvAt(f.de), b = Math.min(lvTop(f.de), lvAt(f.ate - 1) + 1); return a === b ? `Monstros de nível ${a}.` : `Monstros de nível ${a} a ${b}.`; };
   function cavernas() {
     let h = `<p class="lead">${E(X.caverna)}</p><p><span class="rot">Entrada</span>${E(X.cavernaEntrada)}</p>${X.cavernaSom ? `<p><span class="rot">Som</span>${E(X.cavernaSom)}</p>` : ''}<h2>Faixas</h2><div class="faixas">`;
     for (const f of X.cvFaixas) {
       const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1;
       h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
         <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
-        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. Monstros de nível ${lvAt(f.de)} a ${lvAt(f.ate - 1) + 1}.</p>` : ''}
+        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
         <div class="lista">${X.cvMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
       </section>`;
     }
@@ -28,7 +31,7 @@
       const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1;
       h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
         <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
-        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. Monstros de nível ${lvAt(f.de)} a ${lvAt(f.ate - 1) + 1}.</p>` : ''}
+        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
         <div class="lista">${X.icMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
       </section>`;
     }
@@ -44,7 +47,7 @@
       const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1;
       h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
         <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
-        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. Monstros de nível ${lvAt(f.de)} a ${lvAt(f.ate - 1) + 1}.</p>` : ''}
+        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
         <div class="lista">${X.mnMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
       </section>`;
     }
@@ -60,7 +63,7 @@
       const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1;
       h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
         <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
-        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. Monstros de nível ${lvAt(f.de)} a ${lvAt(f.ate - 1) + 1}.</p>` : ''}
+        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
         <div class="lista">${X.abMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
       </section>`;
     }
@@ -77,7 +80,7 @@
       const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1;
       h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
         <p>${E(f.carater)}.</p><p><span class="rot">Andares</span>${f.andares} <span class="rot">Salas</span>${E(f.salas)}</p>
-        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. Monstros de nível ${lvAt(f.de)} a ${Math.min(7, lvAt(f.ate - 1) + 1)}.</p>` : ''}
+        ${sp ? `<div class="spawn">${sp[0].map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
         <div class="lista">${X.minerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
       </section>`;
     }

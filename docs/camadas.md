@@ -46,7 +46,7 @@ Cada camada traz um metal novo para a forja, na ordem da descida (regra de [regr
 
 - **As Cavernas, a Catedral, o Gelo e a Mina ficam onde estão** (camadas 1 a 4). A ordem delas já sobe de dificuldade e de metal.
 - **O Abismo sai da 5ª e vai para a 15ª**, como você sugeriu: é a penúltima, logo acima da Escuridão. Na prática ele continua debaixo da Mina até as camadas 5 a 14 existirem, e desce a cada camada nova que entrar no meio.
-- **Quando o Abismo descer**, sobem junto o nível dos demônios (hoje 10 a 13), o nível da infernita na forja e a profundidade das faixas. As fendas de entrada passam a sair do fundo da camada 14, e não mais das Fornalhas Esquecidas da Mina.
+- **Quando o Abismo descer**, sobem junto o nível dos demônios (hoje 11 a 12), o nível da infernita na forja e a profundidade das faixas. As fendas de entrada passam a sair do fundo da camada 14, e não mais das Fornalhas Esquecidas da Mina.
 - **Ideias antigas que entraram no mapa:** as Minas Fúngicas (Parte 6 de biomas.md) viram a camada 5. A Cidade Afundada, as Catacumbas Alagadas, a Floresta Petrificada e a Forja dos Anões (Parte 7) viram as camadas 6, 7 e 8, com as catacumbas dentro da cidade.
 
 ---

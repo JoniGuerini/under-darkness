@@ -1,6 +1,6 @@
 # A Colmeia: ficha de implementação
 
-A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m. É o que expulsou os anões: uma colmeia de insetos gigantes que cavou de baixo para cima, engoliu os salões de pedra em cera e resina e guarda, nas câmaras de âmbar, tudo o que prendeu no caminho. Monstros de nível 18 a 20, metal novo Ambrita, chefe A Rainha da Colmeia (nível 21).
+A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m. É o que expulsou os anões: uma colmeia de insetos gigantes que cavou de baixo para cima, engoliu os salões de pedra em cera e resina e guarda, nas câmaras de âmbar, tudo o que prendeu no caminho. Monstros de nível 19 a 20, metal novo Ambrita, chefe A Rainha da Colmeia (nível 21).
 
 **O que a diferencia:** é a única camada **construída por bichos**: tudo é estreito, morno, curvo e hexagonal, sem um único vão grande fora das câmaras de âmbar, o contrário da pedra reta da Fortaleza em cima e do mar aberto e frio embaixo. Do Ninho das Cavernas ela difere pela ordem (favos, cera, mel, luz âmbar) em vez de teia solta no escuro; do Abismo, pelo calor de corpo em vez de fogo.
 
@@ -23,7 +23,7 @@ A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m. É o que expul
 - **Entrada:** as duas descidas saem do chão da última faixa da Fortaleza, nas posições que ela anota (como `mnExits`). Cada uma é uma **brecha**: um buraco torto no piso de pedra, com a borda coberta de crosta de cera escorrida, como uma ferida que inchou. Da brecha desce um tubo de cera de 3 de largura com a **Escada de Favos** inteira (`CM_ESCADA_FAVO`) por 20 a 28 fileiras, até um salão anão da Brecha Tomada. Volta-se pela mesma escada.
 - **Câmara de pouso:** ao pé de cada escada, um salão anão de 12 x 6 que a cera ainda não alcançou: piso de pedra plano, uma lanterna anã acesa, sem monstro. É o último lugar com cara de gente.
 - **Saída:** dois **Escorredouros de Mel** no chão de câmaras de ovos do Berçário, a pelo menos `WW / 3` um do outro e longe da esfera. São poços onde o mel da colmeia escorre para baixo: paredes de cera brilhando de mel, Escada de Favos inteira até a última fileira, gotas caindo. A camada guarda as posições em `cmExits`; o Mar Sem Sol continua o poço como uma raiz de cera pendurada no teto dele.
-- **Nível dos monstros:** 18 + 1 a cada 60 m (18 de 1488 a 1548, 19 até 1608, 20 até o fim). 30% vêm 1 nível acima.
+- **Nível dos monstros:** 19 na metade de cima da camada e 20 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 20, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 
 ## 3. Estrutura e geração (`js/165-colmeia-mundo.js`)
 
@@ -155,7 +155,7 @@ A Formiga-Leão não nasce pelo spawn comum: a geração cava os funis (3 x `WSC
 
 ## 8. Loot e economia
 
-**Metal: Ambrita** (`js/167-ambrita.js`). `min_ambrita` -> `barra_ambrita`, **7 minérios por barra**. Nível da forja **16**. A bigorna ganha as 9 peças de ambrita: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Cor de mel translúcido com miolo mais escuro; o peitoral de ambrita dá luz 1 (o mel brilha). O minério só cai dos insetos desta camada e das de baixo.
+**Metal: Ambrita** (`js/167-ambrita.js`). `min_ambrita` -> `barra_ambrita`, **7 minérios por barra**. Nível da forja **17**. A bigorna ganha as 9 peças de ambrita: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Cor de mel translúcido com miolo mais escuro; o peitoral de ambrita dá luz 1 (o mel brilha). O minério só cai dos insetos desta camada e das de baixo.
 
 **Materiais:**
 
@@ -167,7 +167,7 @@ A Formiga-Leão não nasce pelo spawn comum: a geração cava os funis (3 x `WSC
 | `ferrao` | vespas, zangões | Grimaldo |
 | `ambar_fossil` | bloco Âmbar com Fóssil | Grimaldo, caro (pedra rara como o cristal) |
 
-**Bases temáticas** (nível 18, só caem aqui, como drop raro de monstro):
+**Bases temáticas** (nível 19, só caem aqui, como drop raro de monstro):
 - **Lança-Ferrão** (lança), da Vespa-Resineira e do Zangão, 1,5%: estocada longa, +crítico.
 - **Escudo de Favo** (escudo), da Soldada Porteira, 2%: aparo largo, leve.
 - **Elmo de Âmbar** (elmo), da Cigarra-Tambor e da Operária, 1%: luz 1, um mosquito preso dentro.

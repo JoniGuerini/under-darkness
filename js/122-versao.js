@@ -7,8 +7,15 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.9.0';
+const VERSAO = '0.9.1';
 const NOVIDADES = [
+  { v: '0.9.1', data: '10/10/2026', titulo: 'Correções de desempenho', itens: [
+    'O jogo libera as imagens das partes do mundo que ficaram longe, para o FPS não cair com o tempo de jogo.',
+    'Painel de diagnóstico de desempenho na tecla F9.',
+    'O nível dos monstros acompanha a camada em que eles aparecem.',
+    'Pedras preciosas em todas as camadas.',
+    'A dica dos itens não mostra mais o nível do item.'
+  ] },
   { v: '0.9.0', data: '10/10/2026', titulo: 'Personagens e novidades', itens: [
     'Vários personagens, cada um com o seu save. Novo jogo cria o personagem e já entra no mundo.',
     'Carregar, na tela de início, lista os personagens com nível e ouro; dá para excluir qualquer um.',

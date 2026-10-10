@@ -406,14 +406,14 @@ Object.assign(CATH_SPAWN, {
 });
 // loot: the whole ice layer counts as the deepest
 { const _lz = lootZone; lootZone = function (tx, ty) { if (GELO && zoneAt(tx, ty) >= IC_ZONE0 && zoneAt(tx, ty) <= IC_ZONE0 + 3) return 4; return _lz(tx, ty); }; }
-// levels: 6 + 1 per 60 m of ice (to 8), 30% of them one higher; wolves run in packs; worms start under the floor
+// levels: 7-8 (layerLvl in 52), 30% of them one higher but never past 8; wolves run in packs; worms start under the floor
 let icPacking = false;
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!GELO || e.boss || D.boss || e.yetiMinion) return e;
   const d = Math.floor((py + e.h) / T) - IC_S0;
   if (d >= 0) {
-    const lvl = 6 + Math.min(2, Math.floor(d / 60)) + (Math.random() < 0.3 ? 1 : 0), m = 1 + 0.3 * (lvl - 1);
+    const lvl = layerLvl(7, d), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   if (zone >= IC_ZONE0 && zone <= IC_ZONE0 + 3) {

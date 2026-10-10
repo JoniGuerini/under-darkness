@@ -302,7 +302,7 @@ function gearValue(s) {
   return Math.max(3, Math.round((8 + 6 * Math.pow(L, 1.35)) * k * RAR_VALUE[itemRar(s)]));
 }
 
-/* ---- tooltip (WoW / GDD style): name, type, item level, damage and speed, DPS, base numbers, effects in green, flavour ----
+/* ---- tooltip (WoW / GDD style): name, type (the item level is not shown, Jonathan 2026-10-10), damage and speed, DPS, base numbers, effects in green, flavour ----
    Holding Ctrl splits every summed line into one per origin, with the name piece it came from. */
 const fmtN = (v, d = 1) => (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d).replace('.', ',').replace(/,0+$/, '');
 function statText(st, vs) {
@@ -336,7 +336,7 @@ const SLOT_TYPE = { head: 'Cabeça', body: 'Corpo', feet: 'Pés', shield: 'Escud
 function gearTipBody(s, cmp) {
   const it = ITEMS[s.id], rar = itemRar(s), up = (d, f) => Math.abs(d) < 1e-6 ? '' : ` <span class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${f(Math.abs(d))}</span>`;
   const K = it.slot === 'weapon' ? KIND[it.kind || 'sword'] : null, T = K ? WEAPON_TYPES[it.kind || 'sword'] : null;
-  let h = `<small>${K ? K.name + ' · ' + T.trait : SLOT_TYPE[it.slot]} · ${it.legend ? 'Lendário' : RAR[rar]}</small><span class="il">Nível do item ${s.il || baseInfo(s.id).L}</span>`;
+  let h = `<small>${K ? K.name + ' · ' + T.trait : SLOT_TYPE[it.slot]} · ${it.legend ? 'Lendário' : RAR[rar]}</small>`;
   const b = baseStats(s);
   if (K) {
     const w = weaponInfo(s), c = cmp !== undefined ? weaponInfo(cmp) : null;

@@ -227,9 +227,8 @@ function mnBuild() {
     }
   };
   const iron = t => t === MN_FERROSA || t === MN_REJEITO, quartz = t => t === MN_QUARTZITO;
-  vein(MN_O_CARVAO, 90 * WSC, 0, 186, 3, 8, iron);   // coal and crystal in the mine (102)
+  vein(MN_O_CARVAO, 90 * WSC, 0, 186, 3, 8, iron);   // coal in the mine (102); the crystal is a gem now, placed by 117 like the others
   vein(MN_O_COBALTO, 90 * WSC, 0, 186, 2, 5, t => quartz(t) || t === MN_FERROSA);   // cobalt, the mine's metal
-  vein(MN_O_CRISTAL, 40 * WSC, 0, 186, 1, 3, t => quartz(t) || t === MN_FERROSA);                       // crystal, now a gem: rarer than cobalt
 }
 
 function mnAfter() {
@@ -559,13 +558,13 @@ Object.assign(CATH_SPAWN, {
   [MN_ZONE0 + 2]: [[['gatuno', 0.25], ['goblin', 0.25], ['capataz', 0.15], ['carrinho', 0.15], ['toupeira', 0.2]], 9],
   [MN_ZONE0 + 3]: [[['golem', 0.25], ['goblin', 0.15], ['capataz', 0.15], ['falsoveio', 0.15], ['lampiao', 0.15], ['grisu', 0.15]], 10]
 });
-// levels: 8 + 1 per 60 m of mine (to 10), 30% of them one higher
+// levels: 9-10 (layerLvl in 52), 30% of them one higher but never past 10
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!MINA || e.boss || D.boss || e.mnMinion) return e;
   const d = Math.floor((py + e.h) / T) - MN_S0;
   if (d >= 0) {
-    const lvl = 8 + Math.min(2, Math.floor(d / 60)) + (Math.random() < 0.3 ? 1 : 0), m = 1 + 0.3 * (lvl - 1);
+    const lvl = layerLvl(9, d), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   return e;

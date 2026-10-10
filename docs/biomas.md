@@ -239,7 +239,7 @@ Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas 
 
 Os 10 da camada (regra fixa, sem contar o chefe): os 7 primeiros vêm do `js/55-caverna-bichos.js`, os 3 últimos do `js/76-cavernas-novos.js`. Os números base passam pela mesma escala do combate (vida x0,25, dano x0,4) que todos os monstros. Sem dano de contato: só o bote, a mordida, o pulo, a rolagem, o cuspe, a nuvem e a explosão machucam. Todos usam linha de visão e busca de caminho.
 
-**Nível pela profundidade:** nas cavernas, 1 nível a cada 50 m (níveis 1 a 4). Na catedral, que agora fica mais funda, começa no nível 2 e sobe 1 a cada 45 m (níveis 2 a 6; antes eram 1 a 5).
+**Nível pela profundidade:** nas cavernas, 1 nível a cada 50 m (níveis 1 a 4). Na catedral, 5 na metade de cima e 6 na de baixo. Regra do Jonathan (2026-10-10): cada camada começa 1 nível acima do último da camada de cima, e os 30% que nascem 1 nível acima nunca passam do topo da camada.
 
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
@@ -458,7 +458,7 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 | [ ] | Carniçal | morto-vivo de quatro patas, rápido; agacha (aviso) e pula de longe; a mordida faz sangrar (perde vida por 3 s) | 55 / 12 |
 | [ ] | Abominação | pilha de cadáveres costurados, o dobro do zumbi, lenta; ergue o gancho (aviso) e bate pegando dos dois lados e jogando longe; ao morrer, 2 zumbis saem de dentro | 260 / 22 |
 
-Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/44-mortos-vivos.js`, os 4 últimos do `js/77-catedral-novos.js`. Vida e dano sobem com a profundidade: começam no nível 2 no átrio e sobem 1 a cada 45 m (até o 6). Antes das cavernas eram 1 a 5. Ao morrer: esqueletos viram montes de ossos, zumbis desabam e afundam.
+Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/44-mortos-vivos.js`, os 4 últimos do `js/77-catedral-novos.js`. Vida e dano sobem com a profundidade: são nível 5 na metade de cima e 6 na de baixo (um acima do último das cavernas). Ao morrer: esqueletos viram montes de ossos, zumbis desabam e afundam.
 
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
@@ -645,7 +645,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/72-gelo-
 
 **Feras do frio:** a Nevasca e qualquer efeito de frio deixam estas feras só levemente lentas e nunca as congelam.
 
-**Nível pela profundidade:** começa no 6 e sobe 1 a cada 60 m (níveis 6 a 8); 30% dos monstros vêm 1 nível acima. Os lobos chegam em bando (mais 1 ou 2 junto) e o verme nasce enterrado.
+**Nível pela profundidade:** 7 na metade de cima e 8 na de baixo; 30% dos monstros vêm 1 nível acima, sem passar de 8. Os lobos chegam em bando (mais 1 ou 2 junto) e o verme nasce enterrado.
 
 **Spawn por faixa**
 | Faixa | Monstros (peso) | Máx. |
@@ -726,7 +726,7 @@ A parte técnica está em [mina-spec.md](mina-spec.md).
 - **Decoração de 1 bloco:** escora, trilho, lampião no gancho, escada, ferramentas largadas, monte de pedras, corda, brasa de escória, estaca com caveira.
 - **Paredes de fundo:** rocha ferrosa, tabuado, rocha cavada, tijolo de fornalha, quartzito.
 - **Terceira camada:** rocha, andaimes, fornalhas.
-- **Minérios:** carvão na rocha ferrosa; cobalto (o único metal da mina) no quartzito e na rocha ferrosa; cristal, mais raro, é pedra preciosa (não vai para a forja, o Grimaldo compra).
+- **Minérios:** carvão na rocha ferrosa; cobalto (o único metal da mina) no quartzito e na rocha ferrosa; as pedras preciosas (topázio, esmeralda e safira) seguem a tabela de pedras por camada (docs/camadas/00-geral.md, seção 4b); o cristal não tem mais veio na mina.
 
 ## 5. Objetos de cena
 28 objetos: vagonete (cheio e vazio), vagonete tombado, guincho, pilha de caixotes, barril de pólvora, beliche podre, mesa com lampião e mapa, bigorna e fole, monte de minério, carrinho de mão, mineiro morto, tenda goblin, saque dos goblins, fogueira goblin, engrenagem quebrada, fornalha, cadinho, polia com balde, lanterna grande, jaula goblin, estandarte goblin, elevador de mina, placa de galeria, ferramentas na parede, mapa da mina, pintura goblin, veio de ouro, e o Trono do Rei Goblin.

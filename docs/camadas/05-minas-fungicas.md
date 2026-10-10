@@ -24,7 +24,7 @@ A quinta camada, logo abaixo da Mina Abandonada, de 744 a 930 m. Antes dos minei
 | 27 | Grutas Alagadas | 842 a 894 | lodo, xisto úmido | grutas largas e baixas com bacias de água parada, passarelas da colônia sobre a água, juncos de micélio |
 | 28 | Coração do Micélio | 894 a 930 | carne de micélio, rocha tomada | câmaras redondas de carne, túneis em forma de veia, a Gruta da Mãe (o chefe) |
 
-- **Nível dos monstros:** 10 + 1 a cada 60 m (até 12), 30% vêm 1 nível acima.
+- **Nível dos monstros:** 11 na metade de cima da camada e 12 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 12, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada (de cima):** hoje as duas fendas do Abismo saem do chão das Fornalhas Esquecidas. Quando o Abismo descer para baixo desta camada, essas fendas viram as duas descidas das Minas Fúngicas, nas mesmas posições (`mnExits`). Cada uma é um **poço lacrado**: um anel de tijolo de fornalha no chão, com a grade de ferro que os mineiros puseram arrombada de baixo para cima e fios brancos de micélio escapando pela borda. Embaixo, o poço é de rocha natural forrada de micélio, uns 20 blocos de queda, com uma escada da colônia (tomada) e um cordão de micélio ao lado, até a câmara de pouso. Volta-se pela mesma escada.
 - **Saída (para baixo):** duas descidas no chão do Coração do Micélio, longe uma da outra. Cada uma é uma **raiz-mestra**: um cordão de micélio grosso como um tronco que fura o chão e desce uns 25 blocos de rocha até o teto de uma cisterna da Cidade Afundada. Desce-se e sobe-se pelo próprio cordão (escalável como a corrente). Enquanto a camada 6 não existir, as fendas do Abismo saem dessas mesmas posições (`fgExits`).
 - **Câmara de pouso:** uma em cada pé de descida: 12 x 6, chão plano de tábua, iluminada por cogumelos-lanterna, sem monstro nascendo, reservada para os pontos de volta.
@@ -173,7 +173,7 @@ Brotos contam como 1 no máximo (o grupo). A água-viva só nasce em água ou a 
 
 ## 8. Loot e economia (`js/127-esporita.js` e 125)
 
-- **Metal:** **Esporita** (`min_esporita` -> `barra_esporita`, **6 minérios por barra**), o sexto da forja, depois do cobalto. Nível da forja **8**. A bigorna ganha as 9 peças: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas de esporita. A esporita é metal e não cristal: vem como placas de metal verde-azulado coladas na rocha, que o fungo foi deixando, e funde na fornalha como os outros.
+- **Metal:** **Esporita** (`min_esporita` -> `barra_esporita`, **6 minérios por barra**), o sexto da forja, depois do cobalto. Nível da forja **9**. A bigorna ganha as 9 peças: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas de esporita. A esporita é metal e não cristal: vem como placas de metal verde-azulado coladas na rocha, que o fungo foi deixando, e funde na fornalha como os outros.
 - **Materiais próprios:**
 
 | Id | Nome | Cai de | Quem compra |
@@ -183,7 +183,7 @@ Brotos contam como 1 no máximo (o grupo). A água-viva só nasce em água ou a 
 | `chapeu_lanterna` | Chapéu-Lanterna | semeador, mula, brotos | Odo (ensopado) e Marta |
 | `perna_grilo` | Perna de Grilo | grilo, pernalta | Grimaldo |
 
-- **Bases temáticas** (nível 10, só caem aqui, como drop raro: cerca de 1% de cada Tomado, 3% da mula e da pernalta, e a Mãe-Esporo solta uma das três garantida na primeira morte): **Capacete com Lanterna** (elmo; luz própria pequena), **Botas de Seiva** (botas; o herói anda na água sem perder velocidade), **Gancho de Colheita** (lança; a estocada puxa o inimigo leve um passo para perto).
+- **Bases temáticas** (nível 11, só caem aqui, como drop raro: cerca de 1% de cada Tomado, 3% da mula e da pernalta, e a Mãe-Esporo solta uma das três garantida na primeira morte): **Capacete com Lanterna** (elmo; luz própria pequena), **Botas de Seiva** (botas; o herói anda na água sem perder velocidade), **Gancho de Colheita** (lança; a estocada puxa o inimigo leve um passo para perto).
 - **Sem baús:** a camada não tem baú nenhum (só o baú do vilarejo existe no jogo). O loot vem dos monstros, dos veios e da chefe.
 - **Missões do ancião (Caetano):** 3 novas: fios de micélio, pó de mariposa e uma barra de esporita.
 
@@ -208,7 +208,7 @@ Cenário novo `fungo`, sem melodia:
 
 - **Nomes de zona** (`ZONE_NAMES`, empurrados pelo 125): Galerias Tomadas, Bosque de Chapéus, Grutas Alagadas, Coração do Micélio. Aparecem ao entrar, como hoje.
 - **Cor no mapa (Tab):** xisto `#2c3a40`, rocha tomada `#74807a`, húmus `#3c3444`, lodo `#2a3430`, carne `#a0686c`, chapéu `#3a9a94`, água `#1a3e40`, esporita `#34a890`.
-- **Progressão:** monstros 10 a 12; forja de esporita no nível 8 (boa para entrar, fica para trás no fim); bases no 10; chefe e lendário no 13.
+- **Progressão:** monstros 11 a 12; forja de esporita no nível 9 (boa para entrar, fica para trás no fim); bases no 11; chefe e lendário no 13.
 
 ## 12. Arte
 

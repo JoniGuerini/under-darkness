@@ -15,8 +15,8 @@
     const D = ET[t], m = 1 + 0.3 * (lvl - 1);
     return { lvl, hp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) };
   };
-  // where each level is found (56: caves 1 level every 50 m, the cathedral starts at 2 and goes up 1 every 45 m; 30% are born a level higher)
-  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); if (l >= 2 && l <= 6) o.push(`${CAVE_D + (l - 2) * 45} a ${Math.min(IC_TOP, CAVE_D + (l - 1) * 45) - 1} m`); if (l >= 6 && l <= 8) o.push(`${IC_TOP + (l - 6) * 60} a ${Math.min(IC_TOP + IC_D, IC_TOP + (l - 5) * 60) - 1} m`); if (typeof MN_TOP !== 'undefined' && l >= 8 && l <= 10) o.push(`${MN_TOP + (l - 8) * 60} a ${Math.min(MN_TOP + MN_D, MN_TOP + (l - 7) * 60) - 1} m`); if (typeof AB_TOP !== 'undefined' && l >= 10 && l <= 12) o.push(`${AB_TOP + (l - 10) * 60} a ${Math.min(AB_TOP + AB_D, AB_TOP + (l - 9) * 60) - 1} m`); return o.join(' e ') || '30% nascem um nível acima'; };
+  // where each level is found (caves 1 level every 50 m; every layer below starts 1 above the one over it, its second level from 93 m down; 30% are born a level higher, never past the layer's top)
+  const ondeNivel = l => { const o = []; if (l <= 4) o.push(`${(l - 1) * 50 + (l === 1 ? 6 : 0)} a ${Math.min(CAVE_D, l * 50) - 1} m`); for (const [top, d, lo] of [[CAVE_D, IC_TOP - CAVE_D, 5], [IC_TOP, IC_D, 7], typeof MN_TOP !== 'undefined' && [MN_TOP, MN_D, 9], typeof AB_TOP !== 'undefined' && [AB_TOP, AB_D, 11]].filter(Boolean)) { if (l === lo) o.push(`${top} a ${top + 92} m`); if (l === lo + 1) o.push(`${top + 93} a ${top + d - 1} m`); } return o.join(' e ') || '30% nascem um nível acima'; };
   // onde cada um aparece: CATH_SPAWN (45) faixa por faixa
   UDW.spawnsOf = t => {
     const o = [];

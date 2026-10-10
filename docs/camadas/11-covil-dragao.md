@@ -24,7 +24,7 @@ A camada 11, de 1860 a 2046 m, debaixo do Mar Sem Sol e em cima do Ossário dos 
 | 52 | Leito de Ouro | 2010 a 2046 | obsidiana rajada, osso de dragão, ouro solto | câmaras abertas com ouro espalhado, ossadas de dragões antigos, a Cratera do Tesouro |
 
 - **Constantes:** `DG_D = 186`, `DG_BANDS = [0, 46, 98, 150, 186]`, `DG_ZONE0 = 49`, `dragonBand(ty)`, topo e `DG_S0` dados pelo registro `LAYERS`.
-- **Nível dos monstros:** 22 + 1 a cada 60 m (até 24), 30% vêm 1 nível acima.
+- **Nível dos monstros:** 23 na metade de cima da camada e 24 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 24, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada (vinda do Mar Sem Sol):** as duas descidas saem da última faixa do Mar, onde o fundo do mar encontra o calor: uma fonte termal que borbulha no chão, com um tampão de crosta de tufo que segura a água. No meio do tampão abre uma chaminé de vapor de 4 blocos de largura que desce reta uns 30 blocos, com uma **escada de cravos kobold** (pinos de osso cravados na rocha) do começo ao fim. Ela termina na câmara de pouso, já nas Chaminés de Vapor. Volta-se pela mesma escada. A posição das duas fica anotada pelo Mar (`msExits`) e o `dgBuild` lê dali.
 - **Câmara de pouso:** ao pé de cada chaminé de entrada, uma gruta de tufo de 14 x 6, chão plano, 2 velas de sebo e uma bica de vapor apagada. Não nasce monstro num raio de 20 blocos (`dgSafe`).
 - **Saída (para o Ossário):** duas **descidas dos Tubos Frios** no Leito de Ouro, longe uma da outra e do lado oposto da Cratera do Tesouro. São tubos de lava antigos e já frios que mergulham quase na vertical (5 a 7 blocos de largura, uns 40 de queda). A parede é de lava cordada que vai clareando e virando rocha fóssil no fim. Escada de cravos kobold até a metade; daí para baixo a escada vira ossos amarrados dos catadores do Ossário, e o tubo desemboca no teto da primeira faixa de lá. Gravadas em `dgExits` para o Ossário ler.
@@ -153,14 +153,14 @@ Nenhum deles cava (isso é do Verme de Magma), nada na lava (Salamandra) ou merg
 
 ## 8. Loot e economia (`js/188-draconio.js` e 185)
 
-- **Metal:** **Dracônio**, temperado no fogo do dragão. `min_draconio` → `barra_draconio`, **8 minérios por barra**. Nível da forja **20**. A bigorna ganha as 9 peças de dracônio: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Na arte as peças têm escamas gravadas e o fio dourado.
+- **Metal:** **Dracônio**, temperado no fogo do dragão. `min_draconio` → `barra_draconio`, **8 minérios por barra**. Nível da forja **21**. A bigorna ganha as 9 peças de dracônio: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Na arte as peças têm escamas gravadas e o fio dourado.
 - **Carvão:** veio no tufo e no andesito, como nas outras camadas.
 - **Materiais próprios:**
   - `escama_draco` (Escama de Draco): dos dracos e serpes. O Grimaldo compra.
   - `glandula_fogo` (Glândula de Fogo): da serpe, do wyrm e da ninhada. A Marta compra; serve para a alquimia.
   - `moeda_antiga` (Moeda Antiga): dos kobolds e do ouro solto, 1 a cada 20 blocos. O Odo compra caro (colecionador).
   - `obsidiana_rajada` (Obsidiana Rajada): do bloco. O Grimaldo compra.
-- **Bases temáticas** (só caem aqui, nível de item 22, como drop raro): **Dente de Draco** (adaga, crítico alto; cai do draco couraçado e do wyrm), **Couraça de Escamas** (peitoral, resistência a fogo; cai da serpe e do draco couraçado), **Elmo de Chifre de Serpe** (elmo, +velocidade de ataque; cai da serpe e do kobold montado). Cinzarel solta uma das três garantida, além do lendário.
+- **Bases temáticas** (só caem aqui, nível de item 23, como drop raro): **Dente de Draco** (adaga, crítico alto; cai do draco couraçado e do wyrm), **Couraça de Escamas** (peitoral, resistência a fogo; cai da serpe e do draco couraçado), **Elmo de Chifre de Serpe** (elmo, +velocidade de ataque; cai da serpe e do kobold montado). Cinzarel solta uma das três garantida, além do lendário.
 - **Sem baús:** a camada não tem baús de loot (só o baú do vilarejo existe no jogo). Barras e minério vêm dos veios e dos monstros.
 - **Missões do ancião:** 3 (escamas de draco, glândulas de fogo, uma coroa do Leito de Ouro).
 

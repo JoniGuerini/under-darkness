@@ -19,7 +19,7 @@ A oitava camada, debaixo da Floresta Petrificada, de 1302 a 1488 m. É Brasafund
 ## 2. Lugar no mundo
 
 - **Profundidade:** 1302 a 1488 m. Zonas 37 a 40. Nome no código `ANOES`, prefixo `AN_`.
-- **Nível dos monstros:** 16 + 1 a cada 60 m (até 18), 30% vêm 1 nível acima. Chefe nível 19.
+- **Nível dos monstros:** 17 na metade de cima da camada e 18 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 18, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 19.
 
 | Zona | Faixa | Metros | Massa | Caráter |
 |---|---|---|---|---|
@@ -192,7 +192,7 @@ O Barba-de-Ferro conta o Soldado que ele acorda no máximo da faixa. O Ferreiro 
 
 ## 8. Loot e economia (`js/157-mithril.js` e 155)
 
-- **Metal: Mithril.** `min_mithril` -> `barra_mithril`, **7 minérios por barra**, forja nível **14**. As 9 peças de mithril na bigorna: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Leve: as peças de mithril pesam menos no vigor (mesma regra das outras, só que com o menor custo da lista).
+- **Metal: Mithril.** `min_mithril` -> `barra_mithril`, **7 minérios por barra**, forja nível **15**. As 9 peças de mithril na bigorna: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Leve: as peças de mithril pesam menos no vigor (mesma regra das outras, só que com o menor custo da lista).
 - **Materiais próprios:**
 
 | Id | Nome | De onde | Quem compra |
@@ -202,7 +202,7 @@ O Barba-de-Ferro conta o Soldado que ele acorda no máximo da faixa. O Ferreiro 
 | `brasa_domada` | Brasa Domada | Fornalha Ambulante, Bomba de Lava | o ferreiro; na fornalha vale **2 carvões** |
 | `barba_espectral` | Barba Espectral | Juramentado, Ferreiro, Barba-de-Ferro, Besteiro | a maga |
 
-- **Bases temáticas** (só caem aqui, nível 16): **Machado de Guerra do Clã** (machado, empurra mais e acerta 2 alvos), **Elmo do Clã com Viseira** (elmo, mais defesa contra golpes de cima), **Escudo de Bronze Rúnico** (escudo, aparo alto e pesado).
+- **Bases temáticas** (só caem aqui, nível 17): **Machado de Guerra do Clã** (machado, empurra mais e acerta 2 alvos), **Elmo do Clã com Viseira** (elmo, mais defesa contra golpes de cima), **Escudo de Bronze Rúnico** (escudo, aparo alto e pesado).
 - **Sem baús:** a camada não gera baú nenhum (só o baú do vilarejo existe). O loot vem dos monstros, do chefe e dos veios.
 - **Onde caem as bases:** como drop raro (cerca de 1,5%) de monstros certos: o Machado de Guerra do Juramentado e do Soldado de Bronze, o Elmo do Clã do Besteiro e do Ferreiro Fantasma, o Escudo de Bronze Rúnico da Fornalha Ambulante e do Soldado. O Autômato-Forja solta uma das 3 com 50% de chance, além do Malho.
 

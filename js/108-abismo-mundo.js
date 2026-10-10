@@ -472,13 +472,13 @@ Object.assign(CATH_SPAWN, {
   [AB_ZONE0 + 2]: [[['brutamontes', 0.22], ['almapenada', 0.2], ['rastejador', 0.33], ['moscas', 0.25]], 10],
   [AB_ZONE0 + 3]: [[['diabrete', 0.16], ['brutamontes', 0.22], ['vermemagma', 0.16], ['cultista', 0.24], ['gargulainf', 0.22]], 10]
 });
-// levels: 10 + 1 per 60 m of abyss (to 12), 30% of them one higher
+// levels: 11-12 (layerLvl in 52), 30% of them one higher but never past 12
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!ABISMO || e.boss || D.boss || e.abMinion) return e;
   const d = Math.floor((py + e.h) / T) - AB_S0;
   if (d >= 0) {
-    const lvl = 10 + Math.min(2, Math.floor(d / 60)) + (Math.random() < 0.3 ? 1 : 0), m = 1 + 0.3 * (lvl - 1);
+    const lvl = layerLvl(11, d), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   return e;

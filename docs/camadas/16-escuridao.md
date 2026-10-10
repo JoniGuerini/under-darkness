@@ -125,7 +125,7 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 | `acendedor` | Acendedor Oco | distância em arco | um Acendedor esvaziado pela Escuridão; anda devagar com a lanterna de chama azul fria e guarda os braseiros acesos | ergue a lanterna para trás (rastro de luz) e a arremessa em arco; onde cai, fica uma poça de fogo frio por 4 s, que machuca e ilumina | 100 | 20 | Borda, Raízes |
 | `maofundo` | Mão do Fundo (sombra) | emboscada | mora dentro dos poços sem fundo e das bordas dos vãos | dedos pálidos aparecem na borda e arranham a pedra (0,8 s); a mão agarra quem está na borda ou na corrente e puxa para baixo | 140 | 24 | Breu, Fundo |
 
-- **Nível:** 32 no topo, 33 a partir de 60 m, 34 a partir de 120 m; 30% vêm 1 acima (até 35).
+- **Nível:** 33 na metade de cima da camada e 34 da metade para baixo (a partir de 93 m); 30% vêm 1 acima, mas nunca passam de 34.
 - **Drops:** pó de breu (apagaluz, rastro, mortalha), asa de mariposa (traca), núcleo de breu (colosso, semolhos), lume frio (acendedor), `min_noctirio` (colosso, semolhos, maofundo, bocabreu), poções, carvão, tochas (de 1 a 2, 20%) e raramente as bases temáticas (seção 8).
 - **Spawn:** só em tile com luz abaixo de 0,15, nunca a menos de 12 blocos de um braseiro aceso, nunca na sala do Nox.
 
@@ -170,7 +170,7 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 
 ## 8. Loot e economia
 
-- **Metal: Noctírio** (`js/228-noctirio.js`). O metal que bebe a luz: preto, com borda prateada. `min_noctirio` vira `barra_noctirio` com **10 minérios por barra**. Nível da forja **30**. As 9 peças na bigorna do Grimaldo: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas de noctírio, nas mesmas proporções da infernita (`M.il = 30`).
+- **Metal: Noctírio** (`js/228-noctirio.js`). O metal que bebe a luz: preto, com borda prateada. `min_noctirio` vira `barra_noctirio` com **10 minérios por barra**. Nível da forja **31**. As 9 peças na bigorna do Grimaldo: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas de noctírio, nas mesmas proporções da infernita (`M.il = 31`).
 - **Materiais:**
 
 | Id | Nome | De quem | Quem compra |
@@ -180,7 +180,7 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 | `nucleo_breu` | Núcleo de Breu | colosso, vigia sem olhos | ferreiro |
 | `lume_frio` | Lume Frio | acendedor oco | curandeira |
 
-- **Bases temáticas** (nível 32, só caem aqui, como drop raro de monstro e do chefe): `lamina_vidronegro` (Lâmina de Vidro Negro, espada, rápida e com crítico alto), `manto_breu` (Manto de Breu, peitoral, defesa e esquiva no escuro), `escudo_acendedor` (Escudo dos Acendedores, escudo com uma lanterna presa: +2 de luz).
+- **Bases temáticas** (nível 33, só caem aqui, como drop raro de monstro e do chefe): `lamina_vidronegro` (Lâmina de Vidro Negro, espada, rápida e com crítico alto), `manto_breu` (Manto de Breu, peitoral, defesa e esquiva no escuro), `escudo_acendedor` (Escudo dos Acendedores, escudo com uma lanterna presa: +2 de luz).
 - **Sem baús.** Os baús de loot saíram do jogo (só fica o baú do vilarejo). As bases temáticas caem só como drop raro: `lamina_vidronegro` do rastro e do apagador (1,5%), `manto_breu` da mortalha e do colosso (1,5%), `escudo_acendedor` do acendedor oco (2%). O Nox solta uma das três com 35% de chance.
 - **Tochas são a moeda da camada.** Os monstros soltam carvão e algumas tochas; carvão e madeira fazem tochas como hoje. O ferreiro e a curandeira passam a vender tochas em lote.
 
@@ -264,7 +264,7 @@ O Jonathan quer um sistema de endgame depois do Nox. Esta ficha não desenha o s
 | `js/225-escuro-crias2.js` | rastro, mortalha, ouvinte, acendedor oco, mão do fundo |
 | `js/226-escuro-mundo.js` | geração em pedaços, rota dos Acendedores, `esClimbFix`, zonas, spawn, nível, brilhos, partículas, lojas |
 | `js/227-nox.js` | Nox, a sala, as piras, o fim e a mudança de luz do mundo |
-| `js/228-noctirio.js` | o metal na forja (10 minérios, nível 30) |
+| `js/228-noctirio.js` | o metal na forja (10 minérios, nível 31) |
 | `js/229-escuro-save.js` | `nox`, a idade do mapa não é salva, as piras voltam frias |
 
 Fora da faixa, só ganchos: uma linha em `js/07-chunks-luz.js` (`ambAt` e `plLightK`), o cenário `escuro` no `js/97-ambiente.js`, a camada no `js/75-teleporte.js`, a wiki (aba de bioma, inimigos, chefe, forja e `wiki/js/textos.js`) e a spec `docs/escuridao-spec.md`.

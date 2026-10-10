@@ -20,7 +20,7 @@ Camada 14, de 2418 a 2604 m, debaixo da Cidade dos Antigos e em cima do Abismo. 
 | 63 | Os Quartos Esquecidos | 2516 a 2568 | acolchoado, massa de penas, pedra-sono | quartos de criança em grutas macias, lençóis pendurados, brinquedos gigantes, os Adormecidos |
 | 64 | A Galeria dos Espelhos | 2568 a 2604 | vidro de espelho, azulejo; assoalho queimado no fundo | salões de espelho, o Salão dos Espelhos do chefe, e no fundo o calor do Abismo começando |
 
-- **Monstros:** nível 28 + 1 a cada 60 m (até 30); 30% vêm 1 nível acima.
+- **Monstros:** nível 29 na metade de cima da camada e 30 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 30, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada:** as duas **Escadas que Afundam** saem da Cratera da Estrela (camada 13, posições em `atExits`). Do lado de cima é um vão quadrado de laje com escada embutida. Descendo, as juntas entortam, os degraus ficam de tamanhos diferentes, a laje vira pedra-sono e a escada embutida vira **escada de mão torta** (`PS_ESCADA`). Cerca de 22 blocos abaixo, o vão abre no teto da câmara de pouso, na Casa que Não Era. Volta-se pela mesma escada.
 - **Saída:** duas **Portas Quentes** na Galeria dos Espelhos, longe uma da outra e do lado oposto ao Salão dos Espelhos. Cada uma é uma porta de casa solta no meio de um salão, entreaberta, com luz vermelha saindo por baixo. Atrás dela, um poço de 4 blocos desce pela pedra-sono, que vai escurecendo e rachando em vermelho; a escada de mão torta vira, nas últimas linhas, a corrente de ferro negro do Abismo. A ficha 15 decide a chegada lá embaixo. As posições ficam em `psExits`.
 - **Câmara de pouso:** uma em cada chegada, 10 x 6, piso de assoalho, um abajur aceso, um tapete; não nasce monstro e nenhuma porta de teletransporte fica nela. Reservada para os pontos de volta.
@@ -156,7 +156,7 @@ Drops: `po_de_sono`, `porcelana`, `corda_caixinha`, `ponteiro_mole`, poções, `
 
 ## 8. Loot e economia (`js/218-onirita.js` e 215)
 
-- **Metal: Onirita.** `min_onirita` -> `barra_onirita`, **9 minérios por barra**, forja de **nível 26**. Um metal lilás que muda de cor devagar (lilás, rosa, turquesa), como óleo na água.
+- **Metal: Onirita.** `min_onirita` -> `barra_onirita`, **9 minérios por barra**, forja de **nível 27**. Um metal lilás que muda de cor devagar (lilás, rosa, turquesa), como óleo na água.
 - **A regra da onirita: ela só existe enquanto alguém sonha com ela.** Todo veio de onirita nasce em volta de um **Adormecido** (uma pessoa dormindo numa cama, objeto de chão), num raio de 10 blocos. São 2 a 4 Adormecidos por faixa (vezes `WSC`) na Casa e nos Quartos, mais um ou outro nos quartos que não existem.
   - **Barulho acorda.** Luta perto dele acorda: cada golpe dado ou levado e cada explosão a menos de 10 blocos enche um medidor. Minerar não conta. O aviso é na cama: o Adormecido se vira e as letras "Zz" que flutuam em cima dele somem (é desenho, não texto de interface); na terceira vez ele senta na cama.
   - **Acordou, o sonho acaba.** Os veios ainda não minerados em volta viram Veio Desfeito, de uma vez, com um brilho. O que o herói já tinha minerado fica no inventário: onirita sonhada e levada embora é metal de verdade. A fornalha e a bigorna não sabem de nada disso.
@@ -168,7 +168,7 @@ Drops: `po_de_sono`, `porcelana`, `corda_caixinha`, `ponteiro_mole`, poções, `
   - `porcelana` (Caco de Porcelana), das bonecas e da bailarina: o ferreiro compra.
   - `corda_caixinha` (Corda de Caixinha), da bailarina e do cavalinho: o taverneiro compra.
   - `ponteiro_mole` (Ponteiro Mole), do relógio mole: a curandeira compra.
-- **Bases temáticas** (só caem aqui, nível 28, como drop raro: cerca de 1,5% em cada monstro da camada e 1 garantida no Sem-Rosto, além do lendário): **Tesoura de Costura** (adaga, crítico alto), **Capuz de Lençol** (elmo, esquiva), **Pantufas do Sonâmbulo** (botas: velocidade, e os passos não fazem barulho para os monstros que ouvem).
+- **Bases temáticas** (só caem aqui, nível 29, como drop raro: cerca de 1,5% em cada monstro da camada e 1 garantida no Sem-Rosto, além do lendário): **Tesoura de Costura** (adaga, crítico alto), **Capuz de Lençol** (elmo, esquiva), **Pantufas do Sonâmbulo** (botas: velocidade, e os passos não fazem barulho para os monstros que ouvem).
 - **Sem baús:** a camada não tem baú de loot (só o baú do vilarejo existe no jogo). O prêmio do fim de cada corredor em laço é um quarto com um Adormecido e veios de onirita mais grossos que os normais.
 - **Missões:** o ancião ganha 3 (pó de sono, cacos de porcelana, uma barra de onirita).
 

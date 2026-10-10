@@ -18,7 +18,7 @@ A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m. É uma floresta 
 ## 2. Lugar no mundo
 
 - **Profundidade:** 1116 a 1302 m. Zonas 33 a 36. Nome no código `FLORESTA`, prefixo `FP_`.
-- **Nível dos monstros:** 14 + 1 a cada 60 m (até 16), 30% vêm 1 nível acima. Chefe nível 17.
+- **Nível dos monstros:** 15 na metade de cima da camada e 16 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 16, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 17.
 
 | Zona | Faixa | Metros | Massa | Caráter |
 |---|---|---|---|---|
@@ -47,7 +47,7 @@ A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m. É uma floresta 
    - Câmaras de pouso nas duas entradas e um **acampamento anão** abandonado por camada (16 x 7, na faixa 36, perto de uma escadaria): tábuas, fogueira apagada, picaretas de bronze, cestos de cristal.
 4. **Ligações:** cipós de pedra (`FP_CIPO`, escalam como corrente) descendo das copas e dos tetos; degraus de raiz em todo desnível de 5 blocos ou mais; os andares de folhagem ligados ao chão por cipó.
 5. **Estragos:** troncos que racharam e caíram atravessando salas, montes de cascalho de cristal, solo desabado nas grutas, geodos partidos ao meio mostrando o cristal.
-6. **Minérios:** carvão (madeira fóssil) nas faixas 33 a 35, no solo e no granito; platina no granito e na raiz, mais densa nas faixas 35 e 36; cristal em **geodos** (bolhas de 3x3 a 5x5 com casca de granito e miolo de `FP_O_CRISTAL`), 3 vezes mais comuns na Mata de Cristal. Veios multiplicados por `WSC`.
+6. **Minérios:** carvão (madeira fóssil) nas faixas 33 a 35, no solo e no granito; platina no granito e na raiz, mais densa nas faixas 35 e 36; pedras preciosas em **geodos** (bolhas de 3x3 a 5x5 com casca de granito e miolo de `FP_O_CRISTAL`), 3 vezes mais comuns na Mata de Cristal; cada miolo solta uma pedra sorteada pela linha 7 da tabela de pedras do 00-geral (seção 4b), além das pedras soltas na rocha que toda camada tem. Veios multiplicados por `WSC`.
 7. **Alcance** a partir das duas entradas (preenchimento e busca com pulo); túneis se faltar.
 8. **Decoração de 1 bloco.**
 9. **Correção estrutural:** tronco em pé tem que tocar chão e teto; se não toca, vira toco (corta em cima) ou some. Copa sem tronco embaixo sai. Cipó precisa de teto sólido. Folha caída só em chão.
@@ -76,7 +76,7 @@ Ids 320 a 351.
 | 330 | `FP_BARREIRA` | Muralha de Raízes | fecha a clareira durante a luta; não quebra | nenhum |
 | 331 | `FP_O_CARVAO` | Veio de Carvão | madeira fóssil no solo e no granito | carvao |
 | 332 | `FP_O_PLATINA` | Veio de Platina | no granito e na raiz; branco-acinzentado, brilho frio | min_platina |
-| 333 | `FP_O_CRISTAL` | Miolo de Geodo | cristal dentro dos geodos; luz fraca; solta 1 a 3 | min_cristal |
+| 333 | `FP_O_CRISTAL` | Miolo de Geodo | pedras dentro dos geodos; luz fraca; solta 1 a 3 | uma pedra pela tabela da camada |
 
 Decoração de 1 bloco (não sólida):
 
@@ -142,7 +142,7 @@ Detalhes que fazem cada um ser diferente:
 - **Dríade:** usa o mesmo caminho que o herói por dentro da parede de fundo (só onde existe parede de fundo).
 - **Prisma:** o raio é a única coisa da camada que atravessa folhagem de cristal.
 
-**Drops:** `casca_petrea`, `folha_cristal`, `seiva_vitrea`, `olho_prisma`, `min_cristal` (comum), `min_platina` (só aqui e abaixo), carvão, poções e as bases da camada (seção 8). XP baixo, como hoje.
+**Drops:** `casca_petrea`, `folha_cristal`, `seiva_vitrea`, `olho_prisma`, `min_platina` (só aqui e abaixo), carvão, poções e as bases da camada (seção 8). XP baixo, como hoje.
 
 **Spawn por faixa** (peso; máximo ao mesmo tempo):
 
@@ -191,8 +191,8 @@ Os 10 aparecem em pelo menos uma faixa; cada faixa usa de 4 a 6. O enxame conta 
 
 ## 8. Loot e economia (`js/147-platina.js` e 145)
 
-- **Metal: Platina.** `min_platina` -> `barra_platina`, **6 minérios por barra**, forja nível **12**. A bigorna do Grimaldo ganha as 9 peças de platina: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Entra em `FURN` e no gerador de peças forjadas do `js/05-itens.js` por embrulho, como o 110 faz com a infernita.
-- **Cristal:** `min_cristal` (o Cristal Bruto que já existe) cai muito aqui: geodos, Ouriço e Prisma. Continua pedra preciosa, não vai para a fornalha; o Grimaldo compra. O `ORE_WHERE` dele passa a dizer "abundante na Floresta Petrificada".
+- **Metal: Platina.** `min_platina` -> `barra_platina`, **6 minérios por barra**, forja nível **13**. A bigorna do Grimaldo ganha as 9 peças de platina: espada, adaga, machado, maça, lança, montante, elmo, peitoral e botas. Entra em `FURN` e no gerador de peças forjadas do `js/05-itens.js` por embrulho, como o 110 faz com a infernita.
+- **Pedras preciosas:** a camada tem mais pedras que as outras por causa dos geodos, mas a chance de cada uma é a da linha 7 da tabela do 00-geral (seção 4b): topázio 43%, esmeralda 31%, safira 20%, cristal 6%. O nome "Mata de Cristal" é pela folhagem, não pelo Cristal Bruto.
 - **Materiais próprios:**
 
 | Id | Nome | De onde | Quem compra |
@@ -202,7 +202,7 @@ Os 10 aparecem em pelo menos uma faixa; cada faixa usa de 4 a 6. O enxame conta 
 | `seiva_vitrea` | Seiva Vítrea | Raiz Estranguladora, bolsões de seiva | a curandeira |
 | `olho_prisma` | Olho de Prisma | Prisma Vivo | a maga |
 
-- **Bases temáticas** (só caem aqui, nível 14): **Lança de Raiz Petrificada** (lança, alcance +4), **Escudo de Casca de Pedra** (escudo, mais defesa e aparo baixo), **Manto de Folhas de Cristal** (peitoral leve, dá luz fraca).
+- **Bases temáticas** (só caem aqui, nível 15): **Lança de Raiz Petrificada** (lança, alcance +4), **Escudo de Casca de Pedra** (escudo, mais defesa e aparo baixo), **Manto de Folhas de Cristal** (peitoral leve, dá luz fraca).
 - **Sem baús:** a camada não gera baú nenhum (só o baú do vilarejo existe). O loot vem dos monstros, do chefe e dos blocos (geodos, veios).
 - **Onde caem as bases:** como drop raro (cerca de 1,5%) de monstros certos: a Lança de Raiz do Tronco Andante e da Serpente de Raiz, o Escudo de Casca do Tatu de Granito e do Ouriço, o Manto de Folhas da Dríade e da Mariposa. O Cervo de Pedra solta uma das 3 com 50% de chance, além da Galhada.
 - **Itens de bloco:** granito verde, casca, cerne, folhagem de cristal (bloco que deixa a luz passar) e seiva vítrea (vidro verde) dão material bonito para construir no vilarejo.

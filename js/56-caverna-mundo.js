@@ -416,14 +416,14 @@ Object.assign(CATH_SPAWN, {
 });
 // loot by real depth: Grutas and Galerias 1, Ninho and Fundações 2; in the cathedral Átrio and Nave 2, Claustro 3, Criptas 4
 { const _lz = lootZone; lootZone = function (tx, ty) { const z = zoneAt(tx, ty); if (CAVERNA && z >= CV_ZONE0 && z <= CV_ZONE0 + 3) return z <= CV_ZONE0 + 1 ? 1 : 2; if (CAVERNA && z === 5) return 2; return _lz(tx, ty); }; }
-// levels by real depth: caves 1 + 1 per 50 m (to 4), cathedral 2 + 1 per 45 m (to 6), 30% of them one higher
+// levels by real depth: caves 1 + 1 per 50 m (to 4), cathedral 5-6 (layerLvl in 52); 30% of them one higher, never past the layer's top
 let cvPacking = false;
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!CAVERNA || e.boss || D.boss || zone === 4 || e.reiMinion) return e;
   const d = Math.floor((py + e.h) / T) - CV_S0;
   if (d >= 6) {
-    const lvl = (d < CAVE_D ? 1 + Math.min(3, Math.floor(d / 50)) : Math.min(6, 2 + Math.floor((d - CAVE_D) / 45))) + (Math.random() < 0.3 ? 1 : 0), m = 1 + 0.3 * (lvl - 1);
+    const lvl = d < CAVE_D ? Math.min(4, 1 + Math.min(3, Math.floor(d / 50)) + (Math.random() < 0.3 ? 1 : 0)) : layerLvl(5, d - CAVE_D), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   if (zone >= CV_ZONE0 && zone <= CV_ZONE0 + 3) {

@@ -25,25 +25,25 @@ Cada camada tem 186 m de altura e 4 faixas. Os números de nível seguem a curva
 
 | # | Camada | Metros | Monstros | Chefe (nível) | Metal | Nível da forja |
 |---|---|---|---|---|---|---|
-| 1 | As Cavernas | 6 a 186 | 1 a 6 | A Mãe-Teia (4) | Cobre | 2 |
-| 2 | A Catedral | 186 a 372 | 3 a 6 | O Rei Esqueleto (6) | Ferro | 3 |
-| 3 | As Cavernas de Gelo | 372 a 558 | 6 a 8 | O Yeti Ancestral (9) | Ouro | 5 |
-| 4 | A Mina Abandonada | 558 a 744 | 8 a 10 | O Rei Goblin (10) | Cobalto | 6 |
-| 5 | As Minas Fúngicas | 744 a 930 | 10 a 12 | A Mãe-Esporo (13) | Esporita | 8 |
-| 6 | A Cidade Afundada | 930 a 1116 | 12 a 14 | O Sineiro Afogado (15) | Prata | 10 |
-| 7 | A Floresta Petrificada | 1116 a 1302 | 14 a 16 | O Cervo de Pedra (17) | Platina | 12 |
-| 8 | A Fortaleza dos Anões | 1302 a 1488 | 16 a 18 | O Autômato-Forja (19) | Mithril | 14 |
-| 9 | A Colmeia | 1488 a 1674 | 18 a 20 | A Rainha da Colmeia (21) | Ambrita | 16 |
-| 10 | O Mar Sem Sol | 1674 a 1860 | 20 a 22 | O Leviatã (23) | Oricalco | 18 |
-| 11 | O Covil do Dragão | 1860 a 2046 | 22 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 20 |
-| 12 | O Ossário dos Titãs | 2046 a 2232 | 24 a 26 | O Último Titã (27) | Adamantita | 22 |
-| 13 | A Cidade dos Antigos | 2232 a 2418 | 26 a 28 | O Arquiteto (29) | Ferro Estelar | 24 |
-| 14 | Os Salões do Pesadelo | 2418 a 2604 | 28 a 30 | O Sem-Rosto (31) | Onirita | 26 |
-| 15 | O Abismo | 2604 a 2790 | 30 a 32 | O Príncipe do Caos (33) | Infernita | 28 |
-| 16 | A Escuridão | 2790 a 2976 | 32 a 35 | Nox, Aquele Que Apaga (37) | Noctírio | 30 |
+| 1 | As Cavernas | 6 a 186 | 1 a 4 | A Mãe-Teia (4) | Cobre | 2 |
+| 2 | A Catedral | 186 a 372 | 5 a 6 | O Rei Esqueleto (6) | Ferro | 3 |
+| 3 | As Cavernas de Gelo | 372 a 558 | 7 a 8 | O Yeti Ancestral (9) | Ouro | 5 |
+| 4 | A Mina Abandonada | 558 a 744 | 9 a 10 | O Rei Goblin (10) | Cobalto | 6 |
+| 5 | As Minas Fúngicas | 744 a 930 | 11 a 12 | A Mãe-Esporo (13) | Esporita | 9 |
+| 6 | A Cidade Afundada | 930 a 1116 | 13 a 14 | O Sineiro Afogado (15) | Prata | 11 |
+| 7 | A Floresta Petrificada | 1116 a 1302 | 15 a 16 | O Cervo de Pedra (17) | Platina | 13 |
+| 8 | A Fortaleza dos Anões | 1302 a 1488 | 17 a 18 | O Autômato-Forja (19) | Mithril | 15 |
+| 9 | A Colmeia | 1488 a 1674 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
+| 10 | O Mar Sem Sol | 1674 a 1860 | 21 a 22 | O Leviatã (23) | Oricalco | 19 |
+| 11 | O Covil do Dragão | 1860 a 2046 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
+| 12 | O Ossário dos Titãs | 2046 a 2232 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
+| 13 | A Cidade dos Antigos | 2232 a 2418 | 27 a 28 | O Arquiteto (29) | Ferro Estelar | 25 |
+| 14 | Os Salões do Pesadelo | 2418 a 2604 | 29 a 30 | O Sem-Rosto (31) | Onirita | 27 |
+| 15 | O Abismo | 2604 a 2790 | 31 a 32 | O Príncipe do Caos (33) | Infernita | 29 |
+| 16 | A Escuridão | 2790 a 2976 | 33 a 34 | Nox, Aquele Que Apaga (37) | Noctírio | 31 |
 
-- **Monstros:** o nível sobe 1 a cada 60 m dentro da camada, e 30% deles vêm 1 nível acima (como já é hoje).
-- **Nível da forja:** o nível de item das 9 peças forjadas daquele metal. Na camada 5 em diante ele é o nível do primeiro monstro da camada menos 2: o equipamento forjado é bom para entrar na camada e fica para trás quando o drop dela começa a superar.
+- **Monstros:** a coluna é o nível dos monstros, do topo ao fundo da camada. Regra do Jonathan (2026-10-10): **cada camada começa 1 nível acima do último da camada de cima**, nunca repete nem volta. Da catedral para baixo são 2 níveis por camada: o primeiro na metade de cima, o segundo da metade para baixo (a partir de 93 m). 30% dos monstros nascem 1 nível acima, mas nunca passam do topo da própria camada. As cavernas, por serem a primeira, vão de 1 a 4 (1 nível a cada 50 m). No código: `layerLvl(primeiro, d)` em `js/52-caverna-api.js`.
+- **Nível da forja:** o nível de item das 9 peças forjadas daquele metal. Na camada 5 em diante ele é o nível do primeiro monstro da camada menos 2 (2n − 1, com n a posição da camada): o equipamento forjado é bom para entrar na camada e fica para trás quando o drop dela começa a superar.
 - **Barras por metal:** de 5 minérios por barra no cobalto e 6 na infernita, sobe 1 a cada 3 camadas: 6 da esporita à platina, 7 do mithril ao oricalco, 8 do dracônio ao ferro estelar, 9 na onirita e na infernita, 10 no noctírio.
 - **Bases e lendários de drop:** as bases temáticas de cada camada (armas e armaduras que só caem lá) nascem no nível do primeiro monstro da camada; o lendário do chefe, no nível do chefe.
 
@@ -107,7 +107,7 @@ O Abismo (15) mantém os números que já tem (`js/103` a `111`, blocos 128 a 15
 - **10 monstros próprios** por camada, sem contar o chefe. Cada faixa usa de 4 a 6, e todos aparecem em pelo menos uma. Os 10 cobrem jeitos diferentes de lutar: corpo a corpo, distância, voador, emboscada (parede, teto ou enterrado), pesado e enxame. Nenhum repete o comportamento de outro da mesma camada, e nenhum copia um monstro de camada anterior com outra cor.
 - **Sem dano de contato genérico.** Todo ataque tem aviso claro (pose, brilho, som, marca no chão). Encostar só machuca nos bichos em que isso faz sentido (`touch`).
 - Monstros usam linha de visão e busca de caminho. XP baixo, como já é.
-- **Um metal por camada, mais carvão.** O metal só cai dos monstros daquela camada ou das de baixo. O cristal é pedra preciosa: aparece na Mina e é abundante na Floresta Petrificada.
+- **Um metal por camada, mais carvão.** O metal só cai dos monstros daquela camada ou das de baixo. As pedras preciosas não são metal e seguem a tabela da seção 4b.
 - **Duas descidas** por camada, saindo da última faixa da camada de cima. Todo desnível de 5 blocos ou mais tem escada, corrente ou cipó: dá para voltar sem cavar.
 - **Uma câmara de pouso** por camada, perto de cada descida: uma sala pequena, plana e iluminada onde não nasce monstro. Ela fica reservada para os pontos de volta que o Jonathan ainda vai desenhar.
 - **Sem baús de loot.** Os baús que apareciam nas camadas saíram do jogo (Jonathan, 2026-10-10); só fica o baú do vilarejo. As bases temáticas de cada camada caem como drop raro dos monstros dela, e o chefe solta uma delas na primeira vitória, além do lendário.
@@ -116,6 +116,36 @@ O Abismo (15) mantém os números que já tem (`js/103` a `111`, blocos 128 a 15
 - **Som:** cada camada ganha a sua paisagem sonora no `js/97-ambiente.js` (sem melodia, como as outras).
 - **Wiki e docs:** cada camada nova entra na wiki (aba de bioma, inimigos, chefe, forja) e ganha a sua spec em `docs/`.
 - **Testes antes de entregar:** os de [../regras-de-bioma.md](../regras-de-bioma.md), em 8 sementes, mais a geração em pedaços (o jogo não pode cair abaixo de 50 quadros por segundo enquanto gera).
+
+---
+
+## 4b. Pedras preciosas: as mesmas 5 em todas as camadas
+
+Decisão do Jonathan (2026-10-10). As 5 pedras do encantador (topázio, esmeralda, safira, cristal e rubi) aparecem em todas as camadas, presas na rocha, em grupinhos de 1 ou 2 blocos (36 x `WSC` grupos por camada, cerca de 150 blocos). A camada não tem pedra própria: o que muda é a chance de cada uma. No começo é quase só topázio, esmeralda é rara e o resto não existe. Descendo, as melhores vão ficando menos raras. O rubi nunca vira comum.
+
+| Camada | Topázio | Esmeralda | Safira | Cristal | Rubi |
+|---|---|---|---|---|---|
+| 1 | 97% | 3% | 0 | 0 | 0 |
+| 2 | 90% | 10% | 0 | 0 | 0 |
+| 3 | 82% | 16% | 2% | 0 | 0 |
+| 4 | 72% | 22% | 6% | 0 | 0 |
+| 5 | 62% | 27% | 10% | 1% | 0 |
+| 6 | 52% | 30% | 15% | 3% | 0 |
+| 7 | 43% | 31% | 20% | 6% | 0 |
+| 8 | 35% | 30% | 24% | 10% | 1% |
+| 9 | 28% | 28% | 27% | 14% | 3% |
+| 10 | 22% | 26% | 28% | 19% | 5% |
+| 11 | 17% | 23% | 29% | 23% | 8% |
+| 12 | 14% | 21% | 28% | 27% | 10% |
+| 13 | 11% | 18% | 28% | 30% | 13% |
+| 14 | 9% | 16% | 27% | 32% | 16% |
+| 15 | 7% | 14% | 26% | 35% | 18% |
+| 16 | 6% | 12% | 25% | 37% | 20% |
+
+- **No jogo hoje (5 camadas):** cavernas, catedral, gelo, mina e Abismo usam as linhas 1 a 5 (o Abismo usa a 5 enquanto estiver em 5º). Por isso o rubi ainda não aparece, e o cristal só aparece no Abismo (1%). Quando o Abismo descer para a 15ª, ele passa a usar a linha 15.
+- **No código:** `GEM_SHARE` (as 16 linhas) e `GEM_LAYERS` (a rocha de cada camada) em `js/117-gemas.js`. Cada pedra ganha um bloco próprio para cada rocha (o mesmo desenho sobre a rocha da camada): blocos 153 a 156 e 157 a 167 hoje. Uma camada nova só põe a sua rocha em `GEM_LAYERS`, com os blocos que a linha dela pede.
+- **Só da rocha:** as pedras não caem de monstro (o golem da mina deixou de soltar cristal) e a mina não tem mais veio de cristal. A exceção planejada são os geodos da camada 7, que sorteiam pela linha dela.
+- **O encantador não muda:** a pedra decide a chance de raridade, como antes.
 
 ---
 

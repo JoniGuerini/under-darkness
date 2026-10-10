@@ -20,7 +20,7 @@ Camada 13, de 2232 a 2418 m, debaixo do Ossário dos Titãs e em cima dos Salõe
 | 59 | As Máquinas | 2330 a 2382 | chapa antiga, laje, blocos de engrenagem | salões de máquinas, condutos de luz, poços de pistão, passarelas de chapa |
 | 60 | A Cratera da Estrela | 2382 a 2418 | vidro de cratera, rocha fundida, rocha fria | crateras de vidro, lascas da estrela, veios de ferro estelar, a sala do Arquiteto |
 
-- **Monstros:** nível 26 + 1 a cada 60 m (até 28); 30% vêm 1 nível acima.
+- **Monstros:** nível 27 na metade de cima da camada e 28 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 28, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada:** duas descidas saem da última faixa do Ossário dos Titãs (a ficha 12 desenha o lado de cima). Do lado de cá, cada descida é um **Poço dos Antigos**: um poço quadrado perfeito de 4 blocos de largura, paredes de laje, com uma escada embutida (`AT_ESCADA`) correndo inteira por uma das paredes. As 3 últimas linhas do Ossário em volta da boca já são laje, como se o osso tivesse crescido em cima de uma construção. O poço desce uns 24 blocos e abre no teto da câmara de pouso, nas Escadarias. Volta-se pela mesma escada. As posições vêm de `ttExits` (camada 12) e ficam guardadas em `atEntry`.
 - **Saída:** duas **Escadas que Afundam** na Cratera da Estrela, longe uma da outra (pelo menos 250 blocos com `WSC = 3`) e do lado oposto da sala do chefe. Cada uma é um vão quadrado de laje com escada embutida; ao descer, as juntas da laje começam a entortar, os degraus ficam de tamanhos diferentes e a pedra vira pedra-sono (o material dos Salões do Pesadelo). As posições ficam em `atExits`, que a camada 14 lê.
 - **Câmara de pouso:** uma em cada chegada, 10 x 6, plana, piso de laje, duas lâmpadas de glifo; não nasce monstro. Reservada para os pontos de volta.
@@ -158,14 +158,14 @@ Drops: `nucleo_estelar`, `lente_vigia`, `tessela`, `po_estelar`, poções, `min_
 
 ## 8. Loot e economia (`js/208-ferro-estelar.js` e 205)
 
-- **Metal: Ferro Estelar.** `min_ferro_estelar` -> `barra_ferro_estelar`, **8 minérios por barra**, forja de **nível 24**. Veios grossos na Cratera (no vidro e na rocha fundida, perto das lascas) e veios finos e raros na pedra lisa das Máquinas. Nas Escadarias e na Cidade Inversa, nenhum: quem quer o metal tem que descer até a estrela.
+- **Metal: Ferro Estelar.** `min_ferro_estelar` -> `barra_ferro_estelar`, **8 minérios por barra**, forja de **nível 25**. Veios grossos na Cratera (no vidro e na rocha fundida, perto das lascas) e veios finos e raros na pedra lisa das Máquinas. Nas Escadarias e na Cidade Inversa, nenhum: quem quer o metal tem que descer até a estrela.
 - **As 9 peças forjadas:** Espada, Adaga, Machado, Maça, Lança e Montante de Ferro Estelar, Elmo, Peitoral e Botas de Ferro Estelar. Cor violeta-prata com pontinhos brancos de estrela na lâmina.
 - **Materiais próprios:**
   - `nucleo_estelar` (Núcleo Estelar), do obreiro, do cubo e do custódio: o ferreiro compra.
   - `tessela` (Tessela), das tesselas e do ponteiro: o ferreiro compra.
   - `lente_vigia` (Lente de Vigia), do olho-vigia e do agrimensor: a alquimista compra.
   - `po_estelar` (Pó Estelar), do estilhaço e do astrolábio, e de quebrar lascas de estrela: a alquimista compra.
-- **Bases temáticas** (só caem aqui, nível 26, como drop raro: cerca de 1,5% em cada monstro da camada e 1 garantida no Arquiteto, além do lendário): **Lança-Compasso** (lança, alcance maior), **Elmo de Prumo** (elmo, luz), **Couraça de Tesselas** (peitoral, defesa alta e um pouco de esquiva).
+- **Bases temáticas** (só caem aqui, nível 27, como drop raro: cerca de 1,5% em cada monstro da camada e 1 garantida no Arquiteto, além do lendário): **Lança-Compasso** (lança, alcance maior), **Elmo de Prumo** (elmo, luz), **Couraça de Tesselas** (peitoral, defesa alta e um pouco de esquiva).
 - **Sem baús:** a camada não tem baú de loot (só o baú do vilarejo existe no jogo). O prêmio das Salas de Prumo é um veio grosso de ferro estelar preso no que é o teto com gravidade normal.
 - **Missões:** o ancião ganha 3 (núcleos estelares, lentes, uma barra de ferro estelar).
 

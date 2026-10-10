@@ -18,6 +18,9 @@ const CV_BANDS = [6, 60, 120, 168, 186];
 const CV_BAND_NAMES = ['grutas', 'galerias', 'ninho', 'fundacoes'];
 const CV_ZONE0 = 9;                               // zone ids 9..12 (ZONE_NAMES in 10-combate gets them in 56)
 let CV_S0 = 46;                                   // the village floor row of the current world (set by buildCaves)
+// monster level in a layer below the caves (Jonathan 2026-10-10): every layer starts 1 above the last level of the one above it.
+// lo on the top half, lo + 1 from 93 m down; 30% come 1 higher but never past the layer's top (caves 1-4, cathedral 5-6, ice 7-8, mine 9-10, abyss 11-12)
+function layerLvl(lo, d) { return Math.min(lo + 1, lo + (d >= 93 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0)); }
 
 // foreground blocks (solid)
 const CV_TERRA = 54, CV_ARGILA = 55, CV_ROCHA = 56, CV_MUSGO = 57, CV_CALCITA = 58, CV_CASCALHO = 59, CV_XISTO = 60, CV_TEIA = 61;
