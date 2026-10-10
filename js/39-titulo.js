@@ -1,8 +1,9 @@
 'use strict';
 /* tela de título "Under Darkness": a primeira coisa que aparece ao abrir o jogo.
-   Arte dark fantasy em pixel art (480x270) pintada uma vez no início: céu de sangue e lua fria, montanhas,
-   um castelo em ruína sobre o penhasco, um abismo que brilha lá do fundo e um cavaleiro na beira olhando para ele.
-   Por quadro só sobem umas brasas do abismo (uma camada pequena por cima), e só enquanto o título está aberto.
+   A arte (480x270) vem do 126-titulo-descida: o poço do vilarejo descendo pelas camadas até a Escuridão,
+   com os efeitos dela numa camada pequena por cima, só enquanto o título está aberto.
+   A arte antiga (castelo em ruína, abismo e cavaleiro com capa) continua guardada aqui em paintTitleArt;
+   ela volta sozinha se o 126 sair do index.html.
    O nome é desenhado com a fonte do jogo e sombreado em pixel art (latão envelhecido).
    Menu no canto inferior esquerdo: Continuar (só com save), Novo jogo, Opções, Sair.
    Opções abre a mesma tela de opções do menu de pausa (40-opcoes).
@@ -376,7 +377,7 @@ function paintTitleLogo() {
   document.body.appendChild(root);
   $('menu').hidden = true;
 
-  const art = paintTitleArt();
+  const art = typeof paintTitleArtDescida === 'function' ? paintTitleArtDescida() : paintTitleArt();
   $('ttArt').getContext('2d').drawImage(art.canvas, 0, 0);
   function drawLogo() {
     const lg = paintTitleLogo();
@@ -413,6 +414,7 @@ function paintTitleLogo() {
     if (!fxOn) return;
     requestAnimationFrame(fxFrame);
     const dt = Math.min(0.05, (now - (fxLast || now)) / 1000); fxLast = now;
+    if (art.frame) { fx.clearRect(0, 0, TITLE_W, TITLE_H); art.frame(fx, now / 1000, dt); return; }
     if (embers.length < 46 && Math.random() < dt * 14) embers.push({ x: 236 + Math.random() * 60, y: 262 + Math.random() * 10, vx: (Math.random() - 0.5) * 4, vy: -(10 + Math.random() * 16), t: 0, life: 4 + Math.random() * 5, ph: Math.random() * 6 });
     fx.clearRect(0, 0, TITLE_W, TITLE_H);
     drawCape(now / 1000);
