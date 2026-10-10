@@ -127,7 +127,7 @@ Os baús de loot do Abismo já não existem: os baús aleatórios foram tirados 
 
 ## 11. As 3 missões do ancião
 
-As 3 missões do Abismo (essência demoníaca, olhos de demônio, infernita) estão em `BOUNTIES` no 108, no nível 3 de missão. O Jonathan está refazendo o sistema de missões: elas ficam como estão e esperam o sistema novo. Só uma nota para ele: hoje elas aparecem no começo do jogo, e com o Abismo na 15ª o herói vai levar muito tempo para conseguir cumprir.
+As 3 missões do Abismo (essência demoníaca, olhos de demônio, infernita) saíram do jogo junto com todo o sistema de missões antigo (2026-10-10). Quando o Jonathan refizer o sistema, a camada ganha as dela no lugar novo.
 
 ## 12. Wiki e documentos
 

@@ -7,8 +7,15 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.10.4';
+const VERSAO = '0.11.0';
 const NOVIDADES = [
+  { v: '0.11.0', data: '10/10/2026', titulo: 'As Minas Fúngicas', itens: [
+    'Camada nova debaixo da Mina, de 744 a 930 m: as galerias de uma colônia tomada por um fungo, com cogumelos do tamanho de torres, grutas alagadas e um coração de carne viva.',
+    'Água de verdade: dá para nadar, o equipamento pesado afunda e o fôlego dura 10 segundos.',
+    'Dez monstros novos, os Tomados, e a chefe A Mãe-Esporo, a parede viva no fundo da Gruta da Mãe. Ela solta o Lampião da Mãe-Esporo.',
+    'Metal novo, a esporita, com as 9 peças na bigorna, e três equipamentos que só caem lá: Capacete com Lanterna, Botas de Seiva e Gancho de Colheita.',
+    'O Abismo desceu uma camada (930 a 1116 m) e ficou mais forte. O mundo é refeito; seu nível, itens, ouro e o baú da vila continuam.'
+  ] },
   { v: '0.10.4', data: '10/10/2026', titulo: 'Escuridão de verdade', itens: [
     'Debaixo da terra o escuro é quase total: sem tocha não se vê quase nada. Cogumelos, cristais, lava e as velas da catedral continuam iluminando.'
   ] },

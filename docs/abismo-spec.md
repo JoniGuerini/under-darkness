@@ -1,6 +1,6 @@
 # O Abismo: especificação
 
-A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m. É o inferno de Under Darkness: o lugar de onde vieram os demônios. Substitui de vez a ideia antiga da Cripta Abandonada (a sala quadrada nas cavernas com diabretes, cães, demônios e o Carrasco), que foi removida do jogo. Do tema antigo ficam só o clima (fogo, carne, correntes, caos) e alguns itens (chifre, presa, Lâmina Infernal, Elmo de Chifres, Grevas Demoníacas, Machado de Chifre), que agora caem dos demônios novos.
+A última camada do jogo. Foi feita como a quinta, debaixo da Mina Abandonada; desde as Minas Fúngicas (2026-10-10) é a sexta, de 930 a 1116 m, e desce uma camada a cada camada nova, sempre por último (`LAYERS`, `js/129`). Os metros abaixo são os de quando era a quinta: some 186 m por camada a mais. É o inferno de Under Darkness: o lugar de onde vieram os demônios. Substitui de vez a ideia antiga da Cripta Abandonada (a sala quadrada nas cavernas com diabretes, cães, demônios e o Carrasco), que foi removida do jogo. Do tema antigo ficam só o clima (fogo, carne, correntes, caos) e alguns itens (chifre, presa, Lâmina Infernal, Elmo de Chifres, Grevas Demoníacas, Machado de Chifre), que agora caem dos demônios novos.
 
 ## 1. Identidade
 
@@ -10,8 +10,8 @@ A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m. É o inferno de Und
 
 ## 2. Lugar no mundo
 
-- **Profundidade:** 744 a 930 m (186 m, como as outras camadas). `WH` passa de 830 para 1016.
-- **Entrada:** duas **fendas** abertas no chão das Fornalhas Esquecidas (a última faixa da mina): uma rachadura brilhando, com uma escada de ferro negro presa por correntes descendo até a primeira faixa do Abismo. Volta-se pela mesma escada.
+- **Profundidade:** 186 m, como as outras camadas, logo abaixo da camada nova mais funda (hoje 930 a 1116 m, debaixo das Minas Fúngicas). Era 744 a 930 m quando foi feita.
+- **Entrada:** duas **fendas** abertas no chão da camada de cima (eram as Fornalhas Esquecidas da mina; hoje são duas câmaras de raízes no Coração do Micélio): uma rachadura brilhando, com uma escada de ferro negro presa por correntes descendo até a primeira faixa do Abismo. Volta-se pela mesma escada.
 - **Faixas (zonas 21 a 24):**
 
 | Zona | Faixa | Metros | Massa | Caráter |
@@ -110,13 +110,13 @@ Sala: o Trono do Caos (56 x 20), na última faixa, do outro lado do mundo em rel
 - **Fase 2 (60%):** abre portais e chama diabretes e cães; gêiseres de lava saem do chão (círculo brilhando antes).
 - **Fase 3 (25%):** abre as asas e voa; chuva de meteoros (sombra no chão antes), mergulho com a espada.
 
-Vida 1400, dano 30, nível 12. Solta o lendário **Coração do Caos** (acessório: +dano de fogo, cura ao matar, luz vermelha). A morte fica salva (`principe.dead`).
+Nível: o do último monstro da camada mais 1 (`layerBossLvl('abismo')`; hoje 15). Vida e dano escalam do 1400 e 30 que tinha no nível 12. Solta o lendário **Coração do Caos** (acessório: +dano de fogo, cura ao matar, luz vermelha). A morte fica salva (`principe.dead`).
 
 ## 8. Loot e economia (`js/110-infernita.js` e 108)
 
 - Metal novo: **Infernita** (`min_infernita` -> `barra_infernita`, 6 minérios por barra), o quinto da forja, depois do cobalto. A bigorna ganha as 9 peças de infernita (espada, adaga, machado, maça, lança, montante, elmo, peitoral, botas).
 - Materiais novos: essência demoníaca, enxofre, asa de couro, olho de demônio. O ferreiro compra enxofre e olhos; a curandeira compra essência.
-- O ancião ganha 3 missões do Abismo.
+- O ancião ganhava 3 missões do Abismo; saíram com o sistema de missões antigo (2026-10-10).
 
 ## 9. Luz e atmosfera
 

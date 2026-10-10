@@ -185,7 +185,7 @@ Brotos contam como 1 no máximo (o grupo). A água-viva só nasce em água ou a 
 
 - **Bases temáticas** (nível 11, só caem aqui, como drop raro: cerca de 1% de cada Tomado, 3% da mula e da pernalta, e a Mãe-Esporo solta uma das três garantida na primeira morte): **Capacete com Lanterna** (elmo; luz própria pequena), **Botas de Seiva** (botas; o herói anda na água sem perder velocidade), **Gancho de Colheita** (lança; a estocada puxa o inimigo leve um passo para perto).
 - **Sem baús:** a camada não tem baú nenhum (só o baú do vilarejo existe no jogo). O loot vem dos monstros, dos veios e da chefe.
-- **Missões do ancião (Caetano):** 3 novas: fios de micélio, pó de mariposa e uma barra de esporita.
+- **Missões do ancião:** saíram do jogo junto com as tarefas antigas (o sistema de missões vai ser refeito); a camada não ganhou missões.
 
 ## 9. Luz e atmosfera
 
@@ -245,7 +245,7 @@ Os Tomados guardam um pedaço da cor de antes (pele, roupa, pelo da mula) que va
 | `js/122-fungo-objetos.js` | os 28 objetos e `FG_PROP_PLAN` |
 | `js/123-fungo-tomados.js` | colono, marionete, semeador, mariposa, tapete |
 | `js/124-fungo-tomados2.js` | brotos, grilo, pernalta, mula, água-viva |
-| `js/125-fungo-mundo.js` | geração em pedaços, descidas, zonas, spawn, nível, partículas, loja, missões |
+| `js/125-fungo-mundo.js` | geração em pedaços, descidas, zonas, spawn, nível, partículas, loja |
 | `js/126-mae-esporo.js` | a chefe: gruta, parede, bulbos, fases, Lampião da Mãe-Esporo |
 | `js/127-esporita.js` | o metal na forja (9 peças) e os materiais |
 | `js/128-fungo-save.js` | `maeEsporo.dead`, objetos caídos |

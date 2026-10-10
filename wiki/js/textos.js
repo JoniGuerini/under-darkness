@@ -63,7 +63,7 @@ const UDW_TXT = {
     ['Fase 2', 'Abaixo de 60% da vida: rasga portais de onde saem diabretes e cães infernais, e gêiseres de lava estouram do chão (um anel brilha no chão antes).'],
     ['Fase 3', 'Abaixo de 25%: abre as asas e voa. Chovem meteoros na sala (uma sombra no chão avisa) e ele mergulha de espada sobre o herói; depois do mergulho fica um momento preso no chão.']
   ],
-  principeOnde: 'O Trono do Caos, um salão de 56 x 20 blocos no fundo do Abismo (cerca de 926 m), do outro lado do mundo em relação às fendas, com um trono de ferro negro e osso cravejado de cristais do caos, braseiros e correntes. Ao entrar, grades do caos fecham todas as saídas; sair da sala ou morrer recomeça a luta. Fica salvo que ele morreu. Solta o Coração do Caos, acessório lendário.',
+  principeOnde: 'O Trono do Caos, um salão de 56 x 20 blocos no fundo do Abismo (cerca de 1112 m), do outro lado do mundo em relação às fendas, com um trono de ferro negro e osso cravejado de cristais do caos, braseiros e correntes. Ao entrar, grades do caos fecham todas as saídas; sair da sala ou morrer recomeça a luta. Fica salvo que ele morreu. Solta o Coração do Caos, acessório lendário.',
   rgOnde: 'A Oficina da Escavadeira, um salão de 48 x 16 blocos nas Fornalhas Esquecidas (cerca de 730 m), do outro lado do mundo em relação aos poços de descida, com um trono feito de vagonete, montes de saque e fornalhas. Ao entrar, grades de ferro fecham as saídas. Fica salvo que o rei morreu.',
   // fases do Yeti Ancestral (docs/biomas.md, parte 4, seção 7, e js/74-yeti-ancestral.js)
   yetiFases: [
@@ -131,15 +131,23 @@ const UDW_TXT = {
     { zona: 20, nome: 'Fornalhas Esquecidas', de: 708, ate: 744, salas: 'salões das fornalhas, a Oficina da Escavadeira', carater: 'tijolo de fornalha e escória, fornalhas que ainda brilham, cadinhos, bigornas, engrenagens quebradas, brasas' }
   ],
   mnMinerios: [['carvao', 558, 744], ['min_cobalto', 558, 744], ['min_cristal', 558, 744]],
+  // faixas das Minas Fúngicas (js/120-fungo-api.js: FG_BANDS; js/125-fungo-mundo.js) e os minérios delas (125: vein)
+  fgFaixas: [
+    { zona: 25, nome: 'Galerias Tomadas', de: 744, ate: 790, salas: 'galerias tortas da colônia de Ferroalto, casas de tijolo, a enfermaria lacrada, as câmaras de pouso no pé das duas descidas', carater: 'xisto úmido e rocha tomada pelo micélio, escoras tomadas, tábuas podres, fios pendentes, os últimos lampiões da colônia' },
+    { zona: 26, nome: 'Bosque de Chapéus', de: 790, ate: 842, salas: 'salões enormes com cogumelos gigantes em escada', carater: 'húmus de esporo, troncos e chapéus de cogumelo que servem de plataforma, cogumelos-lanterna, cachos de esporos, luz ciano' },
+    { zona: 27, nome: 'Grutas Alagadas', de: 842, ate: 894, salas: 'grutas largas com bacias de água parada e passarelas de tábua, túneis meio alagados', carater: 'lodo e xisto, ilhas de lodo, juncos de micélio na beira da água, gotejos de seiva' },
+    { zona: 28, nome: 'Coração do Micélio', de: 894, ate: 930, salas: 'câmaras redondas de carne ligadas por veias, a Gruta da Mãe, as duas câmaras de onde o Abismo desce', carater: 'carne de micélio pulsando, bolsas de esporo nas paredes, cordões de micélio, ossadas tomadas' }
+  ],
+  fgMinerios: [['carvao', 744, 894], ['min_esporita', 744, 930]],
   // faixas do Abismo (js/103-abismo-api.js: AB_BANDS; js/108-abismo-mundo.js) e os minérios dele (108: vein)
   abFaixas: [
-    { zona: 21, nome: 'Portões de Cinza', de: 744, ate: 790, salas: 'salões em ruína de tijolo infernal, os pés das duas fendas', carater: 'rocha de cinza e basalto, cinza caindo do teto, correntes penduradas, braseiros, caveiras, estátuas de demônio, portões arrombados' },
-    { zona: 22, nome: 'Rios de Fogo', de: 790, ate: 842, salas: 'cavernas largas com um lago de lava e uma ponte de ferro negro', carater: 'basalto e obsidiana, crosta de lava brilhando, poças de lava, colunas de basalto, caldeirões, cachoeiras de lava, faíscas subindo' },
-    { zona: 23, nome: 'As Entranhas', de: 842, ate: 894, salas: 'câmaras redondas de carne', carater: 'carne viva e osso, tentáculos e ganchos no teto, sangue pingando, costelas, ovos, casulos, olhos e bocas nas paredes, um coração batendo' },
-    { zona: 24, nome: 'Trono do Caos', de: 894, ate: 930, salas: 'templos de tijolo infernal, o Trono do Caos', carater: 'pedra do caos e enxofre, runas e cristais roxos, altares, pentagramas, obeliscos, púlpitos, brasas roxas subindo' }
+    { zona: 21, nome: 'Portões de Cinza', de: 930, ate: 976, salas: 'salões em ruína de tijolo infernal, os pés das duas fendas', carater: 'rocha de cinza e basalto, cinza caindo do teto, correntes penduradas, braseiros, caveiras, estátuas de demônio, portões arrombados' },
+    { zona: 22, nome: 'Rios de Fogo', de: 976, ate: 1028, salas: 'cavernas largas com um lago de lava e uma ponte de ferro negro', carater: 'basalto e obsidiana, crosta de lava brilhando, poças de lava, colunas de basalto, caldeirões, cachoeiras de lava, faíscas subindo' },
+    { zona: 23, nome: 'As Entranhas', de: 1028, ate: 1080, salas: 'câmaras redondas de carne', carater: 'carne viva e osso, tentáculos e ganchos no teto, sangue pingando, costelas, ovos, casulos, olhos e bocas nas paredes, um coração batendo' },
+    { zona: 24, nome: 'Trono do Caos', de: 1080, ate: 1116, salas: 'templos de tijolo infernal, o Trono do Caos', carater: 'pedra do caos e enxofre, runas e cristais roxos, altares, pentagramas, obeliscos, púlpitos, brasas roxas subindo' }
   ],
-  abMinerios: [['carvao', 744, 930], ['min_infernita', 744, 930]],
-  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas', portoes: 'Portões', rios: 'Rios de Fogo', entranhas: 'Entranhas', trono: 'Trono' },
+  abMinerios: [['carvao', 930, 1116], ['min_infernita', 930, 1116]],
+  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas', portoes: 'Portões', rios: 'Rios de Fogo', bosque: 'Bosque', entranhas: 'Entranhas', trono: 'Trono' },
   // nome de cada bloco do mundo pela constante do jogo (03-blocos, 41/42 catedral, 52/53 cavernas). Os que viram item usam o nome do item.
   blocoNome: {
     DIRT: 'Terra', GRASS: 'Grama', STONE: 'Pedra', DEEP: 'Pedra funda', BEDROCK: 'Rocha-mãe (fundo do mundo)', LAVA: 'Lava', TRUNK: 'Tronco', LEAVES: 'Folhas',
@@ -184,9 +192,19 @@ const UDW_TXT = {
   catedralSom: 'Um salão enorme e vazio que ecoa: zumbido grave, sussurros sem palavras ao longe (mais nas Criptas), correntes balançando, vento assobiando nas janelas quebradas, gotas e, de vez em quando, um sino que ninguém toca.',
   cavernaSom: 'Ar parado e um ronco grave da rocha, gotas caindo em poças (perto e longe, com eco), pedrinhas rolando e a rocha gemendo lá no fundo. No Ninho, patinhas correndo de um lado ao outro; nas Fundações, correntes.',
   geloSom: 'Vento gelado uivando pelas fendas, o gelo estalando e rangendo devagar, cristais tilintando e gotas de degelo.',
-  abismo: 'A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m: o inferno de onde vieram os demônios. Cinza, rios de fogo, paredes de carne que respiram e, no fundo, o trono de quem manda em tudo isso. O metal daqui é a infernita.',
-  abismoEntrada: 'Duas fendas abertas no chão das Fornalhas Esquecidas, na mina: uma rachadura brilhando em volta da boca, um poço forrado de ferro negro e uma escada até um salão em ruína nos Portões de Cinza. Volta-se pela mesma escada.',
+  abismo: 'A sexta camada, debaixo das Minas Fúngicas, de 930 a 1116 m: o inferno de onde vieram os demônios. Cinza, rios de fogo, paredes de carne que respiram e, no fundo, o trono de quem manda em tudo isso. O metal daqui é a infernita.',
+  abismoEntrada: 'Duas fendas abertas no chão das câmaras do fundo do Coração do Micélio, nas Minas Fúngicas: uma rachadura brilhando em volta da boca, um poço forrado de ferro negro e uma escada até um salão em ruína nos Portões de Cinza. Volta-se pela mesma escada.',
   abismoSom: 'Um ronco grave e o fogo ao fundo; correntes balançando nos Portões; lava borbulhando e estalando nos Rios de Fogo; gotas de sangue e um coração batendo nas Entranhas; sussurros no Trono do Caos e, bem longe, alguma coisa grande rugindo.',
+  fungo: 'A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m. Antes dos mineiros do cobalto, a colônia de Ferroalto cavou aqui atrás da esporita, um metal verde-azulado que o micélio deixa na rocha, e acordou um fungo que tomou as galerias, os bichos e as pessoas. É a camada viva: a rocha, o chão, a água e a parede da chefe crescem e soltam esporos, e a luz é fria e vem dos próprios cogumelos. O metal daqui é a esporita.',
+  fungoEntrada: 'Dois poços lacrados no chão de duas fornalhas da mina: um anel de tijolo de fornalha com a grade arrombada de baixo para cima, um poço forrado de micélio com uma escada da colônia e um cordão de micélio, até uma câmara de pouso de tábua onde nenhum monstro nasce. Volta-se pela mesma escada.',
+  fungoSom: 'Ar úmido e abafado, quase sem eco: gotas caindo na água (mais nas Grutas), esporos estourando com um "puf", madeira encharcada cedendo, passos molhados ao longe e, de vez em quando, um suspiro longo e baixo. No Bosque, um chiado leve de esporos; no Coração, um pulso grave.',
+  fungoAgua: 'As grutas alagadas, os túneis meio alagados e a Gruta da Mãe têm água parada (a água do jogo, igual em todas as camadas). Dá para nadar; debaixo da água o fôlego dura 10 segundos e depois a vida cai. Equipamento pesado afunda o herói. As Botas de Seiva andam na água como em terra.',
+  maeFases: [
+    ['Fase 1.', 'Só os bulbos que abrem na parede levam dano, 3 de cada vez. Um braço de micélio brilha numa linha na sua altura e chicoteia 14 blocos; esporos caem do teto onde os círculos marcam; um bulbo solta brotos a cada 20 s.'],
+    ['Fase 2 (60%).', 'O chão vira micélio vivo (deixa lento) e a água sobe 5 linhas e apodrece (machuca). Raízes rompem a lama, ela puxa o ar e arrasta você para perto (o cordão segura), e o braço vem duas vezes.'],
+    ['Fase 3 (30%).', 'A gruta escurece, a água chega a 8 linhas (o fôlego conta), os chapéus tremem e afundam até sobrarem dois, o peito dela abre como último ponto fraco e vêm as mariposas.']
+  ],
+  maeOnde: 'A Gruta da Mãe, uma gruta alagada de 64 x 28 blocos no Coração do Micélio, do outro lado do mundo em relação às descidas. A parede do fundo é ela: uma massa de fungo com o corpo da primeira colona preso no meio. Só os bulbos que abrem na parede levam dano. A água sobe a cada fase. Ao entrar, muralhas de micélio fecham as saídas; sair da gruta ou morrer recomeça a luta. Fica salvo que ela morreu.',
   minaSom: 'Escoras de madeira rangendo, picaretas ao longe, pedrinhas, gotas e, bem longe, um carrinho guinchando nos trilhos. Nas Fornalhas Esquecidas, o ronco e os estalos do fogo e o fole.',
   cavernas: 'O mundo antigo de cavernas (Cavernas Rasas e Profundas) continua no código, mas está desligado. As cavernas de hoje são outras (js/52 a 57).'
 };

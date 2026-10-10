@@ -1,0 +1,11 @@
+/* fôlego (js/172-nadar.js): a linha azul em cima da hotbar, no lugar e no estilo da barra de vigor; some quando cheio */
+#folegobar{box-sizing:border-box;position:absolute;transform:translateX(-50%);height:16px;padding:0;overflow:hidden;background:#05090d;border:4px solid #000;border-image:var(--tx-frame-sm) 4 / 4px stretch;opacity:0;transition:opacity .35s;pointer-events:none;image-rendering:pixelated}
+#folegobar.show{opacity:1;transition:opacity .12s}
+#folegobar>i{position:absolute;left:0;top:0;bottom:0;display:block;transition:width .08s linear;
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px,rgba(220,245,255,.10) 3px 4px,transparent 4px 6px),
+    linear-gradient(#c8f0ff 0 25%,#3a9ad8 25% 70%,#14467a 70%)}
+#folegobar.low>i{background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px,rgba(220,245,255,.08) 3px 4px,transparent 4px 6px),
+    linear-gradient(#9adcf0 0 25%,#2a6a9a 25% 70%,#0c2a4a 70%);animation:folegoPulse .5s steps(2) infinite}
+@keyframes folegoPulse{50%{opacity:.55}}

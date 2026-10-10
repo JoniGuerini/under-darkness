@@ -143,7 +143,7 @@ Decisão do Jonathan (2026-10-10). As 5 pedras do encantador (topázio, esmerald
 | 15 | 7% | 14% | 26% | 35% | 18% |
 | 16 | 6% | 12% | 25% | 37% | 20% |
 
-- **No jogo hoje (5 camadas):** cavernas, catedral, gelo, mina e Abismo usam as linhas 1 a 5 (o Abismo usa a 5 enquanto estiver em 5º). Por isso o rubi ainda não aparece, e o cristal só aparece no Abismo (1%). Quando o Abismo descer para a 15ª, ele passa a usar a linha 15.
+- **No jogo hoje (6 camadas):** cavernas, catedral, gelo, mina, Minas Fúngicas e Abismo usam as linhas 1 a 6 (o Abismo usa a linha da posição em que estiver). Por isso o rubi ainda não aparece. Quando o Abismo chegar à 15ª, ele passa a usar a linha 15.
 - **No código:** `GEM_SHARE` (as 16 linhas) e `GEM_LAYERS` (a rocha de cada camada) em `js/117-gemas.js`. Cada pedra ganha um bloco próprio para cada rocha (o mesmo desenho sobre a rocha da camada): blocos 153 a 156 e 157 a 167 hoje. Uma camada nova só põe a sua rocha em `GEM_LAYERS`, com os blocos que a linha dela pede.
 - **Só da rocha:** as pedras não caem de monstro (o golem da mina deixou de soltar cristal) e a mina não tem mais veio de cristal. A exceção planejada são os geodos da camada 7, que sorteiam pela linha dela.
 - **O encantador não muda:** a pedra decide a chance de raridade, como antes.

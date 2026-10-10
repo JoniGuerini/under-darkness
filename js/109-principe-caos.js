@@ -18,7 +18,10 @@
    DRAW_E/EYES_E/WARN_E/HOOK. 108 calls abDress() at the end of the build (it also puts the ladders up the walls);
    diggers ask abGuard() before breaking anything. Loads before 49 (BAL scaling). */
 
-const PR = { hp: 1400, dmg: 30, xp: 420, lvl: 12, p2: 0.6, p3: 0.25 };
+// level from the abyss's place in the layer list (129-camadas: 2n + 3, 15 as the 6th); life and damage were tuned at
+// level 12 and follow the monsters' curve from there (life +30% a level, damage +20%)
+const PR_L = layerBossLvl('abismo');
+const PR = { hp: Math.round(1400 * (1 + 0.3 * (PR_L - 1)) / 4.3), dmg: Math.round(30 * (1 + 0.2 * (PR_L - 1)) / 3.2), xp: 420, lvl: PR_L, p2: 0.6, p3: 0.25 };
 const prState = { dead: false };
 const prFx = { gates: [], flames: [], balls: [], portals: [], geysers: [], meteors: [], arcs: [] };
 let prBoss = null, prDressed = false, prBurnCD = 0;
@@ -715,7 +718,7 @@ function prPortals(e) {
 function prSpawnFrom(p) {
   const D = ET[p.type]; if (!D) return;
   const m = spawnEnemy(p.type, p.x - D.w / 2, abBoss.fy * T - D.h - 1, AB_ZONE0 + 3); if (!m) return;
-  m.prMinion = true; m.memT = 6; m.lvl = 11; const mul = 1 + 0.3 * 10; m.hp = m.maxHp = Math.round(D.hp * mul); m.dmg = Math.round(D.dmg * (1 + 0.2 * 10)); m.xp = 1; m.gold = 0;
+  m.prMinion = true; m.memT = 6; m.lvl = layerLo('abismo'); const mul = 1 + 0.3 * (m.lvl - 1); m.hp = m.maxHp = Math.round(D.hp * mul); m.dmg = Math.round(D.dmg * (1 + 0.2 * (m.lvl - 1))); m.xp = 1; m.gold = 0;
   burst(p.x, p.y, 18, '#c4489a', 120, 0, 0.6, 1, true);
 }
 AI.principecaos = function (e, dt, dx, dy, dist) {

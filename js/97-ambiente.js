@@ -4,7 +4,7 @@
    - um "leito" contínuo de ruídos filtrados que respiram devagar (vento, ar da gruta, o salão vazio, o fogo)
    - eventos soltos sorteados no tempo (pássaros, grilos, gotas, pedrinhas, sussurros, sino, gelo estalando, madeira rangendo...)
    - cada cenário tem o seu eco (reverb gerado)
-   Cenários: vila/superfície (dia e noite), cavernas, catedral, gelo, mina e abismo; algumas faixas mudam detalhes (o
+   Cenários: vila/superfície (dia e noite), cavernas, catedral, gelo, mina, minas fúngicas e abismo; algumas faixas mudam detalhes (o
    Ninho tem patinhas correndo, as Criptas mais sussurros, as Fornalhas o fogo e o fole, os Rios de Fogo a lava
    borbulhando, as Entranhas um coração batendo, o Trono do Caos sussurros).
    Ao trocar de cenário, um some enquanto o outro aparece (uns 4 s). O som do cenário que saiu é desmontado depois.
@@ -166,6 +166,21 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-0.4, 0.4), 0.3, 200), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.75, 0.95);
       for (let i = 0; i < n; i++) { const tt = t + i * sp; osc(A, v, tt, 'sine', 55, 38, 0.18, 0.16, 0.01); osc(A, v, tt + 0.22, 'sine', 48, 34, 0.16, 0.11, 0.01); }
     },
+    puff(A, o, t) {   // um esporo abrindo: um "puf" seco e abafado (Minas Fúngicas)
+      const v = voice(A, o, rnd(-0.8, 0.8), 0.3, 900); nz(A, v, t, rnd(0.06, 0.12), rnd(0.05, 0.1), 'lowpass', rnd(500, 900), 1, 0.004, 'pink', 200);
+    },
+    sog(A, o, t) {   // madeira encharcada cedendo: mais grave e mole que o rangido da mina
+      const v = voice(A, o, rnd(-1, 1), 0.5, 700), d = rnd(0.6, 1.2), f = rnd(70, 110);
+      osc(A, v, t, 'triangle', f, f * rnd(0.7, 0.85), d, 0.05, d * 0.3); nz(A, v, t, d, 0.03, 'bandpass', 260, 2, d * 0.4, 'brown');
+    },
+    sigh(A, o, t) {   // o micélio respirando: um suspiro longo e baixo
+      const v = voice(A, o, rnd(-0.5, 0.5), 0.6, 400), d = rnd(2.4, 3.6);
+      nz(A, v, t, d, 0.1, 'lowpass', 180, 0.8, d * 0.45, 'brown', 320); nz(A, v, t + d * 0.55, d * 0.6, 0.07, 'lowpass', 240, 0.8, d * 0.2, 'brown', 120);
+    },
+    wetStep(A, o, t) {   // passos molhados longe, de ninguém
+      const v = voice(A, o, rnd(-1, 1), 0.7, 1500), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.45, 0.65);
+      for (let i = 0; i < n; i++) nz(A, v, t + i * sp, 0.09, 0.05, 'lowpass', rnd(500, 800), 1, 0.005, 'pink', 260);
+    },
     roar(A, o, t) {   // longe, alguma coisa grande ruge
       const v = voice(A, o, rnd(-1, 1), 0.9, 600), d = rnd(1.4, 2.4), f = rnd(48, 70);
       osc(A, v, t, 'sawtooth', f, f * 0.7, d, 0.1, d * 0.3); nz(A, v, t, d, 0.1, 'lowpass', 260, 1, d * 0.3, 'brown', 160);
@@ -201,6 +216,11 @@ const AMBI = (function () {
       rt: 2.2, damp: 0.55, wet: 0.3,
       beds: [['brown', 'lowpass', 90, 140, 0.7, 0.35, 0.48, 3], ['pink', 'bandpass', 280, 450, 1, 0.03, 0.08, 2.5], ['pink', 'bandpass', 500, 900, 0.8, 0.12, 0.25, 0.7, c => c.band === 3 ? 1 : 0]],
       ev: [[0.12, 'creakWood'], [0.07, 'pick', c => c.band === 3 ? 0.4 : 1], [0.06, 'pebbles'], [0.25, 'drip', c => c.band === 3 ? 0.2 : 1], [0.012, 'cart'], [0.02, 'groan'], [7, 'pop', c => c.band === 3 ? 1 : 0], [0.12, 'bellows', c => c.band === 3 ? 1 : 0]]
+    },
+    fungo: {   // úmido e abafado: o fungo come o eco (pouco reverb, filtro baixo)
+      rt: 1.4, damp: 0.75, wet: 0.25,
+      beds: [['brown', 'lowpass', 70, 120, 0.7, 0.32, 0.45, 3.5], ['pink', 'lowpass', 200, 380, 0.7, 0.06, 0.14, 4], ['white', 'highpass', 4500, 6500, 0.5, 0.0, 0.035, 2, c => c.band === 1 ? 1 : 0.2]],
+      ev: [[0.3, 'drip', c => c.band === 2 ? 1.8 : 0.7, true], [0.14, 'puff', c => c.band === 1 ? 1.5 : 1], [0.06, 'sog', c => c.band === 0 ? 1.2 : 0.5], [0.025, 'sigh', c => c.band === 3 ? 1.6 : 0.8], [0.02, 'wetStep'], [0.035, 'heart', c => c.band === 3 ? 1 : 0]]
     },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
@@ -266,7 +286,7 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
     } catch (e) { }
     return c;

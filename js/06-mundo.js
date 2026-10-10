@@ -14,7 +14,7 @@ function solidAt(x, y) { return SOLID[tileAt(x, y)] === 1; }
 function generate(sd) {
   seed = sd >>> 0;
   const R = mulberry32(seed ^ 0x5bd1e995), N = makeNoise(seed), NN = WW * WH;
-  tiles = new Uint8Array(NN); walls = new Uint8Array(NN); surf = new Int16Array(WW); seen = new Uint8Array(NN); mapVer++;
+  tiles = new Uint16Array(NN); walls = new Uint8Array(NN); surf = new Int16Array(WW); seen = new Uint8Array(NN); mapVer++;
   // 1D noise sampled around a circle so the ends meet; 2D noise blended across a seam band
   const ring = (x, f, ox, oy) => { const a = x / WW * Math.PI * 2, r = WW * f / (Math.PI * 2); return [Math.cos(a) * r + ox, Math.sin(a) * r + oy]; };
   const ring1 = (x, f, ox, oy, oct) => { const [a, b] = ring(x, f, ox, oy); return N.fbm(a, b, oct); };

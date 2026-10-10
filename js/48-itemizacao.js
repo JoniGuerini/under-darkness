@@ -47,12 +47,14 @@ const BASE_INFO = {
   picareta_ferro: [1], picareta_ouro: [4], picareta_cristal: [6]
 };
 // forged pieces: copper, iron, gold, crystal
+// a metal that sets its own level (METALS[t].il, the layers from the fifth down) wins over its place in this list
+const IL_MAX = 40;   // highest item level (12 until 2026-10-10; the 16 layers reach about 37)
 const FORGE_ILVL = [2, 3, 5, 6], FORGE_SPD = { espada: 0.6, adaga: 0.43, machado: 0.92, maca: 0.75, lanca: 0.73 };
 function baseInfo(id) {
   const it = ITEMS[id], b = BASE_INFO[id];
   let L = b ? b[0] : null, spd = b ? b[1] : null;
   const f = /^f_([a-z]+)_([a-z]+)$/.exec(id);
-  if (f) { const t = METALS.findIndex(M => M.id === f[2]); if (L == null && t >= 0) L = FORGE_ILVL[t]; if (spd == null) spd = FORGE_SPD[f[1]]; }
+  if (f) { const t = METALS.findIndex(M => M.id === f[2]); if (L == null && t >= 0) L = METALS[t].il || FORGE_ILVL[t]; if (spd == null) spd = FORGE_SPD[f[1]]; }
   if (L == null) L = [1, 2, 4, 6, 7][clamp(it.rar | 0, 0, 4)];
   if (it.slot === 'weapon' && spd == null) { const T = WEAPON_TYPES[it.kind || 'sword']; spd = (T.spd[0] + T.spd[1]) / 2; }
   return { L, spd };
@@ -213,8 +215,8 @@ const validMod = m => Array.isArray(m) && AFF[m[0]] && m.length === 1 + AFF[m[0]
 // rar: -1 pobre .. 4 lendário. Mods from an old save (old ids) are rolled again for the same rarity.
 function mkItem(id, rar, mods, il) {
   const it = ITEMS[id], L0 = baseInfo(id).L;
-  if (it.legend) return { id, n: 1, rar: 4, il: L0, mods: [], uid: UID++ };
-  rar = clamp(rar | 0, -1, 4); il = clamp(il | 0 || L0, 1, 12);
+  if (it.legend) return { id, n: 1, rar: 4, il: clamp(il | 0 || L0, 1, IL_MAX), mods: [], uid: UID++ };   // a legendary keeps the level it dropped at
+  rar = clamp(rar | 0, -1, 4); il = clamp(il | 0 || L0, 1, IL_MAX);
   let ms = Array.isArray(mods) ? mods : [];
   if (ms.some(m => !validMod(m))) ms = rollMods(id, rar, il);
   ms = ms.filter(validMod);
@@ -234,7 +236,7 @@ function rollItem(id, z, src) {
   if (ITEMS[id].legend) return mkItem(id);
   src = src || 'monster';
   const L0 = baseInfo(id).L, zz = clamp(z || 1, 1, 4);
-  const il = clamp(L0 + (src === 'forge' ? 0 : src === 'shop' ? Math.floor(Math.random() * 2) : Math.floor(Math.random() * zz)), 1, 12);
+  const il = clamp(L0 + (src === 'forge' ? 0 : src === 'shop' ? Math.floor(Math.random() * 2) : Math.floor(Math.random() * zz)), 1, IL_MAX);
   const rar = rollRarity(zz, src);
   return mkItem(id, rar, rollMods(id, rar, il), il);
 }

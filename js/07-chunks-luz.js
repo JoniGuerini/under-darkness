@@ -150,6 +150,7 @@ function computeLight(cx, cy) {
       else {
         const ti = gy * WW + wrapX(gx), t = tiles[ti];
         if (SOLID[t] && t !== GATE) d = 0.28; else { if (t === LEAVES) d = 0.15; if (walls[ti] === 0) L = sky; }
+        if (agua.length && agua[ti]) { if (d < 0.13) d = 0.13; if (agua[ti] === 2 && L < 0.3) L = 0.3; }   // water dims the light faster; plankton glows (js/171-agua.js)
         const em = EMIT[t]; if (em > 0) { if (em > L) L = em; if (gx >= vx0 && gx <= vx1 && gy >= vy0 && gy <= vy1) emitters.push(gx, gy, t); }
       }
       LB[k] = L; DB[k] = d;

@@ -30,7 +30,8 @@ const abHallAt = (x, y, m = 1) => abBoss && Math.abs(wdx(x - abBoss.cx)) < abBos
 
 function abBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  AB_S0 = Math.min(WH - 12, MN_S0 + Math.min(MN_D, WH - 8 - MN_S0));
+  const UP = abAbove();   // the layer above (103): today the fungal mines
+  AB_S0 = Math.min(WH - 12, UP.S0 + Math.min(UP.D, WH - 8 - UP.S0));
   const S0 = AB_S0, YB = Math.min(WH - 8, S0 + AB_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x6b1d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
   const mb = m => Math.round(m * DB / AB_D);
@@ -41,17 +42,17 @@ function abBuild() {
 
   // ---------- 1. the rock ----------
   for (let x = 0; x < WW; x++) {
-    // the ash creeps up into the last rows of the mine
+    // the ash creeps up into the last rows of the layer above
     for (let y = S0 - 8; y < S0; y++) {
       const i = y * WW + x, k = (y - (S0 - 8)) / 8, h = nz(x, y, 12, 0x6b3);
-      if (SOLID[tiles[i]] && MN_SOILS[tiles[i]] && h < k * 0.8) tiles[i] = AB_CINZA;
+      if (SOLID[tiles[i]] && UP.soils[tiles[i]] && h < k * 0.8) tiles[i] = AB_CINZA;
       if (walls[i] && h < k * 0.6) walls[i] = WAB_CINZA;
     }
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3) continue;
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x6b4);
-      if (k < 1 && h > 0.35 + k * 0.6) { tiles[i] = MN_ESCORIA; walls[i] = WMN_TIJOLO; continue; }   // the mine's slag thins out
+      if (k < 1 && h > 0.35 + k * 0.6) { tiles[i] = UP.thin; walls[i] = UP.thinW; continue; }   // the rock above thins out
       const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x6a1), n2 = nz(x, y, 18, 0x6a2), n3 = nz(x, y, 50, 0x6a3);
       let t;
       if (y >= YB) t = AB_BASALTO;
@@ -104,8 +105,8 @@ function abBuild() {
   };
   const busy = (cx, cy, w, h, m = 4) => abChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + m && Math.abs(c.cy - cy) < (c.h + h) / 2 + m);
 
-  // the two rifts first: under two furnace halls of the mine, far apart and away from the Rei Goblin's workshop
-  const rb = mnBoss, furn = mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy && (!rb || Math.abs(wdx(c.cx - rb.cx)) > rb.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
+  // the two rifts first: from the floor of two halls of the layer above (the fungal mines' two ways down), far apart and away from its boss
+  const rb = UP.boss, furn = UP.halls.filter(c => c.fy && (!rb || Math.abs(wdx(c.cx - rb.cx)) > rb.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
   const picks = [];
   for (let n = 0; n < furn.length && picks.length < 2; n++) { const c = furn[(n * 5 + ((R() * furn.length) | 0)) % furn.length]; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 80)) picks.push(c); }
   for (const c of furn) { if (picks.length >= 2) break; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 40)) picks.push(c); }
@@ -175,7 +176,7 @@ function abBuild() {
   for (const E of abExits) {
     const x0 = E.x0, y0 = E.fy, y1 = landY;
     for (let y = y0; y < y1; y++) {
-      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); tiles[i] = AIR; walls[i] = y < S0 ? WMN_TIJOLO : WAB_CINZA; }
+      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); tiles[i] = AIR; walls[i] = y < S0 ? UP.thinW : WAB_CINZA; }
       if (y >= y1 - 4) { for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); tiles[i] = AIR; abKeep.add(i); } continue; }   // open on both sides into the hall below
       for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (y === y0) tiles[i] = AB_CROSTA; else if (!SOLID[tiles[i]] || (y - y0) % 6 === 5) tiles[i] = AB_FERRO_NEGRO; abKeep.add(i); }
     }
@@ -472,13 +473,13 @@ Object.assign(CATH_SPAWN, {
   [AB_ZONE0 + 2]: [[['brutamontes', 0.22], ['almapenada', 0.2], ['rastejador', 0.33], ['moscas', 0.25]], 10],
   [AB_ZONE0 + 3]: [[['diabrete', 0.16], ['brutamontes', 0.22], ['vermemagma', 0.16], ['cultista', 0.24], ['gargulainf', 0.22]], 10]
 });
-// levels: 11-12 (layerLvl in 52), 30% of them one higher but never past 12
+// levels: two per layer from the abyss's place in the layer list (129-camadas: 13-14 as the 6th), 30% of them one higher but never past the top
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!ABISMO || e.boss || D.boss || e.abMinion) return e;
   const d = Math.floor((py + e.h) / T) - AB_S0;
   if (d >= 0) {
-    const lvl = layerLvl(11, d), m = 1 + 0.3 * (lvl - 1);
+    const lvl = layerLvl(layerLo('abismo'), d), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   return e;

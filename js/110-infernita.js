@@ -5,7 +5,7 @@
    infernite in the abyss (103-109), an ember-red ore that stays warm in the hand. Here: the ore and the bar, the
    fifth metal at the forge (METALS, so the anvil shows "Peças de infernita") and its nine pieces: the eight of
    05-itens (sword, dagger, axe, mace, spear, helm, breastplate, boots) and the two-handed sword of 61-montante.
-   Item level 7, one above cobalt. The furnace recipe (6 ores a bar), the smith buying it and the prices are in
+   Item level from the abyss's place in the layer list (129-camadas: 2n - 1, 11 while it is the 6th). The furnace recipe (6 ores a bar), the smith buying it and the prices are in
    108-abismo-mundo, which loads after the forge and the village.
    Loads after 61-montante and 48-itemizacao. */
 
@@ -33,10 +33,10 @@ BAR_ICONS.barra_infernita = [[
   "mmmmRRmmmmmE.",
   "dddddddddd..."], { T: '#5a2a24', t: '#3a1612', k: '#24100c', R: '#ff5a1e', Y: '#ffd08a', F: '#6a2a20', m: '#3a1410', e: '#2a0e0a', E: '#140606', d: '#0e0404' }];
 
-METALS.push({ id: 'infernita', name: 'Infernita', bar: 'barra_infernita',
+METALS.push({ id: 'infernita', name: 'Infernita', bar: 'barra_infernita', il: layerForgeIl('abismo'),
   wp: { w: '#ffe0c8', W: '#ff6a2a', l: '#a8200c', g: '#3a1010', G: '#200808', h: '#2a0e0a', p: '#d8401a' },
   m: '#b8321a', M: '#ffb07a', body: { r: '#a82a18', R: '#701408', D: '#400a06', b: '#260808', B: '#ff9a5a' }, s: '#b8321a', S: '#6a1206' });
-FORGE_ILVL.push(7);
+FORGE_ILVL.push(layerForgeIl('abismo'));   // the item level follows the abyss's place in the layer list (129): 7 as the 5th layer, 11 as the 6th
 {
   const t = METALS.length - 1, M = METALS[t];
   // [piece, name, gender, bars, stats]: one step above cobalt

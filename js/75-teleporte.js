@@ -2,7 +2,7 @@
 
 /* ================= teleporte de teste: ir direto para uma camada =================
    No menu de pausa, "Testes" abre um submenu com "Teleporte" e "Batalhão". "Teleporte" troca os botões pela lista de camadas (Vilarejo, Cavernas, Catedral, Cavernas de
-   Gelo, Mina Abandonada, O Abismo); cada camada abre as suas faixas. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
+   Gelo, Mina Abandonada, Minas Fúngicas, O Abismo); cada camada abre as suas faixas. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
    dela, o mais perto possível da entrada da camada (a boca das cavernas, as escadarias do átrio, as fendas das
    criptas, os poços sob o gelo), num lugar que dá para alcançar andando a partir do vilarejo e fora das salas dos chefes.
    "Batalhão" (também de teste, para medir desempenho) solta 25, 50, 100, 200 ou 500 monstros da faixa onde o herói
@@ -16,6 +16,7 @@
     { nome: 'Catedral', ok: true, faixas: [[0, 26], [26, 82], [82, 132], [132, 186]].map(([a, b], k) => ({ nome: ZONE_NAMES[5 + k], y0: cbY(a), y1: cbY(b) })), entrada: () => caveExits && caveExits[0] },
     { nome: 'Cavernas de Gelo', ok: typeof GELO !== 'undefined' && GELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[IC_ZONE0 + b], y0: IC_S0 + IC_BANDS[b], y1: IC_S0 + IC_BANDS[b + 1] })), entrada: () => icExits && icExits[0] && [icExits[0].x0 + 3, IC_S0 + 13] },
     { nome: 'Mina Abandonada', ok: typeof MINA !== 'undefined' && MINA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[MN_ZONE0 + b], y0: MN_S0 + MN_BANDS[b], y1: Math.min(WH - 8, MN_S0 + MN_BANDS[b + 1]) })), entrada: () => mnExits && mnExits[0] && [mnExits[0].x0 + 1, mnExits[0].fy - 2] },
+    { nome: 'Minas Fúngicas', ok: typeof FUNGO !== 'undefined' && FUNGO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[FG_ZONE0 + b], y0: FG_S0 + FG_BANDS[b], y1: Math.min(WH - 8, FG_S0 + FG_BANDS[b + 1]) })), entrada: () => fungExits && fungExits[0] && [fungExits[0].x0 + 1, fungExits[0].fy - 2] },
     { nome: 'O Abismo', ok: typeof ABISMO !== 'undefined' && ABISMO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AB_ZONE0 + b], y0: AB_S0 + AB_BANDS[b], y1: Math.min(WH - 8, AB_S0 + AB_BANDS[b + 1]) })), entrada: () => abExits && abExits[0] && [abExits[0].x0 + 1, abExits[0].fy - 2] }
   ].filter(L => L.ok);
 
