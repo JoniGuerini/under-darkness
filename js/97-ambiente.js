@@ -162,6 +162,26 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-0.8, 0.8), 0.4, 900), f = rnd(70, 130);
       osc(A, v, t, 'sine', f, f * 2.2, rnd(0.12, 0.2), 0.12, 0.02); nz(A, v, t + 0.15, 0.08, 0.08, 'lowpass', 600, 1, 0.003, 'brown');
     },
+    wings(A, o, t, big) {   // o zumbido da colmeia: asas batendo de 6 a 9 vezes por segundo, ruído marrom num filtro estreito
+      const v = voice(A, o, rnd(-0.6, 0.6), 0.4, 0), r = rnd(6, 9), n = Math.floor(r * rnd(2.5, 4.5)), f = big ? rnd(110, 140) : rnd(140, 180);
+      for (let i = 0; i < n; i++) { const k = Math.sin(Math.PI * i / n); nz(A, v, t + i / r, 0.1, (big ? 0.2 : 0.13) * (0.3 + 0.7 * k), 'bandpass', f, 9, 0.03, 'brown'); }
+    },
+    buzzBy(A, o, t) {   // um zumbido que cruza a tela e some
+      const p0 = Math.random() < 0.5 ? -1 : 1, d = rnd(1.2, 2), f = rnd(180, 260);
+      for (let i = 0; i < 8; i++) { const k = i / 8, v = voice(A, o, p0 * (1 - 2 * k), 0.4, 0); osc(A, v, t + k * d, 'sawtooth', f * (1.06 - k * 0.12), f * (1.04 - k * 0.12), d / 8 + 0.05, 0.02 * Math.sin(Math.PI * (k + 0.06)), 0.02); }
+    },
+    plop(A, o, t) {   // um plop grosso de mel caindo
+      const v = voice(A, o, rnd(-0.9, 0.9), 0.5, 1800), f = rnd(180, 320);
+      osc(A, v, t, 'sine', f, f * 0.4, 0.14, 0.11, 0.004); nz(A, v, t, 0.06, 0.04, 'lowpass', 600, 1, 0.003, 'brown');
+    },
+    chew(A, o, t) {   // uma larva mastigando dentro da parede
+      const v = voice(A, o, rnd(-1, 1), 0.6, 2500), n = 4 + Math.floor(rnd(0, 6));
+      for (let i = 0; i < n; i++) nz(A, v, t + i * rnd(0.12, 0.18), 0.05, 0.05, 'bandpass', rnd(900, 1600), 4, 0.004, 'pink');
+    },
+    waxCrack(A, o, t) {   // a cera estalando, a resina endurecendo
+      const v = voice(A, o, rnd(-1, 1), 0.6, 0), n = 1 + Math.floor(rnd(0, 3));
+      for (let i = 0; i < n; i++) { const tt = t + i * rnd(0.05, 0.2); nz(A, v, tt, 0.025, 0.07, 'bandpass', rnd(1800, 3200), 5); osc(A, v, tt, 'triangle', rnd(500, 800), 300, 0.04, 0.02); }
+    },
     heart(A, o, t) {   // as paredes de carne batendo como um coração (As Entranhas)
       const v = voice(A, o, rnd(-0.4, 0.4), 0.3, 200), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.75, 0.95);
       for (let i = 0; i < n; i++) { const tt = t + i * sp; osc(A, v, tt, 'sine', 55, 38, 0.18, 0.16, 0.01); osc(A, v, tt + 0.22, 'sine', 48, 34, 0.16, 0.11, 0.01); }
@@ -188,6 +208,10 @@ const AMBI = (function () {
     roofSteps(A, o, t) {   // alguém correndo num telhado lá em cima
       const v = voice(A, o, rnd(-1, 1), 0.6, 2600), n = 5 + Math.floor(rnd(0, 6)), sp = rnd(0.16, 0.24);
       for (let i = 0; i < n; i++) { nz(A, v, t + i * sp, 0.05, 0.06, 'bandpass', rnd(700, 1100), 2, 0.003, 'pink'); if (Math.random() < 0.3) nz(A, v, t + i * sp + 0.02, 0.03, 0.03, 'highpass', 3000, 1); }
+    },
+    hooves(A, o, t) {   // cascos de pedra correndo longe (a Clareira dos Gigantes, enquanto o Cervo vive)
+      const v = voice(A, o, rnd(-1, 1), 0.85, 1500), n = 6 + Math.floor(rnd(0, 8)), sp = rnd(0.13, 0.18);
+      for (let i = 0; i < n; i++) { const tt = t + i * sp + (i % 2) * 0.05, a = Math.sin(Math.PI * (i + 1) / (n + 1)); nz(A, v, tt, 0.04, 0.09 * a, 'lowpass', 520, 1, 0.002, 'brown'); osc(A, v, tt, 'sine', rnd(90, 120), 50, 0.08, 0.04 * a, 0.002); }
     },
     coins(A, o, t) {   // moedas caindo no chão de pedra
       const v = voice(A, o, rnd(-1, 1), 0.6, 7000), n = 3 + Math.floor(rnd(0, 5)); let tt = t;
@@ -258,6 +282,24 @@ const AMBI = (function () {
         [0.025, 'murmur', c => c.calma], [0.2, 'drip', c => (c.band === 0 ? 1.6 : 0.6) * c.calma, true], [0.12, 'slap', c => c.band === 0 ? 1 : 0], [0.06, 'creakWood', c => (c.band === 1 ? 1 : 0.2) * c.calma],
         [0.2, 'chant', c => c.band === 2 ? c.calma : 0], [0.04, 'whistle', c => (c.band === 3 ? 0.4 : 1) * c.calma]]
     },
+    floresta: {   // a floresta de pedra: vento grave e oco nos troncos, eco longo e frio, cristal tilintando
+      rt: 4.6, damp: 0.35, wet: 0.55,
+      beds: [['brown', 'lowpass', 50, 90, 0.7, 0.3, 0.46, 5], ['pink', 'bandpass', 160, 300, 2, 0.04, 0.12, 4.5]],
+      ev: [[0.08, 'tinkle', c => c.band === 1 ? 1.8 : 0.6], [0.05, 'crack', c => c.band === 3 ? 1 : 0.6], [0.06, 'creakWood'], [0.12, 'drip', c => c.band === 2 ? 1.6 : 0.5, true],
+        [0.08, 'pebbles', c => c.band === 0 ? 1.4 : 0.2], [0.03, 'groan', c => c.band === 2 ? 1.4 : 0.4], [0.03, 'hooves', c => c.band === 3 && c.cervo ? 1 : 0]]
+    },
+    anoes: {   // a fortaleza vazia: zumbido grave de máquina, eco seco de pedra, malho e fole ao longe, coro sem palavras nos salões
+      rt: 3.8, damp: 0.5, wet: 0.5,
+      beds: [['brown', 'bandpass', 50, 80, 1.2, 0.28, 0.4, 4], ['pink', 'lowpass', 150, 260, 0.8, 0.04, 0.1, 4, c => c.band === 2 ? 1.5 : 0.7], ['white', 'bandpass', 900, 1600, 3, 0.0, 0.04, 2.5, c => c.band === 0 ? 1 : 0.2]],
+      ev: [[0.05, 'anvil', c => c.band === 3 ? 1.6 : 0.6], [0.04, 'chains'], [0.05, 'puff', c => c.band === 2 ? 1.6 : 0.6], [0.03, 'bellows', c => c.band === 3 ? 1.4 : 0.2], [0.02, 'door'],
+        [0.12, 'chant', c => c.band === 1 ? 0.9 : 0], [0.04, 'skitter', c => c.band === 3 ? 1 : 0], [0.03, 'pebbles', c => c.band === 0 ? 1 : 0.3]]
+    },
+    colmeia: {   // a colmeia: zumbido grave que não para, uma respiração lenta (7 s), eco curto e abafado
+      rt: 0.4, damp: 0.85, wet: 0.3,
+      beds: [['brown', 'bandpass', 110, 180, 4, 0.2, 0.32, 1.2, c => c.band === 3 ? 1.4 : 1], ['brown', 'lowpass', 120, 420, 0.7, 0.04, 0.16, 3.5]],
+      ev: [[0.9, 'wings', c => c.band === 3 ? 1.6 : 1, false], [0.12, 'wings', c => c.band >= 2 ? 1 : 0.3, true], [0.06, 'skitter'], [0.08, 'waxCrack', c => c.band === 2 ? 1.6 : 0.8], [0.07, 'plop', c => c.band === 1 ? 1.4 : 0.6],
+        [0.05, 'chew', c => c.band === 1 || c.band === 3 ? 1 : 0.4], [0.03, 'buzzBy'], [0.04, 'creakWood', c => c.band === 0 ? 1 : 0], [0.02, 'chains', c => c.band === 0 ? 0.6 : 0], [0.04, 'heart', c => c.band === 3 ? 1 : 0], [0.1, 'drip', c => c.band === 1 ? 0.6 : 0.3, true]]
+    },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
@@ -322,8 +364,9 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
+      c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some
       c.calma = 1; if (c.name === 'cidade' && typeof cdPoco !== 'undefined' && cdPoco) { const d = Math.hypot(wdx(tx - cdPoco.cx), Math.max(0, cdPoco.top - ty)); c.calma = Math.abs(wdx(tx - cdPoco.cx)) <= 6 && ty >= cdPoco.top ? 0.1 : Math.min(1, Math.max(0.1, (d - 4) / 12)); }
     } catch (e) { }

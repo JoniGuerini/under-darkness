@@ -19,16 +19,19 @@
 const ABISMO = true;
 const AB_D = 186;                                   // metres of abyss
 // the abyss is always the last layer (129-camadas): it starts under whatever layer is above it, today the fungal mines (120)
-const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO, AB_CIDADE = typeof CIDADE !== 'undefined' && CIDADE;
-const AB_TOP = (AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // where the abyss starts, metres below the village floor (930)
+const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO, AB_CIDADE = typeof CIDADE !== 'undefined' && CIDADE, AB_FLORESTA = typeof FLORESTA !== 'undefined' && FLORESTA, AB_ANOES = typeof ANOES !== 'undefined' && ANOES, AB_COLMEIA = typeof COLMEIA !== 'undefined' && COLMEIA;
+const AB_TOP = (AB_COLMEIA ? CM_TOP : AB_ANOES ? AN_TOP : AB_FLORESTA ? FP_TOP : AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // where the abyss starts, metres below the village floor (930)
 // band tops in metres below AB_TOP: Portões de Cinza, Rios de Fogo, As Entranhas, Trono do Caos, (bedrock)
 const AB_BANDS = [0, 46, 98, 150, 186];
 const AB_BAND_NAMES = ['portoes', 'rios', 'entranhas', 'trono'];
 const AB_ZONE0 = ZONE_NAMES.length;                 // zone ids 21..24 (108 pushes the names)
-let AB_S0 = AB_CIDADE ? CD_S0 + CD_D : AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)
+let AB_S0 = AB_COLMEIA ? CM_S0 + CM_D : AB_ANOES ? AN_S0 + AN_D : AB_FLORESTA ? FP_S0 + FP_D : AB_CIDADE ? CD_S0 + CD_D : AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)
 // the layer right above: its first row and depth, its natural ground (the abyss's ash creeps into it), the rock its
 // last rows thin out into, and the halls the two rifts open from
-const abAbove = () => AB_CIDADE ? { S0: CD_S0, D: CD_D, soils: CD_SOILS, thin: CD_ATERRO, thinW: WCD_TIJOLO, halls: cdDown, boss: cdBoss }
+const abAbove = () => AB_COLMEIA ? { S0: CM_S0, D: CM_D, soils: CM_SOILS, thin: CM_CERA_REAL, thinW: WCM_REAL, halls: cmExits, boss: cmBoss }
+  : AB_ANOES ? { S0: AN_S0, D: AN_D, soils: AN_SOILS, thin: AN_GRANITO, thinW: WAN_GRANITO, halls: anExits, boss: anBoss }
+  : AB_FLORESTA ? { S0: FP_S0, D: FP_D, soils: FP_SOILS, thin: FP_GRANITO, thinW: WFP_GRANITO, halls: fpExits, boss: fpBoss }
+  : AB_CIDADE ? { S0: CD_S0, D: CD_D, soils: CD_SOILS, thin: CD_ATERRO, thinW: WCD_TIJOLO, halls: cdDown, boss: cdBoss }
   : AB_FUNGO ? { S0: FG_S0, D: FG_D, soils: FG_SOILS, thin: FG_CARNE, thinW: WFG_CARNE, halls: fungDown, boss: fungBoss }
   : { S0: MN_S0, D: MN_D, soils: MN_SOILS, thin: MN_ESCORIA, thinW: WMN_TIJOLO, halls: mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy), boss: mnBoss };
 

@@ -119,8 +119,11 @@ const GEM_LAYERS = [
   { pos: 4, ok: t => t === MN_FERROSA || t === MN_QUARTZITO, pal: 'mnFerrosa', host: MN_FERROSA, soils: MN_SOILS, own: MN_O_CRISTAL },
   { pos: layerPos('fungo'), ok: t => t === FG_XISTO || t === FG_TOMADA, pal: 'fgXisto', host: FG_XISTO, soils: FG_SOILS },
   { pos: layerPos('cidade'), ok: t => t === CD_ATERRO || t === CD_LIMO, pal: 'cdAterro', host: CD_ATERRO, soils: CD_SOILS },
+  typeof FLORESTA !== 'undefined' && { pos: layerPos('floresta'), ok: t => t === FP_GRANITO || t === FP_SOLO || t === FP_RAIZ, pal: 'fpGranito', host: FP_GRANITO, soils: FP_SOILS },
+  typeof ANOES !== 'undefined' && { pos: layerPos('anoes'), ok: t => t === AN_GRANITO || t === AN_ENTULHO, pal: 'anGranito', host: AN_GRANITO, soils: AN_SOILS },
+  typeof COLMEIA !== 'undefined' && { pos: layerPos('colmeia'), ok: t => t === CM_CERA || t === CM_RESINA, pal: 'cmCera', host: CM_CERA, soils: CM_SOILS },
   { pos: layerPos('abismo'), ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI }
-];
+].filter(Boolean);   // a camada que não foi carregada (a wiki carrega só parte do jogo) fica de fora
 // blocos novos: 157 em diante (uma pedra fora da sua camada de origem)
 let gemNextId = 157;
 for (const L of GEM_LAYERS) {

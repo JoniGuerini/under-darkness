@@ -557,7 +557,8 @@ function cdAfter() {
   // ---------- 1. tudo alcançável das duas entradas ----------
   const reach = new Uint8Array(NN), stack = [];
   const flood = (s0, again) => { if ((reach[s0] && !again) || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
-  for (const E of cdEntries) flood(I(E.x0 + 2, E.fy - 1));
+  // das entradas: a coluna inteira até a borda do salão de chegada (a boca de cima pode ainda estar fechada)
+  for (const E of cdEntries) for (let y = E.fy - 1; y <= (E.ledge || E.fy); y++) for (let x = E.x0; x < E.x0 + 4; x++) flood(I(x, y));
   if (!cdEntries.length) flood(I(cdChambers[0].cx, mouthOf(cdChambers[0])));
   if (cdBoss) for (let y = cdBoss.top; y < cdBoss.fy; y++) for (let k = 0; k < cdBoss.w; k++) reach[I(cdBoss.x0 + k, y)] = 1;   // a torre: o 137 cuida
   for (let pass = 0; pass < 60 * WSC; pass++) {
@@ -578,10 +579,8 @@ function cdAfter() {
         const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
       }
     }
-    if (!best) { for (const c of bestC) reach[c] = 1; continue; }
-    worm(best[0], best[1], best[2], best[3], 1.6, 0x66a0 + pass);
-    flood(I(best[2], best[3]), true);
-    if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
+    if (best) { worm(best[0], best[1], best[2], best[3], 1.6, 0x66a0 + pass); flood(I(best[2], best[3]), true); }
+    if (!reach[bestC[0]]) {   // longe demais, ou a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
       const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
       for (let h = 0; h < q.length && hit < 0; h++) {
         const c = q[h], x = c % WW, row = c - x;

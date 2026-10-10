@@ -15,6 +15,9 @@ const LAYERS = [
   { id: 'mina', nome: 'A Mina Abandonada' },
   { id: 'fungo', nome: 'As Minas Fúngicas' },
   { id: 'cidade', nome: 'A Cidade Afundada' },
+  { id: 'floresta', nome: 'A Floresta Petrificada' },
+  { id: 'anoes', nome: 'A Fortaleza dos Anões' },
+  { id: 'colmeia', nome: 'A Colmeia' },
   { id: 'abismo', nome: 'O Abismo' }
 ];
 const LAYER_D = 186;   // metros de cada camada

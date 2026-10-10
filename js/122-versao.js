@@ -7,8 +7,18 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.14.0';
+const VERSAO = '0.17.0';
 const NOVIDADES = [
+  { v: '0.17.0', data: '10/10/2026', titulo: 'A Colmeia', itens: [
+    'Camada 9, A Colmeia (1488 a 1674 m): cera, favos e âmbar com anões presos, 10 insetos novos, a chefe A Rainha e a ambrita.',
+    'O Abismo desceu para 1674 a 1860 m e continua sendo a última camada.'
+  ] },
+  { v: '0.16.0', data: '10/10/2026', titulo: 'A Fortaleza dos Anões', itens: [
+    'Camada 8, A Fortaleza dos Anões (1302 a 1488 m): salões de granito e bronze, alavancas e comportas, autômatos e fantasmas anões, o chefe O Autômato-Forja e o mithril.'
+  ] },
+  { v: '0.15.0', data: '10/10/2026', titulo: 'A Floresta Petrificada', itens: [
+    'Camada 7, A Floresta Petrificada (1116 a 1302 m): floresta de pedra com folhagem de cristal, 10 bichos novos, chefe O Cervo de Pedra, platina; corrigido um mundo em que a Cidade Afundada não tinha caminho para baixo.'
+  ] },
   { v: '0.14.0', data: '10/10/2026', titulo: 'A Cidade Afundada', itens: [
     'Nova camada: A Cidade Afundada (930-1116 m), com ruas, casas, templos, cisternas, o Grande Poço, 10 monstros novos, o chefe O Sineiro Afogado e o metal prata.',
     'O Abismo desceu para 1116-1302 m.',

@@ -50,9 +50,13 @@ const UDW = { pages: {}, nav: [], rolls: new Map(), imgs: new Map() };
   // um monstro parado, desenhado pela mesma função do jogo (15-render drawEnemy), num quadro fora da tela
   UDW.enemyArt = type => memo('e:' + type, () => {
     const D = ET[type]; if (!D) return null;
+    // o Cervo de Pedra é desenhado na passada da clareira (146), não pelo drawEnemy: o quadro parado dele
+    if (type === 'cervo' && typeof CERA !== 'undefined') return pack2(crop(CERA.frame(0, false).r));
     low.width = 260; low.height = 160; VW = 260; VH = 160; lc.imageSmoothingEnabled = false;
     const e = { type, x: 130 - D.w / 2, y: 140 - D.h, w: D.w, h: D.h, vx: 0, vy: 0, onGround: true, facing: 1, t: 0.35, flash: 0, state: 'walk', stateT: 0, sAng: 0.9, arm: 2.7,
       variant: 1, lvl: 1, hp: 10, maxHp: 10, stun: 0, vis: 1, seed: 1, hop: 1, boss: !!D.boss, dead: false, phase: 1, atkCD: 1, rise: 0, risen: 1 };
+    // a Serpente de Raiz só aparece saindo do buraco (144): um bote para a direita
+    if (type === 'serpraiz') Object.assign(e, { hole: 1, mx: 110, my: 120, state: 'strike', len: 22, sdx: 1, sdy: 0, ox: 0, oy: 0 });
     lc.clearRect(0, 0, 260, 160); drawEnemy(e, 0, 0);
     return pack2(crop(low));
   });
