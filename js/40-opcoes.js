@@ -1,10 +1,10 @@
 'use strict';
 /* tela de opções: a mesma no título e no menu de pausa (Esc). Três abas:
-   Som: som geral ligado/desligado, música ligada/desligada, volume da música e volume dos efeitos (sliders em pixel art)
+   Som: som geral ligado/desligado, som de ambiente ligado/desligado (97-ambiente), volume do ambiente e volume dos efeitos (sliders em pixel art)
    Vídeo: tela cheia e contador de FPS
    Atalhos: quadro de atalhos na tela ligado/desligado e a lista de todas as teclas
-   Cada opção só chama o que já existia (toggleSound, botão Música, toggleFull, toggleFps, toggleHelp), então tudo continua salvo
-   no navegador como antes. Os volumes ficam em 'sob-a-terra-vol-musica' e 'sob-a-terra-vol-efeitos' (lidos no 09-audio).
+   Cada opção só chama o que já existia (toggleSound, toggleAmb, toggleFull, toggleFps, toggleHelp), então tudo continua salvo
+   no navegador como antes. Os volumes ficam em 'sob-a-terra-vol-musica' (hoje o do ambiente) e 'sob-a-terra-vol-efeitos' (lidos no 09-audio).
    No menu de pausa os botões soltos de som, música, tela cheia, FPS e atalhos dão lugar a um botão "Opções". */
 let optsFrom = null;
 const optsOpen = () => !!$('opts') && !$('opts').hidden;
@@ -28,7 +28,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
         <button type="button" class="tab" data-ot="video" role="tab">Vídeo</button>
         <button type="button" class="tab" data-ot="atalhos" role="tab">Atalhos</button>
       </div>
-      <div class="opane" data-op="som">${tog('oSom', 'Som')}${tog('oMus', 'Música')}${sld('oVolMus', 'Volume da música')}${sld('oVolSfx', 'Volume dos efeitos')}</div>
+      <div class="opane" data-op="som">${tog('oSom', 'Som')}${tog('oMus', 'Ambiente')}${sld('oVolMus', 'Volume do ambiente')}${sld('oVolSfx', 'Volume dos efeitos')}</div>
       <div class="opane" data-op="video" hidden>${tog('oFull', 'Tela cheia')}${tog('oFps', 'Mostrar FPS')}</div>
       <div class="opane" data-op="atalhos" hidden>${tog('oHelp', 'Atalhos na tela')}<div class="sep" role="separator"></div><div class="okeys" id="oKeys">${keyList}</div></div>
       <div class="ofoot"><button type="button" class="ghost" id="oBack">Voltar</button></div>
@@ -48,7 +48,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
   /* liga/desliga */
   const TOG = {
     oSom: [() => !muted, () => { initAudio(); toggleSound(); }],
-    oMus: [() => window.isMusicOn ? isMusicOn() : true, () => { initAudio(); $('btnMusic') && $('btnMusic').click(); }],
+    oMus: [() => window.isAmbOn ? isAmbOn() : true, () => { initAudio(); if (window.toggleAmb) toggleAmb(); }],
     oFull: [() => !!fullEl(), () => toggleFull()],
     oFps: [() => fpsOn, () => toggleFps()],
     oHelp: [() => !helpHidden, () => toggleHelp()]
@@ -56,7 +56,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
   function paintTog(id) {
     const b = $(id), on = !!TOG[id][0]();
     b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
-    b.querySelector('b').textContent = id === 'oMus' || id === 'oFull' ? (on ? 'Ligada' : 'Desligada') : (on ? 'Ligado' : 'Desligado');
+    b.querySelector('b').textContent = id === 'oFull' ? (on ? 'Ligada' : 'Desligada') : (on ? 'Ligado' : 'Desligado');
   }
   function paintAll() { for (const id in TOG) paintTog(id); paintSl('oVolMus', musVol); paintSl('oVolSfx', sfxVol); el.querySelector('[data-op="som"]').classList.toggle('mute', muted); }
   for (const id in TOG) $(id).addEventListener('click', () => { TOG[id][1](); paintAll(); setTimeout(paintAll, 150); sfxTick(); });

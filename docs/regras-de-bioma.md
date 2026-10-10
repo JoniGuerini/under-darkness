@@ -67,7 +67,7 @@ Regra do Jonathan (2026-10-09), fixa:
 2. Salas e corredores.
 3. Ligações entre andares (escadas e poços com corrente).
 4. Estragos (escombros, buracos na abóbada).
-5. Minérios.
+5. Minérios: carvão e um único metal por camada, na ordem da forja (cobre, ferro, ouro, cobalto, infernita; o cristal é pedra preciosa, não metal; ver `js/102-minerios-camada.js` e `js/110-infernita.js`). Camada nova abaixo do Abismo traz um metal novo.
 6. Garantir que tudo é alcançável a partir da entrada.
 7. Decoração de 1 bloco.
 8. Correção estrutural (colunas, árvores).

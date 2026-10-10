@@ -1,0 +1,65 @@
+/* ================= alquimia: o livro da Marta (js/96-alquimista.js) e os elixires no HUD (js/95-alquimia-uso.js) =================
+   O livro usa a mesma estrutura do livro da forja (.prof, .plist, .pg, .pr, .pdet, .preag, .pwork em estilo.css) e
+   veste a casa da Marta com as variáveis do kit de moradores (--k-*, css/temas-npc.css): o telhado de palha em cima,
+   os esteios dos lados, o reboco com vigas por dentro, o verde dos botões dela. Nada se mexe sozinho aqui. */
+#alq{padding-block:10px}
+#alq .alqp{
+  box-sizing:border-box;width:min(940px,100%);height:min(680px,calc(100dvh - 20px));display:flex;flex-direction:column;gap:12px;padding:6px 16px 14px;
+  position:relative;isolation:isolate;image-rendering:pixelated;
+  border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
+  background-color:var(--k-bg,#1a1c12);
+  background-image:var(--k-glow),linear-gradient(var(--k-shade),var(--k-shade-2) 30%,var(--k-shade)),var(--k-wall);background-size:auto,auto,1080px 720px;background-position:0 0,0 0,0 100%;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65);color:var(--k-txt)
+}
+#alq .ch{flex-wrap:nowrap;gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat;padding-bottom:8px}
+#alq .ch::before{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#alq .ch h3{white-space:nowrap;font-size:30px;background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)}
+#alqGold{margin-left:auto;font-size:14px;font-weight:600;color:var(--k-acc);white-space:nowrap;font-variant-numeric:tabular-nums}
+#alq button.ghost{background:var(--k-board) 0 0/180px 42px;image-rendering:pixelated;color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px}
+#alq .ch button.ghost{padding:2px 10px}
+#alq button.ghost:hover{filter:brightness(1.15)}
+#alq .qty button.ghost{padding:0 6px;border-width:8px;border-image-width:8px}
+#btnAlqMake{margin-left:auto;min-width:150px;background:var(--k-main);color:var(--k-main-txt);text-shadow:0 1px 0 var(--k-main-hi);border:3px solid #000;box-shadow:inset 0 2px 0 var(--k-main-hi),inset 0 -3px 0 var(--k-main-lo),0 0 14px -4px var(--k-main-glow),0 3px 0 rgba(0,0,0,.55)}
+#btnAlqMake:hover{filter:brightness(1.1)}
+#btnAlqMake.stop{background:#b0402a;color:#fff2e0;text-shadow:1px 1px 0 #000;box-shadow:inset 0 2px 0 #ff9a7a,inset 0 -3px 0 #5a160a,0 3px 0 rgba(0,0,0,.55)}
+#alq button:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
+/* a lista: uma prateleira escura de madeira; os grupos como rótulos de vidro de botica */
+#alq .plist{background:rgba(10,12,6,.62);box-shadow:inset 0 0 0 1px var(--k-line),inset 0 2px 0 rgba(0,0,0,.7)}
+#alq .psearch input{background:#0b0d07;color:var(--k-txt);box-shadow:inset 0 0 0 1px #3a4a26}
+#alq .psearch input:focus{box-shadow:inset 0 0 0 1px var(--k-acc),0 0 10px -3px var(--k-main-glow)}
+#alq .pg{color:var(--k-acc);background:linear-gradient(90deg,rgba(74,110,38,.55),rgba(30,44,14,.12));box-shadow:inset 0 0 0 1px #4a6a2a}
+#alq .pr{color:#7c8070}
+#alq .pr.can{color:var(--k-txt)}
+#alq .pr em{color:#b8f08a}
+#alq .pr:hover{background:rgba(190,240,140,.07)}
+#alq .pr.on{background:linear-gradient(90deg,rgba(140,210,80,.3),rgba(140,210,80,.05));border-color:var(--k-acc);color:#f4ffe0;box-shadow:0 0 12px -4px var(--k-main-glow)}
+/* a receita: a mesa da Marta, com a placa dela apagada no fundo */
+#alq .pdet{background:rgba(10,12,6,.55);box-shadow:inset 0 0 0 1px var(--k-line)}
+#alq .pdet::before{content:"";position:absolute;right:18px;top:92px;width:156px;height:132px;background:var(--k-sign) center/156px 132px no-repeat;image-rendering:pixelated;opacity:.08;pointer-events:none}
+#alq .pico{background:radial-gradient(circle at 50% 40%,#2c3a1c,#0b0d07 75%);box-shadow:0 0 0 2px #6a9a3a,0 0 0 4px #000,0 0 16px rgba(160,230,90,.35)}
+#alq .pico img{filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#alq .pdh small{color:var(--k-acc)}
+#alq .pdesc{color:var(--k-txt)}
+#alq .pdbody h5{color:var(--k-acc)}
+#alq .alqfx{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;padding:8px 12px;background:rgba(0,0,0,.35);border-left:3px solid var(--k-line)}
+#alq .alqfx b{font-size:12px;font-weight:700;color:var(--k-dim);letter-spacing:.1em;text-transform:uppercase;align-self:center}
+#alq .alqfx span{color:#d8f4b0;font-weight:600}
+#alq .preag .ri{background:radial-gradient(circle at 50% 42%,var(--k-slot),var(--k-slot-2) 78%);box-shadow:inset 0 0 0 1px var(--k-line),inset 2px 2px 0 1px rgba(0,0,0,.7)}
+#alq .preag li.ok b{color:#b8f08a}
+#alq .preag li.no b{color:#ff8a6a}
+#alq .pwork{border-top:2px solid rgba(0,0,0,.6)}
+#alqCv{width:48px;height:36px;flex:none;image-rendering:pixelated;background:radial-gradient(ellipse at 50% 100%,#2a1a0a,#0b0805 70%);border:2px solid #000}
+#alq .pbar{background:#080a05;box-shadow:inset 0 0 0 1px #3a4a26,inset 0 3px 0 rgba(0,0,0,.6)}
+#alq .pbar>i{background:linear-gradient(#eaffc8 0 20%,#9ae05a 20% 48%,#4a9a26 48% 78%,#24560e 78%);box-shadow:0 0 10px 1px rgba(150,230,80,.6)}
+#alq .pnote{color:var(--k-dim);text-shadow:1px 1px 0 #000}
+#alq .qty input{background:#0b0d07;color:var(--k-txt);box-shadow:inset 0 0 0 1px #3a4a26}
+@media (max-width:760px){#alq .ch{flex-wrap:wrap}}
+
+/* ---- elixires ativos: ícones com o tempo, debaixo do quadro do canto ---- */
+#alqBuffs{position:absolute;top:calc(100% + 8px);right:0;display:flex;gap:6px;justify-content:flex-end;pointer-events:none}
+#alqBuffs:empty{display:none}
+#alqBuffs .buff{display:grid;justify-items:center;gap:2px}
+#alqBuffs img{width:34px;height:34px;image-rendering:pixelated;padding:3px;background:radial-gradient(circle at 50% 42%,#2c2232,#120d16 78%);border:2px solid #000;box-shadow:inset 0 0 0 1px #6e4718,0 2px 0 rgba(0,0,0,.5)}
+#alqBuffs span{font:700 12px var(--font-ui);color:#efe2c4;text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;font-variant-numeric:tabular-nums}
+#alqBuffs .low span{color:#ff9a6a}

@@ -7,7 +7,7 @@
      Átrio Soterrado  6-26 m   a broken stairway down from the village sign, a vestibule
      Nave             26-82 m  two floors of tall vaulted halls with columns
      Claustro         82-132 m three floors of chapels and arcaded walks
-     Criptas          132-186m low vaults and ossuaries; the old crypt of O Carrasco at the bottom
+     Criptas          132-186m low vaults and ossuaries
    joined by doorways on each floor, stairways and shafts with chains between floors.
    Then it is dressed: tile decorations (candles, bones, webs...) and the big props
    (43-catedral-objetos), which are baked into the chunk images and cost nothing per frame. */
@@ -29,20 +29,11 @@ function buildCathedral() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const R = mulberry32(seed ^ 0x7ca7ed2a);
   CB_S0 = surf[SPX] + CAVE_D; CB_F = Math.min(1, (WH - 7 - CB_S0) / 188);   // the caves (js/56-caverna-mundo.js) fill the CAVE_D metres above
-  const occ = new Uint8Array(NN);   // 1 masonry, 2 inside a room or passage, 3 kept clear (the crypt)
+  const occ = new Uint8Array(NN);   // 1 masonry, 2 inside a room or passage
   cathRooms = [];
   const X42 = n => { try { const v = eval(n); return (v < 30 ? WMAT[v] : MAT[v] || DECO[v]) ? v : 0; } catch (e) { return 0; } };
   const FRISO = X42('CT_FRISO'), LAPIDE = X42('CT_LAPIDE'), MUSGO = X42('CT_MUSGO'), MARMORE = X42('CT_MARMORE'), PILASTRA = X42('CT_PILASTRA'), TIJOLO = X42('CT_TIJOLO'), ARDOSIA = X42('CT_ARDOSIA'), W_ARCADA = X42('WCT_ARCADA'), W_MARMORE = X42('WCT_MARMORE');
   const inside = (x, y) => occ[I(x, y)] === 2;
-
-  // ---------- 1. lift the old crypt out; it goes back in at the bottom ----------
-  let cb = null;
-  if (CRYPT_HIDDEN) crypt = null;
-  if (crypt) {
-    const w = crypt.x1 - crypt.x0 + 1, h = crypt.y1 - crypt.y0 + 1, t = new Uint8Array(w * h), wl = new Uint8Array(w * h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = (crypt.y0 + y) * WW + crypt.x0 + x; t[y * w + x] = tiles[i]; wl[y * w + x] = walls[i]; }
-    cb = { w, h, t, wl };
-  }
 
   // ---------- 2. the rock: dirt up top, then limestone with dirt pockets, then limestone ----------
   for (let x = 0; x < WW; x++) {
@@ -64,13 +55,6 @@ function buildCathedral() {
     if (Math.abs(n - 0.5) < 0.018 && m > 0.55) tiles[y * WW + x] = AIR;
   }
 
-  // the crypt's new place: its floor near the bottom; nothing else is built there
-  let cryptDy = 0;
-  if (cb) {
-    const ny0 = cbY(184) - cb.h + 1; cryptDy = ny0 - crypt.y0;
-    for (let y = crypt.y0 + cryptDy - 4; y <= crypt.y1 + cryptDy + 3; y++) for (let x = crypt.x0 - 5; x <= crypt.x1 + 5; x++) if (y >= 0 && y < WH) occ[I(x, y)] = 3;
-  }
-
   // ---------- 3. rooms ----------
   const STY = [
     { mas: CT_CANTARIA, floor: CT_LAJE, wall: WCT_CANTARIA, ruin: 0.3, moss: 1 },                                   // átrio
@@ -81,7 +65,7 @@ function buildCathedral() {
   const wallOf = (x, y, w) => y < surf[W1(x)] + 2 ? 0 : w;
   const free = (x0, x1, y0, y1) => { for (let y = y0; y <= y1; y++) { if (y < 1 || y >= WH - 4) return false; for (let x = x0; x <= x1; x++) if (occ[I(x, y)] >= 2) return false; } return true; };
   const masAt = (x, y, st) => {
-    const i = I(x, y); if (occ[i] === 2 || occ[i] === 3 || y < surf[W1(x)]) return;
+    const i = I(x, y); if (occ[i] === 2 || y < surf[W1(x)]) return;
     const n = depthNz(x, y, 60, seed ^ 0x51d1);
     tiles[i] = n > 1 - st.ruin * 1.6 ? (MUSGO && st.moss && hash2(x, y, 0x51d2) < 0.5 ? MUSGO : CT_RUINA) : TIJOLO && st.brick && depthNz(x, y, 45, seed ^ 0x51d3) > 0.7 ? TIJOLO : st.mas; occ[i] = 1;
   };
@@ -111,7 +95,7 @@ function buildCathedral() {
   // a passage on one floor between two rooms (or out into the rock): air rows fy-h..fy-1, lined like a room
   function passage(xa, xb, fy, h, st) {
     for (let x = xa; x <= xb; x++) {
-      for (let y = fy - h; y < fy; y++) { const i = I(x, y); if (occ[i] === 3) continue; tiles[i] = AIR; occ[i] = 2; walls[i] = st.wall; }
+      for (let y = fy - h; y < fy; y++) { const i = I(x, y); tiles[i] = AIR; occ[i] = 2; walls[i] = st.wall; }
       const c = I(x, fy - h - 1); if (occ[c] !== 2 && occ[c] !== 3) { masAt(x, fy - h - 1, st); if (st.lintel && occ[c] === 1) tiles[c] = st.lintel; walls[c] = st.wall; }
       const f = I(x, fy); if (occ[f] !== 2 && occ[f] !== 3) { tiles[f] = st.floor; occ[f] = 1; walls[f] = st.wall; }
       const g = I(x, fy + 1); if (occ[g] === 0) masAt(x, fy + 1, st);
@@ -122,7 +106,7 @@ function buildCathedral() {
     while (true) {
       const run = steep && steep-- > 0 ? 1 : 2;
       for (let s = 0; s < run; s++) {
-        for (let yy = y - h; yy < y; yy++) { const i = I(x, yy); if (occ[i] === 3) continue; tiles[i] = AIR; occ[i] = 2; walls[i] = wallOf(x, yy, st.wall); }
+        for (let yy = y - h; yy < y; yy++) { const i = I(x, yy); tiles[i] = AIR; occ[i] = 2; walls[i] = wallOf(x, yy, st.wall); }
         const c = I(x, y - h - 1); if (occ[c] === 0 || occ[c] === 1) { if (occ[c] === 0) masAt(x, y - h - 1, st); walls[c] = wallOf(x, y - h - 1, st.wall); }
         const f = I(x, y); if (occ[f] !== 2 && occ[f] !== 3) { tiles[f] = st.floor; occ[f] = 1; walls[f] = wallOf(x, y, st.wall); }
         for (let k = 1; k <= 2; k++) { const g = I(x, y + k); if (occ[g] === 0) masAt(x, y + k, st); }
@@ -137,7 +121,7 @@ function buildCathedral() {
   function shaft(x, ya, yb, st) {
     for (let y = ya; y <= yb; y++) for (let dx = -1; dx <= 2; dx++) {
       const i = I(x + dx, y);
-      if (dx === 0 || dx === 1) { if (occ[i] === 3) continue; if (occ[i] !== 2 || SOLID[tiles[i]]) tiles[i] = AIR; occ[i] = 2; walls[i] = st.wall; }
+      if (dx === 0 || dx === 1) { if (occ[i] !== 2 || SOLID[tiles[i]]) tiles[i] = AIR; occ[i] = 2; walls[i] = st.wall; }
       else if (occ[i] === 0) { masAt(x + dx, y, st); walls[i] = st.wall; }
     }
     for (let y = ya; y <= yb; y++) { const i = I(x, y); if (tiles[i] === AIR) tiles[i] = CHAIN; }
@@ -249,22 +233,6 @@ function buildCathedral() {
     for (let y = ey; y < ey + 4; y++) for (let x = ex - 1; x < ex + 6; x++) { const i = I(x, y); if (tiles[i] === AIR) walls[i] = x <= ex + 5 ? WCT_CANTARIA : y - surf[W1(x)] < 2 ? 0 : walls[i]; }
   }
 
-  // ---------- 6. the crypt of O Carrasco goes back in, at the bottom ----------
-  if (cb) {
-    for (let y = 0; y < cb.h; y++) for (let x = 0; x < cb.w; x++) { const i = (crypt.y0 + cryptDy + y) * WW + crypt.x0 + x; tiles[i] = cb.t[y * cb.w + x]; walls[i] = cb.wl[y * cb.w + x]; }
-    for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const i = y * WW + x; if (occ[i] === 3 && !(x >= crypt.x0 && x <= crypt.x1 && y >= crypt.y0 + cryptDy && y <= crypt.y1 + cryptDy)) occ[i] = 0; }
-    const sh = a => { a[1] += cryptDy; };
-    crypt.y0 += cryptDy; crypt.y1 += cryptDy; sh(crypt.door);
-    const B = crypt.boss; B.y0 += cryptDy; B.y1 += cryptDy; B.fy += cryptDy; for (const d of B.doors) sh(d);
-    for (const r of crypt.rooms) { r[1] += cryptDy; r[3] += cryptDy; }
-    // its doorway opens on a crypt passage that runs to the nearest room
-    const [dx0, dy0] = crypt.door, dir = crypt.entRight ? 1 : -1, st = STY[3];
-    let x = dx0 - dir * 2, n = 0;
-    const fy = dy0 + 2;
-    while (n < 90) { const hit = cathRooms.some(Rm => Rm.band === 3 && W1(x - Rm.x0) < Rm.w && fy <= Rm.fy && fy > Rm.top); if (hit && n > 3) break; x += dir; n++; }
-    passage(Math.min(dx0 - dir * 2, x), Math.max(dx0 - dir * 2, x), fy, 3, st);
-  }
-
   // ---------- 7. damage: rubble under broken vaults, collapsed corners ----------
   const R2 = mulberry32(seed ^ 0x2ca7);
   for (const Rm of cathRooms) {
@@ -289,7 +257,7 @@ function buildCathedral() {
       }
     }
   };
-  vein(COAL, 170 * WSC, 6, 184, 3, 7); vein(COPPER, 150 * WSC, 6, 110, 2, 6); vein(IRON, 130 * WSC, 26, 184, 2, 6); vein(GOLD, 80 * WSC, 82, 184, 2, 5); vein(CRYSTAL, 50 * WSC, 132, 184, 2, 5);
+  vein(COAL, 150 * WSC, 6, 184, 3, 7); vein(IRON, 140 * WSC, 6, 184, 2, 6);   // coal and iron in the cathedral (102: one metal per layer)
 
   // ---------- 9. everything reachable from the village ----------
   const reach = new Uint8Array(NN), stack = [];
@@ -299,7 +267,6 @@ function buildCathedral() {
   };
   flood();
   const goals = cathRooms.map(Rm => { let gx = Rm.x0 + (Rm.w >> 1); for (let k = 0; k < Rm.w; k++) { const x = Rm.x0 + ((k + (Rm.w >> 1)) % Rm.w); if (!SOLID[tiles[I(x, Rm.fy - 1)]]) { gx = x; break; } } return [gx, Rm.fy - 1, Rm.band]; });
-  if (crypt) goals.push([crypt.door[0], crypt.door[1], 3]);
   for (const [gx, gy, band] of goals) {
     if (reach[I(gx, gy)]) continue;
     // nearest reached tile above-ish: drop a chained shaft down to here, or a passage across

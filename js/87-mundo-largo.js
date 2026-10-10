@@ -7,7 +7,7 @@
    three times longer to walk round and the boss halls three times further apart.
    Here, last of all in generation: a check that every open pocket underground is joined to the village. Where a
    pocket of 30 or more open tiles is cut off, a passage is dug from it to the nearest open place that is joined:
-   across first, then a climbable shaft (a chain, or a ladder in the mine) up or down. Then the save: worlds of the
+   across first, then a climbable shaft (a chain, or a ladder in the mine and the abyss) up or down. Then the save: worlds of the
    old width are remade (wg 6); level, items, gold and the chest stay.
    Loads after 86 (wraps buildCathedral after everyone else) and before 47. */
 
@@ -18,11 +18,12 @@ function worldLink() {
   const flood = s0 => { if (reach[s0] || !open(s0)) return; reach[s0] = 1; st.push(s0); while (st.length) { const c = st.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !reach[nb] && open(nb)) { reach[nb] = 1; st.push(nb); } } };
   flood(I(SPX, surf[SPX] - 2));
   const sacred = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) ||
-    (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || inVillage(x, y);
-  const keepT = t => t === BEDROCK || t === CHEST || t === CHEST_OPEN || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA);
-  const kept = i => (typeof icLedge !== 'undefined' && icLedge.has(i)) || (typeof mnKeep !== 'undefined' && mnKeep.has(i));   // the fissure steps, the shafts' timbers
+    (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || (typeof inAbHall === 'function' && inAbHall(x, y, -3)) || inVillage(x, y);
+  const keepT = t => t === BEDROCK || t === CHEST || t === CHEST_OPEN || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA) ||
+    (typeof AB_BARREIRA !== 'undefined' && t === AB_BARREIRA) || t === LAVA;
+  const kept = i => (typeof icLedge !== 'undefined' && icLedge.has(i)) || (typeof mnKeep !== 'undefined' && mnKeep.has(i)) || (typeof abKeep !== 'undefined' && abKeep.has(i));   // the fissure steps, the shafts' timbers, the rifts and bridges
   const dig = (x, y) => { const i = I(x, y); if (y < 2 || y >= WH - 4 || keepT(tiles[i]) || kept(i) || sacred(W1(x), y)) return; if (SOLID[tiles[i]]) tiles[i] = AIR; };
-  const climb = y => typeof MN_ESCADA !== 'undefined' && typeof MN_S0 !== 'undefined' && y >= MN_S0 - 2 ? MN_ESCADA : CHAIN;
+  const climb = y => typeof AB_ESCADA !== 'undefined' && typeof AB_S0 !== 'undefined' && AB_S0 && y >= AB_S0 - 2 ? AB_ESCADA : typeof MN_ESCADA !== 'undefined' && typeof MN_S0 !== 'undefined' && y >= MN_S0 - 2 ? MN_ESCADA : CHAIN;
   // the cut-off pockets, biggest first
   const lab = new Int32Array(NN).fill(-1), comps = [];
   for (let s = 0; s < NN; s++) {

@@ -150,7 +150,7 @@ function computeLight(cx, cy) {
   for (const o of projs) if (o.kind !== 'arrow') addL(o.x, o.y, 0.6);
   villageLights((x, y, v) => addL(x, y, v));
   propLights(addL, x0, y0, w, h);
-  for (const e of enemies) if (e.type === 'lurker' || e.type === 'imp' || e.type === 'skull' || e.type === 'ghost') addL(e.x + e.w / 2, e.y + e.h / 2, e.type === 'imp' ? 0.4 : e.type === 'skull' ? 0.5 : e.type === 'ghost' ? 0.3 * (e.vis || 0) : 0.32); else if (e.boss) { addL(e.x + e.w / 2, e.y + 8, 0.5); addL(e.x + e.w / 2, e.y + e.h - 6, 0.45); }
+  for (const e of enemies) if (e.type === 'lurker' || e.type === 'skull' || e.type === 'ghost') addL(e.x + e.w / 2, e.y + e.h / 2, e.type === 'skull' ? 0.5 : e.type === 'ghost' ? 0.3 * (e.vis || 0) : 0.32); else if (e.boss) { addL(e.x + e.w / 2, e.y + 8, 0.5); addL(e.x + e.w / 2, e.y + e.h - 6, 0.45); }
   for (let it = 0; it < 2; it++) {
     for (let j = 0; j < h; j++) {
       const r = j * w;

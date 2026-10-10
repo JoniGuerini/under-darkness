@@ -164,11 +164,11 @@ const TIER_WEIGHT = [0, 65, 25, 9, 1];
 const RARITY_ODDS = {
   monster: [25, 48, 21, 5, 0.9, 0.1],
   chest: [12, 48, 30, 8, 1.8, 0.2],
-  forge: [0, 60, 30, 8, 1.8, 0.2],
+  forge: [0, 100, 0, 0, 0, 0],   // the forge makes white pieces only (2026-10-09): modifiers come from the enchanter (118)
   shop: [0, 45, 42, 11, 2, 0]
 };
 const CHEST_GEAR = 0.55;   // chance that a chest holds gear at all
-// how deep a spot is, 1..4, for loot: the old caves (1-3, crypt 4) or the cathedral (Átrio 1, Nave 2, Claustro 3, Criptas 4)
+// how deep a spot is, 1..4, for loot: the old caves (1-3) or the layers' bands (Átrio 1, Nave 2, Claustro 3, Criptas and deeper 4)
 function lootZone(tx, ty) { const z = zoneAt(tx, ty); return clamp(z >= 5 ? z - 4 : z, 1, 4); }
 
 /* ---- rolling ---- */

@@ -8,8 +8,8 @@
       let h = UDW.head('Regras do jogo', 'Os números que valem para tudo.');
       h += `<h2>Herói</h2><div class="stats">${UDW.stat(HERO_HP, 'vida inicial')}${UDW.stat(pl.maxMana || pl.mana, 'mana')}${UDW.stat(UDW.pct(BASE_CRIT, 0), 'crítico base')}${UDW.stat('+' + UDW.pct(pl.critDmg, 0), 'dano do crítico')}${UDW.stat(VIG_MAX, 'vigor')}${UDW.stat(pl.gold, 'ouro inicial')}</div>
         <ul class="regras"><li>Subir de nível não dá bônus nenhum (vida, mana, dano e defesa vêm só do equipamento).</li>
-        <li>Sem regeneração de vida natural: só de equipamento ou da poção. A mana regenera sozinha.</li>
-        <li>Poção de Vida: ${POT_HEAL} de vida ao longo de 5 s. Beber outra soma ao que falta curar.</li>
+        <li>Sem regeneração de vida natural: só de equipamento, poção ou Elixir da Gosma. A mana regenera sozinha.</li>
+        <li>Poção de Vida: ${POT_HEAL} de vida ao longo de 5 s. Beber outra soma ao que falta curar. Poções maiores, mana e elixires: veja <a href="#/alquimia">Alquimia</a>.</li>
         <li>Encostar num monstro não machuca; só os ataques dele.</li>
         <li>Sem arma, um golpe a cada ${N(SWING, 1)} s.</li></ul>`;
       h += `<h2>Tipos de arma</h2><p class="nota">Toda arma do mesmo nível tem o mesmo dano por segundo. O que muda é quanto cada golpe varia e a velocidade.</p>`

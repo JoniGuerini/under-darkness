@@ -1,0 +1,11 @@
+/* ================= Teodoro, o encantador (js/118-encantador.js) =================
+   Usa o kit dos moradores em temas-npc.css; aqui só as texturas e as cores dele: a pedra e a ardósia da oficina
+   por fora, prateleiras de potes de pedras brutas por dentro, e o verde-água da lente. */
+body[data-npc=encantador]{
+  --k-frame:var(--enc-frame);--k-frame-sm:var(--enc-frame-sm);--k-wall:var(--enc-wall);--k-board:var(--enc-board);--k-sign:var(--enc-sign);--k-portrait:var(--enc-portrait);
+  --k-bg:#0e1a1a;--k-shade:rgba(6,14,14,.74);--k-shade-2:rgba(6,14,14,.56);--k-glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(95,240,204,.14),transparent 70%);
+  --k-txt:#e4f2ee;--k-dim:#a6c2ba;--k-acc:#8ae8d0;--k-line:#1e7d6e;
+  --k-title:linear-gradient(#f0fffa 0 26%,#8ae8d0 26% 52%,#33a891 52% 78%,#1e7d6e 78%);
+  --k-main:linear-gradient(#d8fff2 0 14%,#33a891 14% 50%,#1e7d6e 50% 82%,#13584f 82%);--k-main-txt:#04201c;--k-main-hi:#e8fff8;--k-main-lo:#0c3a36;--k-main-glow:rgba(95,240,204,.5);
+  --k-slot:#122222;--k-slot-2:#050c0c
+}

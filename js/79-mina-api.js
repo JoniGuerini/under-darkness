@@ -30,6 +30,7 @@ let MN_S0 = IC_S0 + IC_D;                          // the first mine row of the 
 const MN_FERROSA = 94, MN_REJEITO = 95, MN_ENTULHO = 96, MN_TABUA = 97, MN_VIGA = 98, MN_CAVADA = 99, MN_TIJOLO = 100, MN_ESCORIA = 101, MN_QUARTZITO = 102, MN_BARREIRA = 103;
 // the ores again, set in the iron rock (same items as COAL, IRON, GOLD, CRYSTAL)
 const MN_O_CARVAO = 104, MN_O_FERRO = 105, MN_O_OURO = 106, MN_O_CRISTAL = 107;
+const MN_O_COBALTO = 124;   // cobalt, the mine's metal (2026-10-09); crystal stays as a rarer gem
 // one-block decorations (not solid): the timber props (floor to roof, like the ice columns), rails on the gallery
 // floors, a miner's lantern on a hook, the ladders (climbed like chains), tools left lying, a heap of stones, a
 // rope hanging down a shaft (climbed too), a glowing lump of slag, a goblin's skull-on-a-stick

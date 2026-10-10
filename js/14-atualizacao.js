@@ -55,7 +55,6 @@ function update(dt) {
   skyLight = 0.4 + 0.6 * dayFactor(hourNow());
   updatePlayer(dt);
   updateEnemies(dt);
-  updateCrypt();
   updateProjs(dt);
   updateOrbs(dt);
   updateLoot(dt);

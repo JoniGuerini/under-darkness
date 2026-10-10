@@ -23,6 +23,7 @@
         ${card('modificadores', 'Modificadores', AFFIXES.length, `${tiers[0]} incomuns, ${tiers[1]} raros, ${tiers[2]} épicos e ${tiers[3]} lendários`)}
         ${card('materiais', 'Materiais e blocos', mats.length, 'minérios, barras, drops de monstro, consumíveis e blocos')}
         ${card('forja', 'Receitas da forja', RECIPES.length + Object.keys(FURN).length, `${Object.keys(FURN).length} fundições na fornalha e ${RECIPES.length} peças na bigorna`)}
+        ${card('alquimia', 'Alquimia', ALQ_RECIPES.length, `${HERBS.length} ervas, ${ALQ_RECIPES.filter(rc => ALQ[rc.id].kind !== 'elixir').length} poções e ${ALQ_RECIPES.filter(rc => ALQ[rc.id].kind === 'elixir').length} elixires no alambique da Marta`)}
         ${card('inimigos', 'Inimigos', Object.keys(ET).length, `${A.size} aparecem no mundo de hoje; os outros estão nas cavernas desligadas`)}
         ${card('npcs', 'Moradores', NPCS.length, NPCS.map(n => n.name).join(', '))}
         ${card('biomas', 'Biomas', 3, `As Cavernas, a Catedral Abandonada, as Cavernas de Gelo e a Mina Abandonada: ${Object.keys(PROP_DEFS).length} objetos de cena, ${UDW.cathBlocks().length} blocos de construção`)}

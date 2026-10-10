@@ -14,3 +14,7 @@
 #pause .danger::before{content:"";position:absolute;left:4px;right:4px;top:0;height:4px;background:linear-gradient(#000 0 1px,#3b3245 1px 3px,#000 3px)}
 #pause .danger button.warn{background:linear-gradient(#3a1a1c,#22100f);color:#ffb4a8}
 #pause .danger button.warn:hover{filter:brightness(1.2)}
+
+/* friso leve entre o Continuar e as opções: o separador do jogo (.sep), mais discreto */
+#pause .sep{height:12px;margin:0 6px;opacity:.7}
+#pause .sep::after{display:none}

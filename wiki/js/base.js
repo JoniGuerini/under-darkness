@@ -24,7 +24,7 @@ const UDW = { pages: {}, nav: [], rolls: new Map(), imgs: new Map() };
     const it = ITEMS[id]; if (!it) return esc(id);
     return `<a class="it" href="#/item/${id}" data-item="${id}">${UDW.icon(id, o.px || 26)}<span style="color:${RAR_COL[UDW.baseRar(id)]}">${esc(it.name)}</span>${o.n ? `<b class="qt">×${o.n}</b>` : ''}</a>`;
   };
-  UDW.kindOf = id => { const it = ITEMS[id]; return it.slot ? (it.slot === 'weapon' ? KIND[it.kind || 'sword'].name : UDW.SLOT[it.slot]) : it.gold ? 'Moeda' : it.spell ? 'Feitiço' : it.scroll ? 'Pergaminho' : it.use ? 'Consumível' : it.block || it.deco ? 'Bloco' : it.icon === 'bar' ? 'Barra' : it.icon === 'ore' || id === 'carvao' ? 'Minério' : 'Material'; };
+  UDW.kindOf = id => { const it = ITEMS[id]; return it.slot ? (it.slot === 'weapon' ? KIND[it.kind || 'sword'].name : UDW.SLOT[it.slot]) : it.gold ? 'Moeda' : it.spell || it.scroll ? (it.spell ? 'Feitiço' : 'Pergaminho') + (it.elem && typeof SPELL_ELEM !== 'undefined' && SPELL_ELEM[it.elem] ? ' de ' + SPELL_ELEM[it.elem].name : '') : it.use ? 'Consumível' : it.block || it.deco ? 'Bloco' : it.icon === 'bar' ? 'Barra' : id === 'min_cristal' ? 'Pedra preciosa' : it.icon === 'ore' || id === 'carvao' ? 'Minério' : 'Material'; };
   // a dica do jogo: o mesmo texto que aparece quando você passa o mouse num item lá dentro
   UDW.tipFor = s => {
     const it = ITEMS[s.id];

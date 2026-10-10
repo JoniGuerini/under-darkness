@@ -22,7 +22,7 @@ let IC_S0 = 46 + IC_TOP;                          // the first ice row of the cu
 // foreground blocks (solid)
 const IC_NEVE = 74, IC_NEVE_DURA = 75, IC_GELO = 76, IC_GELO_AZUL = 77, IC_PERMA = 78, IC_ROCHA = 79, IC_GELO_NEGRO = 80, IC_CALC_GELO = 81;
 // the ores again, set in the frozen rock (same items as IRON, GOLD, CRYSTAL)
-const IC_O_FERRO = 82, IC_O_OURO = 83, IC_O_CRISTAL = 84;
+const IC_O_FERRO = 82, IC_O_OURO = 83, IC_O_CRISTAL = 84, IC_O_CARVAO = 123;   // 123: coal in frozen rock (102)
 // one-block decorations (not solid)
 const IC_SINCELO = 85, IC_ESTALAG = 86, IC_CRISTAL = 87, IC_CRISTAL_TETO = 88, IC_NEVE_MONTE = 89, IC_OSSOS = 90;
 // the boss hall's wall of ice (solid, unbreakable while the fight lasts), the glowing ice veins, and the ice

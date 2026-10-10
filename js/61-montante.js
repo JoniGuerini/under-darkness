@@ -90,7 +90,6 @@ for (const id in ITEMS) if (ITEMS[id].kind === 'greatsword') { ITEM_G[id] = 0; I
 // where they turn up
 DROPS.skeleton.push(['montante_ferro', 0.02]);
 DROPS.guard.push(['montante_osso', 0.02]);
-DROPS.brute.push(['montante_ouro', 0.025]);
 DROPS.lurker.push(['montante_cristal', 0.02]);
 CHEST_LOOT[1].push('montante_ferro');
 CHEST_LOOT[2].push('montante_ferro', 'montante_osso');

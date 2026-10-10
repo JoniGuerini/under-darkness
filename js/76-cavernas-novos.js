@@ -247,7 +247,6 @@ function gbBoom(b) {
   for (let ty = ty0 - 2; ty <= ty0 + 2; ty++) for (let tx = tx0 - 2; tx <= tx0 + 2; tx++) {
     const ddx = (tx + 0.5) * T - b.x, ddy = (ty + 0.5) * T - b.y; if (ddx * ddx + ddy * ddy > (R * 0.7) * (R * 0.7)) continue;
     const t = tileAt(tx, ty); if (!SOLID[t] || !GB_SAFE(t) || inVillage(tx, ty) || gbHall(tx, ty)) continue;
-    if (t === CRYPT && typeof cryptLocked === 'function' && cryptLocked(tx, ty)) continue;
     breakTile(tx, ty);
   }
 }

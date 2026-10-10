@@ -346,7 +346,7 @@ function reiEnd(won) {
   const e = reiBoss; reiBoss = null; bossFight = null;
   reiGates(false);
   $('bossbar').hidden = true; $('hud').classList.remove('boss');
-  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'O Carrasco'; bn.lastChild.textContent = 'guardião da cripta'; }
+  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = ''; bn.lastChild.textContent = ''; }
   for (const m of enemies) if (m.reiMinion && !m.dead) { m.dead = true; m.despawn = true; burst(m.x + m.w / 2, m.y + m.h - 6, 10, '#d8ccae', 60, 300, 0.5); }
   reiFx.waves.length = 0; reiFx.spikes.length = 0; reiFx.say = null;
   if (!won) { if (e) { const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); } return; }

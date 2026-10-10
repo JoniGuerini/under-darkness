@@ -204,7 +204,7 @@ function icBuild() {
     }
   };
   const rocky = t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO || t === IC_NEVE_DURA, blackish = t => t === IC_GELO_NEGRO || t === IC_ROCHA;
-  vein(IC_O_FERRO, 90 * WSC, 0, 156, 2, 6, rocky); vein(IC_O_OURO, 45 * WSC, 28, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO); vein(IC_O_CRISTAL, 70 * WSC, 46, 186, 2, 5, t => blackish(t) || t === IC_GELO_AZUL);
+  vein(IC_O_CARVAO, 90 * WSC, 0, 186, 3, 7, rocky); vein(IC_O_OURO, 100 * WSC, 0, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO);   // coal and gold in the ice (102)
 }
 
 /* the props of the crypt rooms that lost their footing when the floor broke open: dropped */
@@ -263,7 +263,7 @@ function icAfter() {
   // ---------- 2. the faces of the caves: frozen lakes, snow on the den floors, frost in the fissures, glowing seams ----------
   const airAt = (x, y) => tiles[I(x, y)] === AIR;
   for (let y = S0 + 1; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-    const i = y * WW + x, t = tiles[i], b = iceBand(y); if (!SOLID[t] || !IC_SOILS[t] || icLedge.has(i) || t === IC_O_FERRO || t === IC_O_OURO || t === IC_O_CRISTAL) continue;
+    const i = y * WW + x, t = tiles[i], b = iceBand(y); if (!SOLID[t] || !IC_SOILS[t] || icLedge.has(i) || t === IC_O_FERRO || t === IC_O_OURO || t === IC_O_CRISTAL || t === IC_O_CARVAO) continue;
     const up = tiles[i - WW] === AIR, dn = tiles[i + WW] === AIR, side = tiles[y * WW + W1(x - 1)] === AIR || tiles[y * WW + W1(x + 1)] === AIR;
     if (b === 1 && up && nz(x, y, 18, 0x1d2) > 0.42) tiles[i] = IC_GELO;                                     // frozen lakes on the hall floors
     else if (b === 2 && up) tiles[i] = nz(x, y, 10, 0x1d3) > 0.3 ? IC_NEVE : IC_NEVE_DURA;                  // snow on the den floors

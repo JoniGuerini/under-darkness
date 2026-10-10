@@ -12,7 +12,7 @@ const QICON = {};
 (function makeQuestIcons() {
   const art = {
     xp: [["....y....", "...yYy...", "yyyyYyyyy", ".yYYWYYy.", "..yYYYy..", ".yYy.yYy.", ".yy...yy."], { y: '#7ab83a', Y: '#c8ff6a', W: '#f4ffd8' }],
-    // the Carrasco: a hood with two red eyes over a cleaver
+    // a boss: a hood with two red eyes over a cleaver
     boss: [["...kkkkk...", "..kKKKKKk..", ".kKkkkkkKk.", ".kKkrkrkKk.", ".kKkkkkkKk.", "..kKkkkKk..", "...kkkkk...", "ss.......ss", "sSs.....sSs", ".sSs...sSs.", "..sSs.sSs.."], { k: '#3a2c36', K: '#7a6472', r: '#ff4a2a', s: '#8a909a', S: '#e4e8ee' }],
     place: [["..ddddd..", ".dDDDDDd.", "dDd...dDd", "dD.....Dd", "dD..k..Dd", "dD.kkk.Dd", "dDkkkkkDd", "ddddddddd"], { d: '#3a3f48', D: '#7d858f', k: '#0c0a10' }]
   };
@@ -29,7 +29,7 @@ const qIcon = k => QICON[k] || (ICON[k] && ICON[k].url) || '';
 const ORE_WHERE = { min_cobre: 'Minério de qualquer caverna', min_ferro: 'Minério das Cavernas Rasas para baixo', min_ouro: 'Minério das Cavernas Profundas', min_cristal: 'Minério do Abismo, na pedra escura', carvao: 'Veios pretos nas cavernas, ou com o Odo' };
 function whereFrom(id) {
   if (ORE_WHERE[id]) return ORE_WHERE[id];
-  const who = []; for (const t in DROPS) if (ET[t] && !ET[t].boss && t !== 'boss' && DROPS[t].some(d => d[0] === id)) who.push(ET[t].name.toLowerCase());
+  const who = []; for (const t in DROPS) if (ET[t] && !ET[t].boss && DROPS[t].some(d => d[0] === id)) who.push(ET[t].name.toLowerCase());
   if (!who.length) return '';
   const list = who.length > 1 ? who.slice(0, -1).join(', ') + ' e ' + who[who.length - 1] : who[0];
   return 'Cai de ' + list;

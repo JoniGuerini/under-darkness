@@ -26,7 +26,7 @@ Profundidade (1 bloco = 1 m, medida a partir do chão do vilarejo, como no HUD):
 | Átrio | 6 a ~25 m | **Átrio Soterrado** | terra virando calcário claro, escadaria quebrada, primeiras paredes de cantaria, raízes |
 | Nave | ~25 a ~80 m | **Nave da Catedral** | salões altos (14–22 blocos), colunas, arcos, bancos, vitrais, candelabros, estandartes |
 | Claustro | ~80 a ~130 m | **Claustro Profanado** | capelas menores, corredores, escadas, reboco com afrescos, estátuas, mais escombros |
-| Criptas | ~130 a ~185 m | **Criptas** | corredores baixos, ossário, nichos de túmulo, sarcófagos, pedra de cripta escura; a cripta do Carrasco no fundo |
+| Criptas | ~130 a ~185 m | **Criptas** | corredores baixos, ossário, nichos de túmulo, sarcófagos, pedra de cripta escura |
 
 Abaixo de ~186 m: rocha-mãe (BEDROCK). Mundo continua 300 x 240 blocos, dá a volta na horizontal.
 
@@ -74,7 +74,7 @@ A **parede de fundo** é sempre bem mais escura que o bloco da frente (o jogo in
 | 34 | `CT_MOSAICO` | Mosaico | piso de mármore xadrez claro/escuro com friso | 0.9 |
 | 35 | `CT_RUINA` | Cantaria rachada | cantaria quebrada, rachaduras e fuligem; bordas de desabamento | 0.7 |
 | 36 | `CT_ESCOMBRO` | Escombros | pedras soltas amontoadas (montes de desabamento) | 0.45 |
-| 37 | `CT_CRIPTA` | Pedra da cripta | alvenaria velha, fria, escura (faixa das criptas). Diferente de `CRYPT` (21), que é a cripta do Carrasco | 1.0 |
+| 37 | `CT_CRIPTA` | Pedra da cripta | alvenaria velha, fria, escura (faixa das criptas). Diferente de `CRYPT` (21), o bloco da antiga cripta do Carrasco (removida) | 1.0 |
 | 38 | `CT_OSSARIO` | Ossário | parede de crânios e ossos longos em argamassa | 0.6 |
 | 39 | `CT_MARMORE_NEGRO` | Mármore negro | degraus de altar, rodapés, molduras | 1.1 |
 | 40 | `CT_GRADE` | Grade de ferro | sólida, mas vazada: a parede de fundo aparece pelos furos (como `GATE`) | 1.0 |
@@ -117,7 +117,7 @@ Bem mais escuras e “distantes” (tons como `deepAntiga`):
 
 ### 3.5 Minérios dentro da catedral
 
-Os minérios continuam os mesmos tiles (`COAL`, `COPPER`, `IRON`, `GOLD`, `CRYSTAL`; a forja e os itens dependem deles), mas o hospedeiro muda: **a thread de blocos refaz `MAT[ore]` com `bakeOre(t, vCalcario)` e o halo sobre a paleta `calcario`** (ajuste `ORE_HALO[t].pal[0]` antes de assar), para o veio não aparecer cercado de pedra cinza. A líder põe os minérios no calcário (não nas paredes lavradas): cobre e carvão desde o átrio, ferro a partir da nave, ouro do claustro para baixo, cristal só nas criptas.
+Os minérios continuam os mesmos tiles (`COAL`, `COPPER`, `IRON`, `GOLD`, `CRYSTAL`; a forja e os itens dependem deles), mas o hospedeiro muda: **a thread de blocos refaz `MAT[ore]` com `bakeOre(t, vCalcario)` e o halo sobre a paleta `calcario`** (ajuste `ORE_HALO[t].pal[0]` antes de assar), para o veio não aparecer cercado de pedra cinza. A líder põe os minérios no calcário (não nas paredes lavradas): carvão e ferro em toda a catedral (desde 2026-10-09, um metal por camada: `js/102-minerios-camada.js`).
 
 ### 3.6 O que a thread de blocos registra por bloco
 
@@ -242,7 +242,7 @@ Código que roda na carga do 42/43/44 pode usar tudo de `00`–`36` + `41` (e o 
 | Nave | zombie 0.3, vomit 0.15, skeleton 0.3, archer 0.25 | 8 |
 | Claustro | zombie 0.1, vomit 0.13, skeleton 0.22, archer 0.2, guard 0.2, ghost 0.15 | 9 |
 | Criptas | zombie 0.13, vomit 0.1, skeleton 0.2, archer 0.1, guard 0.22, ghost 0.25 | 10 |
-| Cripta do Carrasco | como hoje (diabretes, cães, demônios) | 7 |
+| ~~Cripta do Carrasco~~ | removida em 2026-10-09; os demônios estão no Abismo (`abismo-spec.md`) | - |
 
 ## 8. Save
 

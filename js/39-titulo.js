@@ -473,9 +473,9 @@ function paintTitleLogo() {
   }, true);
   for (const b of root.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
 
-  // menu de pausa: "Voltar ao início" salva e volta para esta tela
+  // menu de pausa: "Tela de início" salva e volta para esta tela
   const bt = document.createElement('button');
-  bt.id = 'btnTitle'; bt.className = 'ghost'; bt.type = 'button'; bt.textContent = 'Voltar ao início';
+  bt.id = 'btnTitle'; bt.className = 'ghost'; bt.type = 'button'; bt.textContent = 'Tela de início';
   $('pause').querySelector('.actions').appendChild(bt);
   bt.addEventListener('click', () => {
     saveGame();

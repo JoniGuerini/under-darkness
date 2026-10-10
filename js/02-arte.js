@@ -149,7 +149,22 @@ const PICK = [
   "....H....",
   "....H...."
 ];
-const PICK_ICON = ["......MMMMM.", "....MMmmmmMM", "...amm...hmM", "..a.....h.mM", ".......h..mM", "......h...mM", ".....h...mM.", "....h....mM.", "...h.....a..", "..H.....a...", ".H..........", "............"];
+// the icon is the same pick laid on the diagonal: same crescent head (bright rim, dark underside), same wood and dark grip
+const PICK_ICON = [
+  "....aMMMMa...",
+  "...ammmMMMM..",
+  "..a....mmMMM.",
+  ".........hMMa",
+  "........h.mMM",
+  ".......h..mMM",
+  "......h....mM",
+  ".....h.....mM",
+  "....h......ma",
+  "...H.......a.",
+  "..H.......a..",
+  ".H...........",
+  "............."
+];
 const PICK_P = { M: '#dfe6ee', m: '#7f8d9b', a: '#aeb9c5', h: '#9a6a3c', H: '#5f3a20' };
 
 const SLIME = [
@@ -213,11 +228,7 @@ const LURK_B = LURK_A.slice(0, 11).concat([
   "..m...mm...m.."
 ]);
 const LURK_PAL = { m: '#2a1638', M: '#4d2c68', w: '#eadaa8', p: '#b0122a', P: '#ff5d78' };
-// ---- crypt & demon art (hand-placed pixels) ----
-const ART_IMP_A = ["WW.........WW", "WwW..H.H..WwW", ".WwW.rrrr.WwW", "..WwrRrryry..", "...wrrrrrrr..", "....rRrkkr...", "...t.rrrrr...", "..t...r..r...", ".tt.........."], ART_IMP_A_P = { W: '#2a0a10', w: '#6e1a22', H: '#e8d8b0', r: '#c8402a', R: '#ff7a5a', y: '#ffe14a', k: '#3a0a08', t: '#8e2018' };
-const ART_IMP_B = [".............", ".....H.H.....", ".....rrrr....", "....rRrryry..", "WWwrrrrrrrwWW", "WwwrRrkkrwwwW", "...t.rrrrr...", "..t...r..r...", ".tt.........."], ART_IMP_B_P = { W: '#2a0a10', w: '#6e1a22', H: '#e8d8b0', r: '#c8402a', R: '#ff7a5a', y: '#ffe14a', k: '#3a0a08', t: '#8e2018' };
-const ART_HOUND_A = ["............kk..", "...f.f.f...kbbk.", "..fFfFfFf.kbbebk", ".tkbbbbbbbkbbbbb", "tFkbBBbbbbbbbbkk", ".tkbbbbbbbbbbk..", "...bb.....bb....", "..bb.......bb...", "..k.........k..."], ART_HOUND_A_P = { k: '#14080a', b: '#3a1418', B: '#5a2024', f: '#ff7a1a', F: '#ffd27a', e: '#ffe14a', t: '#c0300a' };
-const ART_HOUND_B = ["............kk..", "...f.f.f...kbbk.", "..fFfFfFf.kbbebk", ".tkbbbbbbbkbbbbb", "tFkbBBbbbbbbbbkk", ".tkbbbbbbbbbbk..", "....bb...bb.....", "....b.b..b.b....", "....k..k.k..k..."], ART_HOUND_B_P = { k: '#14080a', b: '#3a1418', B: '#5a2024', f: '#ff7a1a', F: '#ffd27a', e: '#ffe14a', t: '#c0300a' };
+// ---- dungeon dressing and material icons (hand-placed pixels) ----
 const ART_CANDLE = ["............", "............", ".w...w...w..", ".w...w...w..", ".W...W...W..", "gGg.gGg.gGg.", ".g...g...g..", ".gg..g..gg..", "..ggggggg...", ".....G......", "....gGg.....", "...gGGGg...."], ART_CANDLE_P = { w: '#e8dcc0', W: '#b8a888', g: '#b08a3a', G: '#6e5420' };
 const ART_CANDLE2 = ["............", "............", "............", ".....w......", ".....w......", ".....W......", "....gGg.....", ".....g......", ".....g......", ".....G......", "....gGg.....", "...gGGGg...."], ART_CANDLE2_P = { w: '#e8dcc0', W: '#b8a888', g: '#b08a3a', G: '#6e5420' };
 const ART_CHAIN = [".....O......", "....o.o.....", "....o.o.....", "....o.o.....", ".....O......", ".....o......", ".....O......", "....o.o.....", "....o.o.....", "....o.o.....", ".....O......", ".....o......"], ART_CHAIN_P = { o: '#4a4e58', O: '#8a8f9a' };
@@ -229,17 +240,10 @@ const ART_URN = ["............", "............", "............", "............",
 const ART_URN2 = ["............", "............", "............", "............", "............", ".....kk.....", "....oOoo....", "...oOoooo...", "...oyyyyo...", "...oOoooo...", "....oooo....", "....kkkk...."], ART_URN2_P = { k: '#1e1e24', o: '#4e525c', O: '#727886', y: '#7a2a2a' };
 const ART_GATE = [".k..k..k..k.", ".m..m..m..m.", ".m..m..m..m.", "kmmmmmmmmmmk", ".m..m..m..m.", ".m..m..m..m.", ".m..m..m..m.", ".m..m..m..m.", "kmmmmmmmmmmk", ".m..m..m..m.", ".m..m..m..m.", ".k..k..k..k."], ART_GATE_P = { k: '#1c1c22', m: '#6a6e78' };
 const ART_ALTAR = ["............", "............", "............", ".....rr.....", "....rRRr....", ".....rr.....", "..kkkkkkkk..", "..sSssssss..", "...ssssss...", "...sSssss...", "..ssssssss..", ".ssssssssss."], ART_ALTAR_P = { s: '#3a3446', S: '#544c64', k: '#16131c', r: '#ff3a2a', R: '#ffc0a0' };
-const ART_DBODY = ["....hhhh....", "...hhhhhh...", "..hhsssshh..", "..hssssss...", "..hsssseess.", "..hssssss...", "...sSsss....", "....SSss....", "...SssssS...", "..sssssssss.", ".sSsssssssss", ".sSsssSssss.", "..SssssSss..", "..bbbbbbBb..", "..RrrrrrRr..", "..RRrrrrrr..", ".RRr.rrr.rr.", ".DR..rr..RD."], ART_DBODY_P = { h: '#1a0c0e', s: '#a8322a', S: '#7a1e1a', e: '#ffd23a', r: '#2e2220', R: '#1e1614', D: '#120c0a', b: '#4a3020', B: '#8a6038' };
-const ART_DHORNS = ["..K......K..", "..Kk....kK..", "...Kk..kK..."], ART_DHORNS_P = { K: '#d8c8a8', k: '#8a7a5a' };
-const ART_CLEAVER = ["..mmmm.", ".mMMMMm", ".mMMMMm", ".mMMMMm", ".mMMMMm", "..mMMMm", "...mMmm", "...h...", "...h...", "...h...", "...h...", "...H...", "...H...", "...H..."], ART_CLEAVER_P = { m: '#4a4e58', M: '#9aa0aa', h: '#4a2a18', H: '#2a1810' };
-const ART_BBODY = ["....hhhh....", "...hhHHhh...", "..hhHhhhhh..", "..hhhhhhhh..", "..hhhhheeh..", "..hhhhhhhh..", "...hhhhhh...", "....SSss....", "...SssssS...", "..sssssssss.", ".sSsssssssss", ".sSsssSssss.", "..SsssssSs..", "..bbbbbbBb..", "..pppppppp..", "..Pppppppp..", ".PPpppppppp.", ".dPPppppPPd."], ART_BBODY_P = { h: '#121014', H: '#2a2630', e: '#ffd23a', s: '#8a2018', S: '#5e1410', b: '#2a1e1a', B: '#6a5a48', p: '#1c1618', P: '#141012', d: '#0c0a0a' };
-const ART_BHORNS = [".K........K.", ".KK......KK.", "..KK....KK..", "...k....k..."], ART_BHORNS_P = { K: '#cfc2a4', k: '#7a6e58' };
-const ART_AXE = ["....k....", "....kmm..", "....kMMm.", "....kMMMm", "....kMMMm", "....kMMMm", "....kMMm.", "....kmm..", "....k....", "....h....", "....h....", "....h....", "....h....", "....h....", "....H....", "....H....", "....H....", "....k...."], ART_AXE_P = { k: '#1c1c22', m: '#5a5e68', M: '#b8bec8', h: '#3a2214', H: '#24160c' };
 const ART_ICO_HEART = ["rr.rr..", "rRrrrr.", "rRrrrrr", "rrrrrrr", ".rrrrr.", "..rrr..", "...r..."], ART_ICO_HEART_P = { r: '#a01a2a', R: '#ff6a7a' };
 const ART_ICO_EMBER = ["...y....", "..yYy...", ".yYOYy..", ".yOROy..", "..ORO...", "...O...."], ART_ICO_EMBER_P = { y: '#ffd27a', Y: '#fff3b0', O: '#ff7a1a', R: '#c0300a' };
 const ART_ICO_FANG = ["w......", "ww.....", ".ww....", ".wWw...", "..wWw..", "...wWw.", "....www"], ART_ICO_FANG_P = { w: '#ece4cf', W: '#b5aa92' };
 const ART_ICO_HORN = ["......k.", "......Kk", ".....kKk", "....kKK.", "...kKKk.", "..kKKk..", ".kKKKk..", "kKKKk...", "kkkk...."], ART_ICO_HORN_P = { k: '#6e5a40', K: '#c8b48a' };
-const DLEG_P = { S: '#7a1e1a', s: '#a8322a' }, BLEG_P = { S: '#141012', s: '#1c1618' };
 // ---- undead art ----
 const ART_BOW = [".w...", ".sw..", ".s.w.", ".s.w.", ".s..w", ".s..w", ".s..W", ".s..w", ".s..w", ".s.w.", ".s.w.", ".sw..", ".w..."], ART_BOW_P = { w: '#8a5a32', W: '#5f3a20', s: '#e8e0cc' };
 const ART_SPEAR = [".M.", "MmM", "MmM", ".m.", ".k.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".h.", ".H."], ART_SPEAR_P = { M: '#c8ced8', m: '#7a808a', k: '#3a2a1a', h: '#6a4628', H: '#3a2414' };

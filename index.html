@@ -7,6 +7,12 @@
 <link rel="stylesheet" href="css/estilo.css">
 <link rel="stylesheet" href="css/missoes.css">
 <link rel="stylesheet" href="css/temas-npc.css">
+<link rel="stylesheet" href="css/tema-maga.css">
+<link rel="stylesheet" href="css/tema-encantador.css">
+<link rel="stylesheet" href="css/vitrine.css">
+<link rel="stylesheet" href="css/cozinha.css">
+<link rel="stylesheet" href="css/alquimia.css">
+<link rel="stylesheet" href="css/encantador.css">
 <link rel="stylesheet" href="css/rolagem.css">
 <link rel="stylesheet" href="css/bau.css">
 <link rel="stylesheet" href="css/itens.css">
@@ -62,7 +68,7 @@
   <div class="orb mp" id="orbMp"><div class="liq"><i id="hMpFill"></i></div><div class="gloss"></div><span id="hMp">25 / 25</span><small>Mana</small></div>
   <div id="hbName"></div>
   <div id="toasts"></div>
-  <div id="bossbar" class="panel" hidden><div class="bn"><b>O Carrasco</b><span>guardião da cripta</span></div><div class="bar bossb"><i id="bossFill"></i></div></div>
+  <div id="bossbar" class="panel" hidden><div class="bn"><b></b><span></span></div><div class="bar bossb"><i id="bossFill"></i></div></div>
   <div id="banner"></div>
   <div id="lowhp"></div>
 </div>
@@ -168,15 +174,22 @@
 <div id="shop" class="overlay" hidden>
   <div class="inv">
     <section class="panel vendor" aria-label="Loja">
-      <header class="ch"><h3 id="shopTitle">Loja</h3><button class="ghost sm push" id="btnShopBack" type="button">Voltar</button></header>
-      <div class="ph"><span id="shopSub"></span><span id="shopGold" class="coin push"></span></div>
-      <div class="grid" id="shopGrid"></div>
-      <p class="shopf" id="shopHint"></p>
-      <div class="sep" role="separator"></div>
-      <p class="shopf"><b>Botão direito</b> num item da loja compra (<kbd>Shift</kbd> compra 5 do que não acaba).<br><kbd>Shift</kbd> + <b>botão direito</b> num item seu vende, ou arraste o item até a loja. O que estiver apagado este morador não compra.<br><b>Botão direito</b> num item seu equipa, igual ao inventário. <kbd>Esc</kbd> volta.</p>
+      <header class="ch"><h3 id="shopTitle">Loja</h3><span id="shopGold" class="vgold"></span><button class="ghost sm" id="btnShopBack" type="button">Voltar</button></header>
+      <div class="vit">
+        <div class="vshelves" id="shopGrid"></div>
+        <aside class="vfeat" id="shopFeat">
+          <div class="vstage" id="vfStage"><i class="vrays"></i><i class="vlight"></i><i class="vpool"></i><img id="vfIcon" alt="" hidden><i class="vped"></i></div>
+          <div class="tipbox vtip" id="vfInfo"></div>
+          <div class="vbuy" id="vfBuy" hidden>
+            <div class="vqty" id="vfQty"><button class="ghost" id="vfMinus" type="button" aria-label="Menos">−</button><b id="vfN">1</b><button class="ghost" id="vfPlus" type="button" aria-label="Mais">+</button></div>
+            <span class="vprice" id="vfPrice"></span>
+            <button id="btnBuy" type="button">Comprar</button>
+          </div>
+          <div class="vsell" id="vSell" hidden></div>
+        </aside>
+      </div>
     </section>
   </div>
-  <div id="shopTip" class="tipbox" hidden></div>
 </div>
 
 <div id="forge" class="overlay" hidden>
@@ -224,6 +237,10 @@
 <script src="js/63-arco-dados.js"></script>
 <script src="js/65-morcego-dados.js"></script>
 <script src="js/67-nevasca-dados.js"></script>
+<script src="js/90-armas-magicas.js"></script>
+<script src="js/112-fogo-dados.js"></script>
+<script src="js/114-escolas-dados.js"></script>
+<script src="js/110-infernita.js"></script>
 <script src="js/06-mundo.js"></script>
 <script src="js/07-chunks-luz.js"></script>
 <script src="js/36-profundeza.js"></script>
@@ -258,6 +275,8 @@
 <script src="js/23-save.js"></script>
 <script src="js/25-temas-npc.js"></script>
 <script src="js/27-bau.js"></script>
+<script src="js/93-reagentes.js"></script>
+<script src="js/91-maga.js"></script>
 <script src="js/29-missoes.js"></script>
 <script src="js/45-catedral-mundo.js"></script>
 <script src="js/46-rei-esqueleto.js"></script>
@@ -280,7 +299,19 @@
 <script src="js/84-mina-mundo.js"></script>
 <script src="js/85-rei-goblin.js"></script>
 <script src="js/86-sapo-grutas.js"></script>
+<script src="js/103-abismo-api.js"></script>
+<script src="js/104-abismo-blocos.js"></script>
+<script src="js/105-abismo-objetos.js"></script>
+<script src="js/106-abismo-demonios.js"></script>
+<script src="js/107-abismo-demonios2.js"></script>
+<script src="js/108-abismo-mundo.js"></script>
+<script src="js/109-principe-caos.js"></script>
 <script src="js/87-mundo-largo.js"></script>
+<script src="js/102-minerios-camada.js"></script>
+<script src="js/111-abismo-save.js"></script>
+<script src="js/117-gemas.js"></script>
+<script src="js/94-alquimia-dados.js"></script>
+<script src="js/98-cozinha-dados.js"></script>
 <script src="js/47-hud-nivel-ouro.js"></script>
 <script src="js/49-itens-efeitos.js"></script>
 <script src="js/50-vigor.js"></script>
@@ -290,19 +321,32 @@
 <script src="js/64-arco-voltaico.js"></script>
 <script src="js/66-morcego.js"></script>
 <script src="js/68-nevasca.js"></script>
+<script src="js/92-magia-regras.js"></script>
+<script src="js/95-alquimia-uso.js"></script>
+<script src="js/96-alquimista.js"></script>
+<script src="js/117-moradores.js"></script>
+<script src="js/101-tipos-dano.js"></script>
+<script src="js/113-fogo.js"></script>
+<script src="js/115-escolas.js"></script>
+<script src="js/116-gelo.js"></script>
+<script src="js/99-cozinha.js"></script>
+<script src="js/118-encantador.js"></script>
 <script src="js/88-escalada.js"></script>
 <script src="js/89-agachar.js"></script>
+<script src="js/118-cajado-andar.js"></script>
+<script src="js/94-janelas-atras.js"></script>
 <script src="js/24-boot.js"></script>
 <script src="js/26-rolagem.js"></script>
 <script src="js/28-fps.js"></script>
 <script src="js/30-tela-cheia.js"></script>
 <script src="js/31-cursor.js"></script>
 <script src="js/33-atalhos.js"></script>
-<script src="js/38-musica.js"></script>
+<script src="js/97-ambiente.js"></script>
 <script src="js/39-titulo.js"></script>
 <script src="js/40-opcoes.js"></script>
 <script src="js/75-teleporte.js"></script>
 <script src="js/60-modo-deus.js"></script>
+<script src="js/100-fora-de-foco.js"></script>
 
 
 </body></html>

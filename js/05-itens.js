@@ -25,9 +25,12 @@ const KIND = {
   mace: { name: 'Maça', spd: 0.8, reach: 27, stun: 0.3, rows: MACE, px: 2.5, py: 9, note: '30% de chance de atordoar' },
   spear: { name: 'Lança', spd: 0.85, reach: 44, thrust: true, rows: PSPEAR, px: 1.5, py: 12, note: 'estocada reta e comprida' }
 };
+// cobalt (the mine's metal since 2026-10-09, in crystal's place at the forge): dark, body, glint, like ORE_PAL
+const COB_PAL = ['#1c2a78', '#3a64e0', '#b8ccff'];
 const SW = {
   bone: { w: '#fbf6ea', W: '#ddd2b6', l: '#a89a7c', g: '#8a7a5c', G: '#5a4c38', h: '#3b2a20', p: '#ddd2b6' },
   gold: { w: '#fff8cc', W: '#f0c43a', l: '#b07a0a', g: '#c04040', G: '#7a2020', h: '#3b2a20', p: '#f0c43a' },
+  cob: { w: '#eef2ff', W: '#8aa8ff', l: '#2a48b8', g: '#3a3a4a', G: '#22222e', h: '#1c1c26', p: '#5a7ae8' },
   crys: { w: '#f8f0ff', W: '#c493ff', l: '#7a3fd0', g: '#5a4a7a', G: '#3a2f55', h: '#2a2040', p: '#c493ff' },
   horn: { w: '#f0e6cc', W: '#c8b48a', l: '#6e5a40', g: '#3a2a20', G: '#2a1a14', h: '#3a2418', p: '#8a6a4a' }
 };
@@ -62,7 +65,7 @@ const ITEMS = {
   barra_cobre: { name: 'Barra de Cobre', rar: 0, stack: 99, icon: 'bar', ore: ORE_PAL[COPPER], desc: 'Fundida de 2 minérios de cobre. Vai para a bigorna do Grimaldo.' },
   barra_ferro: { name: 'Barra de Ferro', rar: 1, stack: 99, icon: 'bar', ore: ORE_PAL[IRON], desc: 'Fundida de 3 minérios de ferro. Vai para a bigorna do Grimaldo.' },
   barra_ouro: { name: 'Barra de Ouro', rar: 2, stack: 99, icon: 'bar', ore: ORE_PAL[GOLD], desc: 'Fundida de 4 minérios de ouro. Vai para a bigorna do Grimaldo.' },
-  barra_cristal: { name: 'Barra de Cristal', rar: 3, stack: 99, icon: 'bar', ore: ORE_PAL[CRYSTAL], desc: 'Fundida de 5 cristais brutos. Vai para a bigorna do Grimaldo.' },
+  barra_cobalto: { name: 'Barra de Cobalto', rar: 3, stack: 99, icon: 'bar', ore: COB_PAL, desc: 'Fundida de 5 minérios de cobalto. Vai para a bigorna do Grimaldo.' },
   pocao: { name: 'Poção de Vida', rar: 1, stack: 30, use: true, icon: 'potion', desc: 'Recupera 12 de vida ao longo de 5 segundos.' },
   tocha: { name: 'Tocha', rar: 0, stack: 99, icon: 'torch', desc: 'Q coloca uma tocha onde o mouse aponta.' },
   gel: { name: 'Gel', rar: 0, stack: 99, icon: 'gel', desc: 'Grudento. Material.' },
@@ -73,19 +76,19 @@ const ITEMS = {
   min_cobre: { name: 'Minério de Cobre', rar: 0, stack: 99, icon: 'ore', ore: ORE_PAL[COPPER], desc: 'Material.' },
   min_ferro: { name: 'Minério de Ferro', rar: 0, stack: 99, icon: 'ore', ore: ORE_PAL[IRON], desc: 'Material.' },
   min_ouro: { name: 'Minério de Ouro', rar: 1, stack: 99, icon: 'ore', ore: ORE_PAL[GOLD], desc: 'Material.' },
-  min_cristal: { name: 'Cristal Bruto', rar: 2, stack: 99, icon: 'ore', ore: ORE_PAL[CRYSTAL], desc: 'Material.' },
+  min_cobalto: { name: 'Minério de Cobalto', rar: 2, stack: 99, icon: 'ore', ore: COB_PAL, desc: 'Material. Pesado e frio, de um azul que mancha os dedos.' },
+  min_cristal: { name: 'Cristal Bruto', rar: 2, stack: 99, icon: 'ore', ore: ORE_PAL[CRYSTAL], desc: 'Uma pedra preciosa, não um metal: não vai para a fornalha. O Grimaldo compra.' },
   terra: { name: 'Terra', rar: 0, stack: 99, block: DIRT, desc: 'Um bloco de terra. Na barra, clique para colocar.' },
   pedra: { name: 'Pedra', rar: 0, stack: 99, block: STONE, desc: 'Paralelepípedo firme. Bom para pontes e paredes.' },
   pedra_escura: { name: 'Pedra Escura', rar: 0, stack: 99, block: DEEP, desc: 'Ardósia das profundezas.' },
   madeira: { name: 'Madeira', rar: 0, stack: 99, block: PLANK, desc: 'Tábuas da árvore que você derrubou. Vira piso, parede ou ponte.' },
-  tijolo: { name: 'Tijolo da Cripta', rar: 1, stack: 99, block: CRYPT, desc: 'Pedra escura e fria. Só se solta depois que o Carrasco cai.' },
   candelabro: { name: 'Candelabro', rar: 1, stack: 99, deco: CANDLE, desc: 'Coloque no chão para iluminar. Na barra, clique para colocar.' },
   brasa: { name: 'Brasa Infernal', rar: 1, stack: 99, icon: 'ember', desc: 'Não apaga nunca. Material.' },
   presa: { name: 'Presa Infernal', rar: 1, stack: 99, icon: 'fang', desc: 'Arrancada de um cão infernal. Material.' },
   chifre: { name: 'Chifre de Demônio', rar: 1, stack: 99, icon: 'horn', desc: 'Pesado e torto. Material.' },
   ectoplasma: { name: 'Ectoplasma', rar: 1, stack: 99, icon: 'ecto', desc: 'Frio e grudento. Brilha de leve no escuro. Material.' },
   cranio: { name: 'Crânio em Brasa', rar: 1, stack: 99, icon: 'skullI', desc: 'Ainda morno. Material.' },
-  lamina_infernal: { name: 'Lâmina Infernal', slot: 'weapon', rar: 3, dmg: 36, crit: 0.14, pal: { w: '#fff0c8', W: '#ff8a3a', l: '#b02a10', g: '#3a1a1a', G: '#1a0a0a', h: '#2a1410', p: '#ff5a2a' }, desc: 'Tirada das mãos do Carrasco. Ainda está quente.' },
+  lamina_infernal: { name: 'Lâmina Infernal', slot: 'weapon', rar: 3, dmg: 36, crit: 0.14, pal: { w: '#fff0c8', W: '#ff8a3a', l: '#b02a10', g: '#3a1a1a', G: '#1a0a0a', h: '#2a1410', p: '#ff5a2a' }, desc: 'Forjada nos rios de fogo do Abismo. Ainda está quente.' },
   coracao_infernal: { name: 'Coração Infernal', slot: 'acc', rar: 3, hp: 40, regen: 1, icon: 'heart', desc: 'Ainda bate. Devagar.' }
 };
 // more gear: new weapon kinds, armour from the crypt and the undead, special rings, better picks
@@ -130,7 +133,7 @@ const METALS = [
   { id: 'cobre', name: 'Cobre', bar: 'barra_cobre', wp: { w: '#ffd8b0', W: '#e0884c', l: '#9a4a22', g: '#5a3a22', G: '#3a2416', h: '#3b2a20', p: '#e0884c' }, m: '#c8703a', M: '#ffc08a', body: { r: '#c8703a', R: '#9a4a22', D: '#6a3416', b: '#4a2a16', B: '#ffc08a' }, s: '#c8703a', S: '#8a4420' },
   { id: 'ferro', name: 'Ferro', bar: 'barra_ferro', wp: { w: '#f4f6f8', W: '#b8c0cc', l: '#6e7680', g: '#3a2a1a', G: '#22180e', h: '#2a1d12', p: '#8a929c' }, m: '#7e8792', M: '#dfe4ea', body: { r: '#8a929c', R: '#5e6670', D: '#3e444c', b: '#2a2a30', B: '#c8ced8' }, s: '#9aa3ad', S: '#6f7883' },
   { id: 'ouro', name: 'Ouro', bar: 'barra_ouro', wp: SW.gold, m: '#d8a830', M: '#fff0a0', body: { r: '#d8a830', R: '#a87808', D: '#6a4a08', b: '#5a3a10', B: '#fff0a0' }, s: '#d8a830', S: '#8a6a10' },
-  { id: 'cristal', name: 'Cristal', bar: 'barra_cristal', wp: SW.crys, m: '#8a5ad8', M: '#e8d4ff', body: { r: '#9a6ae0', R: '#6a32c0', D: '#40207a', b: '#2a1a4a', B: '#f0deff' }, s: '#9a6ae0', S: '#5a2aa0' }
+  { id: 'cobalto', name: 'Cobalto', bar: 'barra_cobalto', wp: SW.cob, m: '#3a5ad0', M: '#c4d4ff', body: { r: '#4a6ad8', R: '#2a44a8', D: '#1a2a6a', b: '#141c40', B: '#c8d8ff' }, s: '#4a6ad8', S: '#22348a' }
 ];
 // [piece, name, gender, bars, stats per metal tier]
 const FORGE_PIECES = [
@@ -162,7 +165,7 @@ ITEMS.coracao_infernal.legend = [['carniceiro', 8]]; ITEMS.coracao_infernal.rar 
 ITEMS.ouro = { name: 'Ouro', rar: 0, stack: 1e9, icon: 'coin', gold: true, g: 0, desc: 'Moedas. O vilarejo aceita.' };
 
 /* ---- random properties (bases, modifiers, rarity, damage and DPS): js/48-itemizacao.js ---- */
-const BLOCK_DROP = { [CRYPT]: 'tijolo', [DIRT]: 'terra', [GRASS]: 'terra', [STONE]: 'pedra', [DEEP]: 'pedra_escura', [PLANK]: 'madeira' };
+const BLOCK_DROP = { [DIRT]: 'terra', [GRASS]: 'terra', [STONE]: 'pedra', [DEEP]: 'pedra_escura', [PLANK]: 'madeira' };
 const ORE_ITEM = { [COAL]: 'carvao', [COPPER]: 'min_cobre', [IRON]: 'min_ferro', [GOLD]: 'min_ouro', [CRYSTAL]: 'min_cristal' };
 const DROPS = {
   slime: [['gel', 0.65, 1, 2], ['pocao', 0.06], ['anel_vida', 0.012]],
@@ -173,10 +176,6 @@ const DROPS = {
   ghost: [['ectoplasma', 0.6], ['pocao', 0.1], ['pedra_lunar', 0.015], ['manto_espectral', 0.03], ['coroa_espectral', 0.02], ['lanterna_fantasma', 0.02]],
   skull: [['cranio', 0.45], ['pocao', 0.06], ['talisma_ossos', 0.03], ['anel_espinhos', 0.02]],
   skeleton: [['osso', 0.7, 1, 3], ['pocao', 0.1], ['cutelo', 0.07], ['escudo_ferro', 0.05], ['elmo_ferro', 0.04], ['cota', 0.035], ['botas_ferro', 0.03], ['espada_osso', 0.03], ['escudo_osso', 0.025], ['machado_ferro', 0.03], ['lanca_ferro', 0.03], ['elmo_osso', 0.03], ['couraca_osso', 0.02], ['botas_osso', 0.02], ['maca_osso', 0.02]],
-  imp: [['brasa', 0.5], ['pocao', 0.08], ['anel_vampiro', 0.015]],
-  hound: [['presa', 0.5], ['pocao', 0.1], ['anel_furia', 0.02], ['grevas_demonio', 0.015]],
-  brute: [['chifre', 0.6], ['pocao', 0.12], ['espada_ouro', 0.03], ['escudo_ouro', 0.025], ['elmo_ouro', 0.025], ['manto', 0.025], ['machado_chifre', 0.04], ['elmo_chifres', 0.03], ['grevas_demonio', 0.03], ['escudo_infernal', 0.02]],
-  boss: [['lamina_infernal', 1], ['coracao_infernal', 1], ['pocao', 1, 3, 5]],
   lurker: [['olho', 0.6], ['pocao', 0.15], ['espada_ouro', 0.05], ['escudo_ouro', 0.04], ['elmo_ouro', 0.04], ['manto', 0.04], ['pedra_lunar', 0.04], ['lamina_cristal', 0.03], ['adaga_cristal', 0.03], ['lanca_cristal', 0.03], ['maca_ouro', 0.03], ['machado_ouro', 0.02]]
 };
 const CHEST_LOOT = {
@@ -231,14 +230,15 @@ const BAR_ICONS = {
     "mmmsmmsmmmEE",
     "mmmssssmmmEE",
     "dddddddddd.."], { W: '#ffffff', T: '#fff2a6', t: '#f8d65a', F: '#fff6c0', m: '#e2ac22', s: '#b47e0e', d: '#7a4e06', e: '#c08a10', E: '#7a4e06' }],
-  barra_cristal: [[
-    "...LLLLLLLLL.",
-    "..LWLLLLLLLPp",
-    ".LWLLLLLLLPpp",
-    "FFFFFFFFFFFpd",
-    "PPPGPPPPPPPpd",
-    "PPPPGPPPPGPdd",
-    "pppppppppppd."], { W: '#ffffff', L: '#e6d2ff', F: '#f4e6ff', G: '#e0c8ff', P: '#a66cf6', p: '#6a32c0', d: '#3a1874' }]
+  barra_cobalto: [[
+    "..tTtTTtTt..",
+    ".tTtttttttee",
+    "FFFFFFFFFFeE",
+    "mhhhhmmmrmeE",
+    "mmmmmmhmmmEE",
+    "mrmmmmmhhhEE",
+    "mmmmmmmmmmE.",
+    "dddddddddd.."], { T: '#e4ecff', t: '#8aa4f0', F: '#b4c6ff', m: '#3a5ad0', h: '#5a7ae8', r: '#22348a', d: '#141c48', e: '#2a3c98', E: '#18225a' }]
 };
 const ORE_ICON = ["..ssss..", ".sSsoss.", "ssoOssss", "sssssoOs", "sSsossss", ".ssssss."];
 // raw ore as a loose chunk, drawn in the same colours as the nodes in the rock
@@ -260,6 +260,14 @@ const ORE_ICONS = {
     "dmhmmmRrdd",
     ".dmmmrrdd.",
     "..ddddd..."], { W: '#ffffff', H: '#ced4e0', h: '#9ea5b4', m: '#6f7584', d: '#474b58', r: '#a84e22', R: '#cc6a30' }],
+  min_cobalto: [[
+    "...hHHm...",
+    "..hHWHmm..",
+    ".hhHHmmmd.",
+    "dhhhmmmrdd",
+    "dmhmmmRrdd",
+    ".dmmmrrdd.",
+    "..ddddd..."], { W: '#ffffff', H: '#a8bcff', h: '#5a7ae8', m: '#2e4cc0', d: '#141c58', r: '#c24a8a', R: '#e87ab4' }],
   min_ouro: [[
     "...QwQq...",
     "..yYQqqd..",

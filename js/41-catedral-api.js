@@ -9,8 +9,6 @@
    and 45-catedral-mundo builds the world and places everything. See docs/catedral-spec.md. */
 
 const CATEDRAL = true;
-// the purple crypt of O Carrasco (and its demons) is set aside for now: not generated, its code stays
-const CRYPT_HIDDEN = true;
 
 // foreground blocks (solid)
 const CT_CALCARIO = 30, CT_CALC_TERRA = 31, CT_CANTARIA = 32, CT_LAJE = 33, CT_MOSAICO = 34, CT_RUINA = 35, CT_ESCOMBRO = 36, CT_CRIPTA = 37, CT_OSSARIO = 38, CT_MARMORE_NEGRO = 39, CT_GRADE = 40;

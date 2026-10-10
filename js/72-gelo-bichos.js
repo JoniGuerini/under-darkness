@@ -45,7 +45,7 @@ Object.assign(DROPS, {
   lobo: [['presa_lobo', 0.6], ['carne', 0.35], ['pocao', 0.07], ['botas_ferro', 0.03], ['anel_furia', 0.015], ['amuleto_vento', 0.012]],
   espirito: [['essencia_gelida', 0.55], ['pocao', 0.1], ['pedra_lunar', 0.025], ['manto_espectral', 0.03], ['lanterna_fantasma', 0.02]],
   verme: [['carne', 0.5, 1, 2], ['presa_lobo', 0.25], ['pocao', 0.1], ['anel_vida', 0.02]],
-  sentinela: [['lasca_eterna', 0.45], ['min_cristal', 0.25], ['pocao', 0.1], ['lamina_cristal', 0.03], ['adaga_cristal', 0.03], ['lanca_cristal', 0.03], ['escudo_torre', 0.03], ['armadura_placas', 0.025]]
+  sentinela: [['lasca_eterna', 0.45], ['min_ouro', 0.25], ['pocao', 0.1], ['lamina_cristal', 0.03], ['adaga_cristal', 0.03], ['lanca_cristal', 0.03], ['escudo_torre', 0.03], ['armadura_placas', 0.025]]
 });
 for (const k of ['yeti', 'lobo', 'espirito', 'verme', 'sentinela']) DROPS[k] = DROPS[k].filter(([id]) => ITEMS[id]);
 Object.assign(NAV_WALKERS, { yeti: 1, lobo: 1, verme: 1, sentinela: 1 });

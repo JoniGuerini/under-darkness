@@ -7,7 +7,7 @@ A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m. A ficha do bioma 
 | Arquivo | O que tem |
 |---|---|
 | `js/79-mina-api.js` | ids de blocos (94 a 116), paredes (23 a 27), camada distante (18 a 20), faixas `MN_BANDS`, `MN_D = 186`, `MN_TOP`, zonas 17 a 20 (`MN_ZONE0`), `mineBand`, `mnExits`, `mnBoss`. `MINA = false` desliga a camada inteira. |
-| `js/80-mina-blocos.js` | texturas (rocha ferrosa, rejeito, entulho, tábua, viga, rocha cavada, tijolo de fornalha, escória, quartzito, grade do chefe), paredes, camada distante (rocha, andaimes, fornalhas), minérios (carvão e ferro na rocha ferrosa, ouro e cristal no quartzito), decoração de 1 bloco (escora, trilho, lampião, escada, ferramentas, pedras, corda, brasa, estaca com caveira), itens de bloco. |
+| `js/80-mina-blocos.js` | texturas (rocha ferrosa, rejeito, entulho, tábua, viga, rocha cavada, tijolo de fornalha, escória, quartzito, grade do chefe), paredes, camada distante (rocha, andaimes, fornalhas), minérios (carvão e ferro na rocha ferrosa, ouro e cristal no quartzito; a geração só usa carvão e cristal), decoração de 1 bloco (escora, trilho, lampião, escada, ferramentas, pedras, corda, brasa, estaca com caveira), itens de bloco. |
 | `js/81-mina-objetos.js` | 28 objetos de cena (`mina: true`), o Trono do Rei Goblin e o plano por faixa `MN_PROP_PLAN`. |
 | `js/82-mina-bichos.js` | mineiro morto, carrinho assombrado, grisu, lampião assombrado, falso veio, golem de minério, rato-toupeira: arte, IA, sons, drops e materiais (engrenagem, pepita, núcleo de minério, óleo de lampião). Exporta `MNB`. |
 | `js/83-mina-goblins.js` | goblin gatuno (rouba ouro e foge) e capataz goblin (chicote que acelera os goblins); o goblin dinamiteiro vem do 76. |
@@ -33,7 +33,7 @@ A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m. A ficha do bioma 
 1. Rocha por faixa; o gelo negro afina nas primeiras linhas e a rocha ferrosa sobe um pouco no fundo do gelo.
 2. Cavernas naturais (autômato esparso) e o trabalho dos mineiros: galerias retas em níveis fixos, poços com escadas (os largos com plataformas nos Poços), salões do acampamento, salões das fornalhas e a oficina do chefe (48 x 16), ligados por túneis.
 3. Dois poços antigos descem do chão do Coração do Inverno até a primeira galeria, com escada inteira (volta-se pela mesma escada).
-4. Limpeza (bolsões pequenos, ilhas soltas) e veios: carvão 558 a 688 m, ferro em toda a camada, ouro a partir de 588 m, cristal a partir de 648 m.
+4. Limpeza (bolsões pequenos, ilhas soltas) e veios: carvão, cobalto e cristal (pedra preciosa, mais rara) em toda a camada (um metal por camada, `js/102-minerios-camada.js`).
 5. Alcance a partir dos dois poços e o acabamento: tábuas onde a galeria cruza caverna, vigas, escoras, trilhos, lampiões, escadas em todo desnível de 5 blocos ou mais, tijolo e escória nas fornalhas, cordas, baús e objetos.
 
 ## 4. Subida garantida

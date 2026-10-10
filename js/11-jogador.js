@@ -162,9 +162,6 @@ function pickImpact(sx, sy, aim) {
   if (tg && tg.inReach && tg.dig && inVillage(tg.tx, tg.ty)) {
     sfx.tink(); burst((tg.tx + 0.5) * T, (tg.ty + 0.5) * T, 3, PCOL[t] || '#888', 40, 300, 0.3);
     if (pl.hintT <= 0) { pl.hintT = 2.5; floatText(pl.x + pl.w / 2, pl.y - 10, 'Não dá para cavar no vilarejo', '#d9c7a3', 0.8); }
-  } else if (tg && tg.inReach && tg.dig && t === CRYPT && cryptLocked(tg.tx, tg.ty)) {
-    sfx.tink(); burst((tg.tx + 0.5) * T, (tg.ty + 0.5) * T, 4, '#b77bff', 50, 0, 0.35, 1, true);
-    if (pl.hintT <= 0) { pl.hintT = 2.5; floatText(pl.x + pl.w / 2, pl.y - 10, 'Uma força sombria protege a cripta', '#c58cff', 0.8); }
   } else if (tg && tg.inReach && tg.dig && DIG[t] > 0) {
     if (pl.digX !== tg.tx || pl.digY !== tg.ty) { pl.digX = tg.tx; pl.digY = tg.ty; pl.digT = 0; }
     pl.digT += MINE_P * (pl.mine || 1);

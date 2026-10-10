@@ -41,11 +41,9 @@ function buildDepth() {
     else n = box(xa, y0, xb, y1);
     return n / ((xb - xa) * (y1 - y0));
   };
-  const cr = crypt;
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x, w = walls[i];
     if (!w || w === 4 || y < surf[x] + 13 || y > WH - 9) continue;
-    if (cr && x >= cr.x0 - 3 && x <= cr.x1 + 3 && y >= cr.y0 - 3 && y <= cr.y1 + 3) continue;
     const n = depthNz(x, y, 25, seed ^ 0x6d31) * 0.65 + depthNz(x, y, 60, seed ^ 0x6d32) * 0.35;
     const k = clamp((y - surf[x] - 13) / 10, 0, 1);       // the openings ease in below the surface
     DF[i] = (n * 0.62 + openAt(x, y) * 0.62 + clamp((y - Z1) / 400, -0.05, 0.08)) * k;

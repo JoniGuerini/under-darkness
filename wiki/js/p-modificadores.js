@@ -20,7 +20,7 @@
     }).join('<br>');
   };
   UDW.affixName = a => Array.isArray(a.name) ? a.name[0] + (a.g ? ` / ${a.g[0]}` : '') : a.name;
-  const SLOTN = { weapon: 'arma', shield: 'escudo', head: 'cabeça', body: 'corpo', feet: 'pés', acc: 'acessório', tool: 'picareta' };
+  const SLOTN = { weapon: 'arma', shield: 'escudo', head: 'cabeça', body: 'corpo', feet: 'pés', acc: 'acessório', tool: 'picareta', magic: 'cajado, varinha e tomo' };
   const TIER = ['', 'Incomum', 'Raro', 'Épico', 'Lendário'];
 
   let curL = 5;

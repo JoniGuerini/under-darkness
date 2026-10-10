@@ -2,7 +2,7 @@
 
 /* ================= tiles ================= */
 const AIR = 0, DIRT = 1, GRASS = 2, STONE = 3, DEEP = 4, COPPER = 5, IRON = 6, GOLD = 7, CRYSTAL = 8, BEDROCK = 9, LAVA = 10, TRUNK = 11, LEAVES = 12, TORCH = 13, SHROOM = 14, TUFT = 15, FLOWER = 16, CHEST = 17, CHEST_OPEN = 18, BONES = 19, PLANK = 20, CRYPT = 21, CANDLE = 22, CHAIN = 23, WEB = 24, BANNER = 25, GATE = 26, URN = 27, ALTAR = 28, COAL = 29;
-const NT = 128;   // tile ids: 30-53 cathedral, 54-73 caves (js/52-caverna-api.js), 74-93 ice (69), 94-117 mine (79)
+const NT = 192;   // tile ids: 30-53 cathedral, 54-73 caves (js/52-caverna-api.js), 74-93 ice (69), 94-117 mine (79), 118-122 herbs (94), 123 ice coal, 128-152 abyss (103), 153-156 gems (117)
 const SOLID = new Uint8Array(NT), BLOCKY = new Uint8Array(NT), EMIT = new Float32Array(NT), DIG = new Float32Array(NT), ORE_XP = new Uint8Array(NT);
 [DIRT, GRASS, STONE, DEEP, COPPER, IRON, GOLD, CRYSTAL, BEDROCK, PLANK, CRYPT, COAL].forEach(t => { SOLID[t] = 1; BLOCKY[t] = 1; });
 SOLID[GATE] = 1;

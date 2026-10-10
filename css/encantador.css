@@ -1,0 +1,73 @@
+/* ================= o livro de encantamento do Teodoro (js/118-encantador.js) =================
+   O livro usa a mesma estrutura do livro da forja (.prof, .plist, .pg, .pr, .pdet, .preag, .pwork em estilo.css) e
+   veste a oficina do encantador com as variáveis do kit de moradores (--k-*, css/temas-npc.css, cores em
+   tema-encantador.css). Mais aqui: a fileira de pedras e as barras de chance. */
+#enc{padding-block:10px}
+#enc .encp{
+  box-sizing:border-box;width:min(940px,100%);height:min(680px,calc(100dvh - 20px));display:flex;flex-direction:column;gap:12px;padding:6px 16px 14px;
+  position:relative;isolation:isolate;image-rendering:pixelated;
+  border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
+  background-color:var(--k-bg,#1a1c12);
+  background-image:var(--k-glow),linear-gradient(var(--k-shade),var(--k-shade-2) 30%,var(--k-shade)),var(--k-wall);background-size:auto,auto,1080px 720px;background-position:0 0,0 0,0 100%;
+  box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65);color:var(--k-txt)
+}
+#enc .ch{flex-wrap:nowrap;gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat;padding-bottom:8px}
+#enc .ch::before{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#enc .ch h3{white-space:nowrap;font-size:30px;background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)}
+#encGold{margin-left:auto;font-size:14px;font-weight:600;color:var(--k-acc);white-space:nowrap;font-variant-numeric:tabular-nums}
+#enc button.ghost{background:var(--k-board) 0 0/180px 42px;image-rendering:pixelated;color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px}
+#enc .ch button.ghost{padding:2px 10px}
+#enc button.ghost:hover{filter:brightness(1.15)}
+#enc .qty button.ghost{padding:0 6px;border-width:8px;border-image-width:8px}
+#btnEncGo{margin-left:auto;min-width:150px;background:var(--k-main);color:var(--k-main-txt);text-shadow:0 1px 0 var(--k-main-hi);border:3px solid #000;box-shadow:inset 0 2px 0 var(--k-main-hi),inset 0 -3px 0 var(--k-main-lo),0 0 14px -4px var(--k-main-glow),0 3px 0 rgba(0,0,0,.55)}
+#btnEncGo:hover{filter:brightness(1.1)}
+#btnEncGo.stop{background:#b0402a;color:#fff2e0;text-shadow:1px 1px 0 #000;box-shadow:inset 0 2px 0 #ff9a7a,inset 0 -3px 0 #5a160a,0 3px 0 rgba(0,0,0,.55)}
+#enc button:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
+/* a lista: uma prateleira escura de madeira; os grupos como rótulos de vidro de botica */
+#enc .plist{background:rgba(4,12,12,.62);box-shadow:inset 0 0 0 1px var(--k-line),inset 0 2px 0 rgba(0,0,0,.7)}
+#enc .psearch input{background:#050c0c;color:var(--k-txt);box-shadow:inset 0 0 0 1px #1e4a44}
+#enc .psearch input:focus{box-shadow:inset 0 0 0 1px var(--k-acc),0 0 10px -3px var(--k-main-glow)}
+#enc .pg{color:var(--k-acc);background:linear-gradient(90deg,rgba(30,125,110,.5),rgba(12,58,54,.12));box-shadow:inset 0 0 0 1px #1e7d6e}
+#enc .pr{color:#7a8a86}
+#enc .pr.can{color:var(--k-txt)}
+#enc .pr em{color:#8ae8d0}
+#enc .pr:hover{background:rgba(140,232,208,.07)}
+#enc .pr.on{background:linear-gradient(90deg,rgba(90,220,190,.28),rgba(90,220,190,.05));border-color:var(--k-acc);color:#effffa;box-shadow:0 0 12px -4px var(--k-main-glow)}
+/* a receita: a mesa da Marta, com a placa dela apagada no fundo */
+#enc .pdet{background:rgba(4,12,12,.55);box-shadow:inset 0 0 0 1px var(--k-line)}
+#enc .pdet::before{content:"";position:absolute;right:18px;top:92px;width:156px;height:132px;background:var(--k-sign) center/156px 132px no-repeat;image-rendering:pixelated;opacity:.08;pointer-events:none}
+#enc .pico{background:radial-gradient(circle at 50% 40%,#12302c,#050c0c 75%);box-shadow:0 0 0 2px #33a891,0 0 0 4px #000,0 0 16px rgba(95,240,204,.35)}
+#enc .pico img{filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#enc .pdh small{color:var(--k-acc)}
+#enc .pdesc{color:var(--k-txt)}
+#enc .pdbody h5{color:var(--k-acc)}
+#enc .encfx{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;padding:8px 12px;background:rgba(0,0,0,.35);border-left:3px solid var(--k-line)}
+#enc .encfx b{font-size:12px;font-weight:700;color:var(--k-dim);letter-spacing:.1em;text-transform:uppercase;align-self:center}
+#enc .encfx span{color:#c8f4e8;font-weight:600}
+#enc .preag .ri{background:radial-gradient(circle at 50% 42%,var(--k-slot),var(--k-slot-2) 78%);box-shadow:inset 0 0 0 1px var(--k-line),inset 2px 2px 0 1px rgba(0,0,0,.7)}
+#enc .preag li.ok b{color:#8ae8d0}
+#enc .preag li.no b{color:#ff8a6a}
+#enc .pwork{border-top:2px solid rgba(0,0,0,.6)}
+#encCv{width:48px;height:36px;flex:none;image-rendering:pixelated;background:radial-gradient(ellipse at 50% 100%,#0e2622,#040a0a 70%);border:2px solid #000}
+#enc .pbar{background:#040a0a;box-shadow:inset 0 0 0 1px #1e4a44,inset 0 3px 0 rgba(0,0,0,.6)}
+#enc .pbar>i{background:linear-gradient(#e0fff6 0 20%,#7ae8cc 20% 48%,#2a9a84 48% 78%,#0e4a40 78%);box-shadow:0 0 10px 1px rgba(95,240,204,.6)}
+#enc .pnote{color:var(--k-dim);text-shadow:1px 1px 0 #000}
+#enc .qty input{background:#050c0c;color:var(--k-txt);box-shadow:inset 0 0 0 1px #1e4a44}
+@media (max-width:760px){#enc .ch{flex-wrap:wrap}}
+
+/* as pedras: um botão por pedra, com a quantidade que você tem; sem nenhuma fica apagada mas escolhível */
+#enc .gems{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+#enc .gem{display:grid;justify-items:center;gap:1px;padding:4px 2px 3px;background:radial-gradient(circle at 50% 38%,var(--k-slot),var(--k-slot-2) 80%);border:2px solid #000;box-shadow:inset 0 0 0 1px var(--k-line);color:var(--k-txt);font:600 12px var(--font-ui);cursor:pointer}
+#enc .gem img{width:26px;height:26px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.7))}
+#enc .gem b{font-size:13px;color:var(--k-acc);font-variant-numeric:tabular-nums}
+#enc .gem.none{filter:grayscale(.8) brightness(.6)}
+#enc .gem:hover{filter:brightness(1.15)}
+#enc .gem.on{box-shadow:inset 0 0 0 2px var(--k-acc),0 0 12px -3px var(--k-main-glow);background:radial-gradient(circle at 50% 38%,#1c3a36,var(--k-slot-2) 80%)}
+#enc .gem.none.on{filter:grayscale(.5) brightness(.8)}
+/* as chances da pedra escolhida: uma barra dividida nas cores das raridades e os números embaixo */
+#enc .encodds{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 12px;background:rgba(0,0,0,.35);border-left:3px solid var(--k-line);font-size:14px;font-weight:600}
+#enc .encodds i{display:flex;flex-basis:100%;height:8px;gap:2px;background:#040a0a;box-shadow:inset 0 0 0 1px #1e4a44;padding:1px}
+#enc .encodds u{display:block;text-decoration:none}
+#enc .encodds b{color:var(--k-txt);font-variant-numeric:tabular-nums}
+#enc .pact{justify-content:flex-end}

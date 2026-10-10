@@ -192,7 +192,7 @@ function cvBuild() {
       }
     }
   };
-  vein(CV_O_CARVAO, 150 * WSC, 6, 186, 3, 7); vein(CV_O_COBRE, 120 * WSC, 6, 120, 2, 6); vein(CV_O_FERRO, 100 * WSC, 35, 186, 2, 6); vein(CV_O_OURO, 40 * WSC, 100, 186, 2, 5);
+  vein(CV_O_CARVAO, 150 * WSC, 6, 186, 3, 7); vein(CV_O_COBRE, 150 * WSC, 6, 186, 2, 6);   // only coal and copper up here (102: one metal per layer)
 }
 
 function cvAfter() {

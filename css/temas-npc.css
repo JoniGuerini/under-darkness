@@ -244,7 +244,7 @@ body[data-npc=taverneiro]{
   --k-slot:#2a1a0e;--k-slot-2:#0c0704
 }
 /* the window is the house: its roof on top, its posts at the sides, its foundation below, its wall inside */
-body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor){
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) :is(#talk .card,#shop .vendor){
   position:relative;isolation:isolate;image-rendering:pixelated;
   border-style:solid;border-color:#000;border-width:48px 18px 24px;
   border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
@@ -252,41 +252,41 @@ body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vend
   background-image:var(--k-glow),linear-gradient(var(--k-shade),var(--k-shade-2) 30%,var(--k-shade)),var(--k-wall);background-size:auto,auto,1080px 720px;background-position:0 0,0 0,0 100%;
   box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 60px rgba(0,0,0,.65);color:var(--k-txt)
 }
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .card{width:min(680px,100%)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .talkh h2,#shop .vendor .ch h3){
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .card{width:min(680px,100%)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) :is(#talk .talkh h2,#shop .vendor .ch h3){
   background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)
 }
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch{gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch h3{white-space:nowrap;font-size:29px}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch::before,
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child::after{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:end;flex:1}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh>div:last-child::after{grid-row:1 / span 2;grid-column:2;align-self:center;width:57px;height:48px}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .talkh .role{grid-column:1;color:var(--k-acc);letter-spacing:.22em}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .portrait{
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .ch{gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .ch h3{white-space:nowrap;font-size:29px}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .ch::before,
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .talkh>div:last-child::after{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .talkh>div:last-child{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:end;flex:1}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .talkh>div:last-child::after{grid-row:1 / span 2;grid-column:2;align-self:center;width:57px;height:48px}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .talkh .role{grid-column:1;color:var(--k-acc);letter-spacing:.22em}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .portrait{
   width:99px;height:108px;background:#10100c var(--k-portrait) center bottom/99px 108px no-repeat;image-rendering:pixelated;
   border:15px solid #000;border-image:var(--k-frame-sm) 5 / 15px stretch
 }
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .portrait canvas{width:96px;height:88px;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .tag{color:var(--k-txt);font-style:italic;padding:10px 14px;border-left:3px solid var(--k-line);background:linear-gradient(90deg,rgba(0,0,0,.5),transparent)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .portrait canvas{width:96px;height:88px;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .tag{color:var(--k-txt);font-style:italic;padding:10px 14px;border-left:3px solid var(--k-line);background:linear-gradient(90deg,rgba(0,0,0,.5),transparent)}
 /* buttons: the house's own colour for the main action, boards from the house for the rest */
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .opts button:not(.ghost){
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .opts button:not(.ghost){
   background:var(--k-main);color:var(--k-main-txt);text-shadow:0 1px 0 var(--k-main-hi);border:3px solid #000;
   box-shadow:inset 0 2px 0 var(--k-main-hi),inset 0 -3px 0 var(--k-main-lo),0 0 14px -4px var(--k-main-glow),0 3px 0 rgba(0,0,0,.55)
 }
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #talk .opts button:not(.ghost):hover{filter:brightness(1.1)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor) button.ghost{
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #talk .opts button:not(.ghost):hover{filter:brightness(1.1)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) :is(#talk .card,#shop .vendor) button.ghost{
   background:var(--k-board) 0 0/180px 42px;image-rendering:pixelated;color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
   border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:4px 14px
 }
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ch button.ghost{padding:2px 10px}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) :is(#talk .card,#shop .vendor) button.ghost:hover{filter:brightness(1.15)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .ch button.ghost{padding:2px 10px}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) :is(#talk .card,#shop .vendor) button.ghost:hover{filter:brightness(1.15)}
 /* the shop: slots as hollows, small print in the house's colours */
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .slot{background:radial-gradient(circle at 50% 40%,var(--k-slot),var(--k-slot-2) 76%);box-shadow:inset 0 0 0 1px var(--rc,var(--k-line)),inset 2px 2px 0 1px rgba(0,0,0,.8)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .slot.full{box-shadow:inset 0 0 0 2px var(--rc,var(--k-line)),inset 3px 3px 0 2px rgba(0,0,0,.6),0 0 10px -2px var(--rc,transparent)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .ph span{color:var(--k-txt)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .shopf{color:var(--k-dim)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .shopf b{color:var(--k-acc)}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep{background:var(--k-board) 0 50%/180px 12px repeat-x;height:12px;border-block:2px solid #000;margin-block:3px}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep::before,body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor .sep::after{display:none}
-body:is([data-npc=curandeira],[data-npc=taverneiro]) #shop .vendor kbd{background:var(--k-slot);color:var(--k-txt);box-shadow:inset 0 -2px 0 #000}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .slot{background:radial-gradient(circle at 50% 40%,var(--k-slot),var(--k-slot-2) 76%);box-shadow:inset 0 0 0 1px var(--rc,var(--k-line)),inset 2px 2px 0 1px rgba(0,0,0,.8)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .slot.full{box-shadow:inset 0 0 0 2px var(--rc,var(--k-line)),inset 3px 3px 0 2px rgba(0,0,0,.6),0 0 10px -2px var(--rc,transparent)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .ph span{color:var(--k-txt)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .shopf{color:var(--k-dim)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .shopf b{color:var(--k-acc)}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .sep{background:var(--k-board) 0 50%/180px 12px repeat-x;height:12px;border-block:2px solid #000;margin-block:3px}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .sep::before,body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor .sep::after{display:none}
+body:is([data-npc=curandeira],[data-npc=taverneiro],[data-npc=maga],[data-npc=encantador]) #shop .vendor kbd{background:var(--k-slot);color:var(--k-txt);box-shadow:inset 0 -2px 0 #000}

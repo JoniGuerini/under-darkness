@@ -1,0 +1,11 @@
+/* ================= Aurélia, a maga (js/91-maga.js) =================
+   Usa o kit da Marta e do Odo em temas-npc.css; aqui só as texturas e as cores dela: a pedra azulada e a ardósia
+   da torre por fora, estantes de livros por dentro, e o violeta da pedra do pináculo. */
+body[data-npc=maga]{
+  --k-frame:var(--maga-frame);--k-frame-sm:var(--maga-frame-sm);--k-wall:var(--maga-wall);--k-board:var(--maga-board);--k-sign:var(--maga-sign);--k-portrait:var(--maga-portrait);
+  --k-bg:#141224;--k-shade:rgba(10,8,20,.74);--k-shade-2:rgba(10,8,20,.56);--k-glow:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(184,138,255,.16),transparent 70%);
+  --k-txt:#ece6f4;--k-dim:#b4aac8;--k-acc:#c8a4ff;--k-line:#6e3cb4;
+  --k-title:linear-gradient(#f6f0ff 0 26%,#d2b8ff 26% 52%,#9a6ade 52% 78%,#6e3cb4 78%);
+  --k-main:linear-gradient(#e8d8ff 0 14%,#9a6ade 14% 50%,#6e3cb4 50% 82%,#4a2680 82%);--k-main-txt:#12062a;--k-main-hi:#f4ecff;--k-main-lo:#2e1850;--k-main-glow:rgba(184,138,255,.5);
+  --k-slot:#1e1830;--k-slot-2:#08060e
+}

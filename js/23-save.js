@@ -2,7 +2,7 @@
 
 /* ================= save ================= */
 const SAVE_KEY = 'sob-a-terra-v2', OLD_SAVE_KEY = 'sob-a-terra-v1';
-function makeSave() { return { wrap: 1, seed, diffs: [...diffs.entries()], p: { x: pl.x, y: pl.y, lvl: pl.lvl, xp: pl.xp, hp: pl.hp, kills: pl.kills }, inv: inv.map(s => !s ? null : ITEMS[s.id].slot ? [s.id, 1, itemRar(s), s.mods || [], s.il] : [s.id, s.n]), eq: Object.fromEntries(EQ_SLOTS.map(k => [k, equip[k] ? [equip[k].id, itemRar(equip[k]), equip[k].mods || [], equip[k].il] : null])), gear: 4, hbv: 2, hb: hb.sel, bt: blockTip, crypt: crypt ? { dead: crypt.bossDead } : null, wg: CATEDRAL ? 2 : 1, cp: [...propGone], seen: packSeen(), wt: worldTime, dl: DAY_LEN, tut: tutorialStep, vil: 1, gold: pl.gold, qc: questCarrasco, bounty, fur: { ore: furnace.ore, fuel: furnace.fuel, out: furnace.out, on: furnace.on, t: furnace.t, goal: furnace.goal } }; }
+function makeSave() { return { wrap: 1, seed, diffs: [...diffs.entries()], p: { x: pl.x, y: pl.y, lvl: pl.lvl, xp: pl.xp, hp: pl.hp, kills: pl.kills }, inv: inv.map(s => !s ? null : ITEMS[s.id].slot ? [s.id, 1, itemRar(s), s.mods || [], s.il] : [s.id, s.n]), eq: Object.fromEntries(EQ_SLOTS.map(k => [k, equip[k] ? [equip[k].id, itemRar(equip[k]), equip[k].mods || [], equip[k].il] : null])), gear: 4, hbv: 2, hb: hb.sel, bt: blockTip, wg: CATEDRAL ? 2 : 1, cp: [...propGone], seen: packSeen(), wt: worldTime, dl: DAY_LEN, tut: tutorialStep, vil: 1, gold: pl.gold, bounty, fur: { ore: furnace.ore, fuel: furnace.fuel, out: furnace.out, on: furnace.on, t: furnace.t, goal: furnace.goal } }; }
 function saveGame() { if (!tiles) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(makeSave())); } catch (e) { } }
 let ringNews = false, gearNews = false, cathNews = false;
 function migrateSave(v) {
@@ -17,8 +17,7 @@ function loadSave() { try { const s = localStorage.getItem(SAVE_KEY); if (s) ret
 function newWorld(sd, sv) {
   generate(sd); diffs.clear(); chunks.clear();
   enemies.length = projs.length = orbs.length = parts.length = texts.length = loot.length = 0;
-  bossFight = null; cryptWhisper = false; $('bossbar').hidden = true; $('hud').classList.remove('boss');
-  if (crypt) crypt.bossDead = !!(sv && sv.crypt && sv.crypt.dead);
+  bossFight = null; $('bossbar').hidden = true; $('hud').classList.remove('boss');
   if (sv && Array.isArray(sv.diffs)) for (const [i, t] of sv.diffs) { if (i >= 0 && i < tiles.length && t >= 0 && t < NT && !inVillage(i % WW, (i / WW) | 0)) { tiles[i] = t; diffs.set(i, t); } }
   if (sv && typeof sv.seen === 'string') unpackSeen(sv.seen);
   applyPropGone(sv && sv.cp);
@@ -29,7 +28,7 @@ function newWorld(sd, sv) {
   inv = new Array(INV_N).fill(null); for (const k of EQ_SLOTS) equip[k] = DEFAULT_EQ[k] ? mkItem(DEFAULT_EQ[k], 0) : null;
   // gear: 3 = bases + modifiers (js/48-itemizacao.js). Older gear keeps its rarity and rolls new modifiers to match
   const loadGear = (id, rar, mods, il) => sv.gear >= 2 ? mkItem(id, rar | 0, sv.gear === 3 ? rerollValues(id, mods, il) : mods, il) : ITEMS[id].legend ? mkItem(id) : mkItem(id, clamp(ITEMS[id].rar || 0, 0, 3));
-  questCarrasco = sv && sv.qc ? 1 : 0; bounty = sv && sv.bounty && ITEMS[sv.bounty.id] ? sv.bounty : null; shopDay = -1; stock = {}; chatIdx = {}; lastVil = null;
+  bounty = sv && sv.bounty && ITEMS[sv.bounty.id] ? sv.bounty : null; shopDay = -1; stock = {}; chatIdx = {}; lastVil = null;
   villageNews = !!(sv && sv.p && !sv.vil); pl.gold = sv && sv.gold != null ? Math.max(0, sv.gold | 0) : 0;
   { const f = sv && sv.fur, ok = (q, fit) => q && ITEMS[q.id] && fit(q.id) && q.n > 0 ? { id: q.id, n: Math.min(99, q.n | 0) } : null;
     furnace = { ore: ok(f && f.ore, id => !!FURN[id]), fuel: ok(f && f.fuel, id => id === 'carvao'), out: ok(f && f.out, id => /^barra_/.test(id)), on: !!(f && f.on), t: f && +f.t || 0, made: 0, goal: f && f.goal | 0 }; forgeDirty = true; }

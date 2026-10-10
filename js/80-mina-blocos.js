@@ -198,6 +198,16 @@ for (const [t, o, p, fn, tint, a1, a2] of MN_ORES) {
   DIG[t] = DIG[o]; ORE_XP[t] = ORE_XP[o]; ORE_NAME[t] = ORE_NAME[o]; PCOL[t] = PCOL[o]; ORE_ITEM[t] = ORE_ITEM[o];
 }
 EMIT[MN_O_CRISTAL] = EMIT[CRYSTAL];
+// cobalt: dark steel-blue lumps with a cold sheen, and the pink "cobalt bloom" crusting their shaded side
+oreRamp(MN_O_COBALTO, ['#0c1030', '#18245a', '#22388a', '#3054c0', '#4a78e8', '#8aaeff', '#e2ecff']);
+ORE_PAINT[MN_O_COBALTO] = function (L, s) {
+  const R = ORE_RAMP[MN_O_COBALTO];
+  oreNodes(L, s, R, 70, [2.7, 0.7], [1.3, 0.5], 4);
+  for (let k = 0; k < 144; k++) if (L.m[k]) { const h = hash2(k, s, 71); if (L.l[k] < 2.1 && h < 0.32) L.put(k % 12, k / 12 | 0, h < 0.12 ? ph('#e87ab4') : ph('#b8487e'), L.l[k]); else if (L.l[k] > 3.4 && h > 0.84) L.put(k % 12, k / 12 | 0, R[6], L.l[k]); }
+};
+ORE_HALO[MN_O_COBALTO] = { pal: ['mnFerrosa', '#2a3c98', 0.4, 0.16], shade: 0 };
+MAT[MN_O_COBALTO] = [PALS.mnFerrosa, bakeOre(MN_O_COBALTO, vFerrosa)]; SOLID[MN_O_COBALTO] = 1; BLOCKY[MN_O_COBALTO] = 1; BLEND[MN_O_COBALTO] = 1;
+DIG[MN_O_COBALTO] = 1.15; ORE_XP[MN_O_COBALTO] = 12; ORE_NAME[MN_O_COBALTO] = 'Cobalto'; PCOL[MN_O_COBALTO] = '#3a5ad0'; ORE_ITEM[MN_O_COBALTO] = 'min_cobalto';
 
 /* ---- block items ---- */
 const MN_ITEMS = {

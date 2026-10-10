@@ -21,11 +21,7 @@ const ET = {
   guard: { name: 'Guardião Esquelético', w: 8, h: 21, hp: 95, dmg: 22, xp: 34, kb: 0.35, fly: false, blood: '#e8e0cc' },
   ghost: { name: 'Espectro', w: 10, h: 13, hp: 40, dmg: 16, xp: 26, kb: 0.6, fly: true, blood: '#b8d8ec', phase: true },
   skull: { name: 'Caveira Flamejante', w: 9, h: 8, hp: 28, dmg: 18, xp: 20, kb: 1, fly: true, blood: '#ff8a2a' },
-  lurker: { name: 'Espreitador', w: 12, h: 12, hp: 95, dmg: 22, xp: 42, kb: 0.4, fly: true, blood: '#7a3a9a' },
-  imp: { name: 'Diabrete', w: 10, h: 9, hp: 24, dmg: 12, xp: 18, kb: 1.1, fly: true, blood: '#c8402a' },
-  hound: { name: 'Cão Infernal', w: 14, h: 9, hp: 42, dmg: 16, xp: 24, kb: 0.7, fly: false, blood: '#8a1a1a' },
-  brute: { name: 'Demônio', w: 8, h: 21, hp: 85, dmg: 24, xp: 40, kb: 0.4, fly: false, blood: '#8a1a1a' },
-  boss: { name: 'O Carrasco', w: 16, h: 40, hp: 2400, dmg: 40, xp: 450, kb: 0, fly: false, blood: '#6a0f14', boss: true }
+  lurker: { name: 'Espreitador', w: 12, h: 12, hp: 95, dmg: 22, xp: 42, kb: 0.4, fly: true, blood: '#7a3a9a' }
 };
 function spawnEnemy(type, px, py, zone) {
   const D = ET[type];
@@ -41,12 +37,9 @@ function spawnEnemy(type, px, py, zone) {
   };
   enemies.push(e); return e;
 }
-function inCrypt(tx, ty) { tx = wrapX(tx); return !!crypt && tx >= crypt.x0 && tx <= crypt.x1 && ty >= crypt.y0 && ty <= crypt.y1; }
-function inBossHall(tx, ty) { tx = wrapX(tx); const B = crypt && crypt.boss; return !!B && tx >= B.x0 && tx <= B.x1 && ty >= B.y0 && ty <= B.y1; }
-function cryptLocked(tx, ty) { return !!crypt && !crypt.bossDead && inCrypt(tx, ty); }
-function zoneAt(tx, ty) { if (inCrypt(tx, ty)) return 4; const d = ty - surf[wrapX(tx)]; if (d < 8) return 0; if (CATEDRAL) return cathZone(tx, ty); if (ty < Z1) return 1; if (ty < Z2) return 2; return 3; }
-const ZONE_NAMES = ['Superfície', 'Cavernas Rasas', 'Cavernas Profundas', 'Abismo', 'Cripta Abandonada', 'Átrio Soterrado', 'Nave da Catedral', 'Claustro Profanado', 'Criptas'];
-const ZONE_SUB = ['onde o sol ainda chega', 'escuro, úmido e cheio de ossos', 'o ar fica pesado', 'algo observa de volta', 'aqui nada descansa em paz', 'a terra cede à pedra branca', 'os bancos ainda esperam os fiéis', 'as orações aqui azedaram', 'os mortos não ficaram deitados'];
+function zoneAt(tx, ty) { const d = ty - surf[wrapX(tx)]; if (d < 8) return 0; if (CATEDRAL) return cathZone(tx, ty); if (ty < Z1) return 1; if (ty < Z2) return 2; return 3; }
+const ZONE_NAMES = ['Superfície', 'Cavernas Rasas', 'Cavernas Profundas', 'Fundo das Cavernas', 'Fendas Antigas', 'Átrio Soterrado', 'Nave da Catedral', 'Claustro Profanado', 'Criptas'];
+const ZONE_SUB = ['onde o sol ainda chega', 'escuro, úmido e cheio de ossos', 'o ar fica pesado', 'algo observa de volta', 'ninguém desce até aqui', 'a terra cede à pedra branca', 'os bancos ainda esperam os fiéis', 'as orações aqui azedaram', 'os mortos não ficaram deitados'];
 function lavaIn(x, y, w, h) { const x0 = Math.floor(x / T), x1 = Math.floor((x + w - 0.001) / T), y0 = Math.floor(y / T), y1 = Math.floor((y + h - 0.001) / T); for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (tileAt(tx, ty) === LAVA) return true; return false; }
 function trySpawn() {
   if (bossFight) return;
@@ -59,9 +52,7 @@ function trySpawn() {
   if (zone === 1) { table = [['slime', 0.25], ['bat', 0.3], ['skeleton', 0.25], ['archer', 0.2]]; max = 8; }
   else if (zone === 2) { table = [['bat', 0.18], ['skeleton', 0.2], ['archer', 0.15], ['guard', 0.14], ['ghost', 0.12], ['slime', 0.08], ['lurker', 0.13]]; max = 9; }
   else if (zone === 3) { table = [['skeleton', 0.18], ['guard', 0.18], ['archer', 0.12], ['ghost', 0.15], ['skull', 0.15], ['lurker', 0.14], ['bat', 0.08]]; max = 10; }
-  else if (zone === 4) { table = [['imp', 0.36], ['hound', 0.3], ['brute', 0.34]]; max = 7; }
   else { [table, max] = CATH_SPAWN[zone]; table = table.filter(([t]) => ET[t] && AI[t]); if (!table.length) return; }
-  const okArea = (x, y) => inCrypt(x, y) === (zone === 4) && !inBossHall(x, y);
   if (enemies.length >= max) return;
   let r = Math.random(), type = table[0][0]; for (const [t, w] of table) { if (r < w) { type = t; break; } r -= w; }
   const D = ET[type], halfW = Math.ceil(VW / 2 / T);
@@ -72,13 +63,13 @@ function trySpawn() {
     if (D.fly) {
       if (ty0 < 2 || ty0 >= WH - 5) continue;
       const px = tx * T, py = ty0 * T;
-      if (okArea(tx, ty0) && !rectSolid(px, py, D.w, D.h) && !lavaIn(px, py, D.w, D.h) && (zone > 0 ? wallAt(tx, ty0) > 0 : wallAt(tx, ty0) === 0)) { spawnEnemy(type, px, py, zone); return; }
+      if (!rectSolid(px, py, D.w, D.h) && !lavaIn(px, py, D.w, D.h) && (zone > 0 ? wallAt(tx, ty0) > 0 : wallAt(tx, ty0) === 0)) { spawnEnemy(type, px, py, zone); return; }
     } else {
       for (let ty = ty0 - 6; ty < ty0 + 9; ty++) {
         if (ty < 2 || ty >= WH - 4) continue;
         const px = tx * T, py = (ty + 1) * T - D.h;
         if (solidAt(tx, ty + 1) && !rectSolid(px, py, D.w, D.h) && !lavaIn(px, py, D.w, D.h + 1)) {
-          if ((zone > 0) !== (wallAt(tx, ty) > 0) || !okArea(tx, ty)) break;
+          if ((zone > 0) !== (wallAt(tx, ty) > 0)) break;
           spawnEnemy(type, px, py, zone); return;
         }
       }
@@ -131,7 +122,7 @@ function hitEnemy(e, dir, mult = 1, melee = false) {
   dmg = Math.max(1, Math.round(dmg));
   e.hp -= dmg; e.flash = 0.1; e.showHp = 3.5;
   const D = ET[e.type];
-  const poise = D.boss || ((e.type === 'skeleton' || e.type === 'brute') && (e.state === 'wind' || e.state === 'swing')) || (e.type === 'guard' && (e.state === 'wind' || e.state === 'thrust'));
+  const poise = D.boss || (e.type === 'skeleton' && (e.state === 'wind' || e.state === 'swing')) || (e.type === 'guard' && (e.state === 'wind' || e.state === 'thrust'));
   if (!poise) { e.vx = dir * 150 * D.kb * (melee ? pl.kb : 1); e.vy = D.fly ? -40 : -120 * D.kb; e.stun = Math.max(e.stun, 0.25); }
   else e.vx = dir * 25;
   if (melee) {
@@ -294,12 +285,10 @@ function hurtPlayer(dmg, srcX, src, isProj) {
       src.vx = pl.facing * (parry ? 230 : 170) * D.kb; if (!D.fly) src.vy = -130 * D.kb;
       src.stun = parry ? 1.4 : 0.35; src.atkCD = Math.max(src.atkCD, parry ? 1.6 : 0.6);
       if (parry) src.parried = 1.5;
-      if (src.type === 'skeleton' || src.type === 'brute') { src.state = 'walk'; src.sAng = 0.9; }
-      if (src.type === 'hound') { src.state = 'recover'; src.stateT = parry ? 1.2 : 0.5; }
+      if (src.type === 'skeleton') { src.state = 'walk'; src.sAng = 0.9; }
       if (src.type === 'guard') { src.state = 'recover'; src.stateT = parry ? 1.2 : 0.6; }
       if (src.type === 'skull') { src.state = 'walk'; src.atkCD = 1.6; }
       if (src.type === 'ghost') { src.state = 'fade'; src.stateT = 1.1; }
-      if (src.type === 'boss') { src.state = 'recover'; src.stateT = parry ? 0.2 : 0.45; pl.vx -= pl.facing * (parry ? 60 : 150); }
       if (src.type === 'bat') src.retreat = 0.9;
     }
     floatText(fx, fy - 8, parry ? 'APARADO!' : 'BLOQUEIO', parry ? '#ffe28a' : '#d9c7a3', parry ? 1.15 : 0.8);

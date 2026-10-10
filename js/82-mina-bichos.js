@@ -40,7 +40,7 @@ Object.assign(DROPS, {
   grisu: [['carvao', 0.25], ['pocao', 0.06]],
   lampiao: [['oleo_lampiao', 0.55], ['tocha', 0.4, 1, 3], ['pocao', 0.1], ['lanterna_fantasma', 0.02], ['amuleto', 0.02]],
   falsoveio: [['pepita', 0.6, 1, 3], ['min_ouro', 0.4, 1, 2], ['pocao', 0.08], ['anel_vida', 0.02], ['espada_ouro', 0.025]],
-  golem: [['nucleo_minerio', 0.5], ['min_ferro', 0.6, 2, 4], ['min_ouro', 0.4, 1, 3], ['min_cristal', 0.2, 1, 2], ['pocao', 0.15], ['armadura_placas', 0.03], ['maca_ouro', 0.035], ['escudo_torre', 0.025]],
+  golem: [['nucleo_minerio', 0.5], ['min_ferro', 0.6, 2, 4], ['min_ouro', 0.4, 1, 3], ['min_cobalto', 0.3, 1, 3], ['min_cristal', 0.1, 1, 1], ['pocao', 0.15], ['armadura_placas', 0.03], ['maca_ouro', 0.035], ['escudo_torre', 0.025]],
   toupeira: [['pele_rato', 0.5], ['carne', 0.35], ['pocao', 0.06], ['botas_couro', 0.03], ['adaga_ferro', 0.02]]
 });
 for (const k of ['mineiro', 'carrinho', 'grisu', 'lampiao', 'falsoveio', 'golem', 'toupeira']) DROPS[k] = DROPS[k].filter(([id]) => ITEMS[id]);

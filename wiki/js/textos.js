@@ -16,10 +16,6 @@ const UDW_TXT = {
     bat: 'Voa em zigue-zague e dá rasantes com mordida.',
     skull: 'Caveira em chamas que voa, treme e se lança contra o herói.',
     lurker: 'Olho voador das profundezas que observa de longe e ataca à distância.',
-    imp: 'Diabrete voador da cripta do Carrasco.',
-    hound: 'Cão infernal rápido que se agacha e salta.',
-    brute: 'Demônio com machado, golpes pesados.',
-    boss: 'Chefe da cripta roxa. Golpes de machado que atravessam escudo; só um aparo no tempo certo segura. Invoca diabretes.',
     rei: 'Chefe da catedral. Veja as fases abaixo.',
     rato: 'Pequeno e rápido, vem em bandos de 2 ou 3. Corre até o herói, pula e morde.',
     aranha: 'Às vezes espera pendurada num fio no teto e cai quando o herói passa embaixo. No chão, se agacha e dá um bote.',
@@ -62,6 +58,12 @@ const UDW_TXT = {
     ['Fase 2', 'Abaixo de 60% da vida, toca a corneta e goblins chegam correndo dos dois lados. Cada batida na parede derruba pedras do teto (uma sombra marca o chão antes), e ele vira a broca contra o teto.'],
     ['Fase 3', 'Abaixo de 25%, a máquina explode e ele pula fora com o martelo-picareta: salta em cima do herói e esmaga o chão (a onda corre pelo chão), e joga feixes de três dinamites.']
   ],
+  principeFases: [
+    ['Fase 1', 'Um golpe largo da espada (a lâmina fica branca antes), uma investida pelo chão arrastando a lâmina e deixando fogo para trás (as chamas ficam um tempo) e um leque de fogo pela boca (ele joga a cabeça para trás e a boca brilha).'],
+    ['Fase 2', 'Abaixo de 60% da vida: rasga portais de onde saem diabretes e cães infernais, e gêiseres de lava estouram do chão (um anel brilha no chão antes).'],
+    ['Fase 3', 'Abaixo de 25%: abre as asas e voa. Chovem meteoros na sala (uma sombra no chão avisa) e ele mergulha de espada sobre o herói; depois do mergulho fica um momento preso no chão.']
+  ],
+  principeOnde: 'O Trono do Caos, um salão de 56 x 20 blocos no fundo do Abismo (cerca de 926 m), do outro lado do mundo em relação às fendas, com um trono de ferro negro e osso cravejado de cristais do caos, braseiros e correntes. Ao entrar, grades do caos fecham todas as saídas; sair da sala ou morrer recomeça a luta. Fica salvo que ele morreu. Solta o Coração do Caos, acessório lendário.',
   rgOnde: 'A Oficina da Escavadeira, um salão de 48 x 16 blocos nas Fornalhas Esquecidas (cerca de 730 m), do outro lado do mundo em relação aos poços de descida, com um trono feito de vagonete, montes de saque e fornalhas. Ao entrar, grades de ferro fecham as saídas. Fica salvo que o rei morreu.',
   // fases do Yeti Ancestral (docs/biomas.md, parte 4, seção 7, e js/74-yeti-ancestral.js)
   yetiFases: [
@@ -84,14 +86,15 @@ const UDW_TXT = {
     ['Fase 3', 'Na primeira "morte" ele desmorona e se remonta com metade da vida, e passa a soltar fileiras de espinhos de osso.']
   ],
   reiOnde: 'Um salão da nave ou do claustro, sorteado pela semente do mundo, com estrado, trono, tapete, candelabros e tocheiros. Ao entrar, grades de ferro fecham todas as saídas. Fica salvo que o rei morreu.',
-  carrascoOnde: 'Na cripta roxa das Cavernas Profundas. Hoje a cripta está escondida: o código existe, mas ela não é gerada.',
 
   // o que cada morador faz
   npcs: {
     ferreiro: 'Compra e vende equipamento (a mercadoria muda todo dia e melhora com o seu nível), compra minério, barras, ossos, chifres e presas, e cuida da fornalha e da bigorna.',
-    curandeira: 'Cura todos os ferimentos de graça, vende Poção de Vida e compra materiais de monstro (gel, asas, carne, olhos, ectoplasma, brasas e crânios).',
-    taverneiro: 'Vende carvão para a fornalha, tochas e candelabros, compra madeira e carvão, e conta boatos (um deles aponta a direção da cripta).',
-    anciao: 'Dá tarefas de buscar materiais em troca de ouro e experiência, e a missão do Carrasco (quando a cripta existe no mundo).'
+    curandeira: 'Alquimista e herborista. Prepara poções de vida, poções de mana e elixires no alambique, com as ervas que você colhe em cada camada e materiais de monstro. Não cura mais de graça.',
+    taverneiro: 'Vende carvão para a fornalha, tochas e candelabros, compra madeira e carvão, conta boatos e cozinha: com a carne crua e os cogumelos que caem dos bichos, faz pratos que se comem parado e devolvem vida e mana aos poucos.',
+    anciao: 'Dá tarefas de buscar materiais em troca de ouro e experiência.',
+    encantador: 'Mora na oficina de pedra à esquerda da forja. Encanta peças: você leva uma peça e uma pedra preciosa, ele sorteia modificadores novos com as chances da pedra. Encantar de novo troca os modificadores. Peças únicas, como as dos chefes, não aceitam encanto.',
+    maga: 'Mora na torre de pedra depois da casa do ancião. Vende cajados, varinhas e tomos (a mercadoria muda todo dia) e os pergaminhos dos feitiços que o herói ainda não conhece. Compra itens mágicos.'
   },
 
   // faixas da catedral (js/45-catedral-mundo.js: cathBand) e minérios (js/45: vein)
@@ -102,7 +105,7 @@ const UDW_TXT = {
     { zona: 8, nome: 'Criptas', de: 318, ate: 372, andares: '3 (333, 348 e 363 m)', salas: 'cripta, ossário, túmulos', carater: 'corredores baixos, ossários, túmulos' }
   ],
   minerios: [
-    ['carvao', 186, 370], ['min_cobre', 186, 296], ['min_ferro', 212, 370], ['min_ouro', 268, 370], ['min_cristal', 318, 370]
+    ['carvao', 192, 370], ['min_ferro', 192, 370]
   ],
   // faixas das cavernas (js/52-caverna-api.js: CV_BANDS; js/56-caverna-mundo.js) e os minérios delas (56: vein)
   cvFaixas: [
@@ -111,7 +114,7 @@ const UDW_TXT = {
     { zona: 11, nome: 'O Ninho', de: 120, ate: 168, salas: 'câmaras redondas forradas de teia, a Câmara do Ninho', carater: 'xisto escuro, teia em tudo, casulos, ovos e ossos das presas' },
     { zona: 12, nome: 'Fundações Soterradas', de: 168, ate: 186, salas: 'grutas de saída com escadarias para o átrio', carater: 'rocha virando calcário, pedra lavrada caída, arcos enterrados: a catedral começando' }
   ],
-  cvMinerios: [['carvao', 6, 186], ['min_cobre', 6, 120], ['min_ferro', 35, 186], ['min_ouro', 100, 186]],
+  cvMinerios: [['carvao', 6, 186], ['min_cobre', 6, 186]],
   // faixas do gelo (js/69-gelo-api.js: IC_BANDS; js/73-gelo-mundo.js) e os minérios delas (73: vein)
   icFaixas: [
     { zona: 13, nome: 'Fendas Geladas', de: 372, ate: 418, salas: 'fendas altas e estreitas, grutas baixas, as duas grutas no pé das descidas', carater: 'o calcário das criptas coberto de geada virando permafrost, tumbas e estátuas da catedral caídas e congeladas, raízes congeladas' },
@@ -119,16 +122,24 @@ const UDW_TXT = {
     { zona: 15, nome: 'Covis dos Yetis', de: 476, ate: 528, salas: 'tocas ligadas por túneis largos', carater: 'permafrost e neve batida, neve no chão, ossadas e presas de mamute, fogueiras apagadas, marcas de garra e pinturas dos yetis' },
     { zona: 16, nome: 'Coração do Inverno', de: 528, ate: 558, salas: 'grutas de gelo negro, o Trono de Gelo', carater: 'gelo negro antigo com veios azuis que brilham, cristais, gigantes e feras presos no gelo, altares de gelo' }
   ],
-  icMinerios: [['min_ferro', 372, 528], ['min_ouro', 400, 558], ['min_cristal', 418, 558]],
+  icMinerios: [['carvao', 372, 558], ['min_ouro', 372, 558]],
   // faixas da mina (js/79-mina-api.js: MN_BANDS; js/84-mina-mundo.js) e os minérios delas (84: vein)
   mnFaixas: [
     { zona: 17, nome: 'Galerias Escoradas', de: 558, ate: 604, salas: 'galerias retas escoradas em níveis fixos, os pés dos dois poços de descida', carater: 'rocha ferrosa listrada de preto e vermelho, escoras e vigas, trilhos com vagonetes, lampiões, ferramentas largadas' },
-    { zona: 18, nome: 'Poços e Andaimes', de: 604, ate: 656, salas: 'poços fundos com escadas e andaimes, galerias de lavra', carater: 'rejeito, guinchos, polias com balde, elevadores, beliches podres, veios de ouro no quartzito' },
+    { zona: 18, nome: 'Poços e Andaimes', de: 604, ate: 656, salas: 'poços fundos com escadas e andaimes, galerias de lavra', carater: 'rejeito, guinchos, polias com balde, elevadores, beliches podres, veios de cobalto no quartzito' },
     { zona: 19, nome: 'Acampamento Goblin', de: 656, ate: 708, salas: 'salões do acampamento com piso de tábua', carater: 'entulho, tendas, fogueiras, jaulas, estandartes, pinturas e o saque dos goblins, estacas com caveira' },
     { zona: 20, nome: 'Fornalhas Esquecidas', de: 708, ate: 744, salas: 'salões das fornalhas, a Oficina da Escavadeira', carater: 'tijolo de fornalha e escória, fornalhas que ainda brilham, cadinhos, bigornas, engrenagens quebradas, brasas' }
   ],
-  mnMinerios: [['carvao', 558, 688], ['min_ferro', 558, 744], ['min_ouro', 588, 744], ['min_cristal', 648, 744]],
-  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas' },
+  mnMinerios: [['carvao', 558, 744], ['min_cobalto', 558, 744], ['min_cristal', 558, 744]],
+  // faixas do Abismo (js/103-abismo-api.js: AB_BANDS; js/108-abismo-mundo.js) e os minérios dele (108: vein)
+  abFaixas: [
+    { zona: 21, nome: 'Portões de Cinza', de: 744, ate: 790, salas: 'salões em ruína de tijolo infernal, os pés das duas fendas', carater: 'rocha de cinza e basalto, cinza caindo do teto, correntes penduradas, braseiros, caveiras, estátuas de demônio, portões arrombados' },
+    { zona: 22, nome: 'Rios de Fogo', de: 790, ate: 842, salas: 'cavernas largas com um lago de lava e uma ponte de ferro negro', carater: 'basalto e obsidiana, crosta de lava brilhando, poças de lava, colunas de basalto, caldeirões, cachoeiras de lava, faíscas subindo' },
+    { zona: 23, nome: 'As Entranhas', de: 842, ate: 894, salas: 'câmaras redondas de carne', carater: 'carne viva e osso, tentáculos e ganchos no teto, sangue pingando, costelas, ovos, casulos, olhos e bocas nas paredes, um coração batendo' },
+    { zona: 24, nome: 'Trono do Caos', de: 894, ate: 930, salas: 'templos de tijolo infernal, o Trono do Caos', carater: 'pedra do caos e enxofre, runas e cristais roxos, altares, pentagramas, obeliscos, púlpitos, brasas roxas subindo' }
+  ],
+  abMinerios: [['carvao', 744, 930], ['min_infernita', 744, 930]],
+  faixaChave: { fendas: 'Fendas', saloes: 'Salões', covis: 'Covis', coracao: 'Coração', atrio: 'Átrio', nave: 'Nave', claustro: 'Claustro', criptas: 'Criptas', grutas: 'Grutas', galerias: 'Galerias', ninho: 'Ninho', fundacoes: 'Fundações', pocos: 'Poços', acampamento: 'Acampamento', fornalhas: 'Fornalhas', portoes: 'Portões', rios: 'Rios de Fogo', entranhas: 'Entranhas', trono: 'Trono' },
   // nome de cada bloco do mundo pela constante do jogo (03-blocos, 41/42 catedral, 52/53 cavernas). Os que viram item usam o nome do item.
   blocoNome: {
     DIRT: 'Terra', GRASS: 'Grama', STONE: 'Pedra', DEEP: 'Pedra funda', BEDROCK: 'Rocha-mãe (fundo do mundo)', LAVA: 'Lava', TRUNK: 'Tronco', LEAVES: 'Folhas',
@@ -139,19 +150,25 @@ const UDW_TXT = {
     CV_MUSGO: 'Rocha com musgo', CV_TEIA: 'Massa de teia', CV_O_CARVAO: 'Veio de carvão', CV_O_COBRE: 'Veio de cobre', CV_O_FERRO: 'Veio de ferro', CV_O_OURO: 'Veio de ouro',
     CV_ESTALACTITE: 'Estalactite', CV_ESTALAGMITE: 'Estalagmite', CV_RAIZES: 'Raízes pendentes', CV_COGUMELO: 'Cogumelos', CV_DRUSA: 'Drusa de cristal', CV_SEIXOS: 'Seixos',
     CV_CASULO: 'Casulo', CV_FIOS: 'Fios de teia',
-    IC_NEVE_DURA: 'Neve batida', IC_CALC_GELO: 'Calcário congelado', IC_O_FERRO: 'Veio de ferro', IC_O_OURO: 'Veio de ouro', IC_O_CRISTAL: 'Veio de cristal no gelo negro',
+    IC_NEVE_DURA: 'Neve batida', IC_CALC_GELO: 'Calcário congelado', IC_O_CARVAO: 'Veio de carvão', IC_O_FERRO: 'Veio de ferro', IC_O_OURO: 'Veio de ouro', IC_O_CRISTAL: 'Veio de cristal no gelo negro',
     IC_SINCELO: 'Sincelo', IC_ESTALAG: 'Estalagmite de gelo', IC_CRISTAL: 'Cristal de gelo', IC_CRISTAL_TETO: 'Cristal de gelo no teto', IC_NEVE_MONTE: 'Montinho de neve',
     IC_OSSOS: 'Ossos congelados', IC_BARREIRA: 'Parede de gelo do chefe', IC_VEIO: 'Veio de gelo azul', IC_COLUNA: 'Coluna de gelo',
     MN_FERROSA: 'Rocha ferrosa', MN_REJEITO: 'Rejeito', MN_ENTULHO: 'Entulho', MN_TABUA: 'Tábua de mina', MN_VIGA: 'Viga de mina', MN_CAVADA: 'Rocha cavada', MN_TIJOLO: 'Tijolo de fornalha',
     MN_ESCORIA: 'Escória', MN_QUARTZITO: 'Quartzito', MN_BARREIRA: 'Grade de ferro do chefe', MN_O_CARVAO: 'Veio de carvão', MN_O_FERRO: 'Veio de ferro', MN_O_OURO: 'Veio de ouro no quartzito',
-    MN_O_CRISTAL: 'Veio de cristal no quartzito', MN_ESCORA: 'Escora', MN_TRILHO: 'Trilho', MN_LAMPIAO: 'Lampião no gancho', MN_ESCADA: 'Escada', MN_FERRAMENTA: 'Ferramentas largadas',
-    MN_PEDRAS: 'Monte de pedras', MN_CORDA: 'Corda', MN_BRASA: 'Brasa de escória', MN_ESTACA: 'Estaca com caveira'
+    MN_O_COBALTO: 'Veio de cobalto', MN_O_CRISTAL: 'Veio de cristal (pedra preciosa)', MN_ESCORA: 'Escora', MN_TRILHO: 'Trilho', MN_LAMPIAO: 'Lampião no gancho', MN_ESCADA: 'Escada', MN_FERRAMENTA: 'Ferramentas largadas',
+    MN_PEDRAS: 'Monte de pedras', MN_CORDA: 'Corda', MN_BRASA: 'Brasa de escória', MN_ESTACA: 'Estaca com caveira',
+    AB_CINZA: 'Rocha de cinza', AB_BASALTO: 'Basalto', AB_OBSIDIANA: 'Obsidiana', AB_CROSTA: 'Crosta de lava', AB_CARNE: 'Carne viva', AB_OSSO: 'Osso compactado', AB_ENXOFRE: 'Enxofre',
+    AB_FERRO_NEGRO: 'Ferro negro', AB_TIJOLO: 'Tijolo infernal', AB_CAOS: 'Pedra do caos', AB_BARREIRA: 'Grade do Trono do Caos', AB_O_CARVAO: 'Veio de carvão no basalto', AB_O_INFERNITA: 'Veio de infernita',
+    AB_CORRENTE: 'Corrente', AB_ESPINHOS: 'Espinhos', AB_BRASEIRO: 'Braseiro', AB_CHAMA: 'Chama', AB_CRANIOS: 'Crânios', AB_ESTALAG: 'Estalagmite de obsidiana', AB_TENTACULO: 'Tentáculo',
+    AB_RUNA: 'Runa', AB_CRISTAL: 'Cristal do caos', AB_ESCADA: 'Escada de ferro negro', AB_GANCHO: 'Gancho', AB_COLUNA: 'Coluna de basalto',
+    HB_SANGUE: 'Sanguinária', HB_LIRIO: 'Lírio-das-grutas', HB_LOSNA: 'Losna-da-cripta', HB_GEADA: 'Flor-de-geada', HB_BRASA: 'Raiz-de-brasa'
   },
   paredeNome: {
     1: 'Terra', 2: 'Pedra', 3: 'Pedra funda', 4: 'Cripta', WCT_CALCARIO: 'Calcário', WCT_CANTARIA: 'Cantaria', WCT_REBOCO: 'Reboco', WCT_PAINEL: 'Painel de madeira',
     WCT_CRIPTA: 'Pedra de cripta', WCT_OSSARIO: 'Ossário', WCT_ARCADA: 'Arcada', WCT_MARMORE: 'Mármore', WCV_TERRA: 'Terra úmida', WCV_ROCHA: 'Rocha', WCV_CALCITA: 'Calcita',
     WCV_TEIA: 'Teia', WCV_XISTO: 'Xisto', WIC_CALC: 'Calcário congelado', WIC_ROCHA: 'Rocha gelada', WIC_GELO: 'Gelo azul', WIC_NEVE: 'Neve batida', WIC_NEGRO: 'Gelo negro',
-    WMN_FERROSA: 'Rocha ferrosa', WMN_TABUADO: 'Tabuado', WMN_CAVADA: 'Rocha cavada', WMN_TIJOLO: 'Tijolo de fornalha', WMN_QUARTZITO: 'Quartzito'
+    WMN_FERROSA: 'Rocha ferrosa', WMN_TABUADO: 'Tabuado', WMN_CAVADA: 'Rocha cavada', WMN_TIJOLO: 'Tijolo de fornalha', WMN_QUARTZITO: 'Quartzito',
+    WAB_CINZA: 'Rocha de cinza', WAB_BASALTO: 'Basalto', WAB_CARNE: 'Carne viva', WAB_TIJOLO: 'Tijolo infernal', WAB_CAOS: 'Pedra do caos'
   },
   apoio: { chao: 'No chão', teto: 'No teto', parede: 'Na parede de fundo', janela: 'Janela' },
 
@@ -161,7 +178,15 @@ const UDW_TXT = {
   cavernaEntrada: 'O pórtico de pedra à direita da placa do vilarejo ("Cavernas →"): a escadaria de cantaria desce e vai virando terra até abrir nas Grutas Rasas.',
   gelo: 'A terceira camada, debaixo das criptas da catedral, de 372 a 558 m: um frio mais velho que a catedral subiu pelas rachaduras e congelou tudo. Fendas de geada, salões de gelo azul que brilha, as tocas dos yetis e, no fundo, o gelo negro do Coração do Inverno. O gelo, o gelo azul e o gelo negro escorregam: o herói demora para arrancar e para frear.',
   geloEntrada: 'Duas salas das Criptas mais baixas têm o chão rachado: uma fenda desce de cada uma até as Fendas Geladas, com degraus de pedra congelada a cada 3 blocos para voltar pulando.',
-  mina: 'A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m: uma mina de ferro e ouro que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins tomaram o lugar: galerias escoradas, poços com andaimes, o acampamento goblin e, no fundo, as fornalhas que nunca apagaram.',
+  mina: 'A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m: uma mina de cobalto que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins tomaram o lugar: galerias escoradas, poços com andaimes, o acampamento goblin e, no fundo, as fornalhas que nunca apagaram.',
   minaEntrada: 'Dois poços antigos descem do chão do Coração do Inverno: uma boca de madeira no gelo, um poço revestido de tábuas e uma escada até a primeira galeria. Volta-se pela mesma escada.',
-  cavernas: 'O mundo antigo de cavernas (Cavernas Rasas, Profundas, Abismo e a Cripta do Carrasco) continua no código, mas está desligado. As cavernas de hoje são outras (js/52 a 57).'
+  // sons de ambiente de cada cenário (js/97-ambiente.js)
+  catedralSom: 'Um salão enorme e vazio que ecoa: zumbido grave, sussurros sem palavras ao longe (mais nas Criptas), correntes balançando, vento assobiando nas janelas quebradas, gotas e, de vez em quando, um sino que ninguém toca.',
+  cavernaSom: 'Ar parado e um ronco grave da rocha, gotas caindo em poças (perto e longe, com eco), pedrinhas rolando e a rocha gemendo lá no fundo. No Ninho, patinhas correndo de um lado ao outro; nas Fundações, correntes.',
+  geloSom: 'Vento gelado uivando pelas fendas, o gelo estalando e rangendo devagar, cristais tilintando e gotas de degelo.',
+  abismo: 'A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m: o inferno de onde vieram os demônios. Cinza, rios de fogo, paredes de carne que respiram e, no fundo, o trono de quem manda em tudo isso. O metal daqui é a infernita.',
+  abismoEntrada: 'Duas fendas abertas no chão das Fornalhas Esquecidas, na mina: uma rachadura brilhando em volta da boca, um poço forrado de ferro negro e uma escada até um salão em ruína nos Portões de Cinza. Volta-se pela mesma escada.',
+  abismoSom: 'Um ronco grave e o fogo ao fundo; correntes balançando nos Portões; lava borbulhando e estalando nos Rios de Fogo; gotas de sangue e um coração batendo nas Entranhas; sussurros no Trono do Caos e, bem longe, alguma coisa grande rugindo.',
+  minaSom: 'Escoras de madeira rangendo, picaretas ao longe, pedrinhas, gotas e, bem longe, um carrinho guinchando nos trilhos. Nas Fornalhas Esquecidas, o ronco e os estalos do fogo e o fole.',
+  cavernas: 'O mundo antigo de cavernas (Cavernas Rasas e Profundas) continua no código, mas está desligado. As cavernas de hoje são outras (js/52 a 57).'
 };

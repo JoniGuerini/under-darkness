@@ -170,8 +170,8 @@ WMAT[WIC_CALC] = [PALS.icCalcW, BKV.calcW]; WMAT[WIC_ROCHA] = [PALS.icRochaW, BK
 WMAT[WIC_NEVE] = [PALS.icNeveW, BKV.neveW]; WMAT[WIC_NEGRO] = [PALS.icNegroW, BKV.negroW];
 DMAT[DP_IC_ROCHA] = [PALS.dpIcRocha, BKV.dpRocha]; DMAT[DP_IC_GELO] = [PALS.dpIcGelo, BKV.dpGelo]; DMAT[DP_IC_SINCELOS] = [PALS.dpIcGelo, BKV.dpSinc]; DMAT[DP_IC_NEGRO] = [PALS.dpIcNegro, BKV.dpNegro];
 
-/* ---- the ores again: iron and gold in frozen rock, crystal in black ice (same items) ---- */
-const IC_ORES = [[IC_O_FERRO, IRON, 'icRocha', vRochaGel, '#8a3f1c', 0.4, 0.16], [IC_O_OURO, GOLD, 'icRocha', vRochaGel, '#c8a040', 0.2, 0.07], [IC_O_CRISTAL, CRYSTAL, 'icNegro', vGeloNegro, '#8a4ae8', 0.42, 0.14]];
+/* ---- the ores again: coal, iron and gold in frozen rock, crystal in black ice (same items) ---- */
+const IC_ORES = [[IC_O_CARVAO, COAL, 'icRocha', vRochaGel, '#0a0a0e', 0.4, 0.15], [IC_O_FERRO, IRON, 'icRocha', vRochaGel, '#8a3f1c', 0.4, 0.16], [IC_O_OURO, GOLD, 'icRocha', vRochaGel, '#c8a040', 0.2, 0.07], [IC_O_CRISTAL, CRYSTAL, 'icNegro', vGeloNegro, '#8a4ae8', 0.42, 0.14]];
 for (const [t, o, p, fn, tint, a1, a2] of IC_ORES) {
   ORE_PAINT[t] = ORE_PAINT[o]; ORE_HALO[t] = { pal: [p, tint, a1, a2], shade: 0, drip: ORE_HALO[o].drip };
   MAT[t] = [PALS[p], bakeOre(t, fn)]; SOLID[t] = 1; BLOCKY[t] = 1; BLEND[t] = 1;

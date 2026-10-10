@@ -10,16 +10,11 @@ function buildSprites() {
   SPR.sword = fromRows(SWORD, SWORD_P); SPR.swordSk = fromRows(SWORD, SWORD_SK);
   SPR.shieldFace = fromRows(SHIELD_FACE, SHIELD_PAL); SPR.shieldSide = fromRows(SHIELD_SIDE, SHIELD_PAL);
   SPR.slime = SLIME_PALS.map(p => set4(SLIME, p));
-  SPR.imp = [set4(ART_IMP_A, ART_IMP_A_P), set4(ART_IMP_B, ART_IMP_B_P)];
   SPR.ghost = [set4(ART_GHOST_A, ART_GHOST_A_P), set4(ART_GHOST_B, ART_GHOST_B_P)];
   SPR.skull = [set4(ART_SKULL_A, ART_SKULL_A_P), set4(ART_SKULL_B, ART_SKULL_B_P)];
   SPR.bow = fromRows(ART_BOW, ART_BOW_P); SPR.spear = fromRows(ART_SPEAR, ART_SPEAR_P);
   SPR.aHood = fromRows(HOOD, { c: '#2e2a22', C: '#4a4434' }); SPR.gHelm = fromRows(HELM, { m: '#5a5e68', M: '#8a909a' });
   SPR.gShield = { face: fromRows(SHIELD_FACE, SH.iron), side: fromRows(SHIELD_SIDE, SH.iron) };
-  SPR.hound = [set4(ART_HOUND_A, ART_HOUND_A_P), set4(ART_HOUND_B, ART_HOUND_B_P)];
-  SPR.dBody = fromRows(ART_DBODY, ART_DBODY_P); SPR.dHorns = fromRows(ART_DHORNS, ART_DHORNS_P); SPR.cleaver = fromRows(ART_CLEAVER, ART_CLEAVER_P);
-  SPR.bBody = fromRows(ART_BBODY, ART_BBODY_P); SPR.bHorns = fromRows(ART_BHORNS, ART_BHORNS_P); SPR.axe = fromRows(ART_AXE, ART_AXE_P);
-  SPR.dLegs = {}; SPR.bLegs = {}; for (const k in LEGS) { SPR.dLegs[k] = fromRows(LEGS[k], DLEG_P); SPR.bLegs[k] = fromRows(LEGS[k], BLEG_P); }
   SPR.deco = { [CANDLE]: fromRows(ART_CANDLE, ART_CANDLE_P) };
   SPR.block = {}; for (const id in ITEMS) { const t = ITEMS[id].block; if (t && MAT[t] && !SPR.block[t]) SPR.block[t] = blockCanvas(t, T, 2, 24, 36); }
   SPR.bat = [set4(BAT_A, BAT_PAL), set4(BAT_B, BAT_PAL)];
@@ -35,17 +30,25 @@ function armDraw(c, sx, sy, A) {
   for (let t = 0; t <= A.len; t++) { c.fillStyle = t < A.sl ? A.sleeve : A.hand; c.fillRect(Math.round(sx + dx * t - 1), Math.round(sy + dy * t - 1), 2, 2); }
   return [sx + dx * A.len, sy + dy * A.len];
 }
-function rotDraw(c, img, x, y, px, py, ang) { c.save(); c.translate(Math.round(x), Math.round(y)); c.rotate(ang); c.drawImage(img, -px, -py); c.restore(); }
+// anything that is not a drawable picture is skipped, and the transform always comes back: a throw between save and
+// restore used to leave the shared compositor rotated for good (the hero froze and every NPC showed his last frame)
+function rotDraw(c, img, x, y, px, py, ang) {
+  if (!img || !(img.width > 0 && img.height > 0)) return;
+  c.save(); try { c.translate(Math.round(x), Math.round(y)); c.rotate(ang); c.drawImage(img, -px, -py); } finally { c.restore(); }
+}
 let compRaw, crctx, compSil, csctx;
 function compose(P) {
   if (!compRaw) { compRaw = mk(CW, CHT); crctx = compRaw.getContext('2d'); crctx.imageSmoothingEnabled = false; compSil = mk(CW, CHT); csctx = compSil.getContext('2d'); }
   const c = crctx; c.clearRect(0, 0, CW, CHT);
   const bx = OX, by = OY;
+  // a body can sit off the hero's grid (wider, taller or shorter villagers, js/117): ox/oy move body, head and shoulders, never the feet
+  const ox = P.ox || 0, oy = P.oy || 0, sb = P.sb || [4.5, 10.5], sf = P.sf || [7.5, 10.5];
+  const arm = A => A.draw || (A.hero ? heroArmDraw : armDraw);
   if (P.shield && !P.shield.top) c.drawImage(P.shield.img, Math.round(P.shield.cx - P.shield.img.width / 2), Math.round(P.shield.cy - P.shield.img.height / 2));
-  if (P.back) { const h = (P.back.hero ? heroArmDraw : armDraw)(c, bx + 4.5, by + 10.5, P.back); if (P.back.item) rotDraw(c, P.back.item.img, h[0], h[1], 2.5, 11, P.back.item.ang); }
-  c.drawImage(P.legs, bx, by + 18); c.drawImage(P.body, bx, by);
-  if (P.head) c.drawImage(P.head.img, bx, by + P.head.oy);
-  if (P.front) { const h = (P.front.hero ? heroArmDraw : armDraw)(c, bx + 7.5, by + 10.5, P.front), it = P.front.item; if (it) rotDraw(c, it.img, h[0], h[1], it.px || 2.5, it.py || 11, it.ang); }
+  if (P.back) { const h = arm(P.back)(c, bx + ox + sb[0], by + oy + sb[1], P.back); if (P.back.item) rotDraw(c, P.back.item.img, h[0], h[1], 2.5, 11, P.back.item.ang); }
+  c.drawImage(P.legs, bx, by + 18); c.drawImage(P.body, bx + ox, by + oy);
+  if (P.head) c.drawImage(P.head.img, bx + ox, by + oy + P.head.oy);
+  if (P.front) { const h = arm(P.front)(c, bx + ox + sf[0], by + oy + sf[1], P.front), it = P.front.item; if (it) rotDraw(c, it.img, h[0], h[1], it.px || 2.5, it.py || 11, it.ang); }
   if (P.shield && P.shield.top) c.drawImage(P.shield.img, Math.round(P.shield.cx - P.shield.img.width / 2), Math.round(P.shield.cy - P.shield.img.height / 2));
   // 1px dark outline: the silhouette shifted four ways, drawn under the figure (no pixel read-back)
   const o = csctx; o.globalCompositeOperation = 'source-over'; o.clearRect(0, 0, CW, CHT);

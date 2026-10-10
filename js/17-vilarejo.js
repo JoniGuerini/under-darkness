@@ -577,18 +577,18 @@ function drawNpcLabels(cx, cy) {
 
 /* ---- gold, prices and shops ---- */
 // what the villagers pay for one of each thing you bring up (gear is priced from its stats instead)
-const MAT_VAL = { carvao: 3, barra_cobre: 10, barra_ferro: 24, barra_ouro: 64, barra_cristal: 130, gel: 2, carne: 2, asa: 3, osso: 3, olho: 12, min_cobre: 4, min_ferro: 7, min_ouro: 14, min_cristal: 24, brasa: 10, presa: 10, chifre: 12, ectoplasma: 10, cranio: 10, tocha: 1, pocao: 10, candelabro: 8, tijolo: 1, madeira: 1 };
+const MAT_VAL = { carvao: 3, barra_cobre: 10, barra_ferro: 24, barra_ouro: 64, barra_cobalto: 130, gel: 2, carne: 2, asa: 3, osso: 3, olho: 12, min_cobre: 4, min_ferro: 7, min_ouro: 14, min_cobalto: 24, min_cristal: 40, brasa: 10, presa: 10, chifre: 12, ectoplasma: 10, cranio: 10, tocha: 1, pocao: 10, candelabro: 8, tijolo: 1, madeira: 1 };
 function itemValue(s) {
   const it = ITEMS[s.id]; if (!it.slot) return MAT_VAL[s.id] || 0;
   return gearValue(s);   // item level and rarity: js/48-itemizacao.js
 }
 const sellPrice = s => ITEMS[s.id].slot ? Math.max(1, Math.floor(itemValue(s) * 0.25)) : (MAT_VAL[s.id] || 0);
 const SHOPS = {
-  ferreiro: { title: 'Loja do Grimaldo', buys: id => !!ITEMS[id].slot || ['min_cobre', 'min_ferro', 'min_ouro', 'min_cristal', 'carvao', 'barra_cobre', 'barra_ferro', 'barra_ouro', 'barra_cristal', 'osso', 'chifre', 'presa', 'tijolo'].includes(id), hint: 'A mercadoria muda a cada dia. Compra equipamento, minério, carvão, barras, ossos, chifres e presas.' },
+  ferreiro: { title: 'Loja do Grimaldo', buys: id => !!ITEMS[id].slot || ['min_cobre', 'min_ferro', 'min_ouro', 'min_cobalto', 'min_cristal', 'carvao', 'barra_cobre', 'barra_ferro', 'barra_ouro', 'barra_cobalto', 'osso', 'chifre', 'presa'].includes(id), hint: 'A mercadoria muda a cada dia. Compra equipamento, minério, cristais, carvão, barras, ossos, chifres e presas.' },
   curandeira: { title: 'Ervas da Marta', buys: id => ['gel', 'asa', 'olho', 'ectoplasma', 'brasa', 'cranio', 'carne', 'pocao'].includes(id), hint: 'Compra gel, asas, carne, olhos, ectoplasma, brasas e crânios.' },
   taverneiro: { title: 'Taverna do Odo', buys: id => ['madeira', 'carvao', 'tocha', 'candelabro'].includes(id), hint: 'Vende carvão para a sua fornalha. Compra madeira e carvão para a lareira, tochas e candelabros.' }
 };
-let shopDay = -1, stock = {}, talkNpc = null, shopNpc = null, sellArm = null, chatIdx = {}, questCarrasco = 0, bounty = null, villageNews = false, lastVil = null;
+let shopDay = -1, stock = {}, talkNpc = null, shopNpc = null, sellArm = null, chatIdx = {}, bounty = null, villageNews = false, lastVil = null;
 const dayNow = () => Math.floor(worldTime / DAY_LEN);
 const tierNow = () => pl.lvl >= 12 ? 3 : pl.lvl >= 6 ? 2 : 1;
 function restock() {
@@ -604,12 +604,11 @@ const goldTxt = v => `${v} de ouro`;
 
 /* ---- talking ---- */
 const pickLine = a => a[Math.floor(Math.random() * a.length)];
-function cryptDir() { if (!crypt) return 'em algum lugar'; return wdx(Math.round((crypt.x0 + crypt.x1) / 2) - SPX) > 0 ? 'à direita' : 'à esquerda'; }
 const CHAT = {
   ferreiro: [
     (CAVERNA ? 'O ferro daqui vem das grutas debaixo da vila. Traga minério que eu pago bem, e pago na hora.' : 'O ferro daqui vem das Cavernas Rasas. Traga minério que eu pago bem, e pago na hora.'),
     'Machado empurra longe, lança mantém a distância, adaga é rápida e maça atordoa. Escolha conforme o bicho.',
-    () => crypt ? 'Dizem que o machado do Carrasco corta escudo como se fosse pão. Só um aparo no tempo certo segura aquilo.' : (CAVERNA ? 'Primeiro vem terra e rocha, depois o ninho das aranhas. Mais embaixo ainda, pedra branca e uma catedral inteira enterrada nela.' : 'Pedra branca debaixo da vila, e uma catedral inteira enterrada nela. Quem diria.'),
+    (CAVERNA ? 'Primeiro vem terra e rocha, depois o ninho das aranhas. Mais embaixo ainda, pedra branca e uma catedral inteira enterrada nela.' : 'Pedra branca debaixo da vila, e uma catedral inteira enterrada nela. Quem diria.'),
     'Troco a mercadoria todo dia. O que não estiver bom hoje pode estar amanhã.',
     'Quanto mais fundo o baú, melhor o que tem dentro. E melhor o que eu consigo te vender depois.'
   ],
@@ -620,7 +619,7 @@ const CHAT = {
     'Não cobro para curar. Ninguém deveria pagar para continuar vivo.'
   ],
   taverneiro: [
-    () => crypt ? `Um mineiro jurou que viu uma porta de pedra escura ${cryptDir()} da vila, lá nas Cavernas Profundas. Estava bêbado, mas era mineiro.` : 'Um mineiro jurou que ouviu um órgão tocando debaixo da praça. Estava bêbado, mas era mineiro.',
+    'Um mineiro jurou que ouviu um órgão tocando debaixo da praça. Estava bêbado, mas era mineiro.',
     'Nada lá de baixo sobe até a vila. A luz e as lanternas espantam tudo. Aqui você pode respirar.',
     'Dizem que quem ergue o escudo no último instante devolve até flecha de esqueleto.',
     'Espectro some e aparece. Se o golpe não pega, espere ele ficar visível de novo.',
@@ -650,7 +649,7 @@ function talkMenu(n, text) {
   if (n.id === 'curandeira') o.push(['Curar ferimentos', () => heal(n), true]);
   if (n.id === 'ferreiro') o.push(['Fornalha e bigorna', () => openForge(n), true]);
   if (SHOPS[n.id]) o.push([n.id === 'taverneiro' ? 'Comprar carvão, tochas e velas' : 'Comprar e vender', () => openShop(n), n.id !== 'curandeira' && n.id !== 'ferreiro']);
-  if (n.id === 'anciao') { o.push([bountyLabel(), () => bountyTalk(n), true]); if (crypt) o.push([crypt && crypt.bossDead && !questCarrasco ? 'A cripta · contar a vitória' : 'A cripta', () => cryptTalk(n), !!(crypt && crypt.bossDead && !questCarrasco)]); }
+  if (n.id === 'anciao') { o.push([bountyLabel(), () => bountyTalk(n), true]); }
   o.push([n.id === 'taverneiro' ? 'Ouvir boatos' : 'Conversar', () => chat(n)]);
   o.push(['Até logo', closeTalk]);
   talkSay(text, o);
@@ -665,7 +664,7 @@ function heal(n) {
   talkMenu(n, pickLine(['Pronto. Tente voltar inteiro da próxima vez.', 'Feito. Não precisa agradecer, só não morra.', 'Costurado. Fica uma cicatriz bonita.']));
 }
 function newBounty() {
-  const t = tierNow(), last = bounty && bounty.id, pool = BOUNTIES.filter(b => b[0] <= t && b[0] >= t - 1 && b[1] !== last && (crypt || (b[1] !== 'chifre' && b[1] !== 'brasa'))), b = pool[Math.floor(Math.random() * pool.length)];
+  const t = tierNow(), last = bounty && bounty.id, pool = BOUNTIES.filter(b => b[0] <= t && b[0] >= t - 1 && b[1] !== last), b = pool[Math.floor(Math.random() * pool.length)];
   bounty = { id: b[1], n: b[2], txt: b[3], title: b[4], gold: Math.round(MAT_VAL[b[1]] * b[2] * 2 + 20 * b[0]), xp: Math.max(12, Math.round(xpNeed(pl.lvl) * 0.35)) };
 }
 const BOUNTIES = [
@@ -705,28 +704,6 @@ function bountyTalk(n) {
       bounty = null; saveGame(); talkMenu(n, 'Obrigado. A vila não esquece quem ajuda. Volte quando quiser outra tarefa.');
     }, true], back]);
   } else talkSay(bounty.txt, [back]);
-  showQuest(q);
-}
-// the Carrasco, as a quest card too; the reward is paid when you come back and tell him
-const CARRASCO_GOLD = 400, carrascoXP = () => Math.round(xpNeed(pl.lvl) * 0.5);
-function carrascoQuest() {
-  const dead = !!(crypt && crypt.bossDead);
-  return {
-    kind: 'Missão do ancião', title: 'O guardião da cripta', state: questCarrasco ? 'done' : dead ? 'ready' : 'open',
-    goals: [{ icon: 'boss', name: 'Derrotar o Carrasco', have: dead ? 1 : 0, need: 1, where: `Na cripta das Cavernas Profundas, ${cryptDir()} do vilarejo` }],
-    rewards: [{ icon: 'ouro', text: goldTxt(CARRASCO_GOLD) }, { icon: 'xp', text: `${carrascoXP()} de experiência` }],
-    note: questCarrasco ? 'A vila já pagou o que juntou.' : dead ? 'Conte a ele o que aconteceu para receber.' : 'Um monge que não morreu direito. Vá preparado.'
-  };
-}
-function cryptTalk(n) {
-  const q = carrascoQuest(), back = ['Voltar', () => talkMenu(n, pickLine(HELLO.anciao))];
-  if (q.state === 'ready') talkSay('Você voltou. E o frio parou de subir pelo poço... Diga, o que aconteceu lá embaixo?', [['Contar que o Carrasco caiu', () => {
-    questCarrasco = 1; const xp = carrascoXP(); pl.gold += CARRASCO_GOLD; gainXP(xp); sfx.chest(); sfx.coin();
-    toast(`O Carrasco caiu: +${goldTxt(CARRASCO_GOLD)} · +${xp} XP`, 'gold'); saveGame();
-    talkMenu(n, `Você... conseguiu. Tome, é tudo que a vila juntou: ${goldTxt(CARRASCO_GOLD)}.`);
-  }, true], back]);
-  else if (q.state === 'done') talkSay('O Carrasco caiu, mas a cripta era só a porta. Há algo mais fundo, no Abismo. Algo que observa de volta.', [back]);
-  else talkSay('Embaixo daqui, nas Cavernas Profundas, dorme uma cripta mais velha que a vila. Quem guarda a porta é o Carrasco. Se você o derrubar, volte e me conte.', [back]);
   showQuest(q);
 }
 function openTalk(n) {

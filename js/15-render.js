@@ -28,6 +28,8 @@ function handSprite(id) {
     const a = ICON_ART[it.icon]; return a ? fromRows(a[0], it.iconPal || a[1]) : null;
   });
 }
+// only a real picture goes in the hand (gear such as a shield carried in the backpack has none: the hand stays empty)
+{ const _hs = handSprite; handSprite = function (id) { const c = _hs(id); return c instanceof HTMLCanvasElement && c.width > 0 && c.height > 0 ? c : null; }; }
 function heldItem(L, ang) {
   if (hb.sel === 0) return L.weapon ? { img: L.weapon, ang, px: L.wpx, py: L.spear && pl.atkT >= 0 ? pl.spearPy : L.wpy } : null;
   if (hb.sel === 1) return L.pick ? { img: L.pick, ang, px: 4.5, py: 11 } : null;
@@ -75,11 +77,6 @@ function enemyPose(e) {
     const up = e.state === 'walk', bx = OX, by = OY;
     return { body: SPR.skBody, legs: SPR.skLegs[legs], head: { img: SPR.gHelm, oy: -1 }, shield: up ? { img: SPR.gShield.side, cx: bx + 13.5, cy: by + 10.5, top: true } : { img: SPR.gShield.face, cx: bx - 0.5, cy: by + 14, top: false }, back: { ang: up ? 1.6 : 2.9, len: 5, sleeve: SKC.O, hand: SKC.O, sl: 9 }, front: { ang: 1.75, len: 6, sleeve: SKC.o, hand: SKC.o, sl: 9, item: { img: SPR.spear, ang: Math.PI / 2, px: 1.5, py: e.reach ?? 12 } }, flash: e.flash > 0 };
   }
-  if (e.type === 'brute') return { body: SPR.dBody, legs: SPR.dLegs[legs], head: { img: SPR.dHorns, oy: -2 }, back: { ang: 2.9, len: 5, sleeve: ART_DBODY_P.S, hand: ART_DBODY_P.S, sl: 0 }, front: { ang: e.arm, len: 6, sleeve: ART_DBODY_P.s, hand: ART_DBODY_P.s, sl: 0, item: { img: SPR.cleaver, ang: e.sAng, px: 3.5, py: 11 } }, flash: e.flash > 0 };
-  if (e.type === 'boss') {
-    const lg = !e.onGround ? 'jump' : walk ? WALK[Math.floor(e.t * 5) % 4] : 'idle', up = e.state === 'cast' || e.state === 'summon';
-    return { body: SPR.bBody, legs: SPR.bLegs[lg], head: { img: SPR.bHorns, oy: -4 }, back: { ang: up ? -0.4 : 2.8, len: 6, sleeve: ART_BBODY_P.S, hand: ART_BBODY_P.S, sl: 0 }, front: { ang: e.arm, len: 6, sleeve: ART_BBODY_P.s, hand: ART_BBODY_P.s, sl: 0, item: { img: SPR.axe, ang: e.sAng, px: 4.5, py: 14 } }, flash: e.flash > 0 };
-  }
   return { body: SPR.skBody, legs: SPR.skLegs[legs], back: { ang: 2.9, len: 5, sleeve: SKC.O, hand: SKC.O, sl: 9 }, front: { ang: e.arm, len: 6, sleeve: SKC.o, hand: SKC.o, sl: 9, item: { img: SPR.swordSk, ang: e.sAng } }, flash: e.flash > 0 };
 }
 function drawEnemy(e, cx, cy) {
@@ -106,12 +103,6 @@ function drawEnemy(e, cx, cy) {
   } else if (e.type === 'skull') {
     const set = SPR.skull[Math.floor(e.t * 9) % 2], j = e.state === 'shake' ? Math.round(Math.sin(e.t * 70)) : 0;
     lc.drawImage(e.facing > 0 ? (fl ? set.wr : set.r) : (fl ? set.wl : set.l), fx - 6 + j, fy - 11);
-  } else if (e.type === 'imp') {
-    const set = SPR.imp[Math.floor(e.t * 10) % 2];
-    lc.drawImage(e.facing > 0 ? (fl ? set.wr : set.r) : (fl ? set.wl : set.l), fx - 7, fy - 10);
-  } else if (e.type === 'hound') {
-    const set = SPR.hound[!e.onGround ? 1 : Math.abs(e.vx) > 4 ? Math.floor(e.t * 10) % 2 : 0], low = e.state === 'crouch' ? 1 : 0;
-    lc.drawImage(e.facing > 0 ? (fl ? set.wr : set.r) : (fl ? set.wl : set.l), fx - 9, fy - 10 + low);
   } else if (e.boss) { compose(enemyPose(e)); drawComposite(fx, fy, e.facing, 2); }
   else { compose(enemyPose(e)); drawComposite(fx, fy, e.facing); }
 }
@@ -120,7 +111,7 @@ function drawEnemyUI(e, cx, cy) {
   if (fx < -40 || fx > VW + 40) return;
   if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) { const bw = 14, x0 = fx - 7, y0 = top - 6; lc.fillStyle = '#140c10'; lc.fillRect(x0 - 1, y0 - 1, bw + 2, 4); lc.fillStyle = '#4a1418'; lc.fillRect(x0, y0, bw, 2); lc.fillStyle = e.parried > 0 ? '#ffb070' : '#e04848'; lc.fillRect(x0, y0, Math.max(1, Math.ceil(bw * e.hp / e.maxHp)), 2); }
   if (e.stun > 0.4) { for (let i = 0; i < 3; i++) { const a = gameTime * 6 + i * 2.1; lc.fillStyle = i === 0 ? '#fff6b0' : '#ffd23f'; lc.fillRect(Math.round(fx + Math.cos(a) * 6), Math.round(top - 9 + Math.sin(a) * 2), 1, 1); } }
-  const warn = WARN_E[e.type] ? WARN_E[e.type](e) : (e.type === 'skeleton' || e.type === 'brute' || e.type === 'guard') && e.state === 'wind' || e.type === 'archer' && e.state === 'aim' || e.type === 'skull' && e.state === 'shake' || e.type === 'hound' && e.state === 'crouch' || e.boss && (e.state === 'wind' || e.state === 'crouch' || e.state === 'cast');
+  const warn = WARN_E[e.type] ? WARN_E[e.type](e) : (e.type === 'skeleton' || e.type === 'guard') && e.state === 'wind' || e.type === 'archer' && e.state === 'aim' || e.type === 'skull' && e.state === 'shake' || e.boss && (e.state === 'wind' || e.state === 'crouch' || e.state === 'cast');
   if (warn) { const y0 = top - (e.boss ? 18 : 13); lc.fillStyle = '#140c10'; lc.fillRect(fx - 2, y0 - 1, 4, 8); lc.fillStyle = '#ff4a3a'; lc.fillRect(fx - 1, y0, 2, 4); lc.fillRect(fx - 1, y0 + 5, 2, 1); }
 }
 function drawEyes(e, cx, cy) {
@@ -134,9 +125,6 @@ function drawEyes(e, cx, cy) {
   else if ((e.type === 'archer' && e.state === 'aim') || (e.type === 'guard' && e.state === 'wind')) { lc.globalAlpha = 0.7; lc.drawImage(SPR.glow.eye, fx + e.facing * 2 - 6, fy - 25); lc.globalAlpha = 1; }
   else if (e.type === 'skeleton' && e.state === 'wind') { lc.globalAlpha = 0.7; lc.drawImage(SPR.glow.eye, fx + e.facing * 2 - 6, fy - 25); lc.globalAlpha = 1; }
   else if (e.type === 'zombie') { lc.globalAlpha = 0.3; lc.drawImage(SPR.glow.eye, fx + e.facing * 2 - 6, fy - 24); lc.globalAlpha = 1; }
-  else if (e.type === 'imp') { lc.globalAlpha = e.charging ? 0.9 : 0.5; lc.drawImage(e.charging ? SPR.glow.fire : SPR.glow.eyeY, fx + e.facing * 3 - (e.charging ? 11 : 6), fy - 7 - (e.charging ? 11 : 6)); lc.globalAlpha = 1; }
-  else if (e.type === 'hound') { lc.globalAlpha = e.state === 'crouch' ? 0.9 : 0.45; lc.drawImage(SPR.glow.eyeY, fx + (e.facing > 0 ? 5 : -6) - 6, fy - 14); lc.globalAlpha = 1; }
-  else if (e.type === 'brute') { lc.globalAlpha = e.state === 'wind' ? 0.8 : 0.35; lc.drawImage(SPR.glow.eyeY, fx + e.facing * 2 - 6, fy - 24); lc.globalAlpha = 1; }
   else if (e.boss) {
     lc.globalAlpha = 0.6 + Math.sin(gameTime * 5) * 0.15; lc.drawImage(SPR.glow.eyeY, fx + e.facing * 3 - 6, fy - 42);
     if (e.charging) { lc.globalAlpha = 0.85; lc.drawImage(SPR.glow.fire, fx + e.facing * 8 - 11, fy - 44); }

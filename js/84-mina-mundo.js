@@ -23,7 +23,7 @@
 
 let mnChambers = [], mnGalleries = [], mnShafts = [], mnKeep = new Set();   // mnKeep: ladders, scaffolds, shaft collars: tunnels and dressing leave them alone
 const MN_SOILS = new Uint8Array(NT);   // natural mine ground: what decorations and props may sit on
-for (const t of [MN_FERROSA, MN_REJEITO, MN_ENTULHO, MN_TABUA, MN_VIGA, MN_CAVADA, MN_TIJOLO, MN_ESCORIA, MN_QUARTZITO, MN_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL]) MN_SOILS[t] = 1;
+for (const t of [MN_FERROSA, MN_REJEITO, MN_ENTULHO, MN_TABUA, MN_VIGA, MN_CAVADA, MN_TIJOLO, MN_ESCORIA, MN_QUARTZITO, MN_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, MN_O_COBALTO]) MN_SOILS[t] = 1;
 const MN_HOST = new Uint8Array(NT);    // what the mine may overwrite (the ice's filler under the Coração)
 for (const t of [IC_GELO_NEGRO, IC_ROCHA, IC_GELO_AZUL, IC_GELO, IC_PERMA, IC_NEVE, IC_NEVE_DURA, IC_VEIO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, IC_SINCELO, IC_ESTALAG, IC_CRISTAL, IC_CRISTAL_TETO, IC_OSSOS, IC_NEVE_MONTE, IC_COLUNA, BEDROCK, AIR]) MN_HOST[t] = 1;
 
@@ -227,8 +227,9 @@ function mnBuild() {
     }
   };
   const iron = t => t === MN_FERROSA || t === MN_REJEITO, quartz = t => t === MN_QUARTZITO;
-  vein(MN_O_CARVAO, 70 * WSC, 0, 130, 3, 8, iron); vein(MN_O_FERRO, 110 * WSC, 0, 186, 3, 7, iron);
-  vein(MN_O_OURO, 70 * WSC, 30, 186, 2, 6, t => quartz(t) || t === MN_FERROSA); vein(MN_O_CRISTAL, 55 * WSC, 90, 186, 2, 5, quartz);
+  vein(MN_O_CARVAO, 90 * WSC, 0, 186, 3, 8, iron);   // coal and crystal in the mine (102)
+  vein(MN_O_COBALTO, 90 * WSC, 0, 186, 2, 5, t => quartz(t) || t === MN_FERROSA);   // cobalt, the mine's metal
+  vein(MN_O_CRISTAL, 40 * WSC, 0, 186, 1, 3, t => quartz(t) || t === MN_FERROSA);                       // crystal, now a gem: rarer than cobalt
 }
 
 function mnAfter() {
@@ -624,7 +625,7 @@ BOUNTIES.push(
   [4, 'engrenagem', 4, 'Engrenagens dos carrinhos de lá de baixo. O Grimaldo quer ver como os antigos faziam.', 'Ferro que gira'],
   [4, 'nucleo_minerio', 2, 'O coração de um golem de minério. Dizem que ainda está quente. Traga com luva.', 'Um coração de pedra']
 );
-Object.assign(ORE_WHERE, { min_cristal: 'Minério da cripta da catedral, do gelo negro e do quartzito da mina', min_ouro: 'Minério do fundo das cavernas, da catedral, do gelo e da mina', min_ferro: 'Minério das cavernas, abaixo de 35 m, do gelo e da rocha ferrosa da mina', carvao: 'Veios pretos em todas as cavernas e na mina, ou com o Odo' });
+Object.assign(ORE_WHERE, { min_cristal: 'Pedra preciosa, rara, da Mina Abandonada', min_ouro: 'Minério do fundo das cavernas, da catedral, do gelo e da mina', min_ferro: 'Minério das cavernas, abaixo de 35 m, do gelo e da rocha ferrosa da mina', carvao: 'Veios pretos em todas as cavernas e na mina, ou com o Odo' });
 
 /* ---------- the save: worlds from before the mine are remade; level, items, gold and the chest stay ---------- */
 let mineNews = false;

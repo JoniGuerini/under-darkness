@@ -145,7 +145,7 @@ Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas 
 | [ ] | Cascalho | montes de pedra solta embaixo de desabamentos | Cascalho |
 | [ ] | Xisto escuro | massa do Ninho, lâminas escuras com brilho de mica | Xisto |
 | [ ] | Teia sólida | massa de teia que tapa passagens no Ninho; quebra muito rápido | Seda de Aranha |
-| [ ] | Minérios da caverna | carvão, cobre, ferro e ouro engastados na rocha da caverna (o mesmo minério da catedral, pintado na pedra certa) | o minério |
+| [ ] | Minérios da caverna | carvão e cobre engastados na rocha da caverna (o mesmo minério da catedral, pintado na pedra certa) | o minério |
 
 ### Decoração de 1 bloco
 | | Nome | Onde | Nota |
@@ -184,10 +184,8 @@ Ficha feita em 2026-10-08 a partir das cavernas antigas (que estavam desligadas 
 | Minério | Faixa |
 |---|---|
 | Carvão | 6 a 186 m |
-| Cobre | 6 a 120 m (o mais comum) |
-| Ferro | 35 a 186 m |
-| Ouro | 100 a 186 m, raro |
-| Cristal | não aparece aqui (fica na catedral) |
+| Cobre | 6 a 186 m (o único metal das cavernas) |
+| Ferro, ouro e cristal | não aparecem (um metal por camada, ver `js/102-minerios-camada.js`) |
 
 ## 5. Objetos de cena
 
@@ -317,7 +315,7 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 
 - Desde 2026-10-08 fica **embaixo das Cavernas** (parte 2): as profundidades acima somam os 186 m das cavernas. Desde 2026-10-09, abaixo de 372 m ficam as Cavernas de Gelo (parte 4).
 - **Entrada:** o pórtico de pedra à direita da placa do vilarejo agora leva às Cavernas. Para a catedral se desce pelas Fundações Soterradas, onde o teto do átrio desabou: duas escadarias em ruína por mundo descem de uma gruta até uma sala do átrio.
-- A cripta roxa do Carrasco está **escondida** (código guardado, sem gerar).
+- A cripta roxa do Carrasco foi **removida** em 2026-10-09. Os demônios dela viraram a quinta camada, O Abismo (`docs/abismo-spec.md`).
 
 ## 3. Estrutura e geração
 - **Massa:** calcário claro, com bolsões de terra perto do topo e algumas fendas naturais.
@@ -391,14 +389,12 @@ Levantado do código atual (`js/41` a `js/46`) e de [catedral-spec.md](catedral-
 | [ ] | Calcário fundo | longe das salas |
 | [ ] | Nichos de túmulo distantes | faixa das criptas |
 
-### Minérios (engastados no calcário; o cristal, na pedra da cripta)
+### Minérios (engastados no calcário)
 | Minério | Faixa |
 |---|---|
 | Carvão | 192 a 370 m |
-| Cobre | 192 a 296 m |
-| Ferro | 212 a 370 m |
-| Ouro | 268 a 370 m |
-| Cristal | 318 a 370 m |
+| Ferro | 192 a 370 m (o único metal da catedral) |
+| Cobre, ouro e cristal | não aparecem (um metal por camada) |
 
 ## 5. Objetos de cena (31 tipos)
 
@@ -496,7 +492,7 @@ Os 10 da camada (regra fixa, sem contar o chefe): os 6 primeiros do `js/44-morto
 - [ ] Materiais exclusivos da catedral para a forja (ex.: prata benta, cera, relíquia).
 - [ ] Missões do vilarejo ligadas à catedral e ao Rei.
 - [ ] Partículas: poeira caindo da abóbada, cera pingando.
-- [ ] O destino da cripta do Carrasco (renomear e virar outro bioma? ver parte 4).
+- [x] O destino da cripta do Carrasco: removida; os demônios viraram O Abismo, a quinta camada (2026-10-09).
 
 ---
 
@@ -557,7 +553,7 @@ Ficha feita em 2026-10-09 a pedido do Jonathan ("um bioma de gelo, cavernas de g
 | [ ] | Gelo | branco-azulado, com bolhas presas; **escorrega** | Gelo |
 | [ ] | Gelo azul | o gelo antigo e translúcido dos Salões, **luz fria** fraca; **escorrega** | Gelo Azul |
 | [ ] | Gelo negro | gelo muito velho, quase preto, com rachaduras azuis; Coração; **escorrega** | Gelo Negro |
-| [ ] | Minérios do gelo | ferro e ouro no permafrost e na rocha gelada, cristal na rocha gelada e no gelo negro | o minério |
+| [ ] | Minérios do gelo | carvão e ouro na rocha gelada, ouro também no gelo negro | o minério |
 
 ### Decoração de 1 bloco
 | | Nome | Onde | Nota |
@@ -590,10 +586,9 @@ Ficha feita em 2026-10-09 a pedido do Jonathan ("um bioma de gelo, cavernas de g
 ### Minérios
 | Minério | Faixa |
 |---|---|
-| Ferro | 372 a 528 m |
-| Ouro | 400 a 558 m |
-| Cristal | 418 a 558 m (o mais comum aqui; brilha no gelo negro) |
-| Carvão e cobre | não aparecem (o gelo é pobre em minério comum) |
+| Carvão | 372 a 558 m (na rocha gelada) |
+| Ouro | 372 a 558 m (o único metal do gelo) |
+| Cobre, ferro e cristal | não aparecem (um metal por camada) |
 
 ## 5. Objetos de cena
 
@@ -712,7 +707,7 @@ A parte técnica está em [mina-spec.md](mina-spec.md).
 ## 1. Identidade
 - **Nome:** A Mina Abandonada.
 - **Faixas:** Galerias Escoradas, Poços e Andaimes, Acampamento Goblin, Fornalhas Esquecidas.
-- **Conceito:** uma mina de ferro e ouro que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins se mudaram para lá com o que sobrou.
+- **Conceito:** uma mina de cobalto que os mineiros abandonaram quando o fundo começou a matar. Os mortos continuam cavando, o gás e os carrinhos ganharam vida, e os goblins se mudaram para lá com o que sobrou.
 - **Clima:** escuro, quente e empoeirado; madeira rangendo, pingos, picaretas ao longe, brasas no fundo.
 
 ## 2. Lugar no mundo
@@ -729,7 +724,7 @@ A parte técnica está em [mina-spec.md](mina-spec.md).
 - **Decoração de 1 bloco:** escora, trilho, lampião no gancho, escada, ferramentas largadas, monte de pedras, corda, brasa de escória, estaca com caveira.
 - **Paredes de fundo:** rocha ferrosa, tabuado, rocha cavada, tijolo de fornalha, quartzito.
 - **Terceira camada:** rocha, andaimes, fornalhas.
-- **Minérios:** carvão e ferro na rocha ferrosa; ouro e cristal no quartzito.
+- **Minérios:** carvão na rocha ferrosa; cobalto (o único metal da mina) no quartzito e na rocha ferrosa; cristal, mais raro, é pedra preciosa (não vai para a forja, o Grimaldo compra).
 
 ## 5. Objetos de cena
 28 objetos: vagonete (cheio e vazio), vagonete tombado, guincho, pilha de caixotes, barril de pólvora, beliche podre, mesa com lampião e mapa, bigorna e fole, monte de minério, carrinho de mão, mineiro morto, tenda goblin, saque dos goblins, fogueira goblin, engrenagem quebrada, fornalha, cadinho, polia com balde, lanterna grande, jaula goblin, estandarte goblin, elevador de mina, placa de galeria, ferramentas na parede, mapa da mina, pintura goblin, veio de ouro, e o Trono do Rei Goblin.
@@ -757,7 +752,7 @@ Na Escavadeira, uma broca a vapor que era dos mineiros. Fase 1: investida com a 
 Materiais novos: engrenagem enferrujada, pepita de ouro, núcleo de minério, óleo de lampião (e a pele de sapo nas cavernas). O ferreiro e a curandeira compram; o ancião tem missões novas para eles.
 
 ## 9. Luz e atmosfera
-Lampiões, fogueiras, fornalhas e brasas dão luz quente; poeira caindo e brasas subindo nas fornalhas; o quartzito brilha onde tem ouro e cristal.
+Lampiões, fogueiras, fornalhas e brasas dão luz quente; poeira caindo e brasas subindo nas fornalhas; o quartzito brilha onde tem cobalto e cristal.
 
 ## 10. Arquivos
 | Arquivo | O que tem |
@@ -936,5 +931,5 @@ Para escolher quais viram ficha completa depois.
 | [ ] | **Catacumbas Alagadas** | esgotos e cisternas romanas abaixo do vilarejo, água negra, ratos gigantes e afogados |
 | [ ] | **Forja dos Anões** | cidade de pedra e bronze abandonada, lava canalizada, autômatos de ferro, a origem da forja do Grimaldo |
 | [ ] | **Floresta Petrificada** | uma floresta inteira engolida pela terra e virada pedra, árvores de cristal, bestas de raiz |
-| [ ] | **O Abismo** (antiga cripta do Carrasco) | a cripta roxa renomeada e ampliada: carne, correntes, diabretes, cães e demônios, o Carrasco como chefe |
+| [x] | **O Abismo** (no lugar da antiga cripta do Carrasco) | FEITO em 2026-10-09: a quinta camada, debaixo da mina (744 a 930 m), 10 demônios e o Príncipe do Caos. Ficha em `docs/abismo-spec.md` |
 | [ ] | **Cidade Afundada** | uma cidade inteira soterrada com ruas, casas e torres tortas, saqueadores e cultistas vivos (inimigos humanos) |

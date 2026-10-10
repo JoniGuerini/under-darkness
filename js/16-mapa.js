@@ -96,7 +96,7 @@ function drawMap() {
     const ty = oy + j; if (ty < 0 || ty >= WH) continue;
     for (let i = 0; i < cols; i++) {
       const tx = ox + i, kk = ty * WW + wrapX(tx); if (!seen[kk]) continue;
-      const t = tiles[kk], col = t === CHEST ? '#ffd23f' : t === ALTAR ? (crypt && crypt.bossDead ? '#8a3a3a' : '#ff3a2a') : null; if (!col) continue;
+      const t = tiles[kk], col = t === CHEST ? '#ffd23f' : t === ALTAR ? '#ff3a2a' : null; if (!col) continue;
       const d = Math.max(3, Math.round(MS * 0.5)), x = Math.round(W / 2 + (tx + 0.5 - px) * MS - d / 2), y = Math.round(H / 2 + (ty + 0.5 - py) * MS - d / 2);
       sc.fillStyle = '#0a0810'; sc.fillRect(x - 1, y - 1, d + 2, d + 2); sc.fillStyle = col; sc.fillRect(x, y, d, d);
     }
@@ -112,12 +112,6 @@ function drawMap() {
     sc.fillStyle = '#0a0810'; sc.fillRect(hx - u * 3, hy - u * 2, u * 6, u * 4); sc.fillRect(hx - u * 2, hy - u * 4, u * 4, u * 2);
     sc.fillStyle = '#efe2c4'; sc.fillRect(hx - u * 2, hy - u, u * 4, u * 2.5); sc.fillStyle = '#f0a83c'; sc.fillRect(hx - u * 3 + 1, hy - u * 2, u * 6 - 2, u); sc.fillRect(hx - u * 2 + 1, hy - u * 3, u * 4 - 2, u); sc.fillRect(hx - u + 1, hy - u * 4 + 1, u * 2 - 2, u);
     label('Vilarejo', hx, hy - u * 6, '#efe2c4', fs);
-  }
-  // the crypt gets its name once you've seen any of it
-  if (crypt) {
-    let known = false; for (let y = crypt.y0; y <= crypt.y1 && !known; y += 2) for (let x = crypt.x0; x <= crypt.x1; x += 2) if (seen[y * WW + x]) { known = true; break; }
-    if (known) { const [lx, ly] = at(near((crypt.x0 + crypt.x1 + 1) / 2), crypt.y0 - 1.2); label('Cripta Abandonada', lx, ly, '#c58cff', fs, true); }
-    if (known && !crypt.bossDead && seen[crypt.boss.y1 * WW + crypt.boss.altar]) { const [bx, by] = at(near(crypt.boss.altar) + 0.5, crypt.boss.y0 - 0.6); label('O Carrasco', bx, by, '#ff6a5a', Math.round(fs * 0.85)); }
   }
   // you: a blinking arrow pointing where you face
   const cx = W / 2, cy = H / 2, s = Math.max(6, MS * 0.85), f = pl.facing, a = 0.75 + 0.25 * Math.sin(gameTime * 8);

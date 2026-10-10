@@ -1,0 +1,126 @@
+/* ================= a vitrine: the shop window of every villager (js/19-loja.js) =================
+   Left: the merchant's shelves, one plank per kind of goods, each piece in its own lit niche with a price tag.
+   Right: the counter, where the chosen piece stands big on a pedestal under a lamp, with its numbers and the buy button.
+   Colours and textures come from the house of whoever is selling (the --k-* kit of temas-npc.css, the smith's own vars),
+   so the window stays that villager's building. Nothing here animates background-position: the only moving things are
+   the piece on the pedestal and the rays behind rare pieces, small layers moved with transform. */
+
+#shop .inv{width:min(1380px,100%);align-items:stretch}
+@media (max-width:1400px){#shop .inv{flex-wrap:wrap}}
+#shop .invcard{margin-block:0}
+#shop .vendor{
+  flex:0 0 640px;max-width:640px;display:flex;flex-direction:column;gap:12px;
+  --v-board:var(--k-board);--v-frame-sm:var(--k-frame-sm);--v-slot:var(--k-slot,#1d1723);--v-slot-2:var(--k-slot-2,#09070c);
+  --v-txt:var(--k-txt,#efe2c4);--v-dim:var(--k-dim,#c4b596);--v-acc:var(--k-acc,#e9c64a);--v-line:var(--k-line,#6e4718);
+  --v-main:var(--k-main,linear-gradient(#ffe590 0 14%,#e9a43a 14% 50%,#b8701a 50%));--v-main-txt:var(--k-main-txt,#1b1006);--v-main-hi:var(--k-main-hi,#fff3c8);--v-main-lo:var(--k-main-lo,#5a3008);--v-main-glow:var(--k-main-glow,rgba(240,180,80,.5))
+}
+body[data-npc=ferreiro] #shop .vendor{
+  --v-board:var(--smith-board);--v-frame-sm:var(--smith-frame-sm);--v-slot:#2c1d12;--v-slot-2:#0a0604;
+  --v-txt:var(--sm-ash);--v-dim:var(--sm-ash-dim);--v-acc:var(--sm-hot);--v-line:#815833;
+  --v-main:linear-gradient(#ffe590 0 14%,#ffb233 14% 46%,#f2701a 46% 78%,#b8380c 78%);--v-main-txt:#2a0d03;--v-main-hi:#fff6cc;--v-main-lo:#6e1c06;--v-main-glow:rgba(255,120,30,.6)
+}
+
+/* header: sign, name of the house, purse, back */
+#shop .vendor .ch h3{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#shop .vgold{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:700;color:#ffd27a;font-variant-numeric:tabular-nums;text-shadow:2px 2px 0 #000;white-space:nowrap}
+#shop .vgold.warn{color:#ffb4a8;font-size:14px}
+#shop .vc{width:18px;height:18px;image-rendering:pixelated;flex:none;vertical-align:-3px}
+
+#shop .vit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 236px;gap:16px}
+
+/* ---- the shelves ---- */
+#shop .vit>.sbwrap{min-height:0}
+#shop .vshelves{height:100%;max-height:620px;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;justify-content:safe center;gap:14px;padding:2px 4px 6px 0;box-sizing:border-box}
+#shop .vshelves::-webkit-scrollbar{display:none}
+#shop .vshelf{display:grid;gap:0;position:relative}
+#shop .vlab{display:flex;align-items:center;gap:8px;margin:0 2px 6px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--v-acc);text-shadow:1px 1px 0 #000}
+#shop .vlab::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--v-line),transparent)}
+#shop .vrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 6px}
+#shop .vbig .vrow{grid-template-columns:repeat(3,1fr);gap:12px}
+/* the plank the pieces stand on: the house's own boards, a lit front edge and a shadow below */
+#shop .vplank{display:block;height:14px;margin-top:-2px;background:var(--v-board) 0 0/180px 42px;image-rendering:pixelated;border:2px solid #000;box-shadow:inset 0 2px 0 rgba(255,236,190,.22),inset 0 -3px 0 rgba(0,0,0,.45),0 6px 0 -2px rgba(0,0,0,.45),0 10px 12px -4px rgba(0,0,0,.6)}
+
+/* a niche: a dark hollow in the wall, the piece glowing in its rarity colour, the price tag hanging below */
+#shop .vn{position:relative;height:96px;display:grid;place-items:center;align-content:center;cursor:pointer;user-select:none;touch-action:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 38%,var(--v-slot),var(--v-slot-2) 80%);border:2px solid #000;border-bottom:0;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc,#000) 45%,var(--v-line)),inset 3px 3px 0 1px rgba(0,0,0,.7)}
+#shop .vbig .vn{height:132px}
+#shop .vn .vglow{position:absolute;left:12%;right:12%;bottom:18px;height:30px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 55%,transparent),transparent);opacity:.6;pointer-events:none}
+#shop .vn.r0 .vglow{opacity:.25}
+#shop .vn>img{width:45px;height:45px;image-rendering:pixelated;pointer-events:none;margin-top:-14px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.55));transition:transform .12s}
+#shop .vbig .vn>img{width:75px;height:75px;margin-top:-18px}
+#shop .vn .vtag{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;align-items:center;gap:3px;padding:1px 6px 1px 3px;white-space:nowrap;
+  font-size:13px;font-weight:700;color:#ffd27a;font-variant-numeric:tabular-nums;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.62);border:1px solid #000;box-shadow:inset 0 0 0 1px rgba(255,210,122,.18);pointer-events:none}
+#shop .vbig .vn .vtag{font-size:15px;bottom:8px}
+#shop .vn .vc{width:14px;height:14px}
+#shop .vn.cant .vtag{color:#ff8a7a}
+#shop .vn.cant>img{opacity:.55}
+#shop .vn:hover{background:radial-gradient(ellipse 70% 60% at 50% 38%,color-mix(in srgb,var(--v-slot) 70%,#fff 10%),var(--v-slot-2) 80%)}
+#shop .vn:hover>img{transform:translateY(-3px)}
+#shop .vn:hover .vglow{opacity:.9}
+#shop .vn.on{box-shadow:inset 0 0 0 2px var(--v-acc),inset 3px 3px 0 2px rgba(0,0,0,.6),0 0 14px -2px var(--v-acc)}
+#shop .vn.on .vglow{opacity:1}
+#shop .vn.bad{animation:bad .3s}
+/* free space on the plank: just the wall behind */
+#shop .vn.vnone{cursor:default;visibility:hidden}
+
+/* ---- the counter ---- */
+#shop .vfeat{position:relative;display:flex;flex-direction:column;gap:10px;min-height:0}
+/* the stage: a deep alcove framed by the house, a lamp from above, a pedestal of the house's boards */
+#shop .vstage{position:relative;height:210px;flex:none;overflow:hidden;isolation:isolate;image-rendering:pixelated;
+  border:10px solid #000;border-image:var(--v-frame-sm) 5 / 10px stretch;
+  background:radial-gradient(ellipse 80% 70% at 50% 46%,var(--v-slot),var(--v-slot-2) 85%);box-shadow:0 4px 0 rgba(0,0,0,.5),inset 0 0 30px rgba(0,0,0,.8)}
+#shop .vstage .vlight{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,color-mix(in srgb,var(--rc,#fff) 26%,transparent),transparent 78%);clip-path:polygon(38% 0,62% 0,88% 100%,12% 100%);opacity:.75;pointer-events:none}
+#shop .vstage.r0 .vlight{opacity:.45}
+#shop .vstage .vpool{position:absolute;left:18%;right:18%;bottom:20px;height:34px;z-index:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc,#fff) 60%,transparent),transparent);pointer-events:none}
+#shop .vstage .vped{position:absolute;left:24%;right:24%;bottom:0;height:30px;z-index:2;background:var(--v-board) 0 0/180px 42px;border:2px solid #000;border-bottom:0;box-shadow:inset 0 3px 0 rgba(255,236,190,.28),inset 0 -8px 0 rgba(0,0,0,.4),0 -2px 0 rgba(0,0,0,.4)}
+#shop .vstage img{position:absolute;left:50%;top:38px;width:105px;height:105px;margin-left:-52px;z-index:3;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.6)) drop-shadow(0 0 14px color-mix(in srgb,var(--rc,#fff) 45%,transparent));
+  will-change:transform;animation:vFloat 2.6s ease-in-out infinite alternate}
+@keyframes vFloat{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+/* rare pieces: slow rays turning behind them (one small layer, transform only) */
+#shop .vstage .vrays{display:none;position:absolute;left:50%;top:90px;width:300px;height:300px;margin:-150px 0 0 -150px;z-index:0;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(color-mix(in srgb,var(--rc) 30%,transparent) 0 7deg,transparent 7deg 22deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 20%,transparent);mask-image:radial-gradient(closest-side,#000 20%,transparent);will-change:transform;animation:vSpin 24s linear infinite}
+#shop .vstage:is(.r2,.r3,.r4) .vrays{display:block}
+#shop .vstage.r4 .vrays{opacity:1}
+#shop .vstage:is(.r2) .vrays{opacity:.6}
+@keyframes vSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#shop .vstage img,#shop .vstage .vrays{animation:none}}
+#shop .vstage.sold img{animation:vSold .35s ease-out,vFloat 2.6s ease-in-out .35s infinite alternate}
+@keyframes vSold{from{transform:translateY(-14px) scale(1.12)}to{transform:none}}
+#shop .vfeat.empty .vstage .vpool,#shop .vfeat.empty .vstage .vlight{opacity:.18}
+
+/* the piece's numbers, the same lines as the item tooltip */
+#shop .vtip.tipbox{position:static;z-index:auto;max-width:none;flex:1;min-height:0;overflow:hidden;pointer-events:none;padding:10px 12px;background:rgba(0,0,0,.42);border:2px solid #000;border-image:none;box-shadow:inset 0 0 0 1px var(--v-line);align-content:start}
+#shop .vfeat.empty .vtip{visibility:hidden}
+#shop .vtip .tn{font-size:18px;line-height:1.15}
+#shop .vtip small,#shop .vtip li span:first-child,#shop .vtip .kd{color:var(--v-dim)}
+#shop .vtip p{color:var(--v-txt)}
+
+/* buy: how many (for what never runs out), the total, the button in the house's colour */
+#shop .vbuy{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"q p" "b b";align-items:center;gap:8px 10px}
+#shop .vbuy .vqty[hidden]+.vprice{grid-column:1 / -1;justify-content:center}
+#shop .vqty{grid-area:q;display:flex;align-items:center;gap:4px}
+#shop .vqty b{min-width:28px;text-align:center;font-size:18px;color:var(--v-txt);font-variant-numeric:tabular-nums;text-shadow:1px 1px 0 #000}
+#shop .vendor .vqty button.ghost{width:34px;height:34px;padding:0!important;font-size:20px;line-height:1;display:grid;place-items:center}
+#shop .vendor .vqty button.ghost:disabled{opacity:.4;cursor:default;filter:none}
+#shop .vprice{grid-area:p;display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:24px;font-weight:800;color:#ffd27a;font-variant-numeric:tabular-nums;text-shadow:2px 2px 0 #000}
+#shop .vprice .vc{width:22px;height:22px}
+#shop .vprice.cant{color:#ff8a7a}
+body #shop .vendor #btnBuy{grid-area:b;width:100%;font-size:19px;padding:10px 12px;background:var(--v-main);color:var(--v-main-txt);text-shadow:0 1px 0 var(--v-main-hi);border:3px solid #000;
+  box-shadow:inset 0 2px 0 var(--v-main-hi),inset 0 -3px 0 var(--v-main-lo),0 0 16px -3px var(--v-main-glow),0 3px 0 rgba(0,0,0,.55)}
+body #shop .vendor #btnBuy:hover:not(:disabled){filter:brightness(1.12)}
+body #shop .vendor #btnBuy:disabled{background:linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.45)),var(--v-board) 0 0/180px 42px;color:#9a8a78;text-shadow:1px 1px 0 #000;box-shadow:inset 0 -3px 0 rgba(0,0,0,.5);cursor:default;filter:none}
+#shop .vfeat.preview .vbuy{opacity:.6}
+
+/* carrying one of your items over the window: the counter turns into the scale */
+#shop .vsell{position:absolute;left:0;right:0;bottom:0;min-height:92px;box-sizing:border-box;z-index:5;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 12px;
+  background:radial-gradient(ellipse 90% 80% at 50% 100%,color-mix(in srgb,var(--v-acc) 22%,transparent),transparent 70%),linear-gradient(var(--v-slot),var(--v-slot-2));border:10px solid #000;border-image:var(--v-frame-sm) 5 / 10px stretch;box-shadow:0 0 24px -4px var(--v-main-glow);pointer-events:none;
+  font-weight:700;color:var(--v-txt);text-shadow:1px 1px 0 #000}
+#shop .vsell .vsi{width:45px;height:45px;image-rendering:pixelated}
+#shop .vsell b{display:flex;align-items:center;gap:6px;font-size:22px;color:#ffd27a;font-variant-numeric:tabular-nums}
+#shop .vsell .vc{width:20px;height:20px}
+#shop .vsell.no{box-shadow:none}
+#shop .vsell.no span{color:#ff9a8a}
+#shop .vendor.selling .vshelves{opacity:.55}
+#shop .vendor.selling .vbuy{visibility:hidden}

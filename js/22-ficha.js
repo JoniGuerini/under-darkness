@@ -9,7 +9,7 @@ const STAT_HELP = {
   'Crítico': 'Chance de cada golpe ser crítico e causar dano extra (veja Dano crítico). Todo mundo tem 5%; adagas têm mais 5%.',
   'Dano crítico': 'Quanto um golpe crítico causa a mais. +75% quer dizer que o crítico tira 1,75x o dano normal.',
   'Roubo de vida': 'Parte do dano que você causa volta como vida para você. Com 2%, cada 100 de dano devolve 2 de vida.',
-  'Chance de atordoar': 'Chance de um golpe deixar o inimigo tonto por quase 1 segundo, sem atacar. Vem das maças (30%); não funciona no Carrasco.',
+  'Chance de atordoar': 'Chance de um golpe deixar o inimigo tonto por quase 1 segundo, sem atacar. Vem das maças (30%); não funciona nos chefes.',
   'Empurrão': 'Quão longe seus golpes jogam o inimigo para trás. 100% é o normal; machados empurram bem mais longe.',
   'Estocada': 'Armas de estocada (lanças) atacam em linha reta para a frente, em vez de girar em arco.',
   'Vida máxima': 'O total de vida. Começa em 20 e sobe com itens de vida.',

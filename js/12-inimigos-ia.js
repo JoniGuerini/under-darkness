@@ -171,115 +171,6 @@ const AI = {
       else if (e.state === 'dash' && e.stateT <= 0) { e.state = 'walk'; e.atkCD = 1.4 + Math.random(); }
     }
   },
-  // ---- demons ----
-  imp(e, dt, dx, dy, dist, aggro) {
-    let tx, ty;
-    if (e.retreat > 0) { e.retreat -= dt; tx = -Math.sign(dx) * 60; ty = -40; }
-    else if (aggro) { const side = dx > 0 ? -1 : 1; tx = dx + side * 64; ty = dy - 26 + Math.sin(e.t * 2.6) * 14; }
-    else { tx = Math.cos(e.t * 0.9 + e.seed) * 40; ty = Math.sin(e.t * 1.5 + e.seed) * 22; }
-    const d = Math.hypot(tx, ty) || 1, sp = aggro ? Math.min(85, d * 2) : 32, k = Math.min(1, dt * 3);
-    e.vx = lerp(e.vx, tx / d * sp, k); e.vy = lerp(e.vy, ty / d * sp + Math.sin(e.t * 10) * 18, k);
-    e.facing = dx > 0 ? 1 : -1;
-    if (e.hitWall) e.vx *= -1; if (e.hitCeil || e.onGround) e.vy *= -1;
-    e.shoot -= dt; e.charging = aggro && e.shoot < 0.4;
-    if (aggro && dist < 210 && e.shoot <= 0) { fireball(e.x + e.w / 2 + e.facing * 4, e.y + 4, 135, e.dmg); e.shoot = 2.1 + Math.random() * 1.4; }
-    else if (!aggro && e.shoot < 0.5) e.shoot = 1.2;
-  },
-  hound(e, dt, dx, dy, dist, aggro) {
-    e.stateT -= dt;
-    if (e.state === 'walk') {
-      if (!aggro) { e.wtimer -= dt; if (e.wtimer <= 0) { e.wander = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? -1 : 1); e.wtimer = 1.5 + Math.random() * 2.5; } }
-      const dir = aggro ? (Math.sign(dx) || 1) : e.wander;
-      if (dir) e.facing = dir; walk(e, dt, dir, aggro ? 70 : 28, 420, 250, dy, aggro);
-      if (aggro && e.onGround && Math.abs(dx) < 96 && Math.abs(dx) > 18 && Math.abs(dy) < 24 && e.atkCD <= 0 && clearPath(e, pl) && floorRun(e, Math.sign(dx), Math.abs(dx)) >= Math.abs(dx) - e.w) { e.state = 'crouch'; e.stateT = 0.45; e.facing = Math.sign(dx) || e.facing; sfx.growl(); }
-    } else if (e.state === 'crouch') {
-      e.vx = approach(e.vx, 0, 700 * dt);
-      if (e.stateT <= 0) { e.state = 'lunge'; e.stateT = 0.55; e.vx = e.facing * Math.min(245, floorRun(e, e.facing, 80) / 0.31); e.vy = -150; e.onGround = false; e.swingHit = false; }
-    } else if (e.state === 'lunge') {
-      if (!e.swingHit && !pl.dead && overlap(e, pl)) { e.swingHit = true; hurtPlayer(e.dmg, e.x + e.w / 2, e, false); }
-      if (e.state === 'lunge' && ((e.onGround && e.stateT < 0.4) || e.stateT <= 0)) { e.state = 'recover'; e.stateT = 0.5; e.atkCD = 1.1 + Math.random() * 0.7; }
-    } else if (e.state === 'recover') {
-      if (e.onGround && e.vx && ledgeAhead(e, Math.sign(e.vx), 0, false) === 'stop') e.vx = 0;   // skids to a halt at an edge
-      e.vx = approach(e.vx, 0, 520 * dt);
-      if (e.stateT <= 0) e.state = 'walk';
-    }
-  },
-  brute(e, dt, dx, dy, dist, aggro) {
-    e.stateT -= dt;
-    const ecx = e.x + e.w / 2;
-    if (e.state === 'walk') {
-      if (!aggro) { e.wtimer -= dt; if (e.wtimer <= 0) { e.wander = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? -1 : 1); e.wtimer = 2 + Math.random() * 3; } }
-      let dir = aggro ? (Math.sign(dx) || 1) : e.wander;
-      if (aggro && Math.abs(dx) < 16) dir = 0;
-      if (dir) e.facing = dir; walk(e, dt, dir, 32 + e.lvl, 300, 270, dy, aggro);
-      if (aggro && Math.abs(dx) < 30 && Math.abs(dy) < 22 && e.atkCD <= 0 && e.onGround && clearPath(e, pl)) { e.state = 'wind'; e.stateT = 0.6; e.facing = Math.sign(dx) || e.facing; sfx.growl(); }
-      e.sAng = lerp(e.sAng, 0.9, Math.min(1, dt * 10)); e.arm = lerp(e.arm, 2.7, Math.min(1, dt * 10));
-    } else if (e.state === 'wind') {
-      e.vx = approach(e.vx, 0, 600 * dt); const k = easeOut(clamp(1 - e.stateT / 0.6, 0, 1));
-      e.sAng = lerp(0.9, -2.2, k); e.arm = lerp(2.7, -1.3, k);
-      if (e.stateT <= 0) { e.state = 'swing'; e.stateT = 0.13; e.swingHit = false; sfx.swing(); e.vx = ledgeAhead(e, e.facing, 0, false) === 'stop' ? 0 : e.facing * 90; }
-    } else if (e.state === 'swing') {
-      const k = clamp(1 - e.stateT / 0.13, 0, 1); e.sAng = lerp(-2.2, 2.6, easeOut(k)); e.arm = clamp(e.sAng * 0.6, -1.25, 1.7);
-      if (!e.swingHit && k > 0.3) { e.swingHit = true; const hb = { x: e.facing > 0 ? ecx - 2 : ecx - 30, y: e.y - 8, w: 32, h: e.h + 10 }; if (overlap(hb, pl) && clearPath(e, pl)) hurtPlayer(e.dmg, ecx, e, false); }
-      if (e.stateT <= 0 && e.state === 'swing') { e.state = 'recover'; e.stateT = 0.7; }
-    } else if (e.state === 'recover') {
-      e.vx = approach(e.vx, 0, 600 * dt);
-      if (e.stateT <= 0) { e.state = 'walk'; e.atkCD = 0.9 + Math.random() * 0.7; }
-    }
-  },
-  // ---- the executioner: overhead axe slam, a charge that stuns him on walls, fireballs and imps when hurt ----
-  boss(e, dt, dx, dy, dist, aggro) {
-    e.stateT -= dt; e.cd -= dt; e.chargeCD -= dt; e.castCD -= dt;
-    const ecx = e.x + e.w / 2, adx = Math.abs(dx), p2 = e.hp < e.maxHp * 0.55;
-    const rest = (a, b) => { const k = Math.min(1, dt * 8); e.sAng = lerp(e.sAng, a, k); e.arm = lerp(e.arm, b, k); };
-    if (e.state === 'walk' && e.summons < 2 && e.hp < e.maxHp * (e.summons === 0 ? 0.66 : 0.33)) { e.state = 'summon'; e.stateT = 0.9; e.summons++; sfx.roar(); }
-    switch (e.state) {
-      case 'intro': e.vx = 0; rest(0.9, 2.6); if (e.stateT <= 0) { e.state = 'walk'; e.cd = 0.5; } break;
-      case 'walk': {
-        const dir = Math.sign(dx) || e.facing; e.facing = dir;
-        walk(e, dt, adx < 24 ? 0 : dir, p2 ? 50 : 38, 400, 240, dy, true);
-        rest(0.9, 2.6);
-        if (e.cd <= 0 && e.onGround) {
-          if (adx < 42 && Math.abs(dy) < 44 && clearPath(e, pl)) { e.state = 'wind'; e.stateT = e.windT = p2 ? 0.5 : 0.68; sfx.wind(); }
-          else if ((p2 || dy < -30) && e.castCD <= 0 && adx > 30) { e.state = 'cast'; e.stateT = 0.7; e.castCD = p2 ? 4.2 : 3.2; }
-          else if (adx > 72 && Math.abs(dy) < 44 && e.chargeCD <= 0 && floorRun(e, dir, adx) >= adx - e.w) { e.state = 'crouch'; e.stateT = 0.6; e.chargeCD = p2 ? 3.6 : 5.2; sfx.roar(); }
-        }
-        break; }
-      case 'wind': { e.vx = approach(e.vx, 0, 900 * dt); const k = easeOut(clamp(1 - e.stateT / e.windT, 0, 1)); e.sAng = lerp(0.9, -2.5, k); e.arm = lerp(2.6, -1.4, k); if (e.stateT <= 0) { e.state = 'slam'; e.stateT = 0.14; e.swingHit = false; sfx.swing(); } break; }
-      case 'slam': {
-        const k = clamp(1 - e.stateT / 0.14, 0, 1); e.sAng = lerp(-2.5, 2.7, easeOut(k)); e.arm = clamp(e.sAng * 0.6, -1.4, 1.8);
-        if (!e.swingHit && k > 0.35) {
-          e.swingHit = true; const hx = ecx + e.facing * 34;
-          shake(5); sfx.slam(); burst(hx, e.y + e.h, 16, '#6a6070', 120, 380, 0.6); burst(hx, e.y + e.h - 2, 6, '#ffb070', 80, 200, 0.3, 1, true);
-          const hb = { x: e.facing > 0 ? ecx - 4 : ecx - 50, y: e.y - 12, w: 54, h: e.h + 14 }; if (overlap(hb, pl) && clearPath(e, pl)) hurtPlayer(e.dmg, ecx, e, false);
-        }
-        if (e.state === 'slam' && e.stateT <= 0) { e.state = 'recover'; e.stateT = p2 ? 0.55 : 0.8; }
-        break; }
-      case 'recover': e.vx = approach(e.vx, 0, 900 * dt); if (e.stateT <= 0) { e.state = 'walk'; e.cd = p2 ? 0.3 : 0.55; } break;
-      case 'crouch':
-        e.vx = approach(e.vx, 0, 900 * dt); e.facing = Math.sign(dx) || e.facing; rest(1.6, 2.2);
-        if (Math.random() < dt * 25) burst(ecx - e.facing * 8, e.y + e.h, 1, '#6a6070', 40, 200, 0.4);
-        if (e.stateT <= 0) { e.state = 'charge'; e.stateT = 1.0; e.swingHit = false; }
-        break;
-      case 'charge':
-        e.vx = e.facing * (p2 ? 290 : 250); rest(1.6, 2.0);
-        if (Math.random() < dt * 30) burst(ecx - e.facing * 8, e.y + e.h, 1, '#6a6070', 50, 200, 0.4);
-        if (!e.swingHit && !pl.dead && overlap(e, pl)) { e.swingHit = true; hurtPlayer(Math.round(e.dmg * 0.85), ecx, e, false); }
-        if (e.state === 'charge') {
-          if (e.hitWall) { e.state = 'walk'; e.cd = 0.4; e.stun = 1.5; e.vx = -e.facing * 70; e.vy = -110; shake(6); sfx.slam(); burst(ecx + e.facing * 10, e.y + 10, 14, '#8a8090', 110, 300, 0.6); }
-          else if (e.stateT <= 0 || ledgeAhead(e, e.facing, 0, false) === 'stop') { e.state = 'recover'; e.stateT = 0.45; e.vx = 0; }
-        }
-        break;
-      case 'cast':
-        e.vx = approach(e.vx, 0, 900 * dt); rest(-0.6, -0.2); e.charging = true;
-        if (e.stateT <= 0) { e.charging = false; for (let i = 0; i < 3; i++) fireball(ecx + e.facing * 6, e.y + 8, 125, Math.round(e.dmg * 0.55), (i - 1) * 0.26); e.state = 'recover'; e.stateT = 0.5; }
-        break;
-      case 'summon':
-        e.vx = 0; rest(-0.4, -0.6); e.charging = true;
-        if (e.stateT <= 0) { e.charging = false; summonImps(e); e.state = 'walk'; e.cd = 0.6; }
-        break;
-    }
-  },
   lurker(e, dt, dx, dy, dist, aggro) {
     let tx, ty;
     if (aggro) { const side = dx > 0 ? -1 : 1; tx = dx + side * 95; ty = dy - 35 + Math.sin(e.t * 1.7) * 15; }
@@ -296,7 +187,7 @@ const AI = {
   }
 };
 // ---- ground pathfinding: a short breadth-first search over the spots a walker can stand on ----
-const NAV_WALKERS = { zombie: 1, skeleton: 1, guard: 1, hound: 1, brute: 1 };
+const NAV_WALKERS = { zombie: 1, skeleton: 1, guard: 1 };
 function navStand(x, y, hT) { if (!solidAt(x, y)) return false; for (let k = 1; k <= hT; k++) if (solidAt(x, y - k)) return false; return true; }
 function navClear(x, y0, y1) { for (let y = y0; y <= y1; y++) if (solidAt(x, y)) return false; return true; }
 function navMoves(x, y, hT, out) {
@@ -407,12 +298,4 @@ function fireball(ox, oy, sp, dmg, off = 0) {
   const a = Math.atan2(pl.y + 9 - oy, pl.x + pl.w / 2 - ox) + off;
   projs.push({ x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, dmg, owner: 'enemy', life: 5, t: 0, kind: 'fire' });
   sfx.fire();
-}
-function summonImps(e) {
-  const B = crypt.boss;
-  for (const sd of [-1, 1]) {
-    const x = clamp(e.x + e.w / 2 + sd * 40, (B.x0 + 1) * T, (B.x1 - 1) * T), y = (B.y0 + 1.5) * T;
-    const m = spawnEnemy('imp', x, y, 4); m.shoot = 1.5 + Math.random();
-    burst(x + 5, y + 4, 18, '#3a1a2a', 70, -40, 0.8); burst(x + 5, y + 4, 8, '#ff7a3a', 60, 0, 0.4, 1, true);
-  }
 }

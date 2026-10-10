@@ -307,7 +307,7 @@ function rgEnd(won) {
   const e = rgBoss; rgBoss = null; bossFight = null;
   rgGates(false); rgFx.rocks.length = 0; rgFx.waves.length = 0;
   $('bossbar').hidden = true; $('hud').classList.remove('boss');
-  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'O Carrasco'; bn.lastChild.textContent = 'guardião da cripta'; }
+  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = ''; bn.lastChild.textContent = ''; }
   for (const m of enemies.slice()) if (m.rgMinion && !m.dead) { rgDrop(m); burst(m.x + m.w / 2, m.y + m.h / 2, 6, '#5a7a3a', 50, 200, 0.4); }
   if (!won) { rgFx.wreck = null; if (e) { const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); } return; }
   rgState.dead = true;

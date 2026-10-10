@@ -167,7 +167,7 @@ function teiaEnd(won) {
   const e = teiaBoss; teiaBoss = null; bossFight = null;
   teiaGates(false);
   $('bossbar').hidden = true; $('hud').classList.remove('boss');
-  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'O Carrasco'; bn.lastChild.textContent = 'guardião da cripta'; }
+  const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = ''; bn.lastChild.textContent = ''; }
   for (const m of enemies.slice()) if (m.teiaMinion && !m.dead) { teiaDrop(m); burst(m.x + m.w / 2, m.y + m.h / 2, 6, '#6a8a3a', 50, 200, 0.4); }
   if (!won) { if (e) { const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); } return; }
   teiaState.dead = true;

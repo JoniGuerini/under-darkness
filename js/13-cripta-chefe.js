@@ -1,37 +1,14 @@
 'use strict';
 
-/* ================= the crypt: boss fight ================= */
-let bossFight = null, cryptWhisper = false;
-function setGates(on) { for (const [x, y] of crypt.boss.doors) { const i = y * WW + x; if (on ? tiles[i] === AIR : tiles[i] === GATE) { tiles[i] = on ? GATE : AIR; markDirty(x, y); } } mapVer++; }
-function updateCrypt() {
-  if (!crypt || pl.dead) return;
-  const ptx = Math.floor((pl.x + pl.w / 2) / T), pty = Math.floor((pl.y + pl.h / 2) / T), B = crypt.boss;
-  if (!crypt.bossDead && !bossFight && ptx >= B.x0 + 2 && ptx <= B.x1 - 2 && pty >= B.y0 && pty <= B.y1) startBossFight();
-  if (!cryptWhisper && !inCrypt(ptx, pty) && ptx > crypt.x0 - 28 && ptx < crypt.x1 + 28 && pty > crypt.y0 - 22 && pty < crypt.y1 + 22) { cryptWhisper = true; toast('Um frio estranho vem de algum lugar aqui perto…'); }
-}
-function startBossFight() {
-  const B = crypt.boss;
-  setGates(true);
-  const side = pl.x + pl.w / 2 < (B.altar + 0.5) * T ? 1 : -1;
-  const e = spawnEnemy('boss', (B.altar + 0.5) * T - 8 + side * 18, B.fy * T - 40, 4);
-  Object.assign(e, { boss: true, lvl: 10, hp: ET.boss.hp, maxHp: ET.boss.hp, dmg: ET.boss.dmg, xp: 450, state: 'intro', stateT: 1.4, cd: 0.6, chargeCD: 3, castCD: 2, summons: 0, facing: -side, arm: 2.6, sAng: 0.9, windT: 0.68 });
-  bossFight = { e };
-  burst(e.x + 8, e.y + 20, 40, '#1a0a12', 120, -60, 1.2); burst(e.x + 8, e.y + 20, 16, '#ff5a2a', 90, 0, 0.6, 1, true);
-  sfx.gate(); sfx.roar(); shake(5); showBanner('O Carrasco', 'guardião da cripta');
-  $('bossbar').hidden = false; $('hud').classList.add('boss'); hudCache.bossFill = null;
-}
-function endBossFight(won) {
+/* ================= boss fights and the enemies' update =================
+   The crypt of O Carrasco that used to stand in the caves is gone (2026-10-09; the demons live in the abyss now,
+   103-109). What stays here: bossFight, the fight in progress ({ e, ...flags }), and the base endBossFight, which
+   every boss (46, 57, 74, 85, 109) wraps with its own; and updateEnemies, the per-frame update of every monster. */
+let bossFight = null;
+function endBossFight() {
   if (!bossFight) return;
-  const e = bossFight.e; bossFight = null;
-  setGates(false);
+  bossFight = null;
   $('bossbar').hidden = true; $('hud').classList.remove('boss');
-  if (!won) { for (let k = enemies.length - 1; k >= 0; k--) { const m = enemies[k]; if (m === e || (m.type === 'imp' && inBossHall(Math.floor(m.x / T), Math.floor(m.y / T)))) enemies.splice(k, 1); } return; }
-  crypt.bossDead = true;
-  const B = crypt.boss, cx = B.altar + 2;
-  if (tileAt(cx, B.y1) === AIR) setTile(cx, B.y1, CHEST);
-  showBanner('Vitória', 'o Carrasco caiu');
-  toast('A força sombria se dissipou: agora dá para minerar os tijolos da cripta. Um baú apareceu ao lado do altar.', 'gold');
-  saveGame();
 }
 function updateEnemies(dt) {
   const pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
@@ -56,7 +33,7 @@ function updateEnemies(dt) {
     else AI[e.type](e, dt, dx, dy, dist, aggro);
     if (!D.fly) e.vy = Math.min(e.vy + GRAV * dt, MAXFALL);
     if (D.phase) { e.x += e.vx * dt; e.y = clamp(e.y + e.vy * dt, 2 * T, (WH - 6) * T); e.onGround = e.hitWall = e.hitCeil = false; }
-    else moveEntity(e, dt, e.type === 'zombie' || e.type === 'skeleton' || e.type === 'brute' || e.type === 'hound' || e.type === 'boss' || e.type === 'archer' || e.type === 'guard');
+    else moveEntity(e, dt, e.type === 'zombie' || e.type === 'skeleton' || e.type === 'archer' || e.type === 'guard');
     // only creatures whose body itself hurts (ET touch) harm you on contact
     if (D.touch && !pl.dead && e.stun <= 0 && e.atkCD <= 0 && overlap(e, pl)) {
       const r = hurtPlayer(Math.round(e.dmg * D.touch), ecx, e, false);

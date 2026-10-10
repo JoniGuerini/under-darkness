@@ -8,16 +8,16 @@
    The arms are pre-rendered for 64 angles. Nothing here runs per pixel per frame. */
 
 // letters = material; an uppercase letter is the same material one step darker (folds, the far side)
-// h hair · s skin · e eye · m mouth · r cloth · b belt · k buckle / trim · n collar
+// h hair · s skin · W eye white · e eye · m mouth · r cloth · b belt · k buckle / trim · n collar
 const HERO_BODY = [
-  "....hhhh....",
-  "...hhhhhh...",
+  "....hh.h....",
   "..hhhhhhhh..",
-  "..hhhhssss..",
-  "..hhhsssess.",
-  "..hhssssss..",
-  "...hssssm...",
-  "....ssss....",
+  ".hhhhhhhhhh.",
+  ".hhhhhhhhh..",
+  "..hhhhssWes.",
+  "..hhSssssss.",
+  "...hhsssms..",
+  "....hssss...",
   "....nssn....",
   "...nnnnnn...",
   "..rrrrrrrr..",
@@ -31,14 +31,14 @@ const HERO_BODY = [
 ];
 // hand-placed light: 5 = highlight ... 0 = deepest shadow (same grid as above)
 const HERO_BODY_LV = [
-  "....3443....",
-  "...344432...",
-  "..23443322..",
-  "..23324423..",
-  "..221344043.",
-  "..12324433..",
-  "...122330...",
-  "....1123....",
+  "....45.5....",
+  "..34554432..",
+  ".2344443322.",
+  ".233444332..",
+  "..22.2.44..3",
+  "..1.2.4443..",
+  "....233.2...",
+  "....1223....",
   "....3112....",
   "...344321...",
   "..44433321..",
@@ -68,7 +68,7 @@ const HERO_LEGS = {
   w3: ["....pPP.....", "....ppPP....", "....ffFFF...", "...fff......"],
   jump: ["...PP.pp....", "..PP...pp...", "..FFF..fff..", "............"]
 };
-const HERO_COL = { h: '#5a3620', s: '#e2a982', e: '#1c1422', m: '#a5604a', p: '#4b3b33', n: '#8a6a48' };
+const HERO_COL = { h: '#4e2c1a', s: '#e2a982', e: '#1c1422', W: '#f2ead8', m: '#a5604a', p: '#4b3b33', n: '#8a6a48' };
 // how each body armour reads: cloth weave, chain rings or plates
 const HERO_TEX = { cota: 'mail', couraca_osso: 'plate' };
 function heroTex(id) { if (!id) return 'cloth'; if (HERO_TEX[id]) return HERO_TEX[id]; if (/peitoral|couraca|placa/.test(id)) return 'plate'; if (/cota|malha/.test(id)) return 'mail'; return 'cloth'; }
@@ -118,10 +118,11 @@ function heroBodyFor(id) {
     const pal = Object.assign({}, PC, id ? ITEMS[id].pal : BODY_RAGS), tex = heroTex(id);
     const cloth = { ramp: heroRamp(pal.r), grain: 0, tex, lip: true };
     const M = {
-      h: { ramp: heroRamp(HERO_COL.h), grain: 0.08 }, s: { ramp: heroRamp(HERO_COL.s), grain: 0 },
-      e: HERO_COL.e, m: heroRamp(HERO_COL.s)[1], r: cloth, n: { ramp: heroRamp(pal.R), grain: 0.06 },
+      h: { ramp: heroRamp(HERO_COL.h), grain: 0.08, tex: 'hair' }, s: { ramp: heroRamp(HERO_COL.s), grain: 0 },
+      e: HERO_COL.e, W: HERO_COL.W, m: heroRamp(HERO_COL.s)[1], r: cloth, n: { ramp: heroRamp(pal.R), grain: 0.06 },
       b: { ramp: heroRamp(pal.b), grain: 0.1, under: true }, k: { ramp: heroRamp(pal.B), grain: 0 }
     };
+    M.w = M.W;
     return { img: heroPaint(HERO_BODY, L => M[L], 7, HERO_BODY_LV), r: pal.r, R: pal.R, arm: pal.r };
   });
 }
