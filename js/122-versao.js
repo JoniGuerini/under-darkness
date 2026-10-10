@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.20.2';
+const VERSAO = '0.21.0';
 const NOVIDADES = [
+  { v: '0.21.0', data: '10/10/2026', titulo: 'Criar', itens: [
+    'Botão Criar no inventário, ao lado do Organizar: 1 carvão + 1 madeira viram 4 tochas, direto na mão. Os materiais podem estar na mochila ou no baú.'
+  ] },
   { v: '0.20.2', data: '10/10/2026', titulo: 'Carregando', itens: [
     'Tela de carregamento enquanto o mundo é gerado.'
   ] },
