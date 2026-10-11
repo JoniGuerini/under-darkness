@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.22.3';
+const VERSAO = '0.23.0';
 const NOVIDADES = [
+  { v: '0.23.0', data: '11/10/2026', titulo: 'Bolsa de blocos', itens: [
+    'Botão Blocos no inventário: uma bolsa com uma casa para cada bloco do jogo, separada em páginas por bioma. Todo bloco coletado vai direto para ela e não ocupa mais a mochila.',
+    'Arraste um bloco da bolsa para a barra para usar; a pilha da barra se completa sozinha com o que houver na bolsa.'
+  ] },
   { v: '0.22.3', data: '10/10/2026', titulo: 'Bichos das Cavernas', itens: [
     'Besouro Couraçado leva dano pela frente (armadura alta em vez de bloqueio total); Rato-de-Gruta um pouco mais lento.'
   ] },
