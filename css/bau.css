@@ -2,9 +2,9 @@
    Its window is the chest: oak boards round the edge, iron corner plates and straps, the dark inside of the lid
    behind the slots, brass for the title. Textures come from js/27-bau.js (--bau-*). Your inventory stays yours. */
 #stash{padding-block:10px}
-#stash .inv{width:min(1400px,100%);align-items:flex-start;flex-wrap:nowrap}
+#stash .inv{width:min(1600px,100%);align-items:flex-start;flex-wrap:nowrap}
 #stash .invcard{margin-block:0}
-@media (max-width:1420px){#stash .inv{flex-wrap:wrap}}
+@media (max-width:1240px){#stash .inv{flex-wrap:wrap}}
 
 #stash .chestp{
   --oak-hi:#e8c06a;--oak-txt:#ecdcbc;--oak-dim:#b49a76;

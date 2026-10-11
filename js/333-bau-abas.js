@@ -43,7 +43,7 @@ function setStashTab(t) {
 }
 
 /* ---- the two little windows: buying a tab, editing one ---- */
-function closeStashPop() { stashPop = null; for (const id of ['stashBuy', 'stashEdit', 'stashList']) { const e = $(id); if (e) e.hidden = true; } }
+function closeStashPop() { stashPop = null; for (const id of ['stashBuy', 'stashEdit']) { const e = $(id); if (e) e.hidden = true; } }
 function placePop(pop, anchor) {   // just under what was clicked, kept inside the chest's window
   const p = pop.parentElement.getBoundingClientRect(), a = anchor.getBoundingClientRect();
   pop.hidden = false;
@@ -55,7 +55,7 @@ function openBuyPop(anchor) {
   stashPop = { kind: 'buy' };
   $('stashBuyCost').innerHTML = coinTag(cost.toLocaleString('pt-BR')); $('stashBuyCost').classList.toggle('cant', !can);
   $('stashBuyOk').disabled = !can;
-  $('stashEdit').hidden = $('stashList').hidden = true; placePop($('stashBuy'), anchor); sfx.select();
+  $('stashEdit').hidden = true; placePop($('stashBuy'), anchor); sfx.select();
 }
 function buyStashTab() {
   const cost = stashPreco(stashTabs.length);
@@ -70,15 +70,17 @@ function openEditPop(t, anchor) {
   stashPop = { kind: 'edit', t }; setStashTab(t);
   const tab = stashTabs[t], inp = $('stashEditName');
   inp.value = tab.name; paintSwatches();
-  $('stashBuy').hidden = $('stashList').hidden = true; placePop($('stashEdit'), document.querySelector(`#stashTabs .aba[data-t="${t}"]`) || anchor);
+  $('stashBuy').hidden = true; placePop($('stashEdit'), document.querySelector(`#stashTabs .aba[data-t="${t}"]`) || anchor);
   inp.focus(); inp.select();
 }
-function openListPop(anchor) {   // every tab in a column, hanging off the right side of the row, like PoE's
-  stashPop = { kind: 'list' }; const pop = $('stashList'), p = pop.parentElement.getBoundingClientRect(), a = anchor.getBoundingClientRect();
-  $('stashBuy').hidden = $('stashEdit').hidden = true; pop.hidden = false;
-  pop.style.left = Math.round(a.right - p.left - 2) + 'px'; pop.style.top = Math.round(a.top - p.top) + 'px';
-  const on = pop.querySelector('.aba-item.on'); if (on) on.scrollIntoView({ block: 'nearest' });
-  sfx.select();
+// every tab in a column docked beside the grid, inside the chest's own window (it takes its own room, never covering the
+// inventory), like PoE's list; it stays open while you pick tabs from it, and the list button closes it again
+let stashListOpen = false;
+function toggleStashList(open = !stashListOpen) {
+  stashListOpen = open; const col = $('stashList'); if (!col) return;
+  col.hidden = !open; $('stashTabListBtn').classList.toggle('on', open);
+  if (open) { const on = col.querySelector('.aba-item.on'); if (on) on.scrollIntoView({ block: 'nearest' }); }
+  fitStashTabs(true);
 }
 function paintSwatches() {
   const t = stashPop && stashTabs[stashPop.t]; if (!t) return;
@@ -114,20 +116,21 @@ buildStashUI = function () {
   const pops = document.createElement('div');
   pops.innerHTML = `<div class="bau-pop" id="stashBuy" hidden><h4>Nova aba</h4><p class="preco" id="stashBuyCost"></p>
       <div class="bts"><button type="button" class="ghost sm" id="stashBuyOk">Comprar</button><button type="button" class="ghost sm" id="stashBuyNo">Cancelar</button></div></div>
-    <div class="bau-lista" id="stashList" hidden></div>
     <div class="bau-pop" id="stashEdit" hidden><input type="text" id="stashEditName" maxlength="${STASH_NAME_MAX}" spellcheck="false" autocomplete="off" aria-label="Nome da aba">
       <div class="cores" id="stashEditCores">${STASH_CORES.map((c, i) => `<button type="button" class="cor" data-c="${i}" aria-label="${c[0]}" style="--a0:${c[1]};--a1:${c[2]};--a2:${c[3]}"></button>`).join('')}</div>
       <div class="bts"><button type="button" class="ghost sm" id="stashEditOk">OK</button></div></div>`;
   while (pops.firstChild) panel.appendChild(pops.firstChild);
+  const grid = $('stashGrid'), corpo = document.createElement('div'); corpo.className = 'bau-corpo';
+  grid.before(corpo); corpo.appendChild(grid); corpo.insertAdjacentHTML('beforeend', '<div class="bau-lista" id="stashList" hidden></div>');
   bar.addEventListener('click', e => {
     const a = tabEl(e.target); if (a) { if (!(stashPop && stashPop.kind === 'edit' && stashPop.t === +a.dataset.t)) closeStashPop(); setStashTab(+a.dataset.t); drawStashTabs(); return; }
     const seta = e.target.closest('.aba-seta'); if (seta) { nav.scrollBy({ left: +seta.dataset.d * nav.clientWidth * 0.75, behavior: 'smooth' }); sfx.select(); return; }
-    const lst = e.target.closest('#stashTabListBtn'); if (lst) { if (stashPop && stashPop.kind === 'list') closeStashPop(); else openListPop(lst); return; }
+    const lst = e.target.closest('#stashTabListBtn'); if (lst) { closeStashPop(); toggleStashList(); sfx.select(); return; }
     const plus = e.target.closest('#stashTabAdd'); if (plus) { if (stashPop && stashPop.kind === 'buy') closeStashPop(); else openBuyPop(plus); }
   });
   nav.addEventListener('scroll', arrowsStashTabs);
   nav.addEventListener('wheel', e => { if (nav.scrollWidth <= nav.clientWidth) return; e.preventDefault(); nav.scrollLeft += e.deltaY || e.deltaX; }, { passive: false });
-  $('stashList').addEventListener('click', e => { const b = e.target.closest('.aba-item'); if (!b) return; closeStashPop(); setStashTab(+b.dataset.t); drawStashTabs(); });
+  $('stashList').addEventListener('click', e => { const b = e.target.closest('.aba-item'); if (!b) return; closeStashPop(); setStashTab(+b.dataset.t); drawStashTabs(); const on = $('stashList').querySelector('.aba-item.on'); if (on) on.scrollIntoView({ block: 'nearest' }); });
   $('stashList').addEventListener('pointerdown', e => { const b = e.target.closest('.aba-item'); if (b && e.button === 2) { e.preventDefault(); openEditPop(+b.dataset.t, b); } });
   nav.addEventListener('dblclick', e => { const a = tabEl(e.target); if (a) openEditPop(+a.dataset.t, a); });
   nav.addEventListener('pointerdown', e => { const a = tabEl(e.target); if (a && e.button === 2) { e.preventDefault(); openEditPop(+a.dataset.t, a); } });
@@ -140,7 +143,7 @@ buildStashUI = function () {
   $('stashEditCores').addEventListener('click', e => { const b = e.target.closest('.cor'), t = stashPop && stashTabs[stashPop.t]; if (!b || !t) return; t.cor = +b.dataset.c; paintSwatches(); drawStashTabs(); sfx.select(); invDirty = true; });
   $('stashEditOk').addEventListener('click', () => { sfx.select(); endEdit(); });
   // a press anywhere else in the window closes an open pop (finishing the edit)
-  panel.addEventListener('pointerdown', e => { if (!stashPop || (e.target.closest && e.target.closest('.bau-pop, .bau-lista, #stashTabAdd, #stashTabListBtn'))) return; if (tabEl(e.target) && stashPop.kind === 'edit') return; stashPop.kind === 'edit' ? endEdit() : closeStashPop(); }, true);
+  panel.addEventListener('pointerdown', e => { if (!stashPop || (e.target.closest && e.target.closest('.bau-pop, #stashTabAdd'))) return; if (tabEl(e.target) && stashPop.kind === 'edit') return; stashPop.kind === 'edit' ? endEdit() : closeStashPop(); }, true);
 };
 const _refreshStash = refreshStash;
 refreshStash = function (force) { if (!stashOpen()) return; drawStashTabs(); _refreshStash(force); };

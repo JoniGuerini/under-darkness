@@ -8,8 +8,8 @@
   overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #stash .chestp .abas::-webkit-scrollbar{display:none}
 #stash .chestp .aba{flex:none}
-#stash .chestp .aba-seta,#stash .chestp .aba-lista{display:none}
-#stash .chestp .abas-bar.cheia .aba-seta,#stash .chestp .abas-bar.cheia .aba-lista{display:block}
+#stash .chestp .aba-seta{display:none}
+#stash .chestp .abas-bar.cheia .aba-seta{display:block}
 #stash .chestp .aba-seta,#stash .chestp .aba-lista{
   flex:none;width:24px;height:30px;padding:0;margin:0;cursor:pointer;
   font:800 20px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;
@@ -21,14 +21,23 @@
 #stash .chestp .aba-lista{width:30px;position:relative}
 #stash .chestp .aba-lista i{position:absolute;left:8px;right:8px;height:3px;background:#f6d27a;box-shadow:2px 2px 0 #000}
 #stash .chestp .aba-lista i:nth-child(1){top:8px}#stash .chestp .aba-lista i:nth-child(2){top:13px}#stash .chestp .aba-lista i:nth-child(3){top:18px}
-/* the list of every tab, hanging off the side of the window like PoE's */
+/* the grid and, when opened, the list of every tab: part of the chest's window, so it takes its own room instead of
+   covering the inventory. On a wide screen it is a column beside the grid, like PoE's; where the chest and the
+   inventory would not fit side by side with it, it sits under the grid instead, in the room the taller inventory leaves */
+#stash .chestp .bau-corpo{display:flex;flex-direction:column;gap:8px}
 #stash .chestp .bau-lista{
-  position:absolute;z-index:6;width:170px;max-height:420px;overflow-y:auto;box-sizing:border-box;padding:4px;
-  display:flex;flex-direction:column;gap:3px;
-  background:#1c120b var(--bau-wall) 0 0/180px 180px;image-rendering:pixelated;
-  border:10px solid #000;border-image:var(--bau-frame-sm) 5 / 10px stretch;box-shadow:0 6px 0 rgba(0,0,0,.55),0 0 30px rgba(0,0,0,.7);
+  flex:none;width:0;min-width:100%;max-height:136px;overflow-y:auto;box-sizing:border-box;padding:6px;
+  display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px;scrollbar-width:thin;scrollbar-color:#7e5414 transparent;
+  background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 2px #000,inset 0 0 0 3px #4f2c15,inset 0 6px 14px rgba(0,0,0,.6);
+}
+#stash .chestp .bau-lista .aba-item{max-width:150px}
+@media (min-width:1620px){
+  #stash .chestp .bau-corpo{flex-direction:row;align-items:stretch}
+  #stash .chestp .bau-lista{width:150px;min-width:0;max-height:0;min-height:100%;flex-direction:column;flex-wrap:nowrap}
+  #stash .chestp .bau-lista .aba-item{max-width:none}
 }
 #stash .chestp .bau-lista[hidden]{display:none}
+#stash .chestp .aba-lista.on{filter:brightness(1.15);box-shadow:inset 0 0 0 2px #d29e34}
 #stash .chestp .aba-item{
   flex:none;height:26px;padding:0 10px;text-align:left;cursor:pointer;
   font:600 14px/1 "Rubik",system-ui,sans-serif;color:#f4ecd8;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;

@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.31.1';
+const VERSAO = '0.31.2';
 const NOVIDADES = [
+  { v: '0.31.2', data: '11/10/2026', titulo: 'Lista de abas', itens: [
+    'A lista de abas do baú abre dentro da janela do baú e não cobre mais o inventário.'
+  ] },
   { v: '0.31.1', data: '11/10/2026', titulo: 'Abas do baú', itens: [
     'O baú pode ter quantas abas você quiser; cada aba nova custa no máximo 5.000 de ouro.',
     'Quando as abas não cabem na fileira, ela rola para o lado com as setas ou a rodinha do mouse, e um botão abre a lista de todas as abas numa coluna ao lado, como no Path of Exile.'
