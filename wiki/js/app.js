@@ -13,7 +13,7 @@
   const NAV = [
     ['Início', [['inicio', 'Visão geral']]],
     ['Itens', [['itens', 'Equipamentos'], ['materiais', 'Materiais e blocos'], ['modificadores', 'Modificadores'], ['raridades', 'Raridades e sorteio'], ['lendarios', 'Lendários'], ['forja', 'Forja'], ['cozinha', 'Cozinha'], ['alquimia', 'Alquimia'], ['oficios', 'Ofícios']]],
-    ['Mundo', [['inimigos', 'Inimigos'], ['chefes', 'Chefes'], ['npcs', 'Moradores'], ['biomas', 'Biomas'], ['regras', 'Regras do jogo']]],
+    ['Mundo', [['inimigos', 'Inimigos'], ['chefes', 'Chefes'], ['npcs', 'Moradores'], ['biomas', 'Biomas'], ['estacoes', 'Estações'], ['regras', 'Regras do jogo']]],
     ['Arquivos', [['docs', 'Documentos']]]
   ];
   $('nav').innerHTML = NAV.map(([g, list]) => `<div class="ng"><small>${g}</small>${list.map(([k, t]) => `<a href="#/${k}" data-k="${k}">${t}</a>`).join('')}</div>`).join('');

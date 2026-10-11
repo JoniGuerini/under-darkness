@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.31.2';
+const VERSAO = '0.32.0';
 const NOVIDADES = [
+  { v: '0.32.0', data: '11/10/2026', titulo: 'Estações do ano', itens: [
+    'A superfície muda com as estações: primavera, verão, outono e inverno, cada uma com 7 dias do jogo. O capim, as flores, as árvores e o fundo mudam de cor, e no inverno a neve cobre o chão e os telhados.',
+    'Pétalas na primavera, folhas caindo no outono e neve de vez em quando no inverno.',
+    'Testes: Menu > Testes ganha um botão que pula para a próxima estação. A wiki tem uma página nova sobre as estações.'
+  ] },
   { v: '0.31.2', data: '11/10/2026', titulo: 'Lista de abas', itens: [
     'A lista de abas do baú abre dentro da janela do baú e não cobre mais o inventário.'
   ] },

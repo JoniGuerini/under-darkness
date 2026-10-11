@@ -31,6 +31,7 @@
       h += `<h2>Mundo</h2><div class="stats">${UDW.stat(`${WW} × ${WH}`, 'blocos de largura e altura')}${UDW.stat(T + ' px', 'tamanho do bloco')}${UDW.stat(DAY_LEN / 60 + ' min', 'um dia inteiro')}</div>
         <ul class="regras"><li>O mundo dá a volta: andando sempre para um lado, você chega pelo outro.</li>
         <li>Dia das 6h às 18h, noite das 18h às 6h. Um jogo novo começa às 18h.</li>
+        <li>Estações: cada uma dura ${EST_DIAS} dias do jogo (${Math.floor(EST_DIAS * DAY_LEN / 3600)} h e ${EST_DIAS * DAY_LEN / 60 % 60} min de jogo rodando), um ano tem ${EST_DIAS * 4} dias. Veja <a href="#/estacoes">Estações</a>.</li>
         <li>A superfície é segura: nenhum monstro nasce debaixo do céu aberto.</li>
         <li>Os monstros só percebem o herói com linha de visão, um caminho curto pelo chão ou muito perto; e procuram caminho até ele.</li>
         <li>O nível dos monstros sobe 1 a cada ${CATEDRAL ? 40 : 20} m de profundidade.</li></ul>`;
