@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.28.1';
+const VERSAO = '0.28.2';
 const NOVIDADES = [
+  { v: '0.28.2', data: '11/10/2026', titulo: 'Bolsa de blocos', itens: [
+    'As abas de bioma da bolsa de blocos mostram só as que cabem no inventário, com setas dos lados para passar para as outras.'
+  ] },
   { v: '0.28.1', data: '11/10/2026', titulo: 'Wiki', itens: [
     'Na wiki, o Covil do Dragão aparece no lugar certo: debaixo do Mar Sem Sol, de 2232 a 2418 m.'
   ] },

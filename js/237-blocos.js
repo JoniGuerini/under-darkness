@@ -82,11 +82,32 @@ function buildBlk() {
   const g = document.createElement('div'); g.className = 'grid'; g.id = 'blkGrid'; g.hidden = true;
   g.innerHTML = Array.from({ length: BLK_PER }, () => '<div class="slot blk"><img alt="" hidden><span class="n"></span></div>').join('');
   const tabs = document.createElement('div'); tabs.id = 'blkTabs'; tabs.hidden = true;
-  tabs.innerHTML = BLK_PAGES.map((P, i) => `<button class="btab" type="button" data-p="${i}" title="${P.name}"><img src="${ICON[P.ids[0]].url}" alt="${P.name}"></button>`).join('');
+  tabs.innerHTML = `<button class="barr l" type="button" data-d="-1" aria-label="Biomas anteriores"></button><div class="bview">${
+    BLK_PAGES.map((P, i) => `<button class="btab" type="button" data-p="${i}" title="${P.name}"><img src="${ICON[P.ids[0]].url}" alt="${P.name}"></button>`).join('')
+  }</div><button class="barr r" type="button" data-d="1" aria-label="Próximos biomas"></button>`;
   $('invGrid').after(g, tabs);
   tabs.querySelectorAll('.btab').forEach(b => b.addEventListener('click', () => { if (+b.dataset.p !== blkPage) { sfx.select(); setBlkPage(+b.dataset.p); } }));
+  tabs.querySelectorAll('.barr').forEach(b => b.addEventListener('click', () => { if (!b.disabled) { sfx.select(); blkTabStart += +b.dataset.d * blkTabFit; layBlkTabs(); } }));
   setBlkPage(0);
 }
+/* as abas: só as que cabem na largura do cartão; as setas dos lados passam para o próximo grupo de biomas */
+let blkTabStart = 0, blkTabFit = BLK_PAGES.length;
+function layBlkTabs(follow) {
+  const tabs = $('blkTabs'); if (!tabs || tabs.hidden) return;
+  const v = tabs.querySelector('.bview'), all = v.querySelectorAll('.btab'), n = all.length;
+  const cs = getComputedStyle(v), gap = parseFloat(cs.columnGap) || 6, w = all[0].offsetWidth || 42;
+  const fullW = tabs.clientWidth, fitAll = Math.floor((fullW + gap) / (w + gap));
+  const arrW = tabs.querySelector('.barr').offsetWidth || 30;
+  blkTabFit = n <= fitAll ? n : Math.max(1, Math.floor((fullW - 2 * (arrW + gap) + gap) / (w + gap)));
+  if (follow) blkTabStart = Math.floor(blkPage / blkTabFit) * blkTabFit;
+  blkTabStart = Math.max(0, Math.min(blkTabStart, n - 1 - (n - 1) % blkTabFit));
+  all.forEach((b, i) => { b.hidden = i < blkTabStart || i >= blkTabStart + blkTabFit; });
+  const paged = blkTabFit < n;
+  tabs.classList.toggle('paged', paged);
+  tabs.querySelector('.l').disabled = !paged || blkTabStart === 0;
+  tabs.querySelector('.r').disabled = !paged || blkTabStart + blkTabFit >= n;
+}
+addEventListener('resize', () => { if (blkView) layBlkTabs(true); });
 function setBlkPage(i) {
   blkPage = i; const P = BLK_PAGES[i];
   $('blkGrid').querySelectorAll('.slot').forEach((d, k) => {
@@ -96,6 +117,7 @@ function setBlkPage(i) {
     d._key = null;
   });
   $('blkTabs').querySelectorAll('.btab').forEach(b => b.classList.toggle('on', +b.dataset.p === i));
+  layBlkTabs(true);
   const h = document.querySelector('.invcard .ph .sub4'); if (h && blkView) h.textContent = P.name;
   hideTip(); paintBlk(true);
 }
@@ -105,6 +127,7 @@ function setBlkView(on) {
   $('btnBlk').classList.toggle('on', on);
   const h = document.querySelector('.invcard .ph .sub4'); if (h) h.textContent = on ? BLK_PAGES[blkPage].name : 'Mochila';
   $('bagCount').hidden = on;
+  if (on) layBlkTabs(true);
   refreshInv(true);
 }
 function paintBlk(force) {
