@@ -2,9 +2,11 @@
 
 /* ---- numbers for the village chest's tabs (js/27-bau.js, js/333-bau-abas.js); plain data, so the wiki loads it too ---- */
 const STASH_COLS = 10, STASH_ROWS = 6, STASH_PER = STASH_COLS * STASH_ROWS;
-const STASH_MAX_TABS = 12, STASH_NAME_MAX = 20;
-// what the next tab costs (index = tabs you already have): cheap enough to buy the 2nd early, then each one a real goal
-const STASH_PRECO = [0, 250, 750, 2000, 4500, 9000, 15000, 25000, 40000, 60000, 90000, 135000];
+const STASH_NAME_MAX = 20;
+// what the next tab costs (index = tabs you already have). No limit on tabs: from the 7th on, every tab costs the last
+// price (Jonathan, 2026-10-11: the dearest tab should be around 5 mil)
+const STASH_PRECO = [0, 250, 500, 1000, 2000, 3500, 5000];
+const stashPreco = n => STASH_PRECO[Math.min(n, STASH_PRECO.length - 1)];
 // tab colours, painted like the rest of the chest: a dark, a mid and a light step of each
 const STASH_CORES = [
   ['carvalho', '#341c0e', '#6c3e1d', '#a96a34'], ['sangue', '#3a0e0c', '#7e2218', '#c4483a'], ['brasa', '#3e1a06', '#8e4612', '#dc8a34'],

@@ -140,7 +140,7 @@ function buildStashUI() {
   root.innerHTML = `<div class="inv"><section class="panel chestp" aria-label="Baú">
     <header class="ch"><h3>Baú do vilarejo</h3><span id="stashCount"></span><button class="ghost sm push" id="btnStashBack" type="button">Fechar</button></header>
     <div class="acts"><button class="ghost sm" id="btnStashAll" type="button" title="Guarda tudo da mochila no baú, menos a fileira da barra">Guardar tudo</button><button class="ghost sm" id="btnStashStack" type="button" title="Guarda só o que o baú já tem: completa as pilhas e põe o resto do mesmo item nas casas livres. A fileira da barra fica.">Empilhar</button><button class="ghost sm" id="btnStashTake" type="button" title="Traz tudo do baú para a mochila, até ela encher">Pegar tudo</button><button class="ghost sm" id="btnStashSort" type="button" title="Junta as pilhas e arruma o baú">Organizar</button></div>
-    <nav class="abas" id="stashTabs" aria-label="Abas do baú"></nav>
+    <div class="abas-bar" id="stashTabsBar"><nav class="abas" id="stashTabs" aria-label="Abas do baú"></nav></div>
     <div class="grid" id="stashGrid"></div>
   </section></div>`;
   document.body.insertBefore(root, $('death'));
@@ -293,7 +293,7 @@ makeSave = () => { const o = _makeSave(); o.stashTabs = stashTabs.map(t => [t.na
 newWorld = (sd, sv) => {
   _newWorld(sd, sv);
   // tabs: an old save (no stashTabs, 40 slots) lands whole in tab 1
-  stashTabs = sv && Array.isArray(sv.stashTabs) && sv.stashTabs.length ? sv.stashTabs.slice(0, STASH_MAX_TABS).map((q, i) => ({ name: String((Array.isArray(q) && q[0]) || i + 1).slice(0, STASH_NAME_MAX), cor: clamp((Array.isArray(q) ? q[1] : 0) | 0, 0, STASH_CORES.length - 1) })) : [newTab(0)];
+  stashTabs = sv && Array.isArray(sv.stashTabs) && sv.stashTabs.length ? sv.stashTabs.map((q, i) => ({ name: String((Array.isArray(q) && q[0]) || i + 1).slice(0, STASH_NAME_MAX), cor: clamp((Array.isArray(q) ? q[1] : 0) | 0, 0, STASH_CORES.length - 1) })) : [newTab(0)];
   stashTab = 0; STASH_N = stashTabs.length * STASH_PER;
   stash = new Array(STASH_N).fill(null);
   if (sv && Array.isArray(sv.stash)) sv.stash.forEach((q, i) => { if (i < STASH_N && Array.isArray(q) && ITEMS[q[0]]) stash[i] = ITEMS[q[0]].slot ? mkItem(q[0], q[2] | 0, Array.isArray(q[3]) ? (sv.gear === 3 ? rerollValues(q[0], q[3], q[4]) : q[3]) : undefined, q[4]) : { id: q[0], n: clamp(q[1] | 0, 1, stackMax(q[0])) }; });
