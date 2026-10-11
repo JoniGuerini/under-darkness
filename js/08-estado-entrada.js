@@ -94,7 +94,7 @@ cvs.addEventListener('mousedown', e => {
 });
 addEventListener('mouseup', e => { if (e.button === 0) { mouse.l = false; if (mouse.ctrlR) { mouse.r = false; mouse.ctrlR = false; } } if (e.button === 2) mouse.r = false; });
 addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-addEventListener('contextmenu', e => { if (e.target === cvs) e.preventDefault(); });
+addEventListener('contextmenu', e => e.preventDefault(), true);   // o menu do navegador nunca abre, em lugar nenhum do jogo (HUD, barra, janelas)
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouse.l = mouse.r = false; });   // perder o foco não pausa: o menu só abre pelo Esc
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
 function mouseLow() { return [mouse.x * dpr / S, mouse.y * dpr / S]; }
