@@ -57,6 +57,8 @@ const UDW = { pages: {}, nav: [], rolls: new Map(), imgs: new Map() };
       variant: 1, lvl: 1, hp: 10, maxHp: 10, stun: 0, vis: 1, seed: 1, hop: 1, boss: !!D.boss, dead: false, phase: 1, atkCD: 1, rise: 0, risen: 1 };
     // a Serpente de Raiz só aparece saindo do buraco (144): um bote para a direita
     if (type === 'serpraiz') Object.assign(e, { hole: 1, mx: 110, my: 120, state: 'strike', len: 22, sdx: 1, sdy: 0, ox: 0, oy: 0 });
+    // o Olho-Cometa (246) precisa da cauda, do olhar e da pálpebra que o spawn dele põe: parado, a cauda sai para trás e para cima
+    if (type === 'olhocometa') Object.assign(e, { lx: 0, ly: 0, look: [1, 0], lid: 0.2, pup: 3, rainbow: false, hidden: false, tail: Array.from({ length: 22 }, (_, i) => [-i * 3, -i * 1.4 + Math.sin(i * 0.5) * 2]) });
     lc.clearRect(0, 0, 260, 160); drawEnemy(e, 0, 0);
     return pack2(crop(low));
   });

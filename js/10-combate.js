@@ -54,7 +54,8 @@ function trySpawn() {
   else if (zone === 3) { table = [['skeleton', 0.18], ['guard', 0.18], ['archer', 0.12], ['ghost', 0.15], ['skull', 0.15], ['lurker', 0.14], ['bat', 0.08]]; max = 10; }
   else { [table, max] = CATH_SPAWN[zone]; table = table.filter(([t]) => ET[t] && AI[t]); if (!table.length) return; }
   if (enemies.length >= max) return;
-  let r = Math.random(), type = table[0][0]; for (const [t, w] of table) { if (r < w) { type = t; break; } r -= w; }
+  // pesos inteiros ou frações: sorteia na soma (as camadas fundas usam 4, 3, 2...)
+  let r = Math.random() * table.reduce((a, q) => a + q[1], 0), type = table[0][0]; for (const [t, w] of table) { if (r < w) { type = t; break; } r -= w; }
   const D = ET[type], halfW = Math.ceil(VW / 2 / T);
   for (let a = 0; a < 24; a++) {
     const side = Math.random() < 0.5 ? -1 : 1;

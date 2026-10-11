@@ -9,6 +9,7 @@ Passo 2 do planejamento das 16 camadas (o mapa do passo 1 está em [../camadas.m
 | [07-floresta-petrificada.md](07-floresta-petrificada.md) | 7. A Floresta Petrificada |
 | [08-fortaleza-anoes.md](08-fortaleza-anoes.md) | 8. A Fortaleza dos Anões |
 | [09-colmeia.md](09-colmeia.md) | 9. A Colmeia |
+| [10-nave-caida.md](10-nave-caida.md) | 10. A Nave Caída (camada extra; as de baixo descem uma posição quando forem feitas) |
 | [10-mar-sem-sol.md](10-mar-sem-sol.md) | 10. O Mar Sem Sol |
 | [11-covil-dragao.md](11-covil-dragao.md) | 11. O Covil do Dragão |
 | [12-ossario-titas.md](12-ossario-titas.md) | 12. O Ossário dos Titãs |
@@ -34,6 +35,7 @@ Cada camada tem 186 m de altura e 4 faixas. Os números de nível seguem a curva
 | 7 | A Floresta Petrificada | 1116 a 1302 | 15 a 16 | O Cervo de Pedra (17) | Platina | 13 |
 | 8 | A Fortaleza dos Anões | 1302 a 1488 | 17 a 18 | O Autômato-Forja (19) | Mithril | 15 |
 | 9 | A Colmeia | 1488 a 1674 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
+| 10 | A Nave Caída (extra) | 1674 a 1860 | 21 a 22 | O Olho-Cometa (23) | Xenita | 19 |
 | 10 | O Mar Sem Sol | 1674 a 1860 | 21 a 22 | O Leviatã (23) | Oricalco | 19 |
 | 11 | O Covil do Dragão | 1860 a 2046 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
 | 12 | O Ossário dos Titãs | 2046 a 2232 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
@@ -91,6 +93,7 @@ Para várias camadas poderem ser feitas em paralelo sem brigar por número.
 | 7 | Floresta Petrificada | 140 a 149 | 320 a 351 | 43 a 47 | 30 a 32 | 33 a 36 | `FLORESTA`, `FP_` |
 | 8 | Fortaleza dos Anões | 150 a 159 | 352 a 383 | 48 a 52 | 33 a 35 | 37 a 40 | `ANOES`, `AN_` |
 | 9 | Colmeia | 160 a 169 | 384 a 415 | 53 a 57 | 36 a 38 | 41 a 44 | `COLMEIA`, `CM_` |
+| 10 | A Nave Caída (feita) | 240 a 249 | 640 a 671 (NT 672) | 88 a 92 | 57 a 59 | 49 a 52 | `NAVE`, `NV_` |
 | 10 | Mar Sem Sol | 170 a 179 | 416 a 447 | 58 a 62 | 39 a 41 | 45 a 48 | `MAR`, `MS_` |
 | 11 | Covil do Dragão | 180 a 189 | 448 a 479 | 63 a 67 | 42 a 44 | 49 a 52 | `DRAGAO`, `DG_` |
 | 12 | Ossário dos Titãs | 190 a 199 | 480 a 511 | 68 a 72 | 45 a 47 | 53 a 56 | `TITAS`, `TT_` |
@@ -98,7 +101,7 @@ Para várias camadas poderem ser feitas em paralelo sem brigar por número.
 | 14 | Salões do Pesadelo | 210 a 219 | 544 a 575 | 78 a 82 | 51 a 53 | 61 a 64 | `PESADELO`, `PS_` |
 | 16 | A Escuridão | 220 a 229 | 576 a 607 | 83 a 87 | 54 a 56 | 65 a 68 | `ESCURO`, `ES_` |
 
-O Abismo (15) mantém os números que já tem (`js/103` a `111`, blocos 128 a 152, zonas 21 a 24). Os ids 608 a 639 sobram para o endgame. Cada camada segue o padrão de arquivos das que já existem: API, blocos, objetos, monstros (2 arquivos), mundo, chefe, metal e save. Ninguém mexe nos arquivos de outra camada; quando precisar, embrulha a função (como o jogo já faz).
+A Nave Caída entrou fora do mapa das 16 e usa números que ninguém tinha reservado (a Escuridão já tinha pegado as zonas 45 a 48); as zonas 49 a 52 eram do Covil do Dragão na reserva, então as camadas que ainda faltam usam as próximas zonas livres (53 em diante) e o próximo bloco livre (672 em diante, subindo o NT). O Abismo (15) mantém os números que já tem (`js/103` a `111`, blocos 128 a 152, zonas 21 a 24). Os ids 608 a 639 sobram para o endgame. Cada camada segue o padrão de arquivos das que já existem: API, blocos, objetos, monstros (2 arquivos), mundo, chefe, metal e save. Ninguém mexe nos arquivos de outra camada; quando precisar, embrulha a função (como o jogo já faz).
 
 ---
 

@@ -258,6 +258,22 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-1, 1), 0.7, 3600), d = rnd(2, 3.4);
       nz(A, v, t, d, 0.045, 'bandpass', rnd(1100, 1700), 6, d * 0.45, 'white', rnd(1500, 2400));
     },
+    theremin(A, o, t) {   // a Nave Caída: um uivo de teremim longe, uma nota só que sobe e desce devagar (sem melodia)
+      const v = voice(A, o, rnd(-1, 1), 0.9, 2400), d = rnd(2.4, 3.6), f = rnd(420, 640);
+      osc(A, v, t, 'sine', f, f * rnd(1.3, 1.6), d * 0.55, 0.028, d * 0.3); osc(A, v, t + d * 0.45, 'sine', f * 1.45, f * rnd(0.8, 1), d * 0.55, 0.024, d * 0.15);
+    },
+    neonBuzz(A, o, t) {   // um tubo de neon piscando: o zumbido da rede, 3 a 6 estalinhos
+      const v = voice(A, o, rnd(-0.6, 0.6), 0.2, 3000), n = 3 + ((Math.random() * 4) | 0);
+      for (let k = 0; k < n; k++) osc(A, v, t + k * rnd(0.05, 0.14), 'sawtooth', 120, 120, rnd(0.03, 0.08), 0.014);
+    },
+    beep(A, o, t) {   // um painel ainda ligado: dois ou três bipes agudos e curtos
+      const v = voice(A, o, rnd(-1, 1), 0.4, 6000), f = [880, 1320, 1760][(Math.random() * 3) | 0], n = 2 + ((Math.random() * 2) | 0);
+      for (let k = 0; k < n; k++) osc(A, v, t + k * 0.16, 'square', f * (k & 1 ? 1.5 : 1), f * (k & 1 ? 1.5 : 1), 0.06, 0.008);
+    },
+    hiss(A, o, t) {   // um cano rachado soltando vapor
+      const v = voice(A, o, rnd(-1, 1), 0.5, 7000), d = rnd(0.8, 1.6);
+      nz(A, v, t, d, 0.03, 'highpass', 2600, 0.7, 0.05);
+    },
     roar(A, o, t) {   // longe, alguma coisa grande ruge
       const v = voice(A, o, rnd(-1, 1), 0.9, 600), d = rnd(1.4, 2.4), f = rnd(48, 70);
       osc(A, v, t, 'sawtooth', f, f * 0.7, d, 0.1, d * 0.3); nz(A, v, t, d, 0.1, 'lowpass', 260, 1, d * 0.3, 'brown', 160);
@@ -331,6 +347,12 @@ const AMBI = (function () {
       ev: [[0.08, 'longDrip', c => c.calma], [0.06, 'breath', c => c.mov * c.calma], [0.05, 'pitStone', c => c.band === 1 ? c.calma : 0], [0.08, 'fibers', c => c.band === 2 ? c.calma : 0],
         [0.07, 'hum', c => c.band === 3 && !c.fogo ? c.calma : 0], [0.06, 'coldWind', c => c.band === 0 ? c.calma : 0], [6, 'pop', c => c.fogo ? 1 : 0], [0.012, 'groan', c => c.calma]]
     },
+    nave: {   // a nave caída: o reator zumbindo grave sem parar, ar que circula num duto, o neon chiando; eco de metal
+      rt: 2.2, damp: 0.6, wet: 0.45,
+      beds: [['brown', 'bandpass', 55, 75, 6, 0.22, 0.34, 2.5, c => c.band === 3 ? 1.5 : c.band === 0 ? 0.5 : 1], ['pink', 'bandpass', 380, 520, 2, 0.02, 0.07, 3, c => c.band === 1 || c.band === 2 ? 1.2 : 0.5]],
+      ev: [[0.1, 'neonBuzz', c => c.band === 0 ? 0.4 : 1.2], [0.07, 'beep', c => c.band === 2 ? 1.6 : 0.7], [0.04, 'hiss', c => c.band === 1 ? 1.4 : 0.6], [0.035, 'theremin', c => c.band === 3 ? 1.2 : 0.6],
+        [0.06, 'plop', c => c.band === 0 || c.band === 2 ? 1 : 0.2], [0.04, 'creakIce', c => c.band === 0 ? 1.2 : 0.4], [0.05, 'drip', c => c.band === 0 ? 1 : 0.3, true], [0.03, 'door', c => c.band === 1 ? 1 : 0.3]]
+    },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
@@ -395,7 +417,7 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
       c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some
