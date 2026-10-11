@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.24.0';
+const VERSAO = '0.25.0';
 const NOVIDADES = [
+  { v: '0.25.0', data: '11/10/2026', titulo: 'O Reino Élfico', itens: [
+    'O Reino Élfico: nova camada 11 entre a Nave e o Abismo.'
+  ] },
   { v: '0.24.0', data: '11/10/2026', titulo: 'A Nave Caída', itens: [
     'Camada 10, A Nave Caída (1674 a 1860 m): uma nave alienígena em neon enterrada debaixo da Colmeia, com visitantes, discos abdutores, hipnose e gosma, o chefe O Olho-Cometa no Planetário e o metal xenita.',
     'O Abismo desceu para 1860 a 2046 m.'

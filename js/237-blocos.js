@@ -65,7 +65,7 @@ function blkSweep() {
 const BLK_BIOMES = [   // [nome, primeiro número de bloco, último]
   ['Superfície', 0, 29], ['Cavernas', 54, 73], ['Catedral', 30, 53], ['Gelo', 74, 93], ['Mina', 94, 127],
   ['Minas Fúngicas', 256, 287], ['Cidade Afundada', 288, 319], ['Floresta Petrificada', 320, 351],
-  ['Fortaleza dos Anões', 352, 383], ['Colmeia', 384, 575], ['Nave Caída', 640, 703], ['Abismo', 128, 255],
+  ['Fortaleza dos Anões', 352, 383], ['Colmeia', 384, 575], ['Nave Caída', 640, 671], ['Reino Élfico', 672, 703], ['Abismo', 128, 255],
   ['Escuridão', 576, 639], ['Outros', 704, 1e9]
 ];
 const BLK_PAGES = BLK_BIOMES.map(([name, a, b]) => ({ name, ids: BLK_IDS.filter(id => ITEMS[id].block >= a && ITEMS[id].block <= b) }))

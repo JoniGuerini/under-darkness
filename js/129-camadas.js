@@ -20,6 +20,7 @@ const LAYERS = [
   { id: 'anoes', nome: 'A Fortaleza dos Anões' },
   { id: 'colmeia', nome: 'A Colmeia' },
   { id: 'nave', nome: 'A Nave Caída' },   // a nave dos Visitantes (2026-10-11), pedida pelo Jonathan fora do mapa das 16
+  { id: 'elfos', nome: 'O Reino Élfico' },   // os elfos da lua (2026-10-11), pedidos pelo Jonathan: Senhor dos Anéis e Warcraft
   { id: 'abismo', nome: 'O Abismo' },
   { id: 'escuro', nome: 'A Escuridão' }   // o fundo do mundo: fica sempre logo abaixo do Abismo (Jonathan, 2026-10-10)
 ];

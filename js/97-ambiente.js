@@ -353,6 +353,12 @@ const AMBI = (function () {
       ev: [[0.1, 'neonBuzz', c => c.band === 0 ? 0.4 : 1.2], [0.07, 'beep', c => c.band === 2 ? 1.6 : 0.7], [0.04, 'hiss', c => c.band === 1 ? 1.4 : 0.6], [0.035, 'theremin', c => c.band === 3 ? 1.2 : 0.6],
         [0.06, 'plop', c => c.band === 0 || c.band === 2 ? 1 : 0.2], [0.04, 'creakIce', c => c.band === 0 ? 1.2 : 0.4], [0.05, 'drip', c => c.band === 0 ? 1 : 0.3, true], [0.03, 'door', c => c.band === 1 ? 1 : 0.3]]
     },
+    elfos: {   // o Reino: vento leve nas folhas de prata, eco longo e claro nos salões, cristal tilintando; na Corte, sussurros; no Poço, gotas na água
+      rt: 4.2, damp: 0.3, wet: 0.55,
+      beds: [['pink', 'bandpass', 900, 2200, 1.2, 0.0, 0.06, 2.2, c => c.band === 0 ? 1.3 : 0.5], ['brown', 'lowpass', 50, 90, 0.7, 0.2, 0.32, 4.5], ['pink', 'bandpass', 220, 360, 2, 0.02, 0.07, 4, c => c.band === 1 || c.band === 2 ? 1.2 : 0.4]],
+      ev: [[0.1, 'tinkle', c => c.band === 3 ? 1.6 : c.band === 0 ? 1 : 0.5], [0.06, 'creakWood', c => c.band === 0 ? 1.4 : c.band === 2 ? 0.8 : 0.2], [0.1, 'chant', c => c.band === 1 ? 0.7 : 0], [0.07, 'whisper', c => c.band === 2 ? 1.5 : 0.2],
+        [0.15, 'drip', c => c.band === 3 ? 1.6 : 0.4, true], [0.006, 'bell', c => c.band === 1 ? 1 : 0.2], [0.02, 'groan', c => c.band === 2 ? 1 : 0.2]]
+    },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
@@ -417,7 +423,7 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave')) { }
+      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave') || in4(typeof EL_ZONE0 !== 'undefined' && typeof ELFOS !== 'undefined' ? EL_ZONE0 : null, 'elfos')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
       c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some

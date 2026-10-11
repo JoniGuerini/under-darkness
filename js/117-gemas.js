@@ -123,6 +123,7 @@ const GEM_LAYERS = [
   typeof ANOES !== 'undefined' && { pos: layerPos('anoes'), ok: t => t === AN_GRANITO || t === AN_ENTULHO, pal: 'anGranito', host: AN_GRANITO, soils: AN_SOILS },
   typeof COLMEIA !== 'undefined' && { pos: layerPos('colmeia'), ok: t => t === CM_CERA || t === CM_RESINA, pal: 'cmCera', host: CM_CERA, soils: CM_SOILS },
   typeof NAVE !== 'undefined' && { pos: layerPos('nave'), ok: t => t === NV_VIDRO_IMPACTO || t === NV_ESCORIA, pal: 'nvVidroImp', host: NV_VIDRO_IMPACTO, soils: NV_SOILS },
+  typeof ELFOS !== 'undefined' && { pos: layerPos('elfos'), ok: t => t === EL_MARMORE || t === EL_PEDRA_POCO, pal: 'elMarmore', host: EL_MARMORE, soils: EL_SOILS },
   { pos: layerPos('abismo'), ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI },
   typeof ESCURO !== 'undefined' && { pos: layerPos('escuro'), ok: t => t === ES_BREU || t === ES_PRIMEVA, pal: 'esBreu', host: ES_BREU, soils: ES_SOILS }
 ].filter(Boolean);   // a camada que não foi carregada (a wiki carrega só parte do jogo) fica de fora
