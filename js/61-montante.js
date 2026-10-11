@@ -35,21 +35,23 @@ const GS_ROWS = [
   "..pPq..",
   "...q..."
 ];
-// the same sword cut down to the 13 rows an inventory icon has
+// the inventory icon: painted straight on the 45° diagonal and filling the whole 13 px tile, corner to corner (point
+// top right, pommel bottom left), so it reads bigger than the one-handed sword: a broad blade, a crossguard that
+// droops at the tips and a long two-hand grip
 const GS_ICON = [
-  "...w...",
-  "..wWl..",
-  "..wWl..",
-  "..wFl..",
-  "..wFl..",
-  "..wFl..",
-  ".kwWlk.",
-  "gGGGGGd",
-  "G..h..d",
-  "...H...",
-  "...h...",
-  "..pPq..",
-  "...q..."
+  "...........wl",
+  ".........wWWl",
+  "........wWFl.",
+  ".......wWFl..",
+  "..dg..wWFl...",
+  "...GgwWWl....",
+  "....GgWl.....",
+  "....HGg......",
+  "...hHhGg.....",
+  "..hHH..Gg....",
+  ".phH....d....",
+  "pPq..........",
+  ".q..........."
 ];
 const GS_MAT = { w: ['W', 5], W: ['W', 3], F: ['W', 1], l: ['l', 2], k: ['g', 4], g: ['g', 4], G: ['g', 3], d: ['G', 2], h: ['h', 3], H: ['h', 1], p: ['p', 5], P: ['p', 3], q: ['p', 1] };
 function gsPaint(rows, pal) {
@@ -104,15 +106,13 @@ SHOP_GEAR[3].push('montante_ouro', 'montante_cristal');
     return Object.assign({}, b, { min, max: Math.max(min + 1, Math.round(b.max * k)) });
   };
 }
-// shaded sprite in the hand; the short version for the icon
+// shaded sprite in the hand; the diagonal one for the icon
 {
   const _weaponFor = weaponFor, _makeIcon = makeIcon;
   weaponFor = function (id) { return isTwoHand(id) ? cached('w:' + id, () => gsPaint(GS_ROWS, ITEMS[id].pal)) : _weaponFor(id); };
   makeIcon = function (id) {
     if (!isTwoHand(id)) return _makeIcon(id);
-    const img = cached('gi:' + id, () => gsPaint(GS_ICON, ITEMS[id].pal)), c = mk(13, 13), x = c.getContext('2d'); x.imageSmoothingEnabled = false;
-    x.save(); x.translate(6.5, 6.5); x.rotate(Math.PI / 4); x.drawImage(img, -img.width / 2, -img.height / 2); x.restore();
-    const o = outlined(c); let url = ''; try { url = o.toDataURL(); } catch (e) { }
+    const o = outlined(gsPaint(GS_ICON, ITEMS[id].pal)); let url = ''; try { url = o.toDataURL(); } catch (e) { }
     return { cv: o, url };
   };
 }

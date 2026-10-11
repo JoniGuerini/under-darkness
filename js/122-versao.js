@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.25.3';
+const VERSAO = '0.25.4';
 const NOVIDADES = [
+  { v: '0.25.4', data: '11/10/2026', titulo: 'Ícones dos montantes', itens: [
+    'Ícones novos para todos os montantes, incluindo o Montante do Eclipse.'
+  ] },
   { v: '0.25.3', data: '11/10/2026', titulo: 'Botão direito', itens: [
     'O botão direito não abre mais o menu do navegador em nenhum lugar do jogo, nem na barra de ações, no HUD ou nas janelas.'
   ] },

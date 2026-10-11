@@ -42,20 +42,22 @@ const ECL_ROWS = [
   "..pPp..",
   "...p..."
 ];
+// the icon is drawn straight on the diagonal and fills the whole tile, like the other montantes (61): a, b the
+// obsidian, S the stars, c the corona on the edges and on top of the guard
 const ECL_ICON = [
-  "...c...",
-  "..cBc..",
-  "..cSc..",
-  ".cBBBc.",
-  ".cBSBc.",
-  ".cBBBc.",
-  "ccDDDcc",
-  "cDdDDDc",
-  "cDDDDDc",
-  "mcDDDcm",
-  "M..H..M",
-  "..pPp..",
-  "...p..."
+  "...........cc",
+  ".........cabc",
+  "........caSc.",
+  ".......cabc..",
+  "..mc..caSc...",
+  "...dcabbc....",
+  "....dcbc.....",
+  "....Hdc......",
+  "...hHhdc.....",
+  "..hHH..dc....",
+  ".phH....m....",
+  "pPp..........",
+  ".p..........."
 ];
 const ECL_COL = {
   B: ['#2a1e3c', '#1c1228', '#110a18'], sheen: '#4a3670',
@@ -64,7 +66,7 @@ const ECL_COL = {
   D: '#040208', d: '#2a2238', m: '#e0b048', M: '#8a6220', h: '#4a2a62', H: '#2a163c', p: '#c89a3a', P: '#fff0b0'
 };
 // the icon sits on a dark slot: the same blade, the obsidian a few steps lighter
-const ECL_COL_ICON = Object.assign({}, ECL_COL, { B: ['#54426e', '#3a2c52', '#241834'], D: '#0c0814', d: '#463a5c' });
+const ECL_COL_ICON = Object.assign({}, ECL_COL, { B: ['#54426e', '#3a2c52', '#241834'], a: '#54426e', b: '#3a2c52', D: '#0c0814', d: '#463a5c' });
 // paints one frame on `x` and, when given, only the lit pixels on `ex` (the layer drawn over the dark).
 // t: seconds, for the shimmer; boost 0..1: the Penumbra lights it up
 function eclPaint(rows, x, ex, t, boost, C = ECL_COL) {
@@ -121,9 +123,7 @@ ITEM_G[ECL_ID] = 0;
   makeIcon = function (id) {
     if (id !== ECL_ID) return _makeIcon(id);
     const img = mk(ECL_ICON[0].length, ECL_ICON.length); eclPaint(ECL_ICON, img.getContext('2d'), null, 0.6, 0.4, ECL_COL_ICON);
-    const c = mk(13, 13), x = c.getContext('2d'); x.imageSmoothingEnabled = false;
-    x.save(); x.translate(6.5, 6.5); x.rotate(Math.PI / 4); x.drawImage(img, -img.width / 2, -img.height / 2); x.restore();
-    const o = outlined(c); let url = ''; try { url = o.toDataURL(); } catch (e) { }
+    const o = outlined(img); let url = ''; try { url = o.toDataURL(); } catch (e) { }
     return { cv: o, url };
   };
 }
