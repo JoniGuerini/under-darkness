@@ -38,7 +38,7 @@ Cada camada tem 186 m de altura e 4 faixas. Os números de nível seguem a curva
 | 9 | A Colmeia | 1488 a 1674 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
 | 10 | A Nave Caída (extra) | 1674 a 1860 | 21 a 22 | O Olho-Cometa (23) | Xenita | 19 |
 | 11 | O Reino Élfico (extra) | 1860 a 2046 | 23 a 24 | A Dama do Espelho (25) | Lunarita | 21 |
-| 10 | O Mar Sem Sol | 1674 a 1860 | 21 a 22 | O Leviatã (23) | Oricalco | 19 |
+| 12 | O Mar Sem Sol (feito) | 2046 a 2232 | 25 a 26 | O Leviatã (27) | Oricalco | 23 |
 | 11 | O Covil do Dragão | 1860 a 2046 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
 | 12 | O Ossário dos Titãs | 2046 a 2232 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
 | 13 | A Cidade dos Antigos | 2232 a 2418 | 27 a 28 | O Arquiteto (29) | Ferro Estelar | 25 |
@@ -97,7 +97,7 @@ Para várias camadas poderem ser feitas em paralelo sem brigar por número.
 | 9 | Colmeia | 160 a 169 | 384 a 415 | 53 a 57 | 36 a 38 | 41 a 44 | `COLMEIA`, `CM_` |
 | 10 | A Nave Caída (feita) | 240 a 249 | 640 a 671 (NT 672) | 88 a 92 | 57 a 59 | 49 a 52 | `NAVE`, `NV_` |
 | 11 | O Reino Élfico (feito) | 250 a 259 | 672 a 703 (NT 704) | 93 a 97 | 60 a 62 | 53 a 56 | `ELFOS`, `EL_` |
-| 10 | Mar Sem Sol | 170 a 179 | 416 a 447 | 58 a 62 | 39 a 41 | 45 a 48 | `MAR`, `MS_` |
+| 12 | O Mar Sem Sol (feito) | 260 a 269 | 704 a 735 (NT 736) | 98 a 102 | 63 a 65 | 57 a 60 | `MAR`, `MS_` |
 | 11 | Covil do Dragão | 180 a 189 | 448 a 479 | 63 a 67 | 42 a 44 | 49 a 52 | `DRAGAO`, `DG_` |
 | 12 | Ossário dos Titãs | 190 a 199 | 480 a 511 | 68 a 72 | 45 a 47 | 53 a 56 | `TITAS`, `TT_` |
 | 13 | Cidade dos Antigos | 200 a 209 | 512 a 543 | 73 a 77 | 48 a 50 | 57 a 60 | `ANTIGOS`, `AT_` |

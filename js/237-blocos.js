@@ -65,11 +65,13 @@ function blkSweep() {
 const BLK_BIOMES = [   // [nome, primeiro número de bloco, último]
   ['Superfície', 0, 29], ['Cavernas', 54, 73], ['Catedral', 30, 53], ['Gelo', 74, 93], ['Mina', 94, 127],
   ['Minas Fúngicas', 256, 287], ['Cidade Afundada', 288, 319], ['Floresta Petrificada', 320, 351],
-  ['Fortaleza dos Anões', 352, 383], ['Colmeia', 384, 575], ['Nave Caída', 640, 671], ['Reino Élfico', 672, 703], ['Abismo', 128, 255],
-  ['Escuridão', 576, 639], ['Outros', 704, 1e9]
+  ['Fortaleza dos Anões', 352, 383], ['Colmeia', 384, 575], ['Nave Caída', 640, 671], ['Reino Élfico', 672, 703], ['Mar Sem Sol', 704, 735], ['Covil do Dragão', 736, 767], ['Cidade dos Antigos', 800, 831], ['Salões do Pesadelo', 832, 863], ['Ossário dos Titãs', 768, 799], ['Abismo', 128, 255],
+  ['Escuridão', 576, 639], ['Outros', 832, 1e9]
 ];
 const BLK_PAGES = BLK_BIOMES.map(([name, a, b]) => ({ name, ids: BLK_IDS.filter(id => ITEMS[id].block >= a && ITEMS[id].block <= b) }))
   .filter(P => P.ids.length);
+// 'Outros' só fica com o que nenhuma camada pegou (as faixas novas, 704 em diante, caem dentro dele)
+{ const O = BLK_PAGES.find(P => P.name === 'Outros'); if (O) { const got = new Set(BLK_PAGES.filter(P => P !== O).flatMap(P => P.ids)); O.ids = O.ids.filter(id => !got.has(id)); if (!O.ids.length) BLK_PAGES.splice(BLK_PAGES.indexOf(O), 1); } }
 { const t = BLK_PAGES[0].ids, k = t.indexOf('terra'); if (k > 0) t.unshift(t.splice(k, 1)[0]); }   // terra é a primeira casa
 // a plataforma (239) usa um número da faixa da mina, mas é feita de madeira: fica na Superfície, logo depois da madeira
 if (ITEMS.plataforma) { for (const P of BLK_PAGES) { const k = P.ids.indexOf('plataforma'); if (k >= 0) P.ids.splice(k, 1); } const t = BLK_PAGES[0].ids; t.splice(t.indexOf('madeira') + 1, 0, 'plataforma'); }

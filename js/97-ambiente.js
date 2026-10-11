@@ -201,6 +201,26 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-1, 1), 0.7, 1500), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.45, 0.65);
       for (let i = 0; i < n; i++) nz(A, v, t + i * sp, 0.09, 0.05, 'lowpass', rnd(500, 800), 1, 0.005, 'pink', 260);
     },
+    tiqueTaque(A, o, t) {   // os Salões do Pesadelo: um tique-taque que vai ficando mais lento até parar
+      const v = voice(A, o, rnd(-0.8, 0.8), 0.5, 2000), n = 6 + Math.floor(rnd(0, 5)); let tt = t, sp = rnd(0.45, 0.55);
+      for (let i = 0; i < n; i++) { nz(A, v, tt, 0.02, 0.05, 'bandpass', i % 2 ? 1900 : 2500, 6, 0.001); osc(A, v, tt, 'sine', i % 2 ? 1200 : 1500, 900, 0.03, 0.012, 0.001); tt += sp; sp *= rnd(1.12, 1.22); }
+    },
+    notaCaixinha(A, o, t) {   // uma nota solta de caixinha de música, sempre a mesma (mi), meio desafinada
+      const v = voice(A, o, rnd(-0.6, 0.6), 0.8, 0), f = 1318 * rnd(0.985, 1.0);
+      osc(A, v, t, 'sine', f, f, 2.4, 0.03, 0.002); osc(A, v, t, 'sine', f * 2.01, f * 2.01, 0.9, 0.009, 0.002); osc(A, v, t, 'triangle', f * 3.02, f * 3.02, 0.25, 0.004, 0.001);
+    },
+    passosParam(A, o, t) {   // passos de chinelo atrás, que param quando o herói para (c.mov)
+      const v = voice(A, o, rnd(-1, 1), 0.5, 1400), n = 3 + Math.floor(rnd(0, 4)), sp = rnd(0.42, 0.55);
+      for (let i = 0; i < n; i++) nz(A, v, t + i * sp, 0.09, 0.045, 'lowpass', rnd(500, 700), 1, 0.01, 'pink');
+    },
+    aoContrario(A, o, t) {   // um som tocado ao contrário: cresce devagar e corta seco
+      const v = voice(A, o, rnd(-1, 1), 0.7, 900), d = rnd(1.2, 2);
+      nz(A, v, t, d, 0.07, 'bandpass', rnd(500, 900), 1.5, d * 0.97, 'pink', rnd(300, 500));
+    },
+    soninho(A, o, t) {   // uma criança respirando, dormindo (perto dos Adormecidos)
+      const v = voice(A, o, rnd(-0.5, 0.5), 0.3, 0), d = rnd(1.3, 1.7);
+      nz(A, v, t, d, 0.03, 'bandpass', 1300, 1.5, d * 0.5, 'pink', 900); nz(A, v, t + d * 1.1, d * 1.2, 0.022, 'bandpass', 1000, 1.5, d * 0.25, 'pink', 700);
+    },
     door(A, o, t) {   // uma porta batendo longe, numa rua da Cidade Afundada
       const v = voice(A, o, rnd(-1, 1), 0.9, 1800); nz(A, v, t, 0.18, 0.16, 'lowpass', 420, 1, 0.003, 'brown'); osc(A, v, t, 'triangle', rnd(70, 95), 50, 0.25, 0.07, 0.003);
       if (Math.random() < 0.5) nz(A, v, t + rnd(0.15, 0.3), 0.1, 0.06, 'lowpass', 380, 1, 0.003, 'brown');
@@ -250,6 +270,19 @@ const AMBI = (function () {
       const v = voice(A, o, rnd(-1, 1), 0.6, 1600), d = rnd(0.8, 1.6), f = rnd(140, 220);
       osc(A, v, t, 'sawtooth', f, f * rnd(1.1, 1.4), d, 0.018, d * 0.5); nz(A, v, t, d, 0.025, 'bandpass', rnd(600, 1100), 6, d * 0.4, 'pink');
     },
+    mecClick(A, o, t) {   // a Cidade dos Antigos: um mecanismo longe, dois cliques secos no mesmo intervalo
+      const v = voice(A, o, rnd(-1, 1), 0.8, 2600);
+      for (let i = 0; i < 2; i++) { nz(A, v, t + i * 0.5, 0.025, 0.12, 'bandpass', 3200, 6, 0.001); osc(A, v, t + i * 0.5, 'square', 1400, 1300, 0.02, 0.012, 0.001); }
+    },
+    stoneSlide(A, o, t) {   // pedra lisa deslizando sobre pedra
+      const v = voice(A, o, rnd(-1, 1), 0.85, 1500), d = rnd(1.2, 2.2); nz(A, v, t, d, 0.07, 'bandpass', 260, 3, d * 0.3, 'brown', 180);
+    },
+    ping(A, o, t) {   // um cristal esfriando
+      const v = voice(A, o, rnd(-1, 1), 0.7, 0), f = rnd(2600, 4200); osc(A, v, t, 'sine', f, f, rnd(1.2, 2), 0.02, 0.002);
+    },
+    piston(A, o, t) {   // As Máquinas: um pistão grave
+      const v = voice(A, o, rnd(-0.6, 0.6), 0.6, 600); osc(A, v, t, 'sine', 62, 44, 0.5, 0.12, 0.01); nz(A, v, t, 0.3, 0.05, 'lowpass', 300, 1, 0.01, 'brown');
+    },
     hum(A, o, t) {   // um tom grave quase inaudível que para quando um braseiro acende perto (O Fundo do Mundo)
       const v = voice(A, o, 0, 0.8, 300), d = rnd(4, 6);
       osc(A, v, t, 'sine', 38, 37, d, 0.09, d * 0.4); osc(A, v, t, 'sine', 57, 56, d, 0.03, d * 0.4);
@@ -273,6 +306,22 @@ const AMBI = (function () {
     hiss(A, o, t) {   // um cano rachado soltando vapor
       const v = voice(A, o, rnd(-1, 1), 0.5, 7000), d = rnd(0.8, 1.6);
       nz(A, v, t, d, 0.03, 'highpass', 2600, 0.7, 0.05);
+    },
+    sand(A, o, t) {   // o Ossário: um fio de pó escorrendo de um osso, perto
+      const v = voice(A, o, rnd(-0.8, 0.8), 0.2, 0), d = rnd(1.2, 2.6);
+      nz(A, v, t, d, 0.05, 'bandpass', rnd(3500, 6000), 1.5, d * 0.4, 'white', rnd(2500, 4000));
+    },
+    hyena(A, o, t) {   // uma hiena rindo longe: 4 a 7 guinchos curtos que sobem e descem
+      const v = voice(A, o, rnd(-1, 1), 0.6, 1800), n = 4 + Math.floor(rnd(0, 4)), b = A.createBiquadFilter(); b.type = 'bandpass'; b.frequency.value = 1100; b.Q.value = 3; b.connect(v);
+      for (let i = 0; i < n; i++) { const f = rnd(520, 760) * (1 + 0.15 * Math.sin(i)); osc(A, b, t + i * rnd(0.11, 0.15), 'sawtooth', f, f * 1.35, 0.1, 0.05, 0.01); }
+    },
+    titanBeat(A, o, t) {   // o Último Titã: um batimento só, muito grave e lento (tum... tum)
+      const v = voice(A, o, 0, 0.5, 160);
+      osc(A, v, t, 'sine', 42, 30, 0.42, 0.2, 0.03); osc(A, v, t + 0.55, 'sine', 38, 28, 0.36, 0.13, 0.03); nz(A, v, t, 0.4, 0.06, 'lowpass', 90, 1, 0.03, 'brown');
+    },
+    whale(A, o, t) {   // o Mar: um canto de baleia grave, longe, que desliza e some
+      const v = voice(A, o, rnd(-1, 1), 1.2, 900), d = rnd(2.2, 3.6), f = rnd(70, 120);
+      osc(A, v, t, 'sine', f, f * rnd(1.4, 1.9), d, 0.045, d * 0.4); osc(A, v, t + d * 0.7, 'sine', f * 1.6, f * 0.9, d * 0.8, 0.025, d * 0.3);
     },
     roar(A, o, t) {   // longe, alguma coisa grande ruge
       const v = voice(A, o, rnd(-1, 1), 0.9, 600), d = rnd(1.4, 2.4), f = rnd(48, 70);
@@ -359,6 +408,37 @@ const AMBI = (function () {
       ev: [[0.1, 'tinkle', c => c.band === 3 ? 1.6 : c.band === 0 ? 1 : 0.5], [0.06, 'creakWood', c => c.band === 0 ? 1.4 : c.band === 2 ? 0.8 : 0.2], [0.1, 'chant', c => c.band === 1 ? 0.7 : 0], [0.07, 'whisper', c => c.band === 2 ? 1.5 : 0.2],
         [0.15, 'drip', c => c.band === 3 ? 1.6 : 0.4, true], [0.006, 'bell', c => c.band === 1 ? 1 : 0.2], [0.02, 'groan', c => c.band === 2 ? 1 : 0.2]]
     },
+    pesadelo: {   // os Salões do Pesadelo: ruído rosa abafado, de debaixo do cobertor, subindo e descendo como respiração (8 s); eco curto de quarto com cortina;
+      // na Galeria, vidro rangendo; perto das Portas Quentes, o ronco do Abismo lá embaixo (c.quente); nos Quartos, perto de um Adormecido, uma criança dormindo (c.sono)
+      rt: 1.1, damp: 0.8, wet: 0.35,
+      beds: [['pink', 'lowpass', 260, 480, 0.7, 0.04, 0.16, 4], ['brown', 'lowpass', 50, 80, 0.7, 0.1, 0.28, 4, c => c.quente]],
+      ev: [[0.03, 'door', c => c.band === 1 ? 1.4 : 0.8], [0.05, 'passosParam', c => c.mov], [0.035, 'tiqueTaque', c => c.band === 1 ? 1.3 : 0.7], [0.03, 'notaCaixinha'],
+        [0.025, 'aoContrario'], [0.12, 'soninho', c => c.sono], [0.05, 'creakIce', c => c.band === 3 ? 1.2 : 0], [0.04, 'roar', c => c.quente * 0.8], [0.03, 'whisper', c => c.band === 3 ? 1 : 0.2]]
+    },
+    antigos: {   // a Cidade dos Antigos: grave quase parado, um zumbido fino de lâmpada, cliques exatos, eco longo e limpo
+      rt: 4, damp: 0.15, wet: 0.6,
+      beds: [['brown', 'lowpass', 40, 70, 0.7, 0.2, 0.3, 6], ['white', 'bandpass', 3900, 4100, 30, 0.006, 0.012, 8]],
+      ev: [[0.33, 'mecClick'], [0.05, 'stoneSlide', c => c.band === 3 ? 0.3 : 1], [0.06, 'ping', c => c.band === 3 ? 2 : 0.6], [0.33, 'piston', c => c.band === 2 ? 1 : 0], [0.04, 'crack', c => c.band === 3 ? 1 : 0], [0.02, 'hum', c => c.band === 3 ? 1 : 0]]
+    },
+    dragao: {   // o Covil: o ronco grave do magma, o vapor chiando nas chaminés, kobolds raspando ao longe; no Leito, a respiração enorme de quem dorme
+      rt: 3.0, damp: 0.55, wet: 0.45,
+      beds: [['brown', 'lowpass', 45, 80, 0.7, 0.3, 0.46, 3.5, c => c.band === 2 ? 1.4 : 1], ['pink', 'bandpass', 600, 1400, 1.2, 0.0, 0.06, 1.6, c => c.band === 0 ? 1.5 : 0.4]],
+      ev: [[0.12, 'hiss', c => c.band === 0 ? 1.6 : 0.4], [0.2, 'bubble', c => c.band === 2 ? 1.4 : 0.4], [0.05, 'pop', c => c.band === 2 ? 1 : 0.3], [0.04, 'creakWood', c => c.band === 1 ? 1.4 : 0.2],
+        [0.04, 'whisper', c => c.band === 1 ? 0.8 : 0], [0.05, 'groan', c => c.band === 3 ? 1.4 : 0.2], [0.012, 'roar', c => c.band === 3 ? 1 : 0.2], [0.06, 'drip', c => c.band === 0 ? 1 : 0.1, true]]
+    },
+    titas: {   // o Ossário: vento seco e largo, o assobio dos ossos ocos (o tom muda ao acaso), osso velho rangendo longe,
+      // pó escorrendo perto, abutre e hiena raros; perto do Leito, o batimento do Último Titã a cada 12 s, até ele morrer
+      rt: 4.6, damp: 0.35, wet: 0.55,
+      beds: [['pink', 'bandpass', 160, 520, 0.9, 0.06, 0.16, 4.5, c => c.band === 1 ? 1.4 : 1], ['brown', 'lowpass', 45, 80, 0.7, 0.1, 0.18, 5]],
+      ev: [[0.06, 'whistle', c => c.band === 1 ? 1.4 : 0.8], [0.05, 'creakIce', c => c.band >= 2 ? 1.2 : 0.7], [0.07, 'sand'], [0.012, 'crow', c => c.band <= 1 ? 1 : 0.3], [0.01, 'hyena', c => c.band === 0 || c.band === 2 ? 1 : 0.3],
+        [1 / 12, 'titanBeat', c => c.tita || 0]]
+    },
+    mar: {   // o Mar Sem Sol: ondas lentas, eco longo e aberto; madeira de navio rangendo, sino de boia, gotas grandes, baleia; debaixo da água, pressão e bolhas
+      rt: 4, damp: 0.25, wet: 0.6,
+      beds: [['pink', 'lowpass', 260, 620, 0.6, 0.04, 0.3, 10, c => c.sub ? 0.25 : c.band === 2 ? 0.3 : 1], ['brown', 'lowpass', 38, 70, 1, 0.08, 0.3, 6, c => c.sub ? 1.6 : c.band === 2 ? 1.2 : 0.3], ['pink', 'bandpass', 180, 320, 2, 0.02, 0.08, 3, c => c.band === 3 ? 1.5 : 0.3]],
+      ev: [[0.06, 'creakWood', c => c.sub ? 0.1 : c.band <= 1 ? 1.2 : 0.2], [0.008, 'bell', c => c.sub ? 0 : c.band === 0 ? 1 : 0.2], [0.12, 'drip', c => c.sub ? 0 : c.band === 0 ? 1.4 : 0.5, true],
+        [0.025, 'whale', c => c.band === 2 ? 1.8 : c.sub ? 1.2 : 0.5], [0.3, 'bubble', c => c.sub ? 1 : c.band === 3 ? 0.8 : 0], [0.06, 'hiss', c => c.band === 3 ? 1.4 : 0], [0.04, 'plop', c => c.sub ? 0.1 : c.band <= 1 ? 1 : 0.3]]
+    },
     abismo: {
       rt: 3.4, damp: 0.5, wet: 0.45,
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
@@ -423,13 +503,21 @@ if (typeof document !== 'undefined') (function () {
       if (z === 0) c.name = 'vila';
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
-      else if (in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave') || in4(typeof EL_ZONE0 !== 'undefined' && typeof ELFOS !== 'undefined' ? EL_ZONE0 : null, 'elfos')) { }
+      else if (in4(typeof PS_ZONE0 !== 'undefined' ? PS_ZONE0 : null, 'pesadelo') || in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave') || in4(typeof EL_ZONE0 !== 'undefined' && typeof ELFOS !== 'undefined' ? EL_ZONE0 : null, 'elfos') || in4(typeof MS_ZONE0 !== 'undefined' && typeof MAR !== 'undefined' && MAR ? MS_ZONE0 : null, 'mar') || in4(typeof DG_ZONE0 !== 'undefined' && typeof DRAGAO !== 'undefined' ? DG_ZONE0 : null, 'dragao') || in4(typeof AT_ZONE0 !== 'undefined' && typeof ANTIGOS !== 'undefined' ? AT_ZONE0 : null, 'antigos') || in4(typeof TT_ZONE0 !== 'undefined' ? TT_ZONE0 : null, 'titas')) { }
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
       c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some
       // a Escuridão: o herói andando (o fôlego longe para quando ele para), um braseiro aceso perto, a sala do Nox em silêncio
+      c.sub = c.name === 'mar' && typeof pl !== 'undefined' && !!pl.cabecaNaAgua;   // o Mar: a cabeça debaixo da água
       c.mov = typeof pl !== 'undefined' && Math.abs(pl.vx) > 15 ? 1 : 0; c.fogo = false;
       if (c.name === 'escuro') { c.fogo = typeof esNearLit === 'function' && esNearLit(tx, ty, 6); if (typeof inEsHall === 'function' && inEsHall(tx, ty, 2)) { c.calma = 0; return c; } }
+      // os Salões do Pesadelo: o ronco perto das Portas Quentes (20 blocos), a criança dormindo perto de uma cama com Adormecido (14 blocos)
+      c.quente = 0; c.sono = 0;
+      if (c.name === 'pesadelo') {
+        if (typeof psExits !== 'undefined') for (const E of psExits) { const d = Math.hypot(wdx(tx - E.cx), ty - E.fy); if (d < 20) c.quente = Math.max(c.quente, 1 - d / 20); }
+        if (typeof psBeds !== 'undefined') for (const B of psBeds) if (B.kind !== 'vazia' && !(typeof psAwakeSet !== 'undefined' && psAwakeSet.has(B.id)) && Math.hypot(wdx(tx - B.tx), ty - B.fy) < 14) { c.sono = 1; break; }
+      }
+      c.tita = 0; if (c.name === 'titas' && typeof ttBoss !== 'undefined' && ttBoss && !ttBoss.dead) c.tita = Math.max(0.12, Math.min(1, 1 - Math.hypot(wdx(tx - ttBoss.cx), ty - (ttBoss.fy - 28)) / 160));   // o Último Titã (287)
       c.calma = 1; if (c.name === 'cidade' && typeof cdPoco !== 'undefined' && cdPoco) { const d = Math.hypot(wdx(tx - cdPoco.cx), Math.max(0, cdPoco.top - ty)); c.calma = Math.abs(wdx(tx - cdPoco.cx)) <= 6 && ty >= cdPoco.top ? 0.1 : Math.min(1, Math.max(0.1, (d - 4) / 12)); }
     } catch (e) { }
     return c;

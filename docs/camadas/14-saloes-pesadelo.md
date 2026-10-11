@@ -4,6 +4,17 @@ Camada 14, de 2418 a 2604 m, debaixo da Cidade dos Antigos e em cima do Abismo. 
 
 **O que a diferencia:** tudo aqui é mole, doméstico e errado. A Cidade de cima é fria e exata; aqui as paredes cedem, os móveis têm o tamanho errado, a luz é amarela de abajur e os lugares se repetem ou levam para onde não deviam. O Abismo de baixo é horror de fogo e carne; o Pesadelo é horror de casa, de criança e de reflexo, sem sangue.
 
+## 0. Como ficou no jogo (implementado em 2026-10-11)
+
+A ficha abaixo é o plano original, com os números antigos (camada 14, `js/210` a `219`, blocos 551 a 575, zonas 61 a 64). No jogo a camada entrou com os números reservados para ela:
+
+- **Posição:** logo acima do Abismo (16ª camada no plano com as camadas novas, 2790 a 2976 m). O registro é `pesadelo` no `js/129-camadas.js`; o Abismo continua sempre por último.
+- **Arquivos:** `300-pesadelo-api.js` (ids, faixas, `psAbove`, estados do herói), `301-pesadelo-blocos.js`, `302-pesadelo-objetos.js`, `303-pesadelo-coisas.js` (sonâmbulo, o que corre atrás, homem alto, porta faminta, bonecas), `304-pesadelo-coisas2.js` (mariposa, bailarina, cavalo de balanço, sombra errada, relógio mole), `305-pesadelo-mundo.js` (geração, spawn, fornalha e lojas), `306-pesadelo-sonho.js` (portas, laços, Quadro Torto, Adormecidos, a volta no tempo), `307-sem-rosto.js` (o chefe e a Máscara Sem Rosto), `308-onirita.js` (metal, materiais e as 3 bases), `309-pesadelo-save.js`.
+- **Ids:** blocos 832 a 863 (`PS_SONO` 832 ... `PS_COSTURA` 858; 859 a 863 livres), paredes 118 a 122, terceira camada 75 a 77, zonas 73 a 76. A bolsa de blocos tem a página "Salões do Pesadelo".
+- **Ordem de geração:** os Salões são feitos dentro do `abBuild` (antes do Abismo), então sempre depois de todas as camadas do meio. O Abismo lê os Salões pelo `abAbove` (as Portas Quentes são as descidas dele).
+- **Decisões das perguntas abertas (pela recomendação da ficha):** o laço se desfaz sozinho na 6ª volta; as cópias imitam o herói com 0,5 s de atraso nas fases 1 e 2; minerar não acorda o Adormecido; perto de uma cama com Adormecido (10 blocos) não nasce monstro; sem missões (o jogo não tem mais) e sem erva própria da camada (as ervas seguem o sistema da Marta).
+- **O save** guarda os laços desfeitos, os Adormecidos acordados e o Sem-Rosto morto; o número de mundo (`wg`) não mudou.
+
 ## 1. Identidade
 
 - **Nome:** Os Salões do Pesadelo. Faixas: A Casa que Não Era, Os Corredores Sem Fim, Os Quartos Esquecidos, A Galeria dos Espelhos.

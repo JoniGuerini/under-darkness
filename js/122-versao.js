@@ -7,8 +7,16 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.27.0';
+const VERSAO = '0.28.0';
 const NOVIDADES = [
+  { v: '0.28.0', data: '11/10/2026', titulo: 'Cinco camadas novas', itens: [
+    'O Mar Sem Sol (camada 12, 2046 a 2232 m), com O Leviatã e o oricalco.',
+    'O Covil do Dragão (camada 13, 2232 a 2418 m), com Cinzarel, o Dragão Ancião, e o dracônio.',
+    'O Ossário dos Titãs (camada 14, 2418 a 2604 m), com O Último Titã e a adamantita.',
+    'A Cidade dos Antigos (camada 15, 2604 a 2790 m), com O Arquiteto e o ferro estelar.',
+    'Os Salões do Pesadelo (camada 16, 2790 a 2976 m), com O Sem-Rosto e a onirita.',
+    'O Abismo desceu para 2976 a 3162 m e a Escuridão para 3162 a 3348 m. Mundos de antes são refeitos; nível, itens, ouro e o baú da vila continuam.'
+  ] },
   { v: '0.27.0', data: '11/10/2026', titulo: 'Árvores tombam', itens: [
     'A árvore agora aguenta 4 golpes de picareta; a cada golpe ela treme e solta folhas.',
     'No último golpe ela tomba para o lado, some ao tocar o chão e a madeira fica espalhada ao longo de onde ela caiu.'

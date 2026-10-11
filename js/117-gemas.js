@@ -110,6 +110,9 @@ const GEM_SHARE = [null,
   [62, 27, 10, 1, 0], [52, 30, 15, 3, 0], [43, 31, 20, 6, 0], [35, 30, 24, 10, 1],
   [28, 28, 27, 14, 3], [22, 26, 28, 19, 5], [17, 23, 29, 23, 8], [14, 21, 28, 27, 10],
   [11, 18, 28, 30, 13], [9, 16, 27, 32, 16], [7, 14, 26, 35, 18], [6, 12, 25, 37, 20]];
+while (GEM_SHARE.length < 24) GEM_SHARE.push(GEM_SHARE[GEM_SHARE.length - 1].slice());   // camadas além da 16: repetem a última linha
+// mais de 16 camadas (várias feitas ao mesmo tempo): as de baixo repetem a última linha
+while (GEM_SHARE.length <= LAYERS.length) GEM_SHARE.push(GEM_SHARE[GEM_SHARE.length - 1]);
 // as camadas de hoje: posição, a rocha que recebe as pedras (teste do bloco, teste da zona), paleta e textura dessa rocha, onde marcar o solo.
 // Cada pedra ganha um bloco próprio em cada rocha (o mesmo desenho sobre a rocha da camada); o da camada de origem é o bloco de sempre.
 const GEM_LAYERS = [
@@ -124,6 +127,11 @@ const GEM_LAYERS = [
   typeof COLMEIA !== 'undefined' && { pos: layerPos('colmeia'), ok: t => t === CM_CERA || t === CM_RESINA, pal: 'cmCera', host: CM_CERA, soils: CM_SOILS },
   typeof NAVE !== 'undefined' && { pos: layerPos('nave'), ok: t => t === NV_VIDRO_IMPACTO || t === NV_ESCORIA, pal: 'nvVidroImp', host: NV_VIDRO_IMPACTO, soils: NV_SOILS },
   typeof ELFOS !== 'undefined' && { pos: layerPos('elfos'), ok: t => t === EL_MARMORE || t === EL_PEDRA_POCO, pal: 'elMarmore', host: EL_MARMORE, soils: EL_SOILS },
+  typeof DRAGAO !== 'undefined' && { pos: layerPos('dragao'), ok: t => t === DG_TUFO || t === DG_ANDESITO || t === DG_LAVA_CORDA, pal: 'dgAndesito', host: DG_ANDESITO, soils: DG_SOILS },
+  typeof ANTIGOS !== 'undefined' && { pos: layerPos('antigos'), ok: t => t === AT_PEDRA || t === AT_ROCHA_FRIA, pal: 'atPedra', host: AT_PEDRA, soils: AT_SOILS },
+  typeof PESADELO !== 'undefined' && { pos: layerPos('pesadelo'), ok: t => t === PS_SONO || t === PS_TIJOLO, pal: 'psSono', host: PS_SONO, soils: PS_SOILS },
+  typeof TITAS !== 'undefined' && { pos: layerPos('titas'), ok: t => t === TT_ROCHA || t === TT_OSSO, pal: 'ttRocha', host: TT_ROCHA, soils: TT_SOILS },
+  typeof MAR !== 'undefined' && MAR && { pos: layerPos('mar'), ok: t => t === MS_ROCHA || t === MS_SULFETO, pal: 'msRocha', host: MS_ROCHA, soils: MS_SOILS },
   { pos: layerPos('abismo'), ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI },
   typeof ESCURO !== 'undefined' && { pos: layerPos('escuro'), ok: t => t === ES_BREU || t === ES_PRIMEVA, pal: 'esBreu', host: ES_BREU, soils: ES_SOILS }
 ].filter(Boolean);   // a camada que não foi carregada (a wiki carrega só parte do jogo) fica de fora

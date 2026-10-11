@@ -240,3 +240,16 @@ Padrão do vilarejo: granulado, rampas de 6 tons, luz de cima à esquerda. Aqui,
 1. **Câmera girando ou parada na gravidade virada?** Girar mantém os controles iguais; parada é mais fácil de fazer, mas "esquerda" passa a ser "cima" na parede. Recomendo girar.
 2. **Salas de Prumo fora da arena:** ficam (2 por faixa na Cidade Inversa) ou a gravidade virada só aparece no chefe? Recomendo que fiquem: ensinam o sistema antes da luta.
 3. **Fase 3 com a gravidade virando no relógio (a cada 12 s)** ou só quando o Arquiteto leva um tanto de dano? Recomendo o relógio, com o aviso das setas: é previsível e combina com a camada.
+
+## 16. Como ficou (2026-10-11)
+
+O que entrou no jogo, por cima do que as seções acima dizem:
+
+- **Lugar:** a **15ª camada** do registro (`js/129-camadas.js`), debaixo do Ossário dos Titãs e em cima dos Salões do Pesadelo. A ficha foi escrita para a 13ª, então os números mudaram: zonas **69 a 72** (não 57 a 60), blocos **800 a 831** (`NT` 832), paredes **113 a 117**, terceira camada (`DEEPT`) **72 a 74**.
+- **Arquivos:** **`js/290` a `js/299`**, não 200 a 209: 290 api, 291 blocos, 292 objetos, 293 e 294 construtos, 295 mundo, 296 gravidade e Salas de Prumo, 297 O Arquiteto, 298 ferro estelar, 299 nomes das zonas e save.
+- **Metros e níveis:** nada fica escrito à mão. O topo é o fim da camada de cima (`atAbove`, que pula as que ainda não existem) e os níveis saem da posição no registro: monstros `layerLvl(layerLo('antigos'), d)`, chefe `layerBossLvl('antigos')`, forja `layerForgeIl('antigos')`, bases `layerLo('antigos')`. Na 15ª posição: 2604 a 2790 m, monstros 31 e 32, Arquiteto 33, ferro estelar nível de item 29.
+- **Câmera:** gira junto com a gravidade, em 0,6 s (a recomendada).
+- **Gravidade:** não há vetor de gravidade espalhado pelo jogo. A sala quadrada gira inteira em volta do centro (a arena 30 x 30, o miolo 12 x 12 das Salas de Prumo), com o herói, os monstros, os itens e os tiros dentro. Depois do giro o "baixo" continua sendo o baixo da tela, então andar, pular, escada, combate e mineração funcionam sem nenhum caso novo.
+- **Salas de Prumo:** ficam (a recomendada): 2 por faixa x `WSC`, na Cidade Inversa. A porta é no pé de uma parede do lado (virada para o quarteirão), não um alçapão no chão. Os 6 modelos têm simetria de giro de 4 (a sala é igual nas 4 gravidades; só o veio de ferro estelar muda de lugar) e são conferidos pela busca do pulo. A direção de cada sala vai no save (`atPrumo`).
+- **Fase 3:** a gravidade vira no relógio, a cada 12 s, com 2 s de aviso (a recomendada).
+- **Missões:** as da seção 8 não entraram (as missões saíram do jogo). O ancião não ganha nada.

@@ -1,9 +1,9 @@
 'use strict';
 
-/* ================= biomas: as cavernas (52 a 57), a catedral (41 a 46), o gelo (69 a 74), a mina (79 a 86), as minas fúngicas (120 a 128), a cidade afundada (130 a 139), a floresta petrificada (140 a 149), a fortaleza dos anões (180 a 189), a colmeia (190 a 199), a nave caída (240 a 249), o reino élfico (250 a 259), o abismo (103 a 111), a escuridão (220 a 229) e o documento de biomas ================= */
+/* ================= biomas: as cavernas (52 a 57), a catedral (41 a 46), o gelo (69 a 74), a mina (79 a 86), as minas fúngicas (120 a 128), a cidade afundada (130 a 139), a floresta petrificada (140 a 149), a fortaleza dos anões (180 a 189), a colmeia (190 a 199), a nave caída (240 a 249), o reino élfico (250 a 259), o mar sem sol (260 a 269), a cidade dos antigos (290 a 299), o abismo (103 a 111), a escuridão (220 a 229) e o documento de biomas ================= */
 (() => {
   const E = UDW.esc, X = UDW_TXT;
-  const TABS = [['cavernas', 'Cavernas'], ['catedral', 'Catedral'], ['gelo', 'Gelo'], ['mina', 'Mina'], ['fungo', 'Fungo'], ['cidade', 'Cidade'], ['floresta', 'Floresta'], ['anoes', 'Anões'], ['colmeia', 'Colmeia'], ['nave', 'Nave'], ['elfos', 'Elfos'], ['abismo', 'Abismo'], ['escuro', 'Escuridão'], ['blocos', 'Blocos'], ['objetos', 'Objetos de cena'], ['documento', 'Documento de biomas'], ['regras', 'Regras de geração']];
+  const TABS = [['cavernas', 'Cavernas'], ['catedral', 'Catedral'], ['gelo', 'Gelo'], ['mina', 'Mina'], ['fungo', 'Fungo'], ['cidade', 'Cidade'], ['floresta', 'Floresta'], ['anoes', 'Anões'], ['colmeia', 'Colmeia'], ['nave', 'Nave'], ['elfos', 'Elfos'], ['mar', 'Mar'], ['dragao', 'Dragão'], ['titas', 'Titãs'], ['antigos', 'Antigos'], ['pesadelo', 'Pesadelo'], ['abismo', 'Abismo'], ['escuro', 'Escuridão'], ['blocos', 'Blocos'], ['objetos', 'Objetos de cena'], ['documento', 'Documento de biomas'], ['regras', 'Regras de geração']];
   // nível dos monstros numa faixa (o mesmo cálculo do layerLvl do 52 com o registro de camadas do 129: cada camada começa 1 acima do fim da de cima, sobe 1 a partir de 93 m)
   const layerAt = m => LAYERS[Math.min(LAYERS.length, Math.floor(m / LAYER_D) + 1) - 1].id;
   const lvAt = m => m < CAVE_D ? 1 + Math.min(3, Math.floor(m / 50)) : layerLo(layerAt(m)) + (m % LAYER_D >= 93 ? 1 : 0);
@@ -157,6 +157,23 @@
     h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.olhocometa ? ET.olhocometa.name : 'O Olho-Cometa')}</a>: ${E(X.olhoCometaOnde || '')}</p>`;
     return h;
   }
+  function pesadelo() {
+    let h = `<p class="lead">${E(X.pesadelo)}</p><p><span class="rot">Entrada</span>${E(X.pesadeloEntrada)}</p><p><span class="rot">Som</span>${E(X.pesadeloSom)}</p><p><span class="rot">Portas, laços e Adormecidos</span>${E(X.pesadeloSonho)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.psFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.psMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.psMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="nota">A onirita só nasce num raio de 10 blocos das camas com Adormecido (mais grossa nos quartos-prêmio dos laços). Se ele acordar, os veios em volta viram veio desfeito.</p>`;
+    h += `<p class="bnav"><a href="#/biomas/blocos/pesadelo">Blocos dos Salões por faixa</a><a href="#/biomas/objetos/pesadelo">Objetos dos Salões por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.semrosto ? ET.semrosto.name : 'O Sem-Rosto')}</a>: ${E(X.semRostoOnde || '')}</p>`;
+    return h;
+  }
   function elfos() {
     let h = `<p class="lead">${E(X.elfos)}</p><p><span class="rot">Entrada</span>${E(X.elfosEntrada)}</p><p><span class="rot">Som</span>${E(X.elfosSom)}</p><p><span class="rot">Enraizado, silenciado e enfeitiçado</span>${E(X.elfosEstados)}</p><h2>Faixas</h2><div class="faixas">`;
     for (const f of X.elFaixas) {
@@ -171,6 +188,71 @@
       X.elMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
     h += `<p class="bnav"><a href="#/biomas/blocos/elfos">Blocos do reino por faixa</a><a href="#/biomas/objetos/elfos">Objetos do reino por faixa</a></p>`;
     h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.dama ? ET.dama.name : 'A Dama do Espelho')}</a>: ${E(X.damaEspelhoOnde || '')}</p>`;
+    return h;
+  }
+  function dragao() {
+    let h = `<p class="lead">${E(X.dragao)}</p><p><span class="rot">Entrada</span>${E(X.dragaoEntrada)}</p><p><span class="rot">Som</span>${E(X.dragaoSom)}</p><p><span class="rot">Pés presos, puxado e agarrado</span>${E(X.dragaoEstados)}</p><p><span class="rot">O ouro solto</span>${E(X.dragaoOuro)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.dgFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.dgMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.dgMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="nota">Dracônio: veios na obsidiana rajada, no osso de dragão, na lava cordada e no andesito, perto do fogo (a até 6 blocos de magma, ouro solto ou crosta), nos Tubos de Lava e no Leito de Ouro; uns poucos longe do fogo. 8 minérios por barra.</p>`;
+    h += `<p class="bnav"><a href="#/biomas/blocos/dragao">Blocos do covil por faixa</a><a href="#/biomas/objetos/dragao">Objetos do covil por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.cinzarel ? ET.cinzarel.name : 'Cinzarel, o Dragão Ancião')}</a>: ${E(X.cinzarelOnde || '')}</p>`;
+    return h;
+  }
+  function titas() {
+    let h = `<p class="lead">${E(X.titas)}</p><p><span class="rot">Entrada</span>${E(X.titasEntrada)}</p><p><span class="rot">Som</span>${E(X.titasSom)}</p><p><span class="rot">O corpo do titã</span>${E(X.titasEscalada)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.ttFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.ttMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.ttMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="bnav"><a href="#/biomas/blocos/titas">Blocos do ossário por faixa</a><a href="#/biomas/objetos/titas">Objetos do ossário por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.tita ? ET.tita.name : 'O Último Titã')}</a>: ${E(X.titaOnde || '')}</p>`;
+    return h;
+  }
+  function antigos() {
+    let h = `<p class="lead">${E(X.antigos)}</p><p><span class="rot">Entrada</span>${E(X.antigosEntrada)}</p><p><span class="rot">Som</span>${E(X.antigosSom)}</p><p><span class="rot">Gravidade virada</span>${E(X.antigosGravidade)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.atFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.atMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.atMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="bnav"><a href="#/biomas/blocos/antigos">Blocos da cidade por faixa</a><a href="#/biomas/objetos/antigos">Objetos da cidade por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.arquiteto ? ET.arquiteto.name : 'O Arquiteto')}</a>: ${E(X.arquitetoOnde || '')}</p>`;
+    return h;
+  }
+  function mar() {
+    let h = `<p class="lead">${E(X.mar)}</p><p><span class="rot">Entrada</span>${E(X.marEntrada)}</p><p><span class="rot">Som</span>${E(X.marSom)}</p><p><span class="rot">Fôlego, puxão, bolha, tinta e água fervente</span>${E(X.marEstados)}</p><h2>Faixas</h2><div class="faixas">`;
+    for (const f of X.msFaixas) {
+      const sp = CATH_SPAWN[f.zona], tot = sp ? sp[0].reduce((n, r) => n + r[1], 0) : 1, tab = sp ? sp[0].filter(([t]) => ET[t]) : [];
+      h += `<section class="faixa"><header><b>${E(ZONE_NAMES[f.zona] || f.nome)}</b><em>${f.de} a ${f.ate} m</em><i>"${E(ZONE_SUB[f.zona] || '')}"</i></header>
+        <p>${E(f.carater)}.</p><p><span class="rot">Salas</span>${E(f.salas)}</p>
+        ${sp ? `<div class="spawn">${tab.map(([t, w]) => `<a href="#/inimigo/${t}" title="">${UDW.enemyImg(t, 2)}<span>${E(ET[t].name)}</span><b>${UDW.pct(w / tot, 0)}</b></a>`).join('')}</div><p class="nota">Até ${sp[1]} monstros ao mesmo tempo. ${lvTxt(f)}</p>` : ''}
+        <div class="lista">${X.msMinerios.filter(([, a, b]) => a < f.ate && b > f.de).map(([id]) => UDW.item(id, { px: 22 })).join('')}</div>
+      </section>`;
+    }
+    h += `</div><h2>Minérios</h2>` + UDW.table([{ t: 'Minério' }, { t: 'De', cls: 'n' }, { t: 'Até', cls: 'n' }],
+      X.msMinerios.map(([id, a, b]) => ({ cells: [UDW.item(id), a + ' m', b + ' m'], keys: [ITEMS[id].name, a, b] })), 'compacta');
+    h += `<p class="bnav"><a href="#/biomas/blocos/mar">Blocos do mar por faixa</a><a href="#/biomas/objetos/mar">Objetos do mar por faixa</a></p>`;
+    h += `<h2>Chefe</h2><p><a href="#/chefes">${E(ET.leviata ? ET.leviata.name : 'O Leviatã')}</a>: ${E(X.leviataOnde || '')}</p>`;
     return h;
   }
   function escuro() {
@@ -239,15 +321,20 @@
     { id: 'colmeia', nome: 'A Colmeia', de: 1488, ate: 1674, parede: WCM_CERA, faixas: X.cmFaixas.map((f, b) => ({ k: 'cm' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'nave', nome: 'A Nave Caída', de: 1674, ate: 1860, parede: WNV_CASCO, faixas: X.nvFaixas.map((f, b) => ({ k: 'nv' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'elfos', nome: 'O Reino Élfico', de: 1860, ate: 2046, parede: WEL_SALAO, faixas: X.elFaixas.map((f, b) => ({ k: 'el' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
-    { id: 'abismo', nome: 'O Abismo', de: 2046, ate: 2232, parede: WAB_BASALTO, faixas: X.abFaixas.map((f, b) => ({ k: 'ab' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
-    { id: 'escuro', nome: 'A Escuridão', de: 2232, ate: 2418, parede: WES_BREU, faixas: X.esFaixas.map((f, b) => ({ k: 'es' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    ...(typeof DRAGAO !== 'undefined' && DRAGAO ? [{ id: 'dragao', nome: 'O Covil do Dragão', de: X.dgFaixas[0].de, ate: X.dgFaixas[3].ate, parede: WDG_ANDESITO, faixas: X.dgFaixas.map((f, b) => ({ k: 'dg' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) }] : []),
+    ...(typeof TITAS !== 'undefined' && TITAS ? [{ id: 'titas', nome: 'O Ossário dos Titãs', de: TT_TOP, ate: TT_TOP + TT_D, parede: WTT_ROCHA, faixas: X.ttFaixas.map((f, b) => ({ k: 'tt' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) }] : []),
+    ...(typeof ANTIGOS !== 'undefined' && ANTIGOS ? [{ id: 'antigos', nome: 'A Cidade dos Antigos', de: AT_TOP, ate: AT_TOP + AT_D, parede: WAT_LAJE, faixas: X.atFaixas.map((f, b) => ({ k: 'at' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) }] : []),
+    { id: 'pesadelo', nome: 'Os Salões do Pesadelo', de: 2790, ate: 2976, parede: WPS_PAPEL, faixas: X.psFaixas.map((f, b) => ({ k: 'ps' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    { id: 'mar', nome: 'O Mar Sem Sol', de: 2046, ate: 2232, parede: WMS_ROCHA, faixas: X.msFaixas.map((f, b) => ({ k: 'ms' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    { id: 'abismo', nome: 'O Abismo', de: 2976, ate: 3162, parede: WAB_BASALTO, faixas: X.abFaixas.map((f, b) => ({ k: 'ab' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
+    { id: 'escuro', nome: 'A Escuridão', de: 3162, ate: 3348, parede: WES_BREU, faixas: X.esFaixas.map((f, b) => ({ k: 'es' + b, nome: ZONE_NAMES[f.zona] || f.nome, de: f.de, ate: f.ate })) },
     { id: 'superficie', nome: 'Superfície', parede: 1, faixas: [{ k: 'sup', nome: 'Vilarejo, campos e morros', de: null }] }
   ];
   function census() {
     if (UDW.censo) return UDW.censo;
     const C = { t: {}, w: {}, p: {}, n: SEEDS.length };
     const add = (o, id, k) => { (o[id] = o[id] || {})[k] = (o[id][k] || 0) + 1; };
-    const bandOf = (x, y) => y < surf[x] + 6 || y - CV_S0 < 6 ? 'sup' : typeof ESCURO !== 'undefined' && y >= ES_S0 ? 'es' + Math.max(0, Math.min(3, escuroBand(y))) : y >= AB_S0 ? 'ab' + Math.max(0, Math.min(3, abyssBand(y))) : typeof ELFOS !== 'undefined' && ELFOS && y >= EL_S0 ? 'el' + Math.max(0, Math.min(3, elfosBand(y))) : typeof NAVE !== 'undefined' && NAVE && y >= NV_S0 ? 'nv' + Math.max(0, Math.min(3, naveBand(y))) : typeof COLMEIA !== 'undefined' && y >= CM_S0 ? 'cm' + Math.max(0, Math.min(3, colmeiaBand(y))) : typeof ANOES !== 'undefined' && y >= AN_S0 ? 'an' + Math.max(0, Math.min(3, dwarfBand(y))) : typeof FP_S0 !== 'undefined' && y >= FP_S0 ? 'fp' + Math.max(0, Math.min(3, forestBand(y))) : y >= CD_S0 ? 'cd' + Math.max(0, Math.min(3, cidadeBand(y))) : y >= FG_S0 ? 'fg' + Math.max(0, Math.min(3, fungoBand(y))) : y >= MN_S0 ? 'mn' + Math.max(0, Math.min(3, mineBand(y))) : y >= IC_S0 ? 'ic' + Math.max(0, Math.min(3, iceBand(y))) : y < CB_S0 ? 'cv' + Math.max(0, Math.min(3, caveBand(y))) : 'ct' + cathBand(y);
+    const bandOf = (x, y) => y < surf[x] + 6 || y - CV_S0 < 6 ? 'sup' : typeof ESCURO !== 'undefined' && y >= ES_S0 ? 'es' + Math.max(0, Math.min(3, escuroBand(y))) : y >= AB_S0 ? 'ab' + Math.max(0, Math.min(3, abyssBand(y))) : typeof PESADELO !== 'undefined' && PESADELO && y >= PS_S0 ? 'ps' + Math.max(0, Math.min(3, pesadeloBand(y))) : typeof ANTIGOS !== 'undefined' && ANTIGOS && y >= AT_S0 ? 'at' + Math.max(0, Math.min(3, antigosBand(y))) : typeof TITAS !== 'undefined' && TITAS && y >= TT_S0 ? 'tt' + Math.max(0, Math.min(3, titanBand(y))) : typeof DRAGAO !== 'undefined' && DRAGAO && y >= DG_S0 && y < DG_S0 + DG_D ? 'dg' + Math.max(0, Math.min(3, dragonBand(y))) : typeof MAR !== 'undefined' && MAR && y >= MS_S0 ? 'ms' + Math.max(0, Math.min(3, marBand(y))) : typeof ELFOS !== 'undefined' && ELFOS && y >= EL_S0 ? 'el' + Math.max(0, Math.min(3, elfosBand(y))) : typeof NAVE !== 'undefined' && NAVE && y >= NV_S0 ? 'nv' + Math.max(0, Math.min(3, naveBand(y))) : typeof COLMEIA !== 'undefined' && y >= CM_S0 ? 'cm' + Math.max(0, Math.min(3, colmeiaBand(y))) : typeof ANOES !== 'undefined' && y >= AN_S0 ? 'an' + Math.max(0, Math.min(3, dwarfBand(y))) : typeof FP_S0 !== 'undefined' && y >= FP_S0 ? 'fp' + Math.max(0, Math.min(3, forestBand(y))) : y >= CD_S0 ? 'cd' + Math.max(0, Math.min(3, cidadeBand(y))) : y >= FG_S0 ? 'fg' + Math.max(0, Math.min(3, fungoBand(y))) : y >= MN_S0 ? 'mn' + Math.max(0, Math.min(3, mineBand(y))) : y >= IC_S0 ? 'ic' + Math.max(0, Math.min(3, iceBand(y))) : y < CB_S0 ? 'cv' + Math.max(0, Math.min(3, caveBand(y))) : 'ct' + cathBand(y);
     for (const sd of SEEDS) {
       generate(sd);
       for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
@@ -269,7 +356,7 @@
     if (typeof ORE_NAME !== 'undefined') for (const t in ORE_NAME) if (!NOMES.t[t] && typeof ORE_ITEM !== 'undefined' && ORE_ITEM[t]) NOMES.t[t] = ORE_NAME[t] + ' na rocha';
     return NOMES;
   }
-  const isOre = t => [COAL, COPPER, IRON, GOLD, CRYSTAL, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, MN_O_CARVAO, MN_O_COBALTO, IC_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, AB_O_CARVAO, AB_O_INFERNITA, FG_O_CARVAO, FG_O_ESPORITA, CD_O_CARVAO, CD_O_PRATA, FP_O_CARVAO, FP_O_PLATINA, FP_O_CRISTAL].includes(t) || (typeof ORE_ITEM !== 'undefined' && !!ORE_ITEM[t]) || (typeof CM_O_AMBRITA !== 'undefined' && (t === CM_O_CARVAO || t === CM_O_AMBRITA)) || (typeof ES_O_NOCTIRIO !== 'undefined' && (t === ES_O_CARVAO || t === ES_O_NOCTIRIO)) || (typeof NV_O_XENITA !== 'undefined' && (t === NV_O_CARVAO || t === NV_O_XENITA)) || (typeof EL_O_LUNARITA !== 'undefined' && (t === EL_O_CARVAO || t === EL_O_LUNARITA));
+  const isOre = t => [COAL, COPPER, IRON, GOLD, CRYSTAL, CV_O_CARVAO, CV_O_COBRE, CV_O_FERRO, CV_O_OURO, IC_O_FERRO, IC_O_OURO, IC_O_CRISTAL, MN_O_CARVAO, MN_O_COBALTO, IC_O_CARVAO, MN_O_FERRO, MN_O_OURO, MN_O_CRISTAL, AB_O_CARVAO, AB_O_INFERNITA, FG_O_CARVAO, FG_O_ESPORITA, CD_O_CARVAO, CD_O_PRATA, FP_O_CARVAO, FP_O_PLATINA, FP_O_CRISTAL].includes(t) || (typeof ORE_ITEM !== 'undefined' && !!ORE_ITEM[t]) || (typeof CM_O_AMBRITA !== 'undefined' && (t === CM_O_CARVAO || t === CM_O_AMBRITA)) || (typeof ES_O_NOCTIRIO !== 'undefined' && (t === ES_O_CARVAO || t === ES_O_NOCTIRIO)) || (typeof NV_O_XENITA !== 'undefined' && (t === NV_O_CARVAO || t === NV_O_XENITA)) || (typeof EL_O_LUNARITA !== 'undefined' && (t === EL_O_CARVAO || t === EL_O_LUNARITA)) || (typeof DG_O_DRACONIO !== 'undefined' && (t === DG_O_CARVAO || t === DG_O_DRACONIO)) || (typeof AT_O_ESTELAR !== 'undefined' && (t === AT_O_CARVAO || t === AT_O_ESTELAR)) || (typeof TT_O_ADAMANTITA !== 'undefined' && (t === TT_O_CARVAO || t === TT_O_ADAMANTITA));
   const kindT = t => isOre(t) ? 'Minérios' : SOLID[t] && BLOCKY[t] ? 'Terreno' : 'Decoração de um bloco';
   // uma linha da matriz: o quanto aparece em cada faixa, comparado com a faixa onde mais aparece
   function cells(row, B) {
@@ -319,14 +406,14 @@
     }
     const resto = Object.keys(PROP_DEFS).filter(id => !visto.has(id));
     if (resto.length) h += `<h2>Raros <small>${resto.length}</small></h2><p class="nota">Não saíram nos mundos de teste: aparecem pouco ou só em salas especiais.</p><div class="props">${resto.map(id => { const P = PROP_DEFS[id];
-      return `<figure class="prop"><div class="pimg">${UDW.propImg(id, 0, P.vars[0].w > 60 ? 1 : 2)}</div><figcaption><b>${E(P.nome || id)}</b><span>${(P.faixas || []).map(f => X.faixaChave[f] || f).join(', ')}</span></figcaption></figure>`; }).join('')}</div>`;
+      return `<figure class="prop"><div class="pimg">${UDW.propImg(id, 0, P.vars[0].w > 60 ? 1 : 2)}</div><figcaption><b>${E(P.nome || id)}</b><span>${(P.faixas || []).map(f => ((X.faixaChavePref || {})[id.slice(0, 3)] || {})[f] || X.faixaChave[f] || f).join(', ')}</span></figcaption></figure>`; }).join('')}</div>`;
     return h;
   }
 
   UDW.pages.biomas = {
     render(tab = 'cavernas', anchor) {
-      const sub = { cavernas: 'A primeira camada, logo debaixo do vilarejo.', catedral: 'A segunda camada, debaixo das cavernas.', gelo: 'A terceira camada, debaixo das criptas da catedral.', mina: 'A quarta camada, debaixo das Cavernas de Gelo.', fungo: 'A quinta camada, debaixo da Mina Abandonada.', cidade: 'A sexta camada, debaixo das Minas Fúngicas.', floresta: 'A sétima camada, debaixo da Cidade Afundada.', anoes: 'A oitava camada, debaixo da Floresta Petrificada.', colmeia: 'A nona camada, debaixo da Fortaleza dos Anões.', nave: 'A décima camada, debaixo da Colmeia.', elfos: 'A décima primeira camada, debaixo da Nave Caída.', abismo: 'A décima segunda camada, debaixo do Reino Élfico.', escuro: 'A décima terceira camada e o fundo do mundo, debaixo do Abismo.', blocos: 'O que nasce em cada bioma, faixa por faixa.', objetos: 'Os objetos de cena de cada bioma, faixa por faixa.' };
-      let h = UDW.head(tab === 'cavernas' ? 'As Cavernas' : tab === 'catedral' ? 'A Catedral Abandonada' : tab === 'gelo' ? 'As Cavernas de Gelo' : tab === 'mina' ? 'A Mina Abandonada' : tab === 'fungo' ? 'As Minas Fúngicas' : tab === 'cidade' ? 'A Cidade Afundada' : tab === 'floresta' ? 'A Floresta Petrificada' : tab === 'anoes' ? 'A Fortaleza dos Anões' : tab === 'colmeia' ? 'A Colmeia' : tab === 'nave' ? 'A Nave Caída' : tab === 'elfos' ? 'O Reino Élfico' : tab === 'abismo' ? 'O Abismo' : tab === 'escuro' ? 'A Escuridão' : 'Biomas', sub[tab] || '') + UDW.tabs('biomas', TABS, tab);
+      const sub = { cavernas: 'A primeira camada, logo debaixo do vilarejo.', catedral: 'A segunda camada, debaixo das cavernas.', gelo: 'A terceira camada, debaixo das criptas da catedral.', mina: 'A quarta camada, debaixo das Cavernas de Gelo.', fungo: 'A quinta camada, debaixo da Mina Abandonada.', cidade: 'A sexta camada, debaixo das Minas Fúngicas.', floresta: 'A sétima camada, debaixo da Cidade Afundada.', anoes: 'A oitava camada, debaixo da Floresta Petrificada.', colmeia: 'A nona camada, debaixo da Fortaleza dos Anões.', nave: 'A décima camada, debaixo da Colmeia.', elfos: 'A décima primeira camada, debaixo da Nave Caída.', mar: 'A décima segunda camada, debaixo do Reino Élfico.', dragao: 'A décima terceira camada, debaixo do Mar Sem Sol.', titas: 'A décima quarta camada, debaixo do Covil do Dragão.', antigos: 'A décima quinta camada, debaixo do Ossário dos Titãs.', pesadelo: 'A décima sexta camada, debaixo da Cidade dos Antigos e logo acima do Abismo.', abismo: 'A décima sétima camada, debaixo dos Salões do Pesadelo.', escuro: 'A décima oitava camada e o fundo do mundo, debaixo do Abismo.', blocos: 'O que nasce em cada bioma, faixa por faixa.', objetos: 'Os objetos de cena de cada bioma, faixa por faixa.' };
+      let h = UDW.head(tab === 'cavernas' ? 'As Cavernas' : tab === 'catedral' ? 'A Catedral Abandonada' : tab === 'gelo' ? 'As Cavernas de Gelo' : tab === 'mina' ? 'A Mina Abandonada' : tab === 'fungo' ? 'As Minas Fúngicas' : tab === 'cidade' ? 'A Cidade Afundada' : tab === 'floresta' ? 'A Floresta Petrificada' : tab === 'anoes' ? 'A Fortaleza dos Anões' : tab === 'colmeia' ? 'A Colmeia' : tab === 'nave' ? 'A Nave Caída' : tab === 'elfos' ? 'O Reino Élfico' : tab === 'mar' ? 'O Mar Sem Sol' : tab === 'dragao' ? 'O Covil do Dragão' : tab === 'titas' ? 'O Ossário dos Titãs' : tab === 'antigos' ? 'A Cidade dos Antigos' : tab === 'pesadelo' ? 'Os Salões do Pesadelo' : tab === 'abismo' ? 'O Abismo' : tab === 'escuro' ? 'A Escuridão' : 'Biomas', sub[tab] || '') + UDW.tabs('biomas', TABS, tab);
       if (tab === 'objetos' || tab === 'blocos') h += UDW.censo ? (tab === 'objetos' ? objetos() : blocos()) : '<p class="nota" id="censo">Gerando mundos para contar o que nasce em cada faixa...</p>';
       else if (tab === 'documento' || tab === 'regras') { const d = UDW_DOCS.find(x => x.id === (tab === 'documento' ? 'biomas' : 'regras-de-bioma')); h += UDW.docView(d); }
       else if (tab === 'catedral') h += catedral();
@@ -339,6 +426,11 @@
       else if (tab === 'colmeia') h += colmeia();
       else if (tab === 'nave') h += nave();
       else if (tab === 'elfos') h += elfos();
+      else if (tab === 'mar') h += mar();
+      else if (tab === 'dragao') h += dragao();
+      else if (tab === 'titas') h += titas();
+      else if (tab === 'antigos') h += antigos();
+      else if (tab === 'pesadelo') h += pesadelo();
       else if (tab === 'abismo') h += abismo();
       else if (tab === 'escuro') h += escuro();
       else h += cavernas();

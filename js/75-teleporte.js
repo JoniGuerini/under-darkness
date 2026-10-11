@@ -23,6 +23,11 @@
     { nome: 'A Colmeia', ok: typeof COLMEIA !== 'undefined' && COLMEIA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[CM_ZONE0 + b], y0: CM_S0 + CM_BANDS[b], y1: Math.min(WH - 8, CM_S0 + CM_BANDS[b + 1]) })), entrada: () => cmLand && cmLand[0] && [cmLand[0].x0 + 6, cmLand[0].fy - 2] },
     { nome: 'A Nave Caída', ok: typeof NAVE !== 'undefined' && NAVE, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[NV_ZONE0 + b], y0: NV_S0 + NV_BANDS[b], y1: Math.min(WH - 8, NV_S0 + NV_BANDS[b + 1]) })), entrada: () => nvLand && nvLand[0] && [nvLand[0].x0 + 6, nvLand[0].fy - 2] },
     { nome: 'O Reino Élfico', ok: typeof ELFOS !== 'undefined' && ELFOS, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[EL_ZONE0 + b], y0: EL_S0 + EL_BANDS[b], y1: Math.min(WH - 8, EL_S0 + EL_BANDS[b + 1]) })), entrada: () => elLand && elLand[0] && [elLand[0].x0 + 6, elLand[0].fy - 2] },
+    { nome: 'O Mar Sem Sol', ok: typeof MAR !== 'undefined' && MAR, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[MS_ZONE0 + b], y0: MS_S0 + MS_BANDS[b], y1: Math.min(WH - 8, MS_S0 + MS_BANDS[b + 1]) })), entrada: () => msLand && msLand[0] && [msLand[0].x0 + 6, msLand[0].fy - 2] },
+    { nome: 'O Covil do Dragão', ok: typeof DRAGAO !== 'undefined' && DRAGAO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[DG_ZONE0 + b], y0: DG_S0 + DG_BANDS[b], y1: Math.min(WH - 8, DG_S0 + DG_BANDS[b + 1]) })), entrada: () => dgLand && dgLand[0] && [dgLand[0].x0 + 6, dgLand[0].fy - 2] },
+    { nome: 'O Ossário dos Titãs', ok: typeof TITAS !== 'undefined' && TITAS, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[TT_ZONE0 + b], y0: TT_S0 + TT_BANDS[b], y1: Math.min(WH - 8, TT_S0 + TT_BANDS[b + 1]) })), entrada: () => ttLand && ttLand[0] && [ttLand[0].x0 + 8, ttLand[0].fy - 2] },
+    { nome: 'A Cidade dos Antigos', ok: typeof ANTIGOS !== 'undefined' && ANTIGOS, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AT_ZONE0 + b], y0: AT_S0 + AT_BANDS[b], y1: Math.min(WH - 8, AT_S0 + AT_BANDS[b + 1]) })), entrada: () => atLand && atLand[0] && [atLand[0].x0 + 5, atLand[0].fy - 2] },
+    { nome: 'Os Salões do Pesadelo', ok: typeof PESADELO !== 'undefined' && PESADELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[PS_ZONE0 + b], y0: PS_S0 + PS_BANDS[b], y1: Math.min(WH - 8, PS_S0 + PS_BANDS[b + 1]) })), entrada: () => psLand && psLand[0] && [psLand[0].x0 + 5, psLand[0].fy - 2] },
     { nome: 'O Abismo', ok: typeof ABISMO !== 'undefined' && ABISMO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[AB_ZONE0 + b], y0: AB_S0 + AB_BANDS[b], y1: Math.min(WH - 8, AB_S0 + AB_BANDS[b + 1]) })), entrada: () => abExits && abExits[0] && [abExits[0].x0 + 1, abExits[0].fy - 2] },
     { nome: 'A Escuridão', ok: typeof ESCURO !== 'undefined' && ESCURO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[ES_ZONE0 + b], y0: ES_S0 + ES_BANDS[b], y1: Math.min(WH - 8, ES_S0 + ES_BANDS[b + 1]) })), entrada: () => esLand && esLand[0] && [esLand[0].x0 + 5, esLand[0].fy - 2] }
   ].filter(L => L.ok);
@@ -37,7 +42,7 @@
     }
     return seen;
   }
-  const inBossHall = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) || (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || (typeof inAbHall === 'function' && inAbHall(x, y, -3));
+  const inBossHall = (x, y) => (typeof inPsHall === 'function' && inPsHall(x, y, -3)) || (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) || (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || (typeof inAbHall === 'function' && inAbHall(x, y, -3)) || (typeof inTtHall === 'function' && inTtHall(x, y, -3));
   // a standing spot: feet in (x, y), two more rows of air above, a firm block underneath, inside the cave (back wall)
   function spot(F, near, any) {
     const seen = any ? null : reachable(), tx = near ? near[0] : SPX, ty = F.y0 + 3;

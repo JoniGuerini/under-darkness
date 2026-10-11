@@ -1,6 +1,6 @@
 # O Mar Sem Sol: ficha de implementação
 
-A décima camada, debaixo da Colmeia, de 1674 a 1860 m. É um mar subterrâneo do tamanho do mundo inteiro, com praias de areia negra, ilhas de rocha, navios que ninguém sabe como chegaram e um fundo onde só a luz dos bichos alcança. Monstros de nível 21 a 22, metal novo Oricalco, chefe O Leviatã (nível 23).
+A décima segunda camada (feita em 2026-10-11), debaixo do Reino Élfico e em cima do Abismo, de 2046 a 2232 m. Esta ficha foi escrita quando o Mar seria a décima; os números de verdade (arquivos 260 a 269, zonas 57 a 60, níveis) estão na seção "Como ficou no jogo", no fim. É um mar subterrâneo do tamanho do mundo inteiro, com praias de areia negra, ilhas de rocha, navios que ninguém sabe como chegaram e um fundo onde só a luz dos bichos alcança. Monstros de nível 25 a 26, metal novo Oricalco, chefe O Leviatã (nível 27).
 
 **O que a diferencia:** é a única camada **aberta e molhada**: um vão de 30 fileiras de ar sobre uma superfície de água que dá a volta no mundo, logo depois do aperto quente da Colmeia em cima e antes do fogo do Covil do Dragão embaixo. Ela traz o sistema de água e de nado, que nenhuma outra camada tem; do Abismo difere em tudo: frio, silêncio, escuro azul e espaço demais.
 
@@ -234,3 +234,33 @@ Gente-peixe: humanoides de 12x22 com os encaixes do herói, curvados, escamas em
 1. **A água serve também para a Mãe-Esporo (camada 5) e a cisterna do Sineiro (6).** Recomendo tirar `171-agua.js` e `172-nadar.js` da faixa do Mar e pôr na preparação da seção 2 do 00-geral, antes da camada 5, com esta seção como especificação. As fichas 5 e 6 usam o mesmo vetor `agua`.
 2. **Água parada que só enche buracos.** Recomendo manter: igual à lava, barato, e sem precisar salvar nada novo. Água que escorre de verdade fica para depois, se fizer falta.
 3. **Limite de peso em 0,06.** Com ele a cota de malha boia e a armadura de placas afunda. Recomendo começar assim e ajustar depois de jogar a Fossa.
+
+## Como ficou no jogo (2026-10-11)
+
+A camada foi feita junto com outras quatro, ao mesmo tempo; as perguntas em aberto foram decididas pela opção recomendada.
+
+- **Lugar:** 12ª camada, de 2046 a 2232 m (`MS_S0` logo abaixo do `EL_S0 + EL_D` do Reino), entre o Reino Élfico e o Abismo. O Abismo desce 186 m e continua o último antes da Escuridão. Desce-se pelos dois poços de raízes do Reino (`elExits`); as duas saídas para baixo são os Poços de Vapor nas Chaminés (`msExits`).
+- **Arquivos:** 260-mar-api, 261-mar-blocos, 262-mar-objetos, 263-mar-bichos, 264-mar-bichos2, 265-mar-mundo, 266-leviata, 267-oricalco, 268-mar-save, 269-mar-estados. A água e o nado já existiam (171-agua e 172-nadar); o Mar só usa.
+- **Ids:** blocos 704 a 730 (reservados até 735), paredes 98 a 102, terceira camada 63 a 65, zonas 57 a 60.
+- **Números:** monstros de nível 25 a 26, Leviatã nível 27, peças de oricalco nível de item 23. **8 minérios por barra** (a regra do 00-geral, como a lunarita), em vez dos 7 desta ficha.
+- **Geração:** o mar é um vão aberto com a superfície da água a 32 fileiras do topo. O fundo é feito em patamares de 3, para os objetos caberem e para dar para subir nadando. Por mundo (escala `WSC`):
+  - 2 ilhas de chegada, mais ilhas até 2 por `WSC`, cada uma com um túnel seco para as Chaminés;
+  - navios, cascos boiando e cascos afundados com bolsões de ar, palafitas;
+  - 2 fendas da Fossa com um templo da gente-peixe no fundo (porta debaixo da água, domo de ar em cima);
+  - as grutas das Chaminés ligadas em anel, umas com poça fervente;
+  - respiradouros em cada fenda e espalhados no mar fundo, longe do Leviatã.
+  - As cordas de subir que ficariam no meio da água são tiradas: debaixo da água se nada.
+- **Missões:** as 3 missões do ancião não foram feitas (as missões foram tiradas do jogo em 2026-10-10).
+- **Prato do Odo:** Peixe-Cego na Brasa (1 peixe-cego e 1 de lenha), 16 de vida em 10 s.
+- **Quem compra:**
+
+  | Quem | O quê |
+  |---|---|
+  | Grimaldo | oricalco, escamas abissais e pérolas negras |
+  | Marta | iscas vivas |
+  | Aurélia | tinta de polvo |
+  | Odo | peixe-cego |
+
+- **Pedras preciosas:** entram na rocha do mar e no sulfeto (linha 12 da tabela do 00-geral).
+- **Save:** o número do mundo (`wg`) não mudou nesta camada. As cinco camadas feitas juntas trocam o número uma vez só, na integração. O Leviatã guarda a morte em `leviata`.
+

@@ -1,5 +1,7 @@
 # O Ossário dos Titãs: ficha de implementação
 
+> **Feito em 2026-10-11.** Os números de arquivo, zona e id desta ficha eram da primeira proposta. No jogo ficou assim: arquivos `js/280` a `289` (290-titas-api vira 280, e assim por diante: 280 api, 281 blocos, 282 objetos, 283 nascidos, 284 carniceiros, 285 mundo, 286 corpo-terreno, 287 Último Titã, 288 adamantita, 289 save), zonas 65 a 68, blocos 768 a 791, paredes 108 a 112, terceira camada 69 a 71. A camada é a 14ª, debaixo do Covil do Dragão; com as camadas novas juntas fica de 2418 a 2604 m. As três decisões em aberto (seção 15) seguiram a recomendação: o titã morto vira terreno, segurar no tremor gasta vigor e a câmera se afasta um passo durante a luta. As missões do ancião não entraram (as missões saíram do jogo em 2026-10-10).
+
 A camada 12, de 2046 a 2232 m, debaixo do Covil do Dragão e em cima da Cidade dos Antigos. É o cemitério dos gigantes que seguravam o mundo: os ossos deles são o próprio terreno, costelas viram arcos, crânios viram cavernas e espinhas viram pontes sobre o vazio. No fundo, meio enterrado, o Último Titã ainda respira, e a luta contra ele é escalar o corpo dele.
 
 **O que a diferencia:** é a única camada em que o terreno é um corpo, na escala do mundo: um osso aqui tem 60 blocos, e o herói anda por dentro dele. Os ossos da Catedral e do Abismo são enfeite do tamanho de gente; aqui não há mortos-vivos, nem carne, nem fogo: só marfim seco, pó, vento e silêncio, depois do calor dourado do Covil.

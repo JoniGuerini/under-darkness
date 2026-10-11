@@ -21,6 +21,12 @@ const LAYERS = [
   { id: 'colmeia', nome: 'A Colmeia' },
   { id: 'nave', nome: 'A Nave Caída' },   // a nave dos Visitantes (2026-10-11), pedida pelo Jonathan fora do mapa das 16
   { id: 'elfos', nome: 'O Reino Élfico' },   // os elfos da lua (2026-10-11), pedidos pelo Jonathan: Senhor dos Anéis e Warcraft
+  { id: 'mar', nome: 'O Mar Sem Sol' },       // o mar debaixo da terra (2026-10-11, js/260)
+  { id: 'dragao', nome: 'O Covil do Dragão' },   // o vulcão de Cinzarel (2026-10-11), debaixo do Mar Sem Sol
+  { id: 'titas', nome: 'O Ossário dos Titãs' },   // o cemitério dos gigantes (2026-10-11): debaixo do Covil, em cima da Cidade dos Antigos
+  // a Cidade dos Antigos (290-299, 2026-10-11): 15ª, debaixo do Ossário dos Titãs
+  { id: 'antigos', nome: 'A Cidade dos Antigos' },
+  { id: 'pesadelo', nome: 'Os Salões do Pesadelo' },   // o sonho que vira real (2026-10-11), logo acima do Abismo
   { id: 'abismo', nome: 'O Abismo' },
   { id: 'escuro', nome: 'A Escuridão' }   // o fundo do mundo: fica sempre logo abaixo do Abismo (Jonathan, 2026-10-10)
 ];

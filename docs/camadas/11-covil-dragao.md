@@ -4,6 +4,26 @@ A camada 11, de 1860 a 2046 m, debaixo do Mar Sem Sol e em cima do Ossário dos 
 
 **O que a diferencia:** aqui nada é do inferno nem foi construído por gente: é rocha vulcânica natural, ouro, ossos de dragão e tocas de kobold, com luz âmbar e dourada, enquanto o Abismo é carne, ruína, correntes e luz vermelho-roxa. Do Mar Sem Sol, logo acima, ela herda só o vapor: lá tudo é água e escuro, aqui tudo é seco e brilha.
 
+## Como ficou (feito em 2026-10-11)
+
+A camada está no jogo, nos arquivos `js/270-dragao-api.js` a `js/279-dragao-save.js`. Os números da reserva antiga desta ficha (arquivos 180 a 189, blocos 448 a 479, zonas 49 a 52) foram trocados pelos da reserva do plano das 5 camadas; as seções abaixo continuam valendo como desenho, com os números daqui.
+
+- **Lugar:** a 13ª camada da ordem nova (... Reino Élfico, 11ª; Mar Sem Sol, 12ª; **Covil do Dragão, 13ª**; Ossário, Antigos, Pesadelo; Abismo; Escuridão), logo debaixo do Mar Sem Sol. São **186 linhas de altura** (`DG_D = 186`). A profundidade final em metros acerta quando as camadas feitas em paralelo forem juntadas. Nesta cópia só o Covil existe debaixo dos elfos: fica de **2046 a 2232 m** (`DG_TOP = 2046`), nas linhas `DG_S0 = 2092` a 2277 do mundo (`WH = 2690`), e o Abismo vem logo abaixo (lê `dgExits` e `dgBoss`). Sem o Mar, `dgAbove()` usa o Reino Élfico (as duas descidas saem das Raízes Fundas); com o Mar, usa `msExits`.
+- **Faixas** (`DG_BANDS = [0, 46, 98, 150, 186]`, `DG_BAND_NAMES`, `dragonBand`): Chaminés de Vapor, Túneis Kobold, Tubos de Lava, Leito de Ouro; **zonas 61 a 64** (`DG_ZONE0 = 61`, nomes e frases no 279).
+- **Ids:** blocos **736 a 762** (`DG_TUFO` 736 a `DG_O_DRACONIO` 749, decoração 750 a 761, `DG_OURO_QUENTE` 762; 746 é a crosta de magma da borda da cratera). O magma corrente é a própria lava do jogo (`DG_MAGMA = LAVA`), com o fluxo desenhado por cima só no Covil. Paredes **103 a 107** (`WDG_TUFO`, `WDG_ANDESITO`, `WDG_TAIPA`, `WDG_LAVA`, `WDG_OBSIDIANA`); terceira camada 66 a 68.
+- **Nível:** pela posição no registro 129: `layerLvl(layerLo('dragao'), d)`. Nesta cópia `layerLo('dragao') = 25` (25 na metade de cima, 26 da metade para baixo) e o chefe `layerBossLvl('dragao') = 27` (conferido no navegador). Com o Mar e as outras camadas juntadas os números sobem sozinhos.
+- **Arquivos:** 270 api (ids, faixas, `dgAbove`, `dgSafe`, os estados do herói), 271 blocos, 272 objetos (**30 objetos**, `DG_PROP_PLAN`), 273 kobolds (`kobfalange`, `kobfunda`, `kobfundidor`, `kobarmad`, `kobmontado`), 274 dracos (`criadraco`, `camaleao`, `serpe`, `dracocour`, `wyrm`), 275 mundo (`dgBuild`, `dgAfter`, veios, `CATH_SPAWN` das zonas 61 a 64, nível, partículas, fornalha e lojas), 276 ouro solto (deslizar, `dgQuake`, `dgMelt`, fios de armadilha, pés presos, puxado, agarrado), 277 Cinzarel (a Cratera, `dgDress`, 3 fases, a Escama de Cinzarel), 278 dracônio (metal, materiais, 3 bases), 279 save (nomes das zonas; `cinzarel.dead`). A paisagem de som `dragao` fica no 97.
+- **Spawn:** os pesos da seção 6, em inteiros; até 8, 9, 9 e 10 monstros por faixa. Nada nasce perto das câmaras de pouso, na cratera nem nos Tubos Frios.
+- **Minérios:** carvão em todas as faixas (tufo e andesito nas Chaminés e Túneis, 22 e 8 veios por `WSC`; andesito e lava cordada nos Tubos e no Leito, 8 veios). Dracônio em veios perto do fogo (a até 6 blocos de magma, ouro solto ou crosta) na obsidiana, no osso, na lava cordada e no andesito, nas faixas Tubos e Leito (14 e 12 por `WSC`), e mais 6 por `WSC` longe do fogo na obsidiana e na lava cordada. **8 minérios por barra** (`FURN.min_draconio`), nível de forja `layerForgeIl('dragao')` (23 nesta cópia); as 9 peças de dracônio na bigorna. As bases da camada têm nível `layerLo('dragao')`; a Escama de Cinzarel, o do chefe.
+- **Chefe:** Cinzarel, nível 27 nesta cópia: vida 330 x (1 + 0,3 x 26) = 2904 e dano 9 x (1 + 0,2 x 26) = 56 antes do balanço geral do 49 (no jogo: 726 de vida e 22 de dano), 560 de XP. Solta a Escama de Cinzarel (escudo lendário), dracônio, escamas, glândulas, moedas antigas, poções e uma das três bases.
+- **Lojas:** o Grimaldo compra dracônio (minério e barra), escama de draco e obsidiana rajada; a Marta, glândula de fogo; o Odo, moeda antiga.
+- **Wiki:** aba Dragão em Biomas (faixas, minérios, chefe, blocos e objetos por faixa), os monstros por faixa em Inimigos e Cinzarel em Chefes.
+
+**Decisões tomadas** (as recomendadas na seção 15):
+1. Ouro solto: **1 moeda de ouro por bloco minerado**, nada quando ele só desliza; e 1 vez em 20 uma Moeda Antiga.
+2. O primeiro golpe em Cinzarel dormindo **conta dobrado**.
+3. O magma corrente **não empurra** o herói: queima como a lava, e o movimento fica só na textura.
+
 ---
 
 ## 1. Identidade
@@ -225,8 +245,8 @@ O jogo ainda não tem bloco que cai. O Covil precisa de um só: `DG_OURO_SOLTO`.
 | `js/188-draconio.js` | o metal na fornalha e na bigorna, as bases temáticas |
 | `js/189-dragao-save.js` | `cinzarel.dead`, o estado do monte, as missões |
 
-## 15. Decisões em aberto
+## 15. Decisões (resolvidas em 2026-10-11, pela opção recomendada; ver "Como ficou" no topo)
 
-1. **Quanto ouro dá o ouro solto?** Um monte grande pode virar fonte infinita de dinheiro. Recomendo 1 moeda por bloco minerado e nada quando o bloco só desliza.
-2. **O golpe no dragão dormindo.** Recomendo manter o golpe dobrado: premia quem chega quieto, combina com o clima de ladrão e não muda a luta depois.
-3. **O magma corrente empurra o herói?** Seria um perigo novo nos canais. Recomendo não: ele queima como a lava de hoje, e o movimento fica só na textura.
+1. **Quanto ouro dá o ouro solto?** Um monte grande pode virar fonte infinita de dinheiro. Recomendo 1 moeda por bloco minerado e nada quando o bloco só desliza. **Resolvido:** assim, mais 1 Moeda Antiga a cada 20 blocos.
+2. **O golpe no dragão dormindo.** Recomendo manter o golpe dobrado: premia quem chega quieto, combina com o clima de ladrão e não muda a luta depois. **Resolvido:** golpe dobrado.
+3. **O magma corrente empurra o herói?** Seria um perigo novo nos canais. Recomendo não: ele queima como a lava de hoje, e o movimento fica só na textura. **Resolvido:** não empurra.

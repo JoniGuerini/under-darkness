@@ -3,7 +3,7 @@
 /* ================= início e busca ================= */
 (() => {
   const gear = () => Object.keys(ITEMS).filter(id => ITEMS[id].slot);
-  const ativos = () => { const s = new Set(['rei', 'maeteia', 'filhote', 'yetiancestral', 'reigoblin', 'maeesporo', 'principecaos', 'sineiro', 'cervo', 'nox', 'autoforja', 'rainha', 'olhocometa']); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
+  const ativos = () => { const s = new Set(['rei', 'maeteia', 'filhote', 'yetiancestral', 'reigoblin', 'maeesporo', 'principecaos', 'sineiro', 'cervo', 'nox', 'autoforja', 'rainha', 'olhocometa', 'dama', 'leviata', 'cinzarel', 'tita', 'arquiteto', 'semrosto']); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
   UDW.ativos = ativos;
 
   UDW.pages.inicio = {
