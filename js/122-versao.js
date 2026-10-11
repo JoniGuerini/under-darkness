@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.25.4';
+const VERSAO = '0.26.0';
 const NOVIDADES = [
+  { v: '0.26.0', data: '11/10/2026', titulo: 'Plataforma', itens: [
+    'Nova receita no Criar: 1 madeira vira 8 plataformas. A plataforma é uma tábua fina: você pula através dela por baixo e para em cima, para atravessar buracos e subir penhascos. S + pulo desce por ela.'
+  ] },
   { v: '0.25.4', data: '11/10/2026', titulo: 'Ícones dos montantes', itens: [
     'Ícones novos para todos os montantes, incluindo o Montante do Eclipse.'
   ] },

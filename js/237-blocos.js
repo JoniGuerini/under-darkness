@@ -71,6 +71,8 @@ const BLK_BIOMES = [   // [nome, primeiro número de bloco, último]
 const BLK_PAGES = BLK_BIOMES.map(([name, a, b]) => ({ name, ids: BLK_IDS.filter(id => ITEMS[id].block >= a && ITEMS[id].block <= b) }))
   .filter(P => P.ids.length);
 { const t = BLK_PAGES[0].ids, k = t.indexOf('terra'); if (k > 0) t.unshift(t.splice(k, 1)[0]); }   // terra é a primeira casa
+// a plataforma (239) usa um número da faixa da mina, mas é feita de madeira: fica na Superfície, logo depois da madeira
+if (ITEMS.plataforma) { for (const P of BLK_PAGES) { const k = P.ids.indexOf('plataforma'); if (k >= 0) P.ids.splice(k, 1); } const t = BLK_PAGES[0].ids; t.splice(t.indexOf('madeira') + 1, 0, 'plataforma'); }
 const BLK_PER = 20;
 let blkPage = 0;
 function buildBlk() {
