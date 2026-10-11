@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.28.0';
+const VERSAO = '0.28.1';
 const NOVIDADES = [
+  { v: '0.28.1', data: '11/10/2026', titulo: 'Wiki', itens: [
+    'Na wiki, o Covil do Dragão aparece no lugar certo: debaixo do Mar Sem Sol, de 2232 a 2418 m.'
+  ] },
   { v: '0.28.0', data: '11/10/2026', titulo: 'Cinco camadas novas', itens: [
     'O Mar Sem Sol (camada 12, 2046 a 2232 m), com O Leviatã e o oricalco.',
     'O Covil do Dragão (camada 13, 2232 a 2418 m), com Cinzarel, o Dragão Ancião, e o dracônio.',
