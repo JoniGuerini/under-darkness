@@ -1,11 +1,11 @@
 'use strict';
 /* modo deus, só para testes: F4 liga e desliga. Em Menu > Testes > Modo deus dá para ligar e desligar o modo
    e cada um dos efeitos dele: sem dano (o herói não perde vida), mana infinita, um golpe mata (qualquer alvo,
-   chefes inclusive) e luz total (o subterrâneo fica bem menos escuro, ainda com sombra). Os efeitos começam todos ligados. Nada disso vai para
+   chefes inclusive) luz total (o subterrâneo fica bem menos escuro, ainda com sombra) e tochas infinitas (põe tocha sem ter nenhuma). Os efeitos começam todos ligados. Nada disso vai para
    o save: todo jogo começa com o modo desligado. Enquanto ligado, aparece uma linha "Deus" no painel do canto superior direito.
    `modoDeus` (lido por outros arquivos para pular dano) quer dizer "o herói não toma dano agora": modo ligado e "Sem dano" ligado. */
 let deusOn = false;
-const DEUS = { vida: true, mana: true, golpe: true, luz: true };
+const DEUS = { vida: true, mana: true, golpe: true, luz: true, tocha: true };
 const deusFx = k => deusOn && DEUS[k];
 Object.defineProperty(window, 'modoDeus', { configurable: true, get: () => deusFx('vida') });
 (function () {
@@ -27,7 +27,7 @@ let deusMenu = () => { };
 (function () {
   const list = $('tpList'); if (!list || !window.__tp) return;
   const h2 = $('pause').querySelector('.card h2');
-  const OPC = [['vida', 'Sem dano'], ['mana', 'Mana infinita'], ['golpe', 'Um golpe mata'], ['luz', 'Luz total']];
+  const OPC = [['vida', 'Sem dano'], ['mana', 'Mana infinita'], ['golpe', 'Um golpe mata'], ['luz', 'Luz total'], ['tocha', 'Tochas infinitas']];
   const lbl = (t, on) => t + ': ' + (on ? 'ligado' : 'desligado');
   let aberto = false;
   const btn = (txt, fn, id) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = txt; if (id) b.id = id; b.addEventListener('click', fn); b.addEventListener('pointerenter', () => b.focus({ preventScroll: true })); list.appendChild(b); return b; };
@@ -65,6 +65,14 @@ let deusMenu = () => { };
   const a = DARK.amb, x = DARK.ex, c = DARK.cap, l = pl.light;
   DARK.amb = 0.22; DARK.ex = 1.3; DARK.cap = 0.95; pl.light = Math.max(l || 0, 2);
   try { return _cl(cx, cy); } finally { DARK.amb = a; DARK.ex = x; DARK.cap = c; pl.light = l; }
+}; }
+// tochas infinitas: enquanto põe a tocha (11-jogador), a conta de tochas (05 + cinto do 231) diz que tem e não tira nenhuma
+{ const _pt = placeTorch; placeTorch = function (tx, ty) {
+  if (!deusFx('tocha')) return _pt(tx, ty);
+  const ci = countItem, ri = removeItem;
+  countItem = id => id === 'tocha' ? Math.max(1, ci(id)) : ci(id);
+  removeItem = (id, n = 1) => id === 'tocha' ? true : ri(id, n);
+  try { return _pt(tx, ty); } finally { countItem = ci; removeItem = ri; }
 }; }
 // um golpe, uma morte. Fica por fora de todos os outros embrulhos de hitEnemy, por isso vem no fim.
 // Respeita só os momentos em que o chefe não pode ser tocado (entrada, queda e volta do Rei Esqueleto);
