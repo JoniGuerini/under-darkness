@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.25.1';
+const VERSAO = '0.25.2';
 const NOVIDADES = [
+  { v: '0.25.2', data: '11/10/2026', titulo: 'A Dama do Espelho', itens: [
+    'Nova arte na tela de início: A Dama do Espelho, do Reino Élfico.'
+  ] },
   { v: '0.25.1', data: '11/10/2026', titulo: 'Tochas infinitas', itens: [
     'Modo deus (F4, para testes): nova opção Tochas infinitas em Menu > Testes > Modo deus, que põe tocha sem gastar nenhuma.'
   ] },
