@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.26.0';
+const VERSAO = '0.27.0';
 const NOVIDADES = [
+  { v: '0.27.0', data: '11/10/2026', titulo: 'Árvores tombam', itens: [
+    'A árvore agora aguenta 4 golpes de picareta; a cada golpe ela treme e solta folhas.',
+    'No último golpe ela tomba para o lado, some ao tocar o chão e a madeira fica espalhada ao longo de onde ela caiu.'
+  ] },
   { v: '0.26.0', data: '11/10/2026', titulo: 'Plataforma', itens: [
     'Nova receita no Criar: 1 madeira vira 8 plataformas. A plataforma é uma tábua fina: você pula através dela por baixo e para em cima, para atravessar buracos e subir penhascos. S + pulo desce por ela.'
   ] },
