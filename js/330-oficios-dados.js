@@ -1,10 +1,10 @@
 'use strict';
 
-/* ================= ofícios: as árvores de talentos de Ferraria, Culinária e Encantamento (só dados; a wiki carrega também) =================
+/* ================= ofícios: as árvores de talentos de Ferraria, Culinária, Encantamento e Alquimia (só dados; a wiki carrega também) =================
    Pedido do Jonathan (2026-10-11): árvores no estilo do Diablo 2 para os ofícios. Usar a mecânica dá XP naquele ofício;
    cada nível do ofício dá 1 ponto para gastar na árvore dele. Cada árvore é uma aba "Talentos" na tela de criação dela:
    Ferraria na forja do Grimaldo (a fornalha, a bigorna, as runas e o Criar do inventário dão XP), Culinária na cozinha
-   do Odo, Encantamento na oficina do Teodoro. A tela e os efeitos ficam no 331-oficios.js.
+   do Odo, Encantamento na oficina do Teodoro, Alquimia no alambique da Marta (pedido do Jonathan, 2026-10-11, à tarde). A tela e os efeitos ficam no 331-oficios.js.
    Como no Diablo 2: cada ofício tem três galhos (abas à direita), cada galho é uma grade de 3 colunas e 6 linhas;
    cada linha pede um nível mínimo do ofício (OF_ROW_LVL); um talento só recebe ponto se os que apontam para ele
    (setas, `req`) já tiverem pelo menos 1; cada talento vai até `max` pontos e o efeito cresce a cada ponto.
@@ -96,6 +96,35 @@ const OFICIOS = {
         { id: 'af_cristal', n: 'Afinidade: Cristal', r: 3, c: 1, max: 5, ic: 'i:min_cristal', req: ['af_safira'], fx: [['af:min_cristal', 3]], t: 'Com cristal bruto, X% da chance de cada raridade sobe para a de cima.' },
         { id: 'af_rubi', n: 'Afinidade: Rubi', r: 4, c: 0, max: 5, ic: 'i:gema_rubi', req: ['af_cristal'], fx: [['af:gema_rubi', 3]], t: 'Com rubi, X% da chance de cada raridade sobe para a de cima.' },
         { id: 'perfeita', n: 'Lapidação Perfeita', r: 5, c: 1, max: 1, ic: 't:aparo', req: ['af_rubi'], fx: [['velEnc', 50]], t: 'O encanto pega X% mais rápido.' }
+      ] }
+    ]
+  },
+  alquimia: {
+    name: 'Alquimia', npc: 'Marta',
+    tabs: [
+      { k: 'alambique', name: 'Alambique', sk: [
+        { id: 'fogo_brando', n: 'Fogo Brando', r: 0, c: 0, max: 5, ic: 'i:pocao', fx: [['velAlq', 10]], t: 'O alambique prepara X% mais rápido.' },
+        { id: 'vidro_soprado', n: 'Vidro Soprado', r: 0, c: 2, max: 5, ic: 'i:frasco', fx: [['frasco', 8]], t: 'X% de chance de o frasco de vidro voltar.' },
+        { id: 'mao_firme', n: 'Mão Firme', r: 1, c: 1, max: 5, ic: 'i:pocao_maior', req: ['fogo_brando'], fx: [['dose', 4]], t: 'X% de chance de sair um frasco a mais.' },
+        { id: 'destilaria', n: 'Destilaria', r: 2, c: 2, max: 5, ic: 'i:gel', req: ['vidro_soprado'], fx: [['parte', 6]], t: 'X% de chance de as partes de monstro da receita voltarem.' },
+        { id: 'fervura', n: 'Fervura Alta', r: 3, c: 0, max: 5, ic: 'i:pocao_mana', req: ['fogo_brando'], fx: [['velAlq', 6]], t: 'O alambique prepara mais X% mais rápido.' },
+        { id: 'alambique_duplo', n: 'Alambique Duplo', r: 5, c: 1, max: 1, ic: 'i:pocao_superior', req: ['mao_firme', 'destilaria'], fx: [['terco', 1]], t: 'A cada três frascos preparados, o terceiro não gasta ingredientes.' }
+      ] },
+      { k: 'ervas', name: 'Ervas', sk: [
+        { id: 'colheita', n: 'Colheita Farta', r: 0, c: 0, max: 5, ic: 'i:erva_sangue', fx: [['colheita', 6]], t: 'X% de chance de vir uma erva a mais ao colher.' },
+        { id: 'terra_boa', n: 'Terra Boa', r: 0, c: 2, max: 5, ic: 'i:lirio_gruta', fx: [['rebrota', 8]], t: 'Volta a nascer X% a mais das ervas colhidas a cada estação.' },
+        { id: 'herbario', n: 'Herbário', r: 1, c: 1, max: 5, ic: 'i:losna', req: ['colheita'], fx: [['poupaErva', 6]], t: 'X% de chance de as ervas da receita voltarem.' },
+        { id: 'cheiro_mato', n: 'Cheiro de Mato', r: 2, c: 0, max: 5, ic: 't:inicio', req: ['colheita'], fx: [['xp', 10]], t: '+X% de experiência de Alquimia.' },
+        { id: 'estacao_curta', n: 'Estação Curta', r: 3, c: 2, max: 5, ic: 'i:flor_geada', req: ['terra_boa'], fx: [['estacao', 10]], t: 'As ervas voltam a nascer X% mais cedo.' },
+        { id: 'jardineira', n: 'Mão de Jardineira', r: 5, c: 1, max: 1, ic: 'i:raiz_brasa', req: ['herbario', 'estacao_curta'], fx: [['jardim', 1]], t: 'Toda erva colhida vem com uma a mais.' }
+      ] },
+      { k: 'frascos', name: 'Frascos', sk: [
+        { id: 'dose_forte', n: 'Dose Forte', r: 0, c: 0, max: 5, ic: 't:vida', fx: [['curaPot', 6]], t: 'Poções de vida curam X% a mais.' },
+        { id: 'mana_destilada', n: 'Mana Destilada', r: 0, c: 2, max: 5, ic: 'i:pocao_mana_maior', fx: [['manaPot', 6]], t: 'Poções de mana devolvem X% a mais.' },
+        { id: 'gole_rapido', n: 'Gole Rápido', r: 1, c: 1, max: 5, ic: 't:vel', req: ['dose_forte'], fx: [['gole', 8]], t: 'Poções de vida curam em X% menos tempo.' },
+        { id: 'elixir_longo', n: 'Elixir Longo', r: 2, c: 0, max: 5, ic: 'i:elixir_pedra', req: ['dose_forte'], fx: [['elixT', 10]], t: 'Elixires duram X% a mais.' },
+        { id: 'ultima_gota', n: 'Última Gota', r: 3, c: 2, max: 5, ic: 't:crit', req: ['mana_destilada'], fx: [['gota', 4]], t: 'X% de chance de beber sem gastar o frasco.' },
+        { id: 'sangue_alquimista', n: 'Sangue de Alquimista', r: 5, c: 1, max: 1, ic: 'i:elixir_vida', req: ['elixir_longo', 'ultima_gota'], fx: [['sangue', 1]], t: 'Os elixires não acabam quando você morre.' }
       ] }
     ]
   }

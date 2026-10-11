@@ -1,4 +1,4 @@
-/* Ofícios: a aba "Talentos" da forja, da cozinha e da oficina (js/331-oficios.js). A placa da árvore é pixel art em múltiplos inteiros */
+/* Ofícios: a aba "Talentos" da forja, da cozinha, da oficina e do alambique (js/331-oficios.js, 332-oficio-alquimia.js). A placa da árvore é pixel art em múltiplos inteiros */
 .forgep .oftal{display:none}
 .forgep.ofon>.prof{display:none}
 .forgep.ofon>.oftal{display:grid;flex:1;min-height:0;grid-template-columns:auto minmax(0,1fr);gap:14px}

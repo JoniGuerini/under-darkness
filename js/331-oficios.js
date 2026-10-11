@@ -1,6 +1,6 @@
 'use strict';
 
-/* ================= ofícios: XP, pontos, efeitos e a aba "Talentos" de Ferraria, Culinária e Encantamento =================
+/* ================= ofícios: XP, pontos, efeitos e a aba "Talentos" de Ferraria, Culinária e Encantamento (a Alquimia fica no 332-oficio-alquimia.js) =================
    Dados das árvores no 330-oficios-dados. Aqui:
    1. Estado: `ofi[prof] = { xp, lvl, sk: { id: pontos } }`; 1 ponto por nível do ofício (o nível 1 já tem 1), até OF_MAX_LVL.
    2. XP: fundir uma barra (2 + tier do metal), forjar uma peça (5 + 2 × tier), gravar uma runa (6), uma receita do Criar (1)
@@ -238,9 +238,8 @@ function ofSub(id, el) {
 }
 function ofChanged(p) {
   ofDirty(p); recalc(); invDirty = true;
-  if (p === 'encanto' && typeof encDirty !== 'undefined') encDirty = true;
-  if (p === 'forja') { forgeDirty = true; if (typeof refreshCraft === 'function') refreshCraft(); }
-  if (p === 'cozinha') ck.dirty = true;
+  OF_REDRAW[p]();
+  if (p === 'forja' && typeof refreshCraft === 'function') refreshCraft();
   saveGame();
 }
 
@@ -248,6 +247,10 @@ function ofChanged(p) {
 const OF_BW = 120, OF_BH = 162;
 const ofCX = c => 20 + c * 40, ofCY = r => 16 + r * 26;
 const OFUI = {};
+// cada janela: se está aberta e como pedir para ela se redesenhar (o 332 põe a da alquimia)
+const OF_OPEN = { forja: () => forgeOpen(), cozinha: () => cookOpen(), encanto: () => encOpen() };
+const OF_REDRAW = { forja: () => { forgeDirty = true; }, cozinha: () => { ck.dirty = true; }, encanto: () => { encDirty = true; } };
+const OF_BG = {};
 function ofDirty(p) { const U = OFUI[p]; if (U) U.dirty = true; ofTabPip(p); }
 function ofTabPip(p) { const U = OFUI[p]; if (U) U.tabBtn.classList.toggle('pts', ofPts(p) > 0); }
 
@@ -256,7 +259,8 @@ const ofBgCache = {};
 function ofBoardBg(p) {
   if (ofBgCache[p]) return ofBgCache[p];
   const c = mk(OF_BW, OF_BH), x = c.getContext('2d');
-  if (p === 'cozinha') vBoards(x, 0, 0, OF_BW, OF_BH, RAMP.beam, 3302);
+  if (OF_BG[p]) OF_BG[p](x);
+  else if (p === 'cozinha') vBoards(x, 0, 0, OF_BW, OF_BH, RAMP.beam, 3302);
   else if (p === 'encanto') vMasonry(x, 0, 0, OF_BW, OF_BH, 3303, { ramps: [RAMP.stoneB, RAMP.stoneBlue] });
   else vMasonry(x, 0, 0, OF_BW, OF_BH, 3301, { heat: (px, py) => py > 132 ? (py - 132) / 30 : 0, soot: (px, py) => py < 10 ? (10 - py) * 0.12 : 0 });
   // a placa escurece para os talentos saltarem; moldura entalhada
@@ -366,9 +370,7 @@ function ofView(p, on) {
   U.on = on; U.section.classList.toggle('ofon', on); U.dirty = true; hideTip();
   ofTabsOn(U);
   if (on) { ofSize(U); ofRender(U); }
-  else if (p === 'forja') forgeDirty = true;
-  else if (p === 'cozinha') ck.dirty = true;
-  else if (p === 'encanto') encDirty = true;
+  else OF_REDRAW[p]();
 }
 function ofTabsOn(U) {
   for (const b of U.tabBtn.parentNode.querySelectorAll('.tab')) {
@@ -433,7 +435,7 @@ addEventListener('resize', () => { for (const p in OFUI) { const U = OFUI[p]; if
 { const _of = openForge; openForge = function (n) { _of(n); ofView('forja', false); }; }
 { const _rf = refreshForge; refreshForge = function () {
   const r = _rf();
-  for (const p in OFUI) { const U = OFUI[p]; if (!U.on) continue; if (p === 'forja' ? !forgeOpen() : p === 'cozinha' ? !cookOpen() : !encOpen()) continue; ofTabsOn(U); ofRender(U); }
+  for (const p in OFUI) { const U = OFUI[p]; if (!U.on) continue; if (!OF_OPEN[p]()) continue; ofTabsOn(U); ofRender(U); }
   return r;
 }; }
 // a cozinha: ganha abas no cabeçalho (Cozinha e Talentos)

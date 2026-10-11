@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.29.0';
+const VERSAO = '0.30.0';
 const NOVIDADES = [
+  { v: '0.30.0', data: '11/10/2026', titulo: 'Alquimia', itens: [
+    'Quarto ofício: Alquimia, com a árvore de talentos numa aba Talentos no alambique da Marta. Ganha XP preparando frascos e colhendo ervas.'
+  ] },
   { v: '0.29.0', data: '11/10/2026', titulo: 'Talentos de ofício', itens: [
     'Árvores de talentos de ofício: Ferraria, Culinária e Encantamento. Cada ofício ganha XP quando você forja, cozinha ou encanta, e a árvore fica numa aba Talentos na forja, na cozinha e na oficina do Teodoro.',
     'Nova página Ofícios na wiki.'
