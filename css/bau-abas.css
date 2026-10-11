@@ -1,0 +1,58 @@
+/* ================= the village chest's tabs (js/332-bau-abas.js) =================
+   Each tab is a short oak board stained with its colour (the board's grain shows through), bevelled like the chest's
+   own buttons. The open tab is lit and edged in brass; the others sit darker. The + is a plain board with a brass cross. */
+#stash .chestp .abas{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px;padding:0 2px 0;margin-bottom:-10px;
+  background:linear-gradient(90deg,#54360c,#d29e34 50%,#54360c) bottom/100% 2px no-repeat;padding-bottom:2px}
+#stash .chestp .aba{
+  --a0:#341c0e;--a1:#6c3e1d;--a2:#a96a34;
+  position:relative;min-width:44px;height:30px;padding:0 12px 1px;margin:0;
+  font:600 14px/1 "Rubik",system-ui,sans-serif;color:#f4ecd8;text-shadow:1px 1px 0 #000,0 0 2px #000;white-space:nowrap;
+  background:var(--bau-board) 0 0/180px 42px,var(--a1);background-blend-mode:luminosity,normal;image-rendering:pixelated;
+  border:2px solid #000;border-bottom:0;cursor:pointer;
+  box-shadow:inset 0 2px 0 var(--a2),inset 2px 0 0 var(--a2),inset -2px 0 0 var(--a0),inset 0 -3px 0 var(--a0);
+  filter:brightness(.72) saturate(.85);
+}
+#stash .chestp .aba:hover,#stash .chestp .aba.over{filter:brightness(.95)}
+#stash .chestp .aba.on{
+  height:34px;filter:none;color:#fff6dc;
+  box-shadow:inset 0 0 0 2px #d29e34,inset 0 4px 0 var(--a2),inset 4px 0 0 var(--a2),inset -4px 0 0 var(--a0);
+}
+#stash .chestp .aba.on::after{content:"";position:absolute;left:2px;right:2px;bottom:-2px;height:2px;background:var(--a1)}
+#stash .chestp .aba.over{outline:2px solid #f6d27a;outline-offset:-4px}
+#stash .chestp .aba-mais{
+  width:32px;height:30px;padding:0;margin:0 0 0 2px;cursor:pointer;
+  font:800 22px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;
+  background:var(--bau-board) 0 0/180px 42px;image-rendering:pixelated;
+  border:2px solid #000;border-bottom:0;box-shadow:inset 0 2px 0 #a96a34,inset 0 -3px 0 #341c0e;filter:brightness(.8);
+}
+#stash .chestp .aba-mais:hover{filter:brightness(1.05)}
+
+/* the two small windows: buying a tab and editing one */
+#stash .chestp .bau-pop{
+  position:absolute;z-index:6;min-width:180px;box-sizing:border-box;padding:8px 10px 10px;
+  background:#1c120b var(--bau-wall) 0 0/180px 180px;image-rendering:pixelated;color:var(--oak-txt);
+  border:10px solid #000;border-image:var(--bau-frame-sm) 5 / 10px stretch;
+  box-shadow:0 6px 0 rgba(0,0,0,.55),0 0 30px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;gap:8px;align-items:stretch;
+}
+#stash .chestp .bau-pop[hidden]{display:none}
+#stash .chestp .bau-pop h4{margin:0;font:600 15px/1.1 "Rubik",system-ui,sans-serif;color:var(--oak-hi);text-align:center;text-shadow:1px 1px 0 #000}
+#stash .chestp .bau-pop .preco{margin:0;display:flex;justify-content:center;align-items:center;gap:6px;font:700 22px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
+#stash .chestp .bau-pop .preco .vc{width:18px;height:18px;image-rendering:pixelated}
+#stash .chestp .bau-pop .preco.cant{color:#d0604a}
+#stash .chestp .bau-pop .bts{display:flex;gap:6px;justify-content:center}
+#stash .chestp .bau-pop .bts button{flex:1;text-align:center;justify-content:center}
+#stash .chestp .bau-pop button:disabled{filter:grayscale(.7) brightness(.6);cursor:default}
+#stash .chestp .bau-pop input{
+  box-sizing:border-box;width:100%;height:32px;padding:0 8px;
+  font:600 15px "Rubik",system-ui,sans-serif;color:#f4ecd8;caret-color:#f6d27a;
+  background:rgba(6,3,1,.75);border:2px solid #000;box-shadow:inset 0 0 0 1px #7e5414,inset 2px 2px 0 1px rgba(0,0,0,.6);outline:none;
+}
+#stash .chestp .bau-pop input:focus{box-shadow:inset 0 0 0 1px #d29e34,inset 2px 2px 0 1px rgba(0,0,0,.6)}
+#stash .chestp .bau-pop .cores{display:grid;grid-template-columns:repeat(5,26px);gap:5px;justify-content:center}
+#stash .chestp .bau-pop .cor{
+  width:26px;height:26px;padding:0;cursor:pointer;
+  background:var(--bau-board) 0 0/180px 42px,var(--a1);background-blend-mode:luminosity,normal;image-rendering:pixelated;
+  border:2px solid #000;box-shadow:inset 2px 2px 0 var(--a2),inset -2px -2px 0 var(--a0);
+}
+#stash .chestp .bau-pop .cor.on{box-shadow:inset 0 0 0 2px #f6d27a,inset 4px 4px 0 var(--a2),inset -4px -4px 0 var(--a0)}

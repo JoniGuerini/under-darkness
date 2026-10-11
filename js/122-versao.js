@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.30.0';
+const VERSAO = '0.31.0';
 const NOVIDADES = [
+  { v: '0.31.0', data: '11/10/2026', titulo: 'Baú com abas', itens: [
+    'O baú do vilarejo ganhou abas: começa com uma, e o + no fim da fileira compra a próxima com ouro. Botão direito ou dois cliques numa aba trocam o nome e a cor; arrastar um item até uma aba guarda nela.'
+  ] },
   { v: '0.30.0', data: '11/10/2026', titulo: 'Alquimia', itens: [
     'Quarto ofício: Alquimia, com a árvore de talentos numa aba Talentos no alambique da Marta. Ganha XP preparando frascos e colhendo ervas.'
   ] },

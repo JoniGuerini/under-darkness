@@ -21,6 +21,12 @@
         <li>Com vigor zero, a guarda quebra: o escudo cai e só volta quando o vigor chegar a ${VIG_BACK}.</li>
         <li>O vigor só recupera com o escudo abaixado: ${VIG_REGEN} por segundo (${VIG_REGEN_BROKEN} com a guarda quebrada), depois de ${N(VIG_DELAY, 1)} s.</li></ul>`;
       h += `<h2>Experiência</h2><p class="nota">Monstros dão pouca experiência; minerar não dá nenhuma.</p><div class="tw"><table class="grade compacta"><thead><tr><th>Nível</th>${Array.from({ length: 15 }, (_, i) => `<th class="n">${i + 1}</th>`).join('')}</tr></thead><tbody><tr><td>XP para subir</td>${Array.from({ length: 15 }, (_, i) => `<td class="n">${xpNeed(i + 1)}</td>`).join('')}</tr></tbody></table></div>`;
+      h += `<h2>Baú do vilarejo</h2><div class="stats">${UDW.stat(STASH_PER, 'casas por aba')}${UDW.stat(STASH_MAX_TABS, 'abas no máximo')}</div>
+        <ul class="regras"><li>Começa com uma aba. O + no fim da fileira de abas mostra o preço da próxima e pede confirmação antes de gastar.</li>
+        <li>Clique direito ou duplo clique numa aba: muda o nome e a cor dela.</li>
+        <li>Arrastar um item e soltar em cima de uma aba guarda ele naquela aba.</li>
+        <li>Guardar tudo, Empilhar, Pegar tudo e Organizar valem para a aba aberta. Forja, alquimia e cozinha contam o que está em todas as abas.</li></ul>`
+        + UDW.table([{ t: 'Aba' }, { t: 'Preço em ouro', cls: 'n' }], STASH_PRECO.map((p, i) => ({ cells: [String(i + 1), i ? p.toLocaleString('pt-BR') : 'já vem com o baú'] })));
       h += `<h2>Mundo</h2><div class="stats">${UDW.stat(`${WW} × ${WH}`, 'blocos de largura e altura')}${UDW.stat(T + ' px', 'tamanho do bloco')}${UDW.stat(DAY_LEN / 60 + ' min', 'um dia inteiro')}</div>
         <ul class="regras"><li>O mundo dá a volta: andando sempre para um lado, você chega pelo outro.</li>
         <li>Dia das 6h às 18h, noite das 18h às 6h. Um jogo novo começa às 18h.</li>

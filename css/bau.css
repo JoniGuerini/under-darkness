@@ -2,9 +2,9 @@
    Its window is the chest: oak boards round the edge, iron corner plates and straps, the dark inside of the lid
    behind the slots, brass for the title. Textures come from js/27-bau.js (--bau-*). Your inventory stays yours. */
 #stash{padding-block:10px}
-#stash .inv{width:min(1300px,100%);align-items:flex-start;flex-wrap:nowrap}
+#stash .inv{width:min(1400px,100%);align-items:flex-start;flex-wrap:nowrap}
 #stash .invcard{margin-block:0}
-@media (max-width:1320px){#stash .inv{flex-wrap:wrap}}
+@media (max-width:1420px){#stash .inv{flex-wrap:wrap}}
 
 #stash .chestp{
   --oak-hi:#e8c06a;--oak-txt:#ecdcbc;--oak-dim:#b49a76;
@@ -40,11 +40,8 @@
   box-shadow:0 3px 0 rgba(0,0,0,.55);padding:2px 10px;
 }
 #stash .chestp button.ghost:hover{filter:brightness(1.15)}
-#stash .chestp .grid{grid-template-columns:repeat(8,52px);gap:6px;padding:8px;background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 2px #000,inset 0 0 0 3px #4f2c15,inset 0 6px 14px rgba(0,0,0,.6)}
+#stash .chestp .grid{grid-template-columns:repeat(10,52px);gap:6px;padding:8px;background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 2px #000,inset 0 0 0 3px #4f2c15,inset 0 6px 14px rgba(0,0,0,.6)}
 #stash .chestp .slot{background:radial-gradient(circle at 50% 40%,#2a1a10,#0c0705 80%);box-shadow:inset 0 0 0 1px var(--rc,#54360c),inset 2px 2px 0 1px rgba(0,0,0,.75),inset -2px -2px 0 1px rgba(210,158,52,.12)}
 #stash .chestp .slot.full{background:radial-gradient(circle at 50% 40%,#3a2616,#140b06 80%);box-shadow:inset 0 0 0 2px var(--rc,#7e5414),inset 3px 3px 0 2px rgba(0,0,0,.55),0 0 10px -2px var(--rc,transparent)}
 #stash .chestp .slot:hover,#stash .chestp .slot.over{background:radial-gradient(circle at 50% 40%,#4a321c,#1c1009 80%)}
-#stash .chestp .sep{background:linear-gradient(90deg,transparent,#54360c 10%,#d29e34 50%,#54360c 90%,transparent) center/100% 2px no-repeat}
-#stash .chestp .shopf{color:var(--oak-dim);max-width:466px}
-#stash .chestp .shopf b{color:var(--oak-txt)}
 @media (max-width:560px){#stash .chestp .grid{grid-template-columns:repeat(6,48px)}}

@@ -1,11 +1,17 @@
 'use strict';
 
-/* ================= the village chest: 40 slots of storage that stay home while you dig ================= */
+/* ================= the village chest: tabs of 60 slots each that stay home while you dig ================= */
 // Self-contained: it adds its own building to the village, its own window (next to your inventory, like a shop),
 // and hooks the shared item handling (refOf, itemAt, moveItem, quickAction...) by wrapping those functions.
 // Loaded before 24-boot.js, so the wraps are in place when start() builds the village and loads the save.
-const STASH_N = 40;
+// Tabs (bought with gold, Path of Exile style; their bar and editing live in js/333-bau-abas.js): `stash` stays ONE
+// flat array, tab t owning the slots t*STASH_PER .. t*STASH_PER+STASH_PER-1, so everything that walks the whole
+// chest (reagents in 93, runes in 189, the belt in 231) keeps working across all tabs without knowing about them.
+// sizes, prices and colours: js/332-bau-abas-dados.js (loaded before this file; the wiki reads it too)
+const newTab = i => ({ name: String(i + 1), cor: 0 });
+let stashTabs = [newTab(0)], stashTab = 0, STASH_N = STASH_PER;
 let stash = new Array(STASH_N).fill(null), stashOn = false, stashBuilt = false;
+const tabLo = (t = stashTab) => t * STASH_PER, tabHi = (t = stashTab) => t * STASH_PER + STASH_PER;
 const stashOpen = () => stashOn && !$('stash').hidden;
 
 /* ---- the chest itself, painted like the houses: every pixel on a 6-step ramp, lit from the top left ---- */
@@ -134,13 +140,12 @@ function buildStashUI() {
   root.innerHTML = `<div class="inv"><section class="panel chestp" aria-label="Baú">
     <header class="ch"><h3>Baú do vilarejo</h3><span id="stashCount"></span><button class="ghost sm push" id="btnStashBack" type="button">Fechar</button></header>
     <div class="acts"><button class="ghost sm" id="btnStashAll" type="button" title="Guarda tudo da mochila no baú, menos a fileira da barra">Guardar tudo</button><button class="ghost sm" id="btnStashStack" type="button" title="Guarda só o que o baú já tem: completa as pilhas e põe o resto do mesmo item nas casas livres. A fileira da barra fica.">Empilhar</button><button class="ghost sm" id="btnStashTake" type="button" title="Traz tudo do baú para a mochila, até ela encher">Pegar tudo</button><button class="ghost sm" id="btnStashSort" type="button" title="Junta as pilhas e arruma o baú">Organizar</button></div>
+    <nav class="abas" id="stashTabs" aria-label="Abas do baú"></nav>
     <div class="grid" id="stashGrid"></div>
-    <div class="sep" role="separator"></div>
-    <p class="shopf">Clique: pegar e mover, entre o baú e a mochila.<br><b>Botão direito</b> num item seu guarda no baú; num item do baú, traz para a mochila.<br>O que fica aqui é salvo junto com o jogo. <kbd>E</kbd> ou <kbd>Esc</kbd> fecha.</p>
   </section></div>`;
   document.body.insertBefore(root, $('death'));
   const g = $('stashGrid');
-  for (let i = 0; i < STASH_N; i++) { const d = document.createElement('div'); d.className = 'slot'; d.dataset.chest = String(i); d.innerHTML = '<img alt="" hidden><span class="n"></span>'; g.appendChild(d); }
+  for (let i = 0; i < STASH_PER; i++) { const d = document.createElement('div'); d.className = 'slot'; d.dataset.chest = String(i); d.innerHTML = '<img alt="" hidden><span class="n"></span>'; g.appendChild(d); }
   const p = root.querySelector('.chestp');
   p.addEventListener('pointerdown', onInvDown);
   p.addEventListener('pointermove', onInvHover);
@@ -167,26 +172,39 @@ function openStash() {
 function closeStash() { if (!stashOn) return; closeTalk(); }
 const _closeTalk = closeTalk;
 closeTalk = function () { const was = stashOn; _closeTalk(); if (stashBuilt) $('stash').hidden = true; stashOn = false; if (was) chestSfx.close(); };
+// the grid shows the open tab only: its slots are renumbered to that tab's part of the flat array
 function refreshStash(force) {
   if (!stashOpen()) return;
-  document.querySelectorAll('#stashGrid .slot').forEach(d => paintSlot(d, stash[+d.dataset.chest], force));
-  $('stashCount').textContent = `${stash.filter(Boolean).length} / ${STASH_N}`;
+  const lo = tabLo();
+  document.querySelectorAll('#stashGrid .slot').forEach((d, j) => {
+    if (+d.dataset.chest !== lo + j) { d.dataset.chest = String(lo + j); force = true; }
+    paintSlot(d, stash[lo + j], force);
+  });
+  $('stashCount').textContent = `${stash.slice(lo, lo + STASH_PER).filter(Boolean).length} / ${STASH_PER}`;
 }
 
 /* ---- moving things in and out ---- */
-function putInStash(s) {   // stacks onto what is already there first; returns what didn't fit (a count, or the item itself)
-  const mx = stackMax(s.id);
+// into one tab: stacks onto what that tab already holds first; returns what didn't fit (a count, or 1 for gear)
+function putInTab(s, t) {
+  const mx = stackMax(s.id), lo = tabLo(t), hi = tabHi(t);
   if (mx > 1) {
     let n = s.n;
-    for (const q of stash) { if (n <= 0) break; if (q && q.id === s.id && q.n < mx) { const k = Math.min(n, mx - q.n); q.n += k; n -= k; } }
-    for (let i = 0; i < STASH_N && n > 0; i++) if (!stash[i]) { const k = Math.min(n, mx); stash[i] = { id: s.id, n: k }; n -= k; }
+    for (let i = lo; i < hi && n > 0; i++) { const q = stash[i]; if (q && q.id === s.id && q.n < mx) { const k = Math.min(n, mx - q.n); q.n += k; n -= k; } }
+    for (let i = lo; i < hi && n > 0; i++) if (!stash[i]) { const k = Math.min(n, mx); stash[i] = { id: s.id, n: k }; n -= k; }
     return n;
   }
-  const i = stash.indexOf(null); if (i < 0) return 1; stash[i] = s; return 0;
+  for (let i = lo; i < hi; i++) if (!stash[i]) { stash[i] = s; return 0; }
+  return 1;
 }
-function toStash(i) {
+// anywhere in the chest (a cancelled craft giving materials back): the open tab first, then the others in order
+function putInStash(s) {
+  let left = putInTab(s, stashTab);
+  for (let t = 0; t < stashTabs.length && left; t++) if (t !== stashTab) left = putInTab(stackMax(s.id) > 1 ? { id: s.id, n: left } : s, t);
+  return left;
+}
+function toStash(i, t = stashTab) {
   const s = inv[i]; if (!s) return false;
-  const left = putInStash(s);
+  const left = putInTab(s, t);
   if (stackMax(s.id) > 1) { if (left === s.n) return false; if (left) s.n = left; else inv[i] = null; }
   else { if (left) return false; inv[i] = null; }
   return true;
@@ -205,7 +223,7 @@ function stashAll() {
 }
 // quick stack: only what the chest already holds goes in (the hotbar row stays, like Guardar tudo)
 function stashStack() {
-  const have = new Set(stash.filter(Boolean).map(s => s.id)); let moved = 0, full = false;
+  const have = new Set(stash.slice(tabLo(), tabHi()).filter(Boolean).map(s => s.id)); let moved = 0, full = false;
   for (let i = HB_BAG; i < INV_N; i++) { const s = inv[i]; if (!s || !have.has(s.id)) continue; if (toStash(i)) moved++; else full = true; }
   if (moved) { sfx.equip(); changed(false); refreshInv(); } else bad(null);
   if (full) toast('O baú está cheio');
@@ -213,20 +231,20 @@ function stashStack() {
 }
 function takeAll() {
   let moved = 0, full = false;
-  for (let i = 0; i < STASH_N; i++) if (stash[i]) { if (toBag(i)) moved++; if (stash[i]) full = true; }
+  for (let i = tabLo(); i < tabHi(); i++) if (stash[i]) { if (toBag(i)) moved++; if (stash[i]) full = true; }
   if (moved) { sfx.equip(); changed(false); refreshInv(); }
   if (full) toast('Mochila cheia: o resto ficou no baú');
   else if (!moved) { bad(null); toast('O baú está vazio'); }
 }
-function sortStash() {
-  const stacks = {}, gear = [];
-  for (const s of stash) { if (!s) continue; if (stackMax(s.id) > 1) stacks[s.id] = (stacks[s.id] || 0) + s.n; else gear.push(s); }
+function sortStash() {   // the open tab only
+  const stacks = {}, gear = [], lo = tabLo(), hi = tabHi();
+  for (const s of stash.slice(lo, hi)) { if (!s) continue; if (stackMax(s.id) > 1) stacks[s.id] = (stacks[s.id] || 0) + s.n; else gear.push(s); }
   const ord = ['weapon', 'shield', 'tool', 'head', 'body', 'feet', 'acc'];
   gear.sort((a, b) => ord.indexOf(ITEMS[a.id].slot) - ord.indexOf(ITEMS[b.id].slot) || itemRar(b) - itemRar(a));
-  stash = new Array(STASH_N).fill(null); let k = 0;
+  for (let i = lo; i < hi; i++) stash[i] = null; let k = lo;
   gear.forEach(g => { stash[k++] = g; });
   for (const id of Object.keys(stacks).sort((a, b) => (ITEMS[b].rar || 0) - (ITEMS[a].rar || 0) || (ITEMS[a].block ? 1 : 0) - (ITEMS[b].block ? 1 : 0) || a.localeCompare(b))) {
-    let n = stacks[id]; const mx = stackMax(id); while (n > 0 && k < STASH_N) { const q = Math.min(n, mx); stash[k++] = { id, n: q }; n -= q; }
+    let n = stacks[id]; const mx = stackMax(id); while (n > 0 && k < hi) { const q = Math.min(n, mx); stash[k++] = { id, n: q }; n -= q; }
   }
   refreshInv();
 }
@@ -271,9 +289,12 @@ refreshInv = force => { _refreshInv(force); refreshStash(force); };
 
 /* ---- the save: the chest's contents ride along in the same save, in the inventory's format ---- */
 const _makeSave = makeSave, _newWorld = newWorld;
-makeSave = () => { const o = _makeSave(); o.stash = stash.map(s => !s ? null : ITEMS[s.id].slot ? [s.id, 1, itemRar(s), s.mods || [], s.il] : [s.id, s.n]); return o; };
+makeSave = () => { const o = _makeSave(); o.stashTabs = stashTabs.map(t => [t.name, t.cor]); o.stash = stash.map(s => !s ? null : ITEMS[s.id].slot ? [s.id, 1, itemRar(s), s.mods || [], s.il] : [s.id, s.n]); return o; };
 newWorld = (sd, sv) => {
   _newWorld(sd, sv);
+  // tabs: an old save (no stashTabs, 40 slots) lands whole in tab 1
+  stashTabs = sv && Array.isArray(sv.stashTabs) && sv.stashTabs.length ? sv.stashTabs.slice(0, STASH_MAX_TABS).map((q, i) => ({ name: String((Array.isArray(q) && q[0]) || i + 1).slice(0, STASH_NAME_MAX), cor: clamp((Array.isArray(q) ? q[1] : 0) | 0, 0, STASH_CORES.length - 1) })) : [newTab(0)];
+  stashTab = 0; STASH_N = stashTabs.length * STASH_PER;
   stash = new Array(STASH_N).fill(null);
   if (sv && Array.isArray(sv.stash)) sv.stash.forEach((q, i) => { if (i < STASH_N && Array.isArray(q) && ITEMS[q[0]]) stash[i] = ITEMS[q[0]].slot ? mkItem(q[0], q[2] | 0, Array.isArray(q[3]) ? (sv.gear === 3 ? rerollValues(q[0], q[3], q[4]) : q[3]) : undefined, q[4]) : { id: q[0], n: clamp(q[1] | 0, 1, stackMax(q[0])) }; });
 };
