@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.28.2';
+const VERSAO = '0.29.0';
 const NOVIDADES = [
+  { v: '0.29.0', data: '11/10/2026', titulo: 'Talentos de ofício', itens: [
+    'Árvores de talentos de ofício: Ferraria, Culinária e Encantamento. Cada ofício ganha XP quando você forja, cozinha ou encanta, e a árvore fica numa aba Talentos na forja, na cozinha e na oficina do Teodoro.',
+    'Nova página Ofícios na wiki.'
+  ] },
   { v: '0.28.2', data: '11/10/2026', titulo: 'Bolsa de blocos', itens: [
     'As abas de bioma da bolsa de blocos mostram só as que cabem no inventário, com setas dos lados para passar para as outras.'
   ] },

@@ -1,0 +1,39 @@
+/* Ofícios: a aba "Talentos" da forja, da cozinha e da oficina (js/331-oficios.js). A placa da árvore é pixel art em múltiplos inteiros */
+.forgep .oftal{display:none}
+.forgep.ofon>.prof{display:none}
+.forgep.ofon>.oftal{display:grid;flex:1;min-height:0;grid-template-columns:auto minmax(0,1fr);gap:14px}
+.ofboard{position:relative;align-self:start;box-shadow:0 0 0 2px #000,0 6px 0 rgba(0,0,0,.4)}
+.ofboard canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+.ofsks{position:absolute;inset:0}
+.ofsk{position:absolute;padding:0;margin:0;border:0;background:none;box-shadow:none;cursor:pointer;border-radius:0}
+.ofsk img{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.ofsk:hover img{filter:brightness(1.22)}
+.ofsk.st0{cursor:default}
+.ofsk.st0:hover img{filter:none}
+.ofsk:focus-visible{outline:2px solid var(--parch);outline-offset:2px}
+.ofsk .rk{position:absolute;right:calc(var(--ofs,3) * -2px);bottom:calc(var(--ofs,3) * -2px);min-width:14px;padding:0 4px;font:700 13px/16px var(--font-ui);color:#ffd27a;text-align:center;background:#0b080d;border:2px solid #000;box-shadow:inset 0 0 0 1px #6e4718;font-variant-numeric:tabular-nums;pointer-events:none}
+.ofsk.st3 .rk{color:#fff6dc;box-shadow:inset 0 0 0 1px #e0b060}
+.ofside{display:flex;flex-direction:column;gap:10px;min-height:0;padding:14px;background:rgba(6,4,9,.45);border:2px solid #000;box-shadow:inset 0 0 0 1px #3a2e22}
+.ofhd{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ofhd h4{margin:0;font-family:var(--font-title);font-weight:400;font-size:32px;line-height:1;color:var(--parch);text-shadow:2px 2px 0 #000}
+.oflv{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#c4b596;white-space:nowrap}
+.oflv b{margin-left:4px;font-family:var(--font-title);font-size:28px;font-weight:400;letter-spacing:0;color:#ffd27a;text-shadow:2px 2px 0 #000}
+.ofxp{position:relative;height:16px;background:#0b080d;border:2px solid #000;box-shadow:inset 0 0 0 1px #3a2e22}
+.ofxp i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#f2c470 0 2px,#c8862a 2px,#8a5a1a)}
+.ofxp span{position:relative;display:block;text-align:center;font:600 11px/16px var(--font-ui);color:var(--parch);text-shadow:1px 1px 0 #000,-1px -1px 0 #000;font-variant-numeric:tabular-nums}
+.ofpts{display:flex;align-items:baseline;justify-content:center;gap:8px;padding:6px 8px;background:rgba(0,0,0,.35);border:2px solid #000;box-shadow:inset 0 0 0 1px #3a2e22}
+.ofpts b{font-family:var(--font-title);font-weight:400;font-size:36px;line-height:1;color:#ffd27a;text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
+.ofpts span{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#c4b596}
+.ofpts.none b{color:#8e8b9c}
+.ofgal{display:grid;gap:6px}
+.ofg{display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;padding:8px 12px;background:linear-gradient(#2c2431,#1b1520);color:#c4b596;border:3px solid #000;box-shadow:inset 0 0 0 1px #4a3826}
+.ofg small{min-width:1.2em;font-family:var(--font-title);font-size:22px;font-weight:400;line-height:1;color:#ffd27a}
+.ofg.on{background:linear-gradient(#5a3a14,#2e1d0a);color:#ffe7a8;box-shadow:inset 0 0 0 1px #e0b060}
+.ofinfo.tipbox{flex:1;min-height:0;overflow:auto;align-content:start}
+.ofinfo p{margin:4px 0 0}
+.ofinfo p.nx{color:#c4b596}
+.ofinfo em.no{color:#ff7a6b;font-size:13px}
+.tab.oftab.pts::after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;vertical-align:2px;background:#ffd27a;box-shadow:0 0 6px #ffb233}
+@media (max-width:760px){.forgep.ofon>.oftal{grid-template-columns:1fr;overflow:auto}.ofboard{justify-self:center}}
+.ofinfo.pdtip .tn,.ofinfo.pdtip>small{display:block}
+.ofinfo .tn{font-family:var(--font-title);font-size:28px;font-weight:400;line-height:1;text-shadow:2px 2px 0 #000}

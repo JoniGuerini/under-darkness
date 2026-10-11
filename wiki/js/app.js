@@ -12,7 +12,7 @@
 
   const NAV = [
     ['Início', [['inicio', 'Visão geral']]],
-    ['Itens', [['itens', 'Equipamentos'], ['materiais', 'Materiais e blocos'], ['modificadores', 'Modificadores'], ['raridades', 'Raridades e sorteio'], ['lendarios', 'Lendários'], ['forja', 'Forja'], ['cozinha', 'Cozinha'], ['alquimia', 'Alquimia']]],
+    ['Itens', [['itens', 'Equipamentos'], ['materiais', 'Materiais e blocos'], ['modificadores', 'Modificadores'], ['raridades', 'Raridades e sorteio'], ['lendarios', 'Lendários'], ['forja', 'Forja'], ['cozinha', 'Cozinha'], ['alquimia', 'Alquimia'], ['oficios', 'Ofícios']]],
     ['Mundo', [['inimigos', 'Inimigos'], ['chefes', 'Chefes'], ['npcs', 'Moradores'], ['biomas', 'Biomas'], ['regras', 'Regras do jogo']]],
     ['Arquivos', [['docs', 'Documentos']]]
   ];
