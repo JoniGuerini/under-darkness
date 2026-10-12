@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.35.0';
+const VERSAO = '0.35.1';
 const NOVIDADES = [
+  { v: '0.35.1', data: '12/10/2026', titulo: 'Monstros dormem', itens: [
+    'Monstros longe do herói dormem em vez de sumir: ao voltar pelo portal da vila, eles continuam onde estavam, com a mesma vida.'
+  ] },
   { v: '0.35.0', data: '12/10/2026', titulo: 'Mundo mais fundo', itens: [
     'Cada camada ficou três vezes mais alta: tem muito mais para explorar até o fundo do mundo.',
     'Menos penhascos e quedas longas, e carvão e metal aparecem mais perto das bordas das cavernas.',
