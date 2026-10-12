@@ -286,13 +286,50 @@ function cvnUpdate(dt) {
   for (let i = gbBooms.length - 1; i >= 0; i--) { gbBooms[i].t -= dt; if (gbBooms[i].t <= 0) gbBooms.splice(i, 1); }
 }
 HOOK.update.push(cvnUpdate);
-HOOK.drawTop.push((cx, cy) => {
-  for (const c of fgClouds) {   // a nuvem: uma névoa verde que some no fim
-    const a = Math.min(1, c.life / 0.8) * 0.22, x = Math.round(c.x) - cx, y = Math.round(c.y) - cy;
-    lc.globalAlpha = a; lc.fillStyle = '#7ab83a';
-    for (let k = 0; k < 9; k++) { const ang = k * 0.7 + c.max - c.life, rr = c.r * (0.35 + (k % 3) * 0.22); const px = x + Math.cos(ang) * rr, py = y + Math.sin(ang) * rr * 0.6; const s = Math.max(3, c.r * 0.5) | 0; lc.fillRect(px - s / 2, py - s / 3, s, (s * 0.66) | 0); }
-    lc.globalAlpha = 1;
+/* a nuvem de esporos (refeita 2026-10-12, pedido do Jonathan: era um monte de quadrados chapados): tufos pintados pixel a
+   pixel numa rampa verde-musgo, com grão e borda roída, como a nuvem da Nevasca (68). Cada nuvem tem uns 9 tufos que
+   nascem do chão do fungo, se espalham girando devagar, sobem um pouco e se desfazem um a um no fim. Os tufos ficam
+   prontos em cache (5 tamanhos x 3 desenhos); por quadro é só drawImage. */
+const FG_TUFO_R = [4, 6, 8, 10, 12];
+let fgTufos = null;
+function fgTufo(r, seed) {
+  const S = r * 2 + 3, c = mk(S, S), x = c.getContext('2d'), R = heroRamp('#6e9238'), o = S / 2;
+  const sub = [[o, o, r]];   // um tufo é uns bolos colados: a borda fica irregular, não um círculo
+  for (let k = 0; k < 3; k++) { const a = hash2(k, 7, seed) * 6.28, d = r * 0.45; sub.push([o + Math.cos(a) * d, o + Math.sin(a) * d * 0.8, r * (0.45 + hash2(k, 8, seed) * 0.25)]); }
+  for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
+    let m = -1; for (const [px, py, pr] of sub) m = Math.max(m, 1 - Math.hypot(i + 0.5 - px, j + 0.5 - py) / pr);
+    const g = hash2(i, j, seed);
+    if (m < 0 || (m < 0.22 && g < 0.55)) continue;            // borda roída
+    const lz = ((i - o) * -0.55 + (j - o) * -0.85) / r;         // luz de cima à esquerda
+    let v = 2 + (lz > 0.35 ? 2 : lz > -0.1 ? 1 : 0);
+    if (m < 0.3) v -= 1;
+    if (g < 0.14) v -= 1; else if (g > 0.9) v += 1;
+    x.globalAlpha = m < 0.3 ? 0.35 : m < 0.6 ? 0.6 : 0.75;                      // por dentro mais denso, a borda rala
+    x.fillStyle = R[clamp(v, 0, 5)]; x.fillRect(i, j, 1, 1);
   }
+  // pontinhos de esporo claros por dentro
+  x.globalAlpha = 1; x.fillStyle = '#d8f088';
+  for (let k = 0; k < 1 + r / 6; k++) { const a = hash2(k, 11, seed) * 6.28, d = hash2(k, 12, seed) * r * 0.6; x.fillRect(Math.round(o + Math.cos(a) * d), Math.round(o + Math.sin(a) * d), 1, 1); }
+  return c;
+}
+function fgCloudDraw(c, cx, cy) {
+  if (!fgTufos) fgTufos = FG_TUFO_R.map((r, i) => [0, 1, 2].map(s => fgTufo(r, 31 + i * 7 + s * 13)));
+  if (!c.p) {   // os tufos desta nuvem: ângulo, distância do meio, tamanho, desenho e a hora em que cada um se desfaz
+    c.p = []; for (let k = 0; k < 9; k++) c.p.push({ a: k * 0.7 + Math.random() * 0.6, d: k === 0 ? 0 : 0.4 + Math.random() * 0.7, z: Math.random(), v: (Math.random() * 3) | 0, f: 0.25 + Math.random() * 0.55, s: (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.25) });
+  }
+  const t = c.max - c.life, grow = c.r / c.R;
+  for (const q of c.p) {
+    const ang = q.a + t * q.s, rr = c.r * q.d;
+    const px = c.x + Math.cos(ang) * rr, py = c.y + Math.sin(ang) * rr * 0.6 - t * 4 - q.z * 3;
+    const k = clamp(Math.round((0.5 + grow * 0.5) * (2 + q.z * 2.4)), 0, FG_TUFO_R.length - 1), r = FG_TUFO_R[k], img = fgTufos[k][q.v];
+    const a = Math.min(1, t / 0.15, c.life / (0.5 + q.f));   // entra rápido, cada tufo some na sua vez
+    if (a <= 0) continue;
+    lc.globalAlpha = a * 0.6; lc.drawImage(img, Math.round(px - r - 1.5) - cx, Math.round(py - r - 1.5) - cy);
+  }
+  lc.globalAlpha = 1;
+}
+HOOK.drawTop.push((cx, cy) => {
+  for (const c of fgClouds) fgCloudDraw(c, cx, cy);
   for (const b of gbBombs) {   // a banana de dinamite
     const x = Math.round(b.x) - cx, y = Math.round(b.y) - cy, h = Math.abs(Math.cos(b.spin)) > 0.7;
     lc.fillStyle = '#2a0a06'; if (h) lc.fillRect(x - 3, y - 2, 7, 4); else lc.fillRect(x - 2, y - 3, 4, 7);

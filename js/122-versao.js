@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.37.3';
+const VERSAO = '0.37.4';
 const NOVIDADES = [
+  { v: '0.37.4', data: '12/10/2026', titulo: 'Nuvem de esporos', itens: [
+    'A nuvem de veneno do fungo das Cavernas foi refeita: tufos de esporos pintados pixel a pixel que giram, sobem e se desfazem, no lugar dos quadrados.',
+  ] },
   { v: '0.37.3', data: '12/10/2026', titulo: 'E para coletar', itens: [
     'Mouse em cima de algo coletável e E: pega na hora e põe na mochila. Vale para tochas e candelabros colocados, drops no chão, ervas e objetos soltos das camadas.',
   ] },
