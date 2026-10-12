@@ -1,0 +1,7 @@
+/* Modo lixo (js/311-modo-lixo.js): a casa do lixo vira um botão aceso, e o cursor vira lixeira nas casas */
+.slot.trash{cursor:pointer}
+.slot.trash:hover{filter:brightness(1.25)}
+.slot.trash.on{--rc:#d8584a;background:#3a1416;box-shadow:inset 0 0 0 2px #d8584a,0 0 10px rgba(216,88,74,.45)}
+.slot.trash.on .lbl{color:#ffb0a4}
+.invcard.lixo #invGrid .slot,.invcard.lixo .slot.blk{cursor:var(--lixo-cur)}
+.invcard.lixo #invGrid .slot.full:hover,.invcard.lixo .slot.blk.full:hover{box-shadow:inset 0 0 0 2px #d8584a}

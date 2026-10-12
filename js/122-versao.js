@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.33.3';
+const VERSAO = '0.33.4';
 const NOVIDADES = [
+  { v: '0.33.4', data: '12/10/2026', titulo: 'Modo lixo', itens: [
+    'O Lixo do inventário virou um botão: ligado, cada clique num item da mochila ou da bolsa de blocos joga ele fora.'
+  ] },
   { v: '0.33.3', data: '12/10/2026', titulo: 'Desempenho', itens: [
     'O jogo fica mais leve: o navegador amplia a imagem do mundo em vez do jogo copiar a tela inteira a cada quadro, o que pesava muito em computadores sem placa de vídeo boa.',
     'Com muitos monstros e muito loot na tela, há menos sons ao mesmo tempo, menos números de dano flutuando e menos trabalho por quadro no HUD.'
