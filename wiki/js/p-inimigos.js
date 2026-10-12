@@ -113,7 +113,7 @@
       const dr = DROPS[t] || [];
       if (dr.length) h += `<h2>O que solta</h2>` + UDW.table([{ t: 'Item' }, { t: 'Chance por morte', cls: 'n' }, { t: 'Quantidade', cls: 'n' }],
         dr.map(r => ({ cells: [UDW.item(r[0]), UDW.pct(UDW.dropRate(t, r), 2), r[2] ? (r[3] && r[3] !== r[2] ? `${r[2]}–${r[3]}` : r[2]) : 1], keys: [ITEMS[r[0]].name, UDW.dropRate(t, r), r[2] || 1] })))
-        + (D.boss ? '' : `<p class="nota">Além disso: ${t === 'slime' ? '' : '6% de chance de uma tocha, '}55% de chance de ouro. Equipamento sai com raridade sorteada (tabela "Monstro").</p>`);
+        + (D.boss ? '' : `<p class="nota">Além disso: ${t === 'slime' ? '' : '6% de chance de uma tocha, '}55% de chance de ouro: um bicho de nível N solta de N a 2N moedas. Equipamento sai com raridade sorteada (tabela "Monstro").</p>`);
       return h;
     }
   };

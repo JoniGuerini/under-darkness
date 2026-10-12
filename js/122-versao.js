@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.35.2';
+const VERSAO = '0.35.3';
 const NOVIDADES = [
+  { v: '0.35.3', data: '12/10/2026', titulo: 'Ouro pelo nível', itens: [
+    'Ouro dos monstros pelo nível: nem todo monstro solta ouro, e quando solta, um monstro de nível N dá de N a 2N moedas (nível 10 dá de 10 a 20).',
+  ] },
   { v: '0.35.2', data: '12/10/2026', titulo: 'Testes com senha', itens: [
     'A tela de Testes (Menu > Testes) agora pede uma senha, e o F4 só liga o modo deus depois dela. Acertou uma vez, o navegador lembra.',
   ] },
