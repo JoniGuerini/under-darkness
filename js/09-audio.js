@@ -12,13 +12,24 @@ function initAudio() {
     noiseBuf = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   } catch (e) { ac = null; }
 }
+// voices: a hit that lands on 50 monsters at once asked for 50 copies of the same sound in the same instant. Each
+// copy costs nodes on the page's thread and on the audio thread, and together they only sound louder (and clip).
+// Now the same voice (same wave, pitch, length and offset) starts at most twice per ~40 ms, and at most 28 voices
+// start in that window. One or two monsters sound exactly as before (2026-10-12).
+const VOICE = { t: -1, n: 0, k: new Map() };
+function voiceOk(key) {
+  const now = ac.currentTime;
+  if (now - VOICE.t > 0.04) { VOICE.t = now; VOICE.n = 0; VOICE.k.clear(); }
+  const c = VOICE.k.get(key) || 0; if (c >= 2 || VOICE.n >= 28) return false;
+  VOICE.k.set(key, c + 1); VOICE.n++; return true;
+}
 function tone(f, dur, type = 'square', vol = 0.15, slide = 0, delay = 0) {
-  if (!ac || muted) return; const t0 = ac.currentTime + delay; const o = ac.createOscillator(), g = ac.createGain();
+  if (!ac || muted || !voiceOk(type + (f | 0) + ':' + dur + ':' + delay)) return; const t0 = ac.currentTime + delay; const o = ac.createOscillator(), g = ac.createGain();
   o.type = type; o.frequency.setValueAtTime(f, t0); if (slide) o.frequency.linearRampToValueAtTime(Math.max(30, f + slide), t0 + dur);
   g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(g); g.connect(sfxOut); o.start(t0); o.stop(t0 + dur + 0.02);
 }
 function noise(dur, vol = 0.2, freq = 1000, ftype = 'bandpass', delay = 0, q = 1) {
-  if (!ac || muted) return; const t0 = ac.currentTime + delay; const s = ac.createBufferSource(); s.buffer = noiseBuf;
+  if (!ac || muted || !voiceOk(ftype + (freq | 0) + ':' + dur + ':' + delay)) return; const t0 = ac.currentTime + delay; const s = ac.createBufferSource(); s.buffer = noiseBuf;
   const f = ac.createBiquadFilter(); f.type = ftype; f.frequency.value = freq; f.Q.value = q; const g = ac.createGain();
   g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(g); g.connect(sfxOut); s.start(t0); s.stop(t0 + dur + 0.02);
 }

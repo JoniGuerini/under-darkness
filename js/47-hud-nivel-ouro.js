@@ -11,8 +11,12 @@ function paintCoinIcon() {
 }
 
 // a barra de XP acompanha a barra de ação, que agora fica deslocada pelos quadros das laterais
-let xpAlign = '';
+// measuring the hotbar right after the HUD texts change forced a full page layout every frame: now it measures 4x per
+// second (and right away after a resize)
+let xpAlign = '', xpAlignT = 0;
+addEventListener('resize', () => { xpAlignT = 0; });
 function alignXp() {
+  const now = performance.now(); if (now - xpAlignT < 250) return; xpAlignT = now;
   const hb = document.getElementById('hotbar'), xp = document.getElementById('xpbar');
   if (!hb || !xp) return;
   const r = hb.getBoundingClientRect();

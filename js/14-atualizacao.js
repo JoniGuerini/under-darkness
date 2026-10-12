@@ -31,8 +31,12 @@ function updateOrbs(dt) {
   }
 }
 function updateParts(dt) {
-  for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.life -= dt; if (p.life <= 0) { parts.splice(i, 1); continue; } p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(p.smoke ? 0.7 : 0.3, dt); if (p.smoke) p.vx += Math.sin(gameTime * 2 + p.y * 0.1) * 6 * dt; }
-  for (let i = texts.length - 1; i >= 0; i--) { const t = texts[i]; t.life -= dt; t.y -= dt * 18; if (t.life <= 0) texts.splice(i, 1); }
+  // the dead are dropped in one pass (a splice per particle was slow when hundreds die in the same frame)
+  const kS = Math.pow(0.7, dt), kP = Math.pow(0.3, dt); let n = 0;
+  for (let i = 0; i < parts.length; i++) { const p = parts[i]; p.life -= dt; if (p.life <= 0) continue; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= p.smoke ? kS : kP; if (p.smoke) p.vx += Math.sin(gameTime * 2 + p.y * 0.1) * 6 * dt; parts[n++] = p; }
+  parts.length = n; n = 0;
+  for (let i = 0; i < texts.length; i++) { const t = texts[i]; t.life -= dt; t.y -= dt * 18; if (t.life > 0) texts[n++] = t; }
+  texts.length = n;
 }
 
 /* ================= time of day ================= */

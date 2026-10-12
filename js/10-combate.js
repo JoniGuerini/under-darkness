@@ -5,7 +5,8 @@ function burst(x, y, n, col, sp = 80, g = 400, life = 0.5, size = 1, glowy = fal
   if (parts.length > 700) return;
   for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = sp * (0.3 + Math.random() * 0.8); parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - sp * 0.3, g, life: life * (0.6 + Math.random() * 0.6), max: life, col, size, glow: glowy }); }
 }
-function floatText(x, y, text, col = '#fff', size = 1) { texts.push({ x, y, text, col, size, life: 0.9, max: 0.9 }); }
+// at most 60 numbers in the air: a hit on a whole crowd drops the oldest instead of outlining hundreds of texts per frame
+function floatText(x, y, text, col = '#fff', size = 1) { if (texts.length >= 60) texts.shift(); texts.push({ x, y, text, col, size, life: 0.9, max: 0.9 }); }
 function shake(m) { if (!REDUCED) shk.m = Math.max(shk.m, m); }
 let lastSpark = 0;
 
@@ -215,7 +216,7 @@ function updateLoot(dt) {
       loot.splice(i, 1); continue;
     }
     const dx = pcx - o.x, dy = pcy - (o.y - 5), d = Math.hypot(dx, dy);
-    const fits = !!ITEMS[o.id].gold || canFit(o.id);
+    const fits = d >= 40 || !!ITEMS[o.id].gold || canFit(o.id);   // only a drop next to the hero needs the bag checked
     if (!pl.dead && o.t > 0.5 && d < 40 && fits) {
       const sp = 90 + (40 - d) * 6, k = Math.min(1, dt * 10); o.rest = false;
       o.vx = lerp(o.vx, dx / (d || 1) * sp, k); o.vy = lerp(o.vy, dy / (d || 1) * sp, k); o.x += o.vx * dt; o.y += o.vy * dt;
