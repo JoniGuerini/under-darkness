@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.2';
+const VERSAO = '0.34.3';
 const NOVIDADES = [
+  { v: '0.34.3', data: '12/10/2026', titulo: 'Modo lixo', itens: [
+    'Runas repetidas vão para o lixo; a última de cada feitiço continua guardada, porque sem ela o feitiço é esquecido.',
+    'A casa que recusa um item treme uma vez só, e não volta a tremer quando o inventário reabre.'
+  ] },
   { v: '0.34.2', data: '12/10/2026', titulo: 'Batalhão', itens: [
     'Na tela de Testes, soltar um Batalhão ou Limpar não fecha mais a tela, e o contador de monstros vivos sobe a cada clique.'
   ] },

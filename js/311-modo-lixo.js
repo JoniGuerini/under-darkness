@@ -5,7 +5,7 @@
    botão que liga e desliga o modo lixo; ligado, cada clique num item da mochila joga a pilha inteira fora.
    - Vale para as casas da mochila (inv a partir de HB_BAG) e para as casas da bolsa de blocos (237), que jogam fora
      tudo daquele bloco. A barra, o cinto e o equipamento ficam de fora: no modo lixo, clicar neles não faz nada.
-   - A última picareta continua protegida (o moveItem do 22 recusa jogá-la fora).
+   - A última picareta e a última runa de cada feitiço continuam protegidas; runas repetidas vão para o lixo.
    - Arrastar um item até o lixo continua funcionando como antes; com um item na mão, clicar no lixo larga o item nele.
    - Fechar o inventário desliga o modo. O cursor vira uma lixeirinha enquanto ele está ligado.
    Carrega depois do 237-blocos, antes do 24-boot. */
@@ -51,5 +51,20 @@ addEventListener('pointerdown', e => {
   closeInv = function () { setTrashMode(false); _ci(); };
   buildInvUI = function () { _bi(); document.querySelectorAll('.slot.trash').forEach(d => d.removeAttribute('title')); };
 }
+// runas (feitiços aprendidos): o 64 não deixa jogar fora, porque sem a runa o feitiço é esquecido. Uma runa repetida
+// (outra igual na mochila ou no baú) pode ir para o lixo; a última continua presa.
+const spellCopies = id => inv.filter(q => q && q.id === id).length + (typeof stash !== 'undefined' ? stash.filter(q => q && q.id === id).length : 0);
+{ const _mv = moveItem; moveItem = function (a, b, el) {
+  const s = b && b.k === 'trash' && (a.k === 'inv' || a.k === 'chest') ? itemAt(a) : null;
+  if (s && ITEMS[s.id].spell && spellCopies(s.id) > 1) {
+    if (a.k === 'inv') inv[a.i] = null; else stash[a.i] = null;
+    changed(false); sfx.trash(); return;
+  }
+  return _mv(a, b, el);
+}; }
+// o tremor de recusa (bad, no 22) larga a classe quando acaba; antes ela ficava e a casa voltava a tremer toda vez que
+// o inventário reabria
+addEventListener('animationend', e => { const t = e.target; if (t.classList && t.classList.contains('bad')) t.classList.remove('bad'); }, true);
+
 // o cartão some por outro caminho (loja, forja, baú, morte): o modo desliga junto
 setInterval(() => { if (trashMode && !invVisible()) setTrashMode(false); }, 250);
