@@ -22,7 +22,7 @@ function updatePlayer(dt) {
   pl.stunT -= dt;
 
   // cancel attack recovery into shield
-  if (wantShield && pl.atkT > ATK_WIND + ATK_SWING) { pl.atkT = -1; pl.lastAtkEnd = gameTime; }
+  if (wantShield && pl.atkT > (pl.twoHand ? GS_TM : ATK_TM).wind + (pl.twoHand ? GS_TM : ATK_TM).swing) { pl.atkT = -1; pl.lastAtkEnd = gameTime; }
   if (wantShield && pl.atkT < 0) {
     if (!pl.shieldOn) { pl.shieldOn = true; pl.shieldStart = gameTime; }
     pl.shieldK = Math.min(1, pl.shieldK + dt / 0.09);
@@ -37,11 +37,9 @@ function updatePlayer(dt) {
   if (hb.sel === 0 && (pl.atkBuf > 0 || mouse.l) && canStart && pl.shieldK < 0.35 && pl.stunT <= 0) {
     const d = mwx - pcx; if (Math.abs(d) > 2) pl.facing = d > 0 ? 1 : -1;
     const combo = pl.atkT >= 0 || gameTime - pl.lastAtkEnd < 0.3;
-    pl.atkType = combo ? 1 - pl.atkType : 0;
     pl.atkStart = pl.sAng; pl.atkT = 0; pl.atkAt = gameTime; pl.atkHit.clear(); pl.atkBuf = 0; pl.trail.length = 0; pl.bladeA = null; pl.atkF0 = pl.fArm;
     if (pl.thrust) { const [, mwy] = mouseWorld(), sy = pl.y + pl.h - 11.5; pl.thrA = clamp(Math.atan2(Math.abs(mwx - pcx), sy - mwy), 1.15, 2.3); }   // a spear thrusts toward the mouse, so it can reach low targets
-    if (pl.twoHand) pl.atkType = 0;   // the lunge and the whoosh come with the chop itself (gsSwing)
-    else { if (pl.onGround) pl.vx += pl.facing * 35; sfx.swing(); }
+    startGolpe(combo);   // which blow of the combo, its timing, steps and whooshes: js/347-golpes.js
   }
   pl.atkBuf -= dt;
 
@@ -84,16 +82,17 @@ function updatePlayer(dt) {
   if (pl.atkT >= 0) {
     pl.atkT += dt * (pl.atkSpd || 1);
     const t = pl.atkT;
-    if (pl.twoHand) gsSwing(t);
+    if (pl.move) golpePose(t);
+    else if (pl.twoHand) gsSwing(t);
     else if (pl.thrust) {
       pl.sAng = pl.thrA || 1.52; pl.fArm = pl.sAng + 0.06;
       pl.spearPy = t < ATK_WIND ? lerp(12, 8, t / ATK_WIND) : t < ATK_WIND + ATK_SWING ? lerp(8, 17, easeOut((t - ATK_WIND) / ATK_SWING)) : lerp(17, 12, clamp((t - ATK_WIND - ATK_SWING) / 0.12, 0, 1));
     } else { pl.sAng = swordAngle(t, pl.atkType, pl.atkStart); pl.fArm = clamp(pl.sAng * 0.6, -1.25, 1.7); }
     if (pl.atkT >= atkTm.wind && pl.atkT <= atkTm.wind + atkTm.swing + 0.02) {
-      if (!pl.thrust) { pl.trail.push(pl.sAng); if (pl.trail.length > 5) pl.trail.shift(); }
+      if (pl.move ? !pl.move.noTrail : !pl.thrust) { pl.trail.push(pl.sAng); if (pl.trail.length > 5) pl.trail.shift(); }
       // the blow lands only where the blade really is: the path it swept since the last frame, hand to tip
       const pts = bladeSweep();
-      for (const e of enemies) if (!e.dead && !pl.atkHit.has(e) && pts.some(q => q[0] >= e.x - BLADE_PAD && q[0] <= e.x + e.w + BLADE_PAD && q[1] >= e.y - BLADE_PAD && q[1] <= e.y + e.h + BLADE_PAD) && clearPath(pl, e)) { pl.atkHit.add(e); hitEnemy(e, pl.facing, 1, true); }
+      for (const e of enemies) if (!e.dead && !pl.atkHit.has(e) && pts.some(q => q[0] >= e.x - BLADE_PAD && q[0] <= e.x + e.w + BLADE_PAD && q[1] >= e.y - BLADE_PAD && q[1] <= e.y + e.h + BLADE_PAD) && clearPath(pl, e)) { pl.atkHit.add(e); hitEnemy(e, pl.facing, pl.move && pl.move.dmg || 1, true); }
       for (const q of pts) { const tx = Math.floor(q[0] / T), ty = Math.floor(q[1] / T); if (tileAt(tx, ty) === URN) breakTile(tx, ty); }
     } else if (pl.trail.length) pl.trail.shift();
     pl.bladeA = pl.sAng; pl.bladeF = pl.fArm; pl.bladeL = bladeLen();

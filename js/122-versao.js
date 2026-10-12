@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.36.0';
+const VERSAO = '0.37.0';
 const NOVIDADES = [
+  { v: '0.37.0', data: '12/10/2026', titulo: 'Armas pesadas e golpes', itens: [
+    'Machado de Guerra e Marreta, armas novas de duas mãos que o Grimaldo forja em todo metal. A Marreta bate no chão e acerta quem está perto.',
+    'A maça de uma mão agora tem um bloco do material na ponta, no lugar da bola.',
+    'Cada tipo de arma tem os seus golpes, com 2 ou 3 variações em combo: cliques seguidos encadeiam, e o último é o golpe forte.',
+  ] },
   { v: '0.36.0', data: '12/10/2026', titulo: 'Nova árvore de talentos', itens: [
     'Árvore de talentos nova (P): tela cheia, com regiões para cada estilo (fogo, gelo, raio, corpo a corpo, defesa, vida e outras), cada uma com sua arte no fundo.',
     'Nós pequenos dão porcentagens, e os keystones têm efeitos grandes. 1 ponto por nível.',
