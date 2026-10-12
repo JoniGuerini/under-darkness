@@ -2,7 +2,7 @@
 /* tela de Testes (Menu > Testes): um cartão largo com quatro abas, no lugar da antiga lista de botões do menu de pausa.
    Modo deus: a chave do modo em cima e as chaves de cada efeito lado a lado (60-modo-deus).
    Viagem: o Vilarejo e as camadas em grade; escolher uma camada mostra as faixas dela embaixo (teleporte do 75).
-   Batalhão: quantos monstros soltar, um ao lado do outro, e Limpar (75), com a faixa e os monstros vivos de agora.
+   Batalhão: quantos monstros soltar, um ao lado do outro, e Limpar (75), com a faixa e os monstros vivos de agora; a tela fica aberta para clicar de novo.
    Outros: pular para a próxima estação (334) e para a próxima fase da lua (337), e +5 pontos de runa (341).
    Esc volta ao menu de pausa. Carrega depois do 60-modo-deus. */
 let testesAba = 'deus';
@@ -92,8 +92,8 @@ let testesFecha = () => { };
 
   /* batalhão */
   $('tArmy').innerHTML = [25, 50, 100, 200, 500].map(n => `<button type="button" class="tn-army" data-n="${n}"><strong>${n}</strong><span>monstros</span></button>`).join('');
-  for (const b of $('tArmy').querySelectorAll('button')) { focar(b); b.addEventListener('click', () => __tp.battalion(+b.dataset.n)); }
-  $('tClear').addEventListener('click', () => __tp.clearMobs());
+  for (const b of $('tArmy').querySelectorAll('button')) { focar(b); b.addEventListener('click', () => { __tp.battalion(+b.dataset.n); pintaBatalhao(); sfx.select(); }); }
+  $('tClear').addEventListener('click', () => { __tp.clearMobs(); pintaBatalhao(); tick(); });
   function pintaBatalhao() {
     const tx = Math.floor((pl.x + pl.w / 2) / T), z = zoneAt(tx, ptY());
     $('tArmyZona').textContent = (CATH_SPAWN[z] && ZONE_NAMES[z]) || ZONE_NAMES[CV_ZONE0] || '';

@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.1';
+const VERSAO = '0.34.2';
 const NOVIDADES = [
+  { v: '0.34.2', data: '12/10/2026', titulo: 'Batalhão', itens: [
+    'Na tela de Testes, soltar um Batalhão ou Limpar não fecha mais a tela, e o contador de monstros vivos sobe a cada clique.'
+  ] },
   { v: '0.34.1', data: '12/10/2026', titulo: 'Tela de testes', itens: [
     'Menu > Testes virou uma tela com abas: Modo deus (a chave do modo e uma chave para cada efeito), Viagem (camadas e faixas), Batalhão e Outros (próxima estação, próxima fase da lua e pontos de runa).'
   ] },

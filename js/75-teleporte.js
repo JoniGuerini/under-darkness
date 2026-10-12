@@ -94,11 +94,10 @@
       const e = spawnEnemy(type, px, py, zone); if (e) { e.memT = 6; made++; } k++;
     }
     } finally { if (typeof icPacking !== 'undefined') icPacking = false; }
-    fim();
   }
-  function clearMobs() { for (let k = enemies.length - 1; k >= 0; k--) if (!enemies[k].boss) enemies.splice(k, 1); fim(); }
+  function clearMobs() { for (let k = enemies.length - 1; k >= 0; k--) if (!enemies[k].boss) enemies.splice(k, 1); }
 
-  // back to the game after a trip or a battalion (the Testes screen, 339, closes with it)
+  // back to the game after a trip (the Testes screen, 339, closes with it); the battalion keeps the screen open to click again
   function fim() { testesFecha(); resumeGame(); }
 
   // Menu > Testes opens the Testes screen (339-testes)
