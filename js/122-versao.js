@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.3';
+const VERSAO = '0.34.4';
 const NOVIDADES = [
+  { v: '0.34.4', data: '12/10/2026', titulo: 'Runas no lixo', itens: [
+    'Runas também vão para o lixo, até a última; o feitiço é esquecido e volta comprando outra runa.'
+  ] },
   { v: '0.34.3', data: '12/10/2026', titulo: 'Modo lixo', itens: [
     'Runas repetidas vão para o lixo; a última de cada feitiço continua guardada, porque sem ela o feitiço é esquecido.',
     'A casa que recusa um item treme uma vez só, e não volta a tremer quando o inventário reabre.'
