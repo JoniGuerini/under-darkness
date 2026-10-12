@@ -210,6 +210,7 @@ addEventListener('mousedown', e => {
 }, true);
 addEventListener('keydown', e => {
   if (e.code !== 'KeyE' || e.repeat || state !== 'play' || pl.dead) return;
+  if (typeof coletavelSobMouse === 'function' && coletavelSobMouse()) return;   // o que está sob o mouse ganha o E (js/348-coletar.js)
   const p = tpPortals().find(tpNear); if (!p) return;
   e.stopImmediatePropagation(); e.preventDefault(); tpEnter(p);
 }, true);
