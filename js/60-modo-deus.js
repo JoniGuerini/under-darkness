@@ -1,5 +1,5 @@
 'use strict';
-/* modo deus, só para testes: F4 liga e desliga. Em Menu > Testes > Modo deus dá para ligar e desligar o modo
+/* modo deus, só para testes: F4 liga e desliga. Na aba Modo deus da tela de Testes (Menu > Testes, 339-testes) dá para ligar e desligar o modo
    e cada um dos efeitos dele: sem dano (o herói não perde vida), mana infinita, um golpe mata (qualquer alvo,
    chefes inclusive) luz total (o subterrâneo fica bem menos escuro, ainda com sombra) tochas infinitas (põe tocha sem ter nenhuma) e compras de graça (loja e abas do baú sem gastar ouro). Os efeitos começam todos ligados. Nada disso vai para
    o save: todo jogo começa com o modo desligado. Enquanto ligado, aparece uma linha "Deus" no painel do canto superior direito.
@@ -22,36 +22,8 @@ addEventListener('keydown', e => {
   if (!e.repeat && !(e.target && e.target.tagName === 'INPUT')) toggleModoDeus();
 });
 
-/* ---- Menu > Testes > Modo deus (a lista do 75-teleporte) ---- */
+// a tela de Testes (339) troca isto para se repintar quando o modo muda (pelo F4 também)
 let deusMenu = () => { };
-(function () {
-  const list = $('tpList'); if (!list || !window.__tp) return;
-  const h2 = $('pause').querySelector('.card h2');
-  const OPC = [['vida', 'Sem dano'], ['mana', 'Mana infinita'], ['golpe', 'Um golpe mata'], ['luz', 'Luz total'], ['tocha', 'Tochas infinitas'], ['ouro', 'Compras de graça']];
-  const lbl = (t, on) => t + ': ' + (on ? 'ligado' : 'desligado');
-  let aberto = false;
-  const btn = (txt, fn, id) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = txt; if (id) b.id = id; b.addEventListener('click', fn); b.addEventListener('pointerenter', () => b.focus({ preventScroll: true })); list.appendChild(b); return b; };
-  function abrir() {
-    aberto = true; list.textContent = ''; h2.textContent = 'Modo deus';
-    btn(lbl('Modo deus', deusOn), toggleModoDeus, 'deusBtnOn');
-    for (const [k, t] of OPC) btn(lbl(t, DEUS[k]), () => { DEUS[k] = !DEUS[k]; deusRefill(); deusMenu(); }, 'deusBtn-' + k);
-    btn('Voltar', () => { aberto = false; __tp.show('tests'); setTimeout(() => { const b = $('btnDeus'); if (b) b.focus(); }); });
-    list.querySelector('button').focus();
-  }
-  deusMenu = () => {
-    if (!aberto || list.hidden) return;
-    $('deusBtnOn').textContent = lbl('Modo deus', deusOn);
-    for (const [k, t] of OPC) $('deusBtn-' + k).textContent = lbl(t, DEUS[k]);
-  };
-  // quando o submenu Testes aparece, o botão entra logo antes do Voltar
-  new MutationObserver(() => {
-    if (!$('btnArmy') || $('btnDeus')) return;
-    aberto = false;
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.id = 'btnDeus'; b.textContent = 'Modo deus';
-    b.addEventListener('click', abrir); b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    list.insertBefore(b, list.lastElementChild);
-  }).observe(list, { childList: true });
-})();
 
 // a mana não desce: qualquer feitiço (de hoje ou futuro) que tire de pl.mana fica com ela cheia
 { let mana = pl.mana; Object.defineProperty(pl, 'mana', { enumerable: true, configurable: true,

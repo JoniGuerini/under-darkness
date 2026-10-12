@@ -93,14 +93,4 @@ HOOK.update.push(() => {
 { const _ms = makeSave; makeSave = function () { const v = _ms(); if (luaOff) v.lua = luaOff; return v; }; }
 
 /* ---- Menu > Testes: pular para a próxima fase ---- */
-(function () {
-  const list = typeof $ === 'function' && $('tpList'); if (!list) return;
-  const txt = () => 'Lua: ' + LUA_FASES[luaFase()] + ' (pular)';
-  new MutationObserver(() => {
-    if (!$('btnArmy') || $('btnLua')) return;
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.id = 'btnLua'; b.textContent = txt();
-    b.addEventListener('click', () => { luaOff = (luaOff + 1) & 7; luaIcone = ''; saveGame(); b.textContent = txt(); });
-    b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    list.insertBefore(b, list.lastElementChild);
-  }).observe(list, { childList: true });
-})();
+// (o botão fica na aba Mundo da tela de Testes, 339-testes)

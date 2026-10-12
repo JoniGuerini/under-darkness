@@ -1,8 +1,7 @@
 'use strict';
 
 /* ================= teleporte de teste: ir direto para uma camada =================
-   No menu de pausa, "Testes" abre um submenu com "Teleporte" e "Batalhão". "Teleporte" troca os botões pela lista de camadas (Vilarejo, Cavernas, Catedral, Cavernas de
-   Gelo, Mina Abandonada, Minas Fúngicas, O Abismo); cada camada abre as suas faixas. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
+   No menu de pausa, "Testes" abre a tela de Testes (339-testes), que usa daqui a viagem (Vilarejo e cada faixa de cada camada) e o batalhão. Escolher uma faixa leva o herói a um vão aberto com chão firme no topo
    dela, o mais perto possível da entrada da camada (a boca das cavernas, as escadarias do átrio, as fendas das
    criptas, os poços sob o gelo), num lugar que dá para alcançar andando a partir do vilarejo e fora das salas dos chefes.
    "Batalhão" (também de teste, para medir desempenho) solta 25, 50, 100, 200 ou 500 monstros da faixa onde o herói
@@ -60,7 +59,7 @@
     if (bossFight) endBossFight(false);
     tpGoTo(x, y);
     if (typeof tpBurst === 'function') { tpBurst(x, y - 12, 20, '#9ccbff', 70, -140, 0.9); tpSfx.go(); }
-    show('main'); resumeGame();
+    fim();
   }
 
   // the battalion: n monsters of the current band's table, on open spots around the hero (inside the despawn range)
@@ -95,42 +94,19 @@
       const e = spawnEnemy(type, px, py, zone); if (e) { e.memT = 6; made++; } k++;
     }
     } finally { if (typeof icPacking !== 'undefined') icPacking = false; }
-    show('main'); resumeGame();
+    fim();
   }
-  function clearMobs() { for (let k = enemies.length - 1; k >= 0; k--) if (!enemies[k].boss) enemies.splice(k, 1); show('main'); resumeGame(); }
+  function clearMobs() { for (let k = enemies.length - 1; k >= 0; k--) if (!enemies[k].boss) enemies.splice(k, 1); fim(); }
 
-  // the pause card: a second list of buttons in place of the menu's
-  const card = $('pause').querySelector('.card'), h2 = card.querySelector('h2'), main = card.querySelector('.actions'), danger = card.querySelector('.danger');
-  const list = document.createElement('div'); list.className = 'actions'; list.id = 'tpList'; list.hidden = true; card.appendChild(list);
-  const btn = (txt, fn, cls = 'ghost') => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = txt; b.addEventListener('click', fn); b.addEventListener('pointerenter', () => b.focus({ preventScroll: true })); list.appendChild(b); return b; };
-  function show(view, L) {
-    const isMain = view === 'main';
-    main.hidden = !isMain; if (danger) danger.hidden = !isMain; list.hidden = isMain; list.textContent = '';
-    if (isMain) { h2.textContent = 'Menu'; return; }
-    h2.textContent = view === 'tests' ? 'Testes' : view === 'army' ? 'Batalhão' : L ? L.nome : 'Teleporte';
-    if (view === 'tests') {
-      btn('Teleporte', () => show('list')).id = 'btnTp';
-      btn('Batalhão', () => show('army')).id = 'btnArmy';
-      btn('Voltar', () => { show('main'); $('btnTests').focus(); });
-    } else if (view === 'army') {
-      for (const n of [25, 50, 100, 200, 500]) btn(String(n), () => battalion(n));
-      btn('Limpar', clearMobs);
-      btn('Voltar', () => { show('tests'); $('btnArmy').focus(); });
-    } else if (!L) {
-      btn('Vilarejo', () => { const v = tpVilSpot(); go(v.x, v.y); });
-      for (const C of LAYERS()) btn(C.nome, () => show('layer', C));
-      btn('Voltar', () => { show('tests'); $('btnTp').focus(); });
-    } else {
-      for (const F of L.faixas) btn(F.nome, () => { const s = spot(F, L.entrada()); if (s) go(s[0] * T + T / 2, (s[1] + 1) * T); });
-      btn('Voltar', () => show('list'));
-    }
-    list.querySelector('button').focus();
-  }
+  // back to the game after a trip or a battalion (the Testes screen, 339, closes with it)
+  function fim() { testesFecha(); resumeGame(); }
+
+  // Menu > Testes opens the Testes screen (339-testes)
+  const main = $('pause').querySelector('.card .actions');
   const b = document.createElement('button'); b.id = 'btnTests'; b.className = 'ghost'; b.type = 'button'; b.textContent = 'Testes';
-  b.addEventListener('click', () => show('tests'));
+  b.addEventListener('click', () => openTestes());
   main.appendChild(b);
   // um friso leve separa o Continuar das opções (fica dentro da lista principal, então some junto nos submenus)
   const sep = document.createElement('div'); sep.className = 'sep'; sep.id = 'pauseSep'; $('btnResume').after(sep);
-  { const _pg = pauseGame; pauseGame = function () { show('main'); return _pg.apply(this, arguments); }; }
-  window.__tp = { spot, LAYERS, show, battalion };
+  window.__tp = { spot, LAYERS, go, battalion, clearMobs };
 })();

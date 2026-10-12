@@ -10,7 +10,7 @@
    - O que vai no save (chave `runas`): { [id do feitiço]: { xp, lvl, n: { [nó]: pontos } } }, por personagem.
    - O Arco Voltaico é lançado por aqui (castArc de js/64 trocado): bifurcação, choque e último elo moram aqui;
      os números (saltos, alcance, dano, mana, recarga) vêm do ARC recalculado pelo tabuleiro.
-   - Menu > Testes ganha "Runa: +5 pontos" para testar o tabuleiro sem caçar.
+   - Menu > Testes, aba Outros (339-testes), dá +5 pontos de runa para testar o tabuleiro sem caçar.
    Carrega depois do 121-pergaminhos (usa knowsSpell e embrulha talkMenu, closeTalk, newWorld e makeSave). */
 
 let runes = {}, runSel = null, runBuilt = false, runNpc = null, runHover = null, runDirty = true;
@@ -320,14 +320,5 @@ function runLoop() {
   requestAnimationFrame(runLoop);
 }
 
-/* ---- Menu > Testes: pontos de runa para testar ---- */
-(function () {
-  const list = typeof $ === 'function' && $('tpList'); if (!list) return;
-  new MutationObserver(() => {
-    if (!$('btnArmy') || $('btnRuna')) return;
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.id = 'btnRuna'; b.textContent = 'Runa: +5 pontos';
-    b.addEventListener('click', () => { for (const id in RUNE_BOARDS) { const r = runOf(id), B = RUNE_BOARDS[id]; r.lvl = Math.min(B.maxLvl, r.lvl + 5); } runDirty = true; saveGame(); sfx.runLvl(); });
-    b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    list.insertBefore(b, list.lastElementChild);
-  }).observe(list, { childList: true });
-})();
+/* ---- Menu > Testes: pontos de runa para testar (o botão fica na aba Outros da tela de Testes, 339-testes) ---- */
+function runTestePontos() { for (const id in RUNE_BOARDS) { const r = runOf(id), B = RUNE_BOARDS[id]; r.lvl = Math.min(B.maxLvl, r.lvl + 5); } runDirty = true; saveGame(); sfx.runLvl(); }

@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.0';
+const VERSAO = '0.34.1';
 const NOVIDADES = [
+  { v: '0.34.1', data: '12/10/2026', titulo: 'Tela de testes', itens: [
+    'Menu > Testes virou uma tela com abas: Modo deus (a chave do modo e uma chave para cada efeito), Viagem (camadas e faixas), Batalhão e Outros (próxima estação, próxima fase da lua e pontos de runa).'
+  ] },
   { v: '0.34.0', data: '12/10/2026', titulo: 'Runas', itens: [
     'A Aurélia tem um tabuleiro de runas: ponha a runa do feitiço no encaixe do centro e gaste pontos nos nós em volta para mudar o feitiço.',
     'Por enquanto só o Arco Voltaico tem tabuleiro, com 10 nós: mais saltos, corrente que perde menos dano, raio que se divide, mais dano, atordoar, último alvo com dano dobrado, mais alcance, saltos mais longos, menos mana e recarga menor.',

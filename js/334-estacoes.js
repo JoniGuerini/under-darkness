@@ -9,7 +9,7 @@
    - Aqui ficam o relógio (estNow), o chão (capim, tufos e flores trocam de cor; no inverno viram neve), o fundo
      (campos, sebes e matas lá longe repintados por estação), a neve nos telhados do vilarejo e a faixa com o nome da
      estação quando ela vira com o herói na superfície. As árvores estão no 335, o tempo (neve, folhas, pétalas) no 336.
-   - Menu > Testes ganha "Estação: ..." que pula para a próxima estação (para testar sem esperar).
+   - Menu > Testes, aba Mundo (339-testes), pula para a próxima estação (para testar sem esperar).
    Nada aqui lê pixels por quadro: cada troca repinta uma vez, e o fundo é rebakeado aos poucos (uma camada por quadro). */
 
 const EST_DIAS = 7;
@@ -179,14 +179,4 @@ HOOK.update.push(() => { estAplica(true); estFundoPasso(); });
 
 /* ---- Menu > Testes: pular para a próxima estação ---- */
 function estPula() { const e = estNow(); estOff += EST_DIAS - e.d; estAplica(false); saveGame(); }
-(function () {
-  const list = $('tpList'); if (!list) return;
-  const txt = () => 'Estação: ' + EST_NOMES[estNow().s] + ' (pular)';
-  new MutationObserver(() => {
-    if (!$('btnArmy') || $('btnEstacao')) return;
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.id = 'btnEstacao'; b.textContent = txt();
-    b.addEventListener('click', () => { estPula(); b.textContent = txt(); });
-    b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    list.insertBefore(b, list.lastElementChild);
-  }).observe(list, { childList: true });
-})();
+// (o botão fica na aba Mundo da tela de Testes, 339-testes)
