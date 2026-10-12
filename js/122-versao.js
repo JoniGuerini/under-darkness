@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.33.0';
+const VERSAO = '0.33.1';
 const NOVIDADES = [
+  { v: '0.33.1', data: '12/10/2026', titulo: 'Plataforma', itens: [
+    'Segurar a plataforma na barra não trava mais o jogo: ela agora tem desenho na mão e no chão.'
+  ] },
   { v: '0.33.0', data: '12/10/2026', titulo: 'Fases da lua', itens: [
     'A lua passa por 8 fases, uma por noite: nova, crescente, cheia e minguante, num ciclo de 8 dias do jogo. Ela foi redesenhada maior, com mares e crateras.',
     'A noite na superfície fica um pouco mais clara na lua cheia e mais escura na lua nova, e o ícone do relógio mostra a fase.'

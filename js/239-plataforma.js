@@ -45,6 +45,11 @@ DECO_PICK[PLAT] = (gx, gy, arr) => arr[(platSide(gx - 1, gy) ? 0 : 1) + (platSid
   return { cv: o, url };
 }; }
 
+// na mão e no chão: uma tábua curta com as mãos-francesas (o blockCanvas do 03 só sabe desenhar blocos com textura)
+const PLAT_HAND = ['ooooooooo', 'hllhllhll', 'mgmkmmgmk', 'ooooooooo', '.i.....i.', '.Ii...iI.'];
+{ const _hs = handSprite; handSprite = function (id) { return id === 'plataforma' ? cached('hs:plataforma', () => fromRows(PLAT_HAND, PLAT_P)) : _hs(id); }; }
+{ const _ds = dropSprite; dropSprite = function (id) { return id === 'plataforma' ? cached('ds:plataforma', () => outlined(fromRows(PLAT_HAND, PLAT_P))) : _ds(id); }; }
+
 /* ---- colocar: também apoia na plataforma do lado ---- */
 let platPlacing = false;
 { const _cp = canPlace; canPlace = function (tx, ty) {
