@@ -60,7 +60,7 @@ function arcLearn(i) {
     const it = ITEMS[s.id]; if (!(it.scroll || it.spell)) return _tipHTML(s, r, act2);
     const rar = itemRar(s), act = act2 != null ? act2 : '';
     const type = it.spell ? 'Feitiço · ' + RAR[rar] : it.scroll === 1 ? 'Pergaminho · Não identificado' : 'Pergaminho · ' + RAR[rar];
-    const lines = it.scroll === 1 ? '' : `<ul><li><span>Mana</span><b style="color:#7fb8ff">${ARC.cost}</b></li><li><span>Dano</span><b>${ARC.min} – ${ARC.max}</b></li><li><span>Saltos</span><b>${ARC.jumps}</b></li><li><span>Recarga</span><b>${fmt(ARC.cd)} s</b></li></ul>`;
+    const lines = it.scroll === 1 ? '' : `<ul><li><span>Mana</span><b style="color:#7fb8ff">${ARC.cost}</b></li><li><span>Dano</span><b>${Math.round(ARC.min)} – ${Math.round(ARC.max)}</b></li><li><span>Saltos</span><b>${ARC.jumps}</b></li><li><span>Recarga</span><b>${fmt(+ARC.cd.toFixed(2))} s</b></li></ul>`;
     return `<span class="tn" style="color:${RAR_COL[rar]}">${it.name}</span><small>${type}</small>${lines}${it.desc ? `<p>${it.desc}</p>` : ''}${act ? `<em>${act}</em>` : ''}`;
   };
 }
