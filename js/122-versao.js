@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.35.3';
+const VERSAO = '0.36.0';
 const NOVIDADES = [
+  { v: '0.36.0', data: '12/10/2026', titulo: 'Nova árvore de talentos', itens: [
+    'Árvore de talentos nova (P): tela cheia, com regiões para cada estilo (fogo, gelo, raio, corpo a corpo, defesa, vida e outras), cada uma com sua arte no fundo.',
+    'Nós pequenos dão porcentagens, e os keystones têm efeitos grandes. 1 ponto por nível.',
+  ] },
   { v: '0.35.3', data: '12/10/2026', titulo: 'Ouro pelo nível', itens: [
     'Ouro dos monstros pelo nível: nem todo monstro solta ouro, e quando solta, um monstro de nível N dá de N a 2N moedas (nível 10 dá de 10 a 20).',
   ] },

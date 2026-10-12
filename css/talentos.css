@@ -1,14 +1,40 @@
-/* Árvore de talentos (P): js/51-talentos.js. Cobre o jogo inteiro; só os globos de vida e mana ficam por cima */
-#tal{position:fixed;inset:0;z-index:40;background:#030205}
-#talCv{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none}
-#talTop{position:absolute;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:baseline;gap:14px;padding:6px 18px;pointer-events:none;white-space:nowrap}
-#talTop b{font-family:var(--font-title);font-size:30px;line-height:1;font-weight:400;color:var(--parch);letter-spacing:.04em;text-shadow:2px 2px 0 #000}
-#talTop span{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c4b596;text-shadow:1px 1px 0 #000}
-#talTop i{font-style:normal;font-family:var(--font-title);font-size:28px;font-weight:400;letter-spacing:0;color:#ffd27a;margin-right:4px;font-variant-numeric:tabular-nums}
-#tal.nopts #talTop i{color:#8e8b9c}
-#talClose{position:absolute;top:14px;right:14px}
-#talTip{z-index:2}
-#talTip .talfx li{color:var(--moss)}
+/* ================= árvore de talentos (P): js/345-talentos.js =================
+   Cobre o jogo inteiro; só os globos de vida e mana ficam por cima. Veste a moldura e as cores da torre da Aurélia,
+   como o tabuleiro de runas (css/runas.css). A árvore é uma folha de pixel art que a câmera só move e escala. */
+#tal{
+  --k-frame:var(--maga-frame);--k-frame-sm:var(--maga-frame-sm);--k-board:var(--maga-board);--k-sign:var(--maga-sign);
+  --k-txt:#ece6f4;--k-acc:#c8a4ff;--k-line:#6e3cb4;--k-main-glow:rgba(184,138,255,.5);
+  --k-title:linear-gradient(#f6f0ff 0 26%,#d2b8ff 26% 52%,#9a6ade 52% 78%,#6e3cb4 78%);
+  position:fixed;inset:0;z-index:40;background:#07060c;overflow:hidden;user-select:none
+}
+#talView{position:absolute;inset:0;touch-action:none}
+#talWorld{position:absolute;left:0;top:0;width:1240px;height:1240px;transform-origin:0 0;will-change:transform}
+#talWorld canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+#talGlow{animation:talPulse 2.4s ease-in-out infinite}
+@keyframes talPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.talSpark{position:absolute;width:1px;height:1px;pointer-events:none}
+/* a moldura da torre em volta da tela inteira */
+#talFrame{position:absolute;inset:0;pointer-events:none;image-rendering:pixelated;border-style:solid;border-color:#000;border-width:48px 18px 24px;
+  border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;box-shadow:inset 0 0 80px 20px rgba(0,0,0,.75)}
+/* o cabeçalho: placa pequena com o título, os pontos e os botões */
+#talTop{position:absolute;left:50%;top:56px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;white-space:nowrap;
+  padding:4px 14px;border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;image-rendering:pixelated;
+  background:radial-gradient(ellipse 80% 90% at 50% 0%,rgba(184,138,255,.16),transparent 70%),#141224;box-shadow:0 6px 0 rgba(0,0,0,.55);color:var(--k-txt)}
+#talTop::before{content:"";flex:none;width:32px;height:27px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+#talTop h3{margin:0;font-family:var(--font-title);font-weight:400;font-size:32px;line-height:1;letter-spacing:.03em;background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(3px 3px 0 #000)}
+#talPts{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+#talPts b{color:#8fd0ff;font-size:20px;text-shadow:0 0 8px rgba(90,168,255,.7),1px 1px 0 #000}
+#tal.nopts #talPts b{color:#8e8b9c;text-shadow:1px 1px 0 #000}
+#talTop button.ghost{background:var(--k-board) 0 0/180px 42px;image-rendering:pixelated;color:#f4ecd8;font-weight:600;text-shadow:1px 1px 0 #000,0 0 2px #000;
+  border:10px solid #000;border-image:var(--k-frame-sm) 5 / 10px stretch;box-shadow:0 3px 0 rgba(0,0,0,.55);padding:2px 10px}
+#talTop button.ghost:hover{filter:brightness(1.15)}
+#talTop button:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
+#talClose{font-size:20px;line-height:1}
+/* a dica do nó */
+#talTip{z-index:3;border-color:#000;box-shadow:inset 0 0 0 2px var(--k-line),0 4px 0 rgba(0,0,0,.4);background:rgba(10,8,20,.97)}
+#talTip.tk{box-shadow:inset 0 0 0 2px var(--k-acc),0 0 18px -4px var(--k-main-glow),0 4px 0 rgba(0,0,0,.4)}
+#talTip li{color:#a8e88a}
+#talTip li.neg{color:#ff8a7a}
 
 /* com a árvore aberta, o HUD some, menos os globos, que passam por cima dela */
 body.tal-open #hud{z-index:41}

@@ -14,7 +14,7 @@ A wiki só lê: ela não deixa o código do jogo ouvir o teclado e nunca grava o
 | `wiki.css` | o visual (cores, fontes e molduras do jogo) |
 | `js/base.js` | desenhos, dica de item (a mesma do jogo), markdown, tabelas que ordenam |
 | `js/app.js` | prepara os desenhos, monta o menu e troca de página pelo endereço (`#/itens`, `#/item/espada_ferro`...) |
-| `js/p-*.js` | uma página cada: início e busca, itens, modificadores, raridades e lendários, forja, inimigos e chefes, moradores, biomas, regras, documentos |
+| `js/p-*.js` | uma página cada: início e busca, itens, modificadores, raridades e lendários, forja, talentos do personagem, inimigos e chefes, moradores, biomas, regras, documentos |
 | `js/textos.js` | o que o código não diz em palavras: papel de cada monstro, fases do Rei, o que cada morador faz, faixas e minérios de cada camada. Os metros saem do jogo pelo `UDW_PROF` (no começo do arquivo): o topo de cada camada (`X_TOP`), as faixas (`X_BANDS`) e a altura (`LAYER_D`); o que só existe no desenho de 186 m (veios, salas de chefe) entra em metros do desenho e sai esticado `LAYER_K` vezes |
 | `js/docs.js` | cópia dos documentos `docs/*.md` e do `LEIA-ME.md` do jogo |
 | `ferramentas/atualizar-docs.js` | refaz o `js/docs.js` a partir da pasta `docs/` (roda com Node: `node wiki/ferramentas/atualizar-docs.js`) |
