@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.37.4';
+const VERSAO = '0.37.5';
 const NOVIDADES = [
+  { v: '0.37.5', data: '12/10/2026', titulo: 'Ímã dos drops', itens: [
+    'O ímã dos drops ficou mais forte e alcança mais longe, então o que cai alcança o herói andando.',
+    'Drop que encosta no herói é pego na hora: minério quebrado em cima não atravessa mais o boneco.',
+    'Drops param em cima das plataformas de madeira.',
+  ] },
   { v: '0.37.4', data: '12/10/2026', titulo: 'Nuvem de esporos', itens: [
     'A nuvem de veneno do fungo das Cavernas foi refeita: tufos de esporos pintados pixel a pixel que giram, sobem e se desfazem, no lugar dos quadrados.',
   ] },

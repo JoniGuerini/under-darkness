@@ -204,6 +204,11 @@ function unstickLoot(o) {
   }
   if (best) { o.x = (best[0] + 0.5) * T; o.y = (best[1] + 1) * T - 0.01; o.vx = 0; o.vy = 0; }
 }
+// the magnet (Jonathan, 2026-10-12): stronger and wider so drops catch up with a walking hero, and a drop that
+// touches the hero is taken at once (ore mined overhead used to fall straight through him)
+const LOOT_MAG_R = 80, LOOT_MAG_T = 0.25, LOOT_TOUCH_T = 0.08;
+// a falling drop lands on top of a wooden platform (js/239-plataforma.js), like the hero
+const lootPlatAt = (x, y) => typeof PLAT !== 'undefined' && tileAt(Math.floor(x / T), Math.floor(y / T)) === PLAT;
 function updateLoot(dt) {
   const pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
   pl.fullMsg -= dt;
@@ -216,11 +221,16 @@ function updateLoot(dt) {
       loot.splice(i, 1); continue;
     }
     const dx = pcx - o.x, dy = pcy - (o.y - 5), d = Math.hypot(dx, dy);
-    const fits = d >= 40 || !!ITEMS[o.id].gold || canFit(o.id);   // only a drop next to the hero needs the bag checked
-    if (!pl.dead && o.t > 0.5 && d < 40 && fits) {
-      const sp = 90 + (40 - d) * 6, k = Math.min(1, dt * 10); o.rest = false;
+    const fits = d >= LOOT_MAG_R || !!ITEMS[o.id].gold || canFit(o.id);   // only a drop near the hero needs the bag checked
+    const touch = o.x + LOOT_HW + 2 > pl.x && o.x - LOOT_HW - 2 < pl.x + pl.w && o.y + 2 > pl.y && o.y - LOOT_H - 2 < pl.y + pl.h;
+    if (!pl.dead && fits && (d < 9 || (touch && o.t > LOOT_TOUCH_T))) {
+      const left = o.item ? (addInst(o.item) ? 0 : 1) : ITEMS[o.id].gold ? (pl.gold += o.n, 0) : addItem(o.id, o.n), got = o.n - left;
+      if (got > 0) pickupMsg(o.id, got, o.item);
+      if (left > 0) o.n = left; else { loot.splice(i, 1); continue; }
+    }
+    if (!pl.dead && o.t > LOOT_MAG_T && d < LOOT_MAG_R && fits) {
+      const sp = 200 + (LOOT_MAG_R - d) * 4, k = Math.min(1, dt * 14); o.rest = false;
       o.vx = lerp(o.vx, dx / (d || 1) * sp, k); o.vy = lerp(o.vy, dy / (d || 1) * sp, k); o.x += o.vx * dt; o.y += o.vy * dt;
-      if (d < 9) { const left = o.item ? (addInst(o.item) ? 0 : 1) : ITEMS[o.id].gold ? (pl.gold += o.n, 0) : addItem(o.id, o.n), got = o.n - left; if (got > 0) pickupMsg(o.id, got, o.item); if (left > 0) o.n = left; else { loot.splice(i, 1); continue; } }
     } else {
       if (!fits && d < 12 && pl.fullMsg <= 0 && !pl.dead) { pl.fullMsg = 2.5; floatText(pcx, pl.y - 10, 'Mochila cheia', '#ffb4a8', 0.8); }
       // a small 8x8 box that collides on both axes, so drops fit one-block gaps and never climb through rock
@@ -228,8 +238,9 @@ function updateLoot(dt) {
       o.vy = Math.min(o.vy + GRAV * 0.8 * dt, 300); o.vx *= Math.pow(o.rest ? 0.02 : 0.08, dt);
       const nx = o.x + o.vx * dt;
       if (lootHit(nx, o.y)) o.vx = -o.vx * 0.3; else o.x = nx;
-      const ny = o.y + o.vy * dt;
-      if (!lootHit(o.x, ny)) { o.y = ny; o.rest = false; }
+      const ny = o.y + o.vy * dt, pTop = Math.floor(ny / T) * T;
+      if (o.vy > 0 && o.y <= pTop + 0.01 && ny > pTop && lootPlatAt(o.x, ny)) { o.y = pTop - 0.01; o.vy = 0; o.rest = true; }
+      else if (!lootHit(o.x, ny)) { o.y = ny; o.rest = false; }
       else if (o.vy > 0) { const land = Math.floor(ny / T) * T - 0.01; if (!lootHit(o.x, land)) o.y = land; o.vy = 0; o.rest = true; }
       else o.vy = 0;
     }

@@ -49,7 +49,7 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 | 07-chunks-luz | cache de chunks e iluminação |
 | 08-estado-entrada | estado do jogador e do jogo, hotbar, teclado e mouse |
 | 09-audio | sons |
-| 10-combate | efeitos, tipos de inimigo, física, dano, loot; ouro dos monstros: 55% de chance, e um monstro de nível N solta de N a 2N moedas (chefes soltam 250 a 349) |
+| 10-combate | efeitos, tipos de inimigo, física, dano, loot; ouro dos monstros: 55% de chance, e um monstro de nível N solta de N a 2N moedas (chefes soltam 250 a 349); ímã dos drops (pedido do Jonathan, 2026-10-12): puxa de até 80 px (`LOOT_MAG_R`) depois de 0,25 s, mais rápido que o herói correndo; drop que encosta no herói é pego na hora (minério minerado em cima não atravessa mais o boneco); drop caindo para em cima de plataforma |
 | 11-jogador | atualização do jogador, mineração, colocar blocos e tochas. A tocha (Q ou tocha na barra) vai no bloco exato sob o mouse, sem limite de distância e sem precisar de linha de visão: dá para pôr num buraco dentro de uma parede. Precisa de um espaço vazio preso a algo (parede de fundo ou bloco ao lado/embaixo), fora do vilarejo, e gasta 1 tocha (pedido do Jonathan, 2026-10-10) |
 | 12-inimigos-ia | IA dos monstros, visão, pathfinding |
 | 13-cripta-chefe | o que sobrou da cripta antiga (removida em 2026-10-09): `bossFight`, `endBossFight()` base e `updateEnemies` |
