@@ -5,7 +5,7 @@
    penhascos, como no Terraria. O herói passa por ela pulando de baixo e, caindo, para em cima dela.
    - Bloco PLAT (125, livre na faixa da mina; a bolsa de blocos mostra a plataforma na página da Superfície, logo
      depois da madeira). Não é sólido: luz, bichos e tiros passam; só o herói pisa nela.
-   - Descer: S (ou seta para baixo) + pulo em cima da plataforma solta o herói por ela.
+   - Descer: S (ou seta para baixo) em cima da plataforma solta o herói por ela, e ele cai reto.
    - Coloca como bloco, e uma plataforma se apoia também na plataforma do lado, então dá para fazer uma ponte no ar.
    - Receita no Criar (235): 1 madeira = 8 plataformas. Picareta tira e devolve a plataforma.
    - Arte: tábua com veio e pregos; as pontas soltas ganham uma mão-francesa de ferro por baixo.
@@ -14,7 +14,7 @@
 const PLAT = 125;
 DIG[PLAT] = 0.12; PCOL[PLAT] = '#8a5a32';
 BLOCK_DROP[PLAT] = 'plataforma';
-ITEMS.plataforma = { name: 'Plataforma', rar: 0, stack: 99, block: PLAT, desc: 'Uma tábua presa na parede. Você pula através dela por baixo e pisa em cima. S + pulo desce por ela.' };
+ITEMS.plataforma = { name: 'Plataforma', rar: 0, stack: 99, block: PLAT, desc: 'Uma tábua presa na parede. Você pula através dela por baixo e pisa em cima. S desce por ela.' };
 CRAFT_RECIPES.push({ id: 'plataforma', n: 8, need: [['madeira', 1]] });
 if (typeof SURF_OF !== 'undefined') SURF_OF.set(PLAT, 'madeira');
 
@@ -50,6 +50,9 @@ const PLAT_HAND = ['ooooooooo', 'hllhllhll', 'mgmkmmgmk', 'ooooooooo', '.i.....i
 { const _hs = handSprite; handSprite = function (id) { return id === 'plataforma' ? cached('hs:plataforma', () => fromRows(PLAT_HAND, PLAT_P)) : _hs(id); }; }
 { const _ds = dropSprite; dropSprite = function (id) { return id === 'plataforma' ? cached('ds:plataforma', () => outlined(fromRows(PLAT_HAND, PLAT_P))) : _ds(id); }; }
 
+// a prévia de colocar (drawWorldUI no 15) usa SPR.block, que o 04 só monta para blocos com textura
+{ const _bs = buildSprites; buildSprites = function () { _bs(); SPR.block[PLAT] = fromRows(platRows(false, false), PLAT_P); }; }
+
 /* ---- colocar: também apoia na plataforma do lado ---- */
 let platPlacing = false;
 { const _cp = canPlace; canPlace = function (tx, ty) {
@@ -74,24 +77,21 @@ function platUnder(e, y) {   // a fileira da tábua em que os pés tocam, ou -1
   if (e !== pl) return _me(e, dt, step);
   const y0 = pl.y, b0 = y0 + pl.h;
   _me(e, dt, step);
-  if ((pl.platDropT || 0) > 0 || pl.climb || pl.onGround || pl.vy < 0) return;
+  if (pl.platSkip != null && pl.y + pl.h > (pl.platSkip + 1) * T) pl.platSkip = null;   // já passou da tábua de que se soltou
+  if (pl.climb || pl.onGround || pl.vy < 0) return;
   const b1 = pl.y + pl.h; if (b1 < b0) return;
   // cada fileira cruzada pelos pés neste passo, de cima para baixo
   for (let ty = Math.ceil(b0 / T - 0.001); ty * T <= b1 + 0.01; ty++) {
     const top = ty * T, x0 = Math.floor(pl.x / T), x1 = Math.floor((pl.x + pl.w - 0.001) / T);
     let hit = false; for (let tx = x0; tx <= x1 && !hit; tx++) if (tileAt(tx, ty) === PLAT) hit = true;
-    if (hit && b0 <= top + 0.01) { pl.y = top - pl.h; pl.vy = 0; pl.onGround = true; return; }
+    if (hit && ty !== pl.platSkip && b0 <= top + 0.01) { pl.y = top - pl.h; pl.vy = 0; pl.onGround = true; return; }
   }
 }; }
-// S + pulo em cima da plataforma: desce por ela em vez de pular
+// S em cima da plataforma: o herói se solta dela e cai reto; se houver outra embaixo, pára nela
 { const _up = updatePlayer; updatePlayer = function (dt) {
-  if (pl.platDropT > 0) pl.platDropT -= dt;
-  const jump = pressed.Space || pressed.KeyW || pressed.ArrowUp, down = keys.KeyS || keys.ArrowDown;
-  if (!pl.dead && jump && down && pl.onGround && !pl.climb && platUnder(pl, pl.y + 0.5) >= 0 && !rectSolid(pl.x, pl.y + 1, pl.w, pl.h)) {
-    const s = [pressed.Space, pressed.KeyW, pressed.ArrowUp];
-    pressed.Space = pressed.KeyW = pressed.ArrowUp = false; pl.jumpBuf = 0;
-    pl.platDropT = 0.22; pl.onGround = false; pl.y += 1; pl.vy = Math.max(pl.vy, 40);
-    try { return _up(dt); } finally { [pressed.Space, pressed.KeyW, pressed.ArrowUp] = s; }
+  const down = pressed.KeyS || pressed.ArrowDown;
+  if (!pl.dead && down && pl.onGround && !pl.climb && platUnder(pl, pl.y + 0.5) >= 0 && !rectSolid(pl.x, pl.y + 1, pl.w, pl.h)) {
+    pl.platSkip = platUnder(pl, pl.y + 0.5); pl.onGround = false; pl.y += 1; pl.vy = Math.max(pl.vy, 40);
   }
   return _up(dt);
 }; }

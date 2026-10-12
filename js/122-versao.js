@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.33.1';
+const VERSAO = '0.33.2';
 const NOVIDADES = [
+  { v: '0.33.2', data: '12/10/2026', titulo: 'Plataforma', itens: [
+    'A prévia de colocar a plataforma não dá mais erro.',
+    'Apertar S em cima da plataforma solta o herói dela: ele cai reto e para na plataforma de baixo, se houver.'
+  ] },
   { v: '0.33.1', data: '12/10/2026', titulo: 'Plataforma', itens: [
     'Segurar a plataforma na barra não trava mais o jogo: ela agora tem desenho na mão e no chão.'
   ] },
