@@ -337,7 +337,7 @@ function drawSky(cx, cy) {
     lc.globalAlpha = 1; lc.drawImage(BG.sun[0], bx - 25, by - 25);
     if (low > 0.02) { lc.globalAlpha = low; lc.drawImage(BG.sun[1], bx - 25, by - 25); }
   } else {
-    const ph = ((Math.floor(worldTime / DAY_LEN) + 4) % 8 + 8) % 8; // the first night has a full moon
+    const ph = typeof luaFase === 'function' ? luaFase() : ((Math.floor(worldTime / DAY_LEN) + 4) % 8 + 8) % 8; // the first night has a full moon; phases in js/337-lua.js
     lc.globalAlpha = clamp(1 - wt[0] - wt[1] * 0.5, 0.25, 1); lc.drawImage(BG.moon[ph], bx - 16, by - 16);
   }
   // clouds drift with the wind

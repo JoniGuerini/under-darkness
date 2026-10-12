@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.32.0';
+const VERSAO = '0.33.0';
 const NOVIDADES = [
+  { v: '0.33.0', data: '12/10/2026', titulo: 'Fases da lua', itens: [
+    'A lua passa por 8 fases, uma por noite: nova, crescente, cheia e minguante, num ciclo de 8 dias do jogo. Ela foi redesenhada maior, com mares e crateras.',
+    'A noite na superfície fica um pouco mais clara na lua cheia e mais escura na lua nova, e o ícone do relógio mostra a fase.'
+  ] },
   { v: '0.32.0', data: '11/10/2026', titulo: 'Estações do ano', itens: [
     'A superfície muda com as estações: primavera, verão, outono e inverno, cada uma com 7 dias do jogo. O capim, as flores, as árvores e o fundo mudam de cor, e no inverno a neve cobre o chão e os telhados.',
     'Pétalas na primavera, folhas caindo no outono e neve de vez em quando no inverno.',
