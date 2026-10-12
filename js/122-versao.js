@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.4';
+const VERSAO = '0.34.5';
 const NOVIDADES = [
+  { v: '0.34.5', data: '12/10/2026', titulo: 'Desempenho', itens: [
+    'Ataques em área sobre muitos monstros resfriados, congelados ou parados no tempo não travam mais o jogo: o tom de gelo e de sépia é pintado uma vez e reaproveitado.'
+  ] },
   { v: '0.34.4', data: '12/10/2026', titulo: 'Runas no lixo', itens: [
     'Runas também vão para o lixo, até a última; o feitiço é esquecido e volta comprando outra runa.'
   ] },

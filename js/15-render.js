@@ -145,6 +145,24 @@ function drawWorldUI(cx, cy) {
   if (tg.dig && tg.inReach && tg.pick) { lc.globalAlpha = mouse.l ? 0.85 : 0.35; lc.strokeStyle = '#fff'; lc.lineWidth = 1; lc.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); lc.globalAlpha = 1; }
   if (pl.digX === tg.tx && pl.digY === tg.ty && pl.digT > 0) { const t = tileAt(tg.tx, tg.ty); const n = Math.floor(CRACK.length * Math.min(1, pl.digT / DIG[t])); lc.fillStyle = '#0d0a10'; for (let i = 0; i < n; i++) lc.fillRect(x + CRACK[i][0], y + CRACK[i][1], 1, 1); }
 }
+// contorno + preenchimento de um texto da tela (sc), pintados uma vez numa figura pequena e reaproveitados: os números que
+// voam e as etiquetas dos bichos eram contornados (strokeText) de novo em todo quadro, o que pesava num golpe em muitos
+// bichos (2026-10-12). Usa o textAlign/textBaseline/lineJoin que o sc tiver na hora, como antes.
+const TXT = new Map(), txtCtx = mk(1, 1).getContext('2d');
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => TXT.clear());
+function outlinedText(text, x, y, font, lw, stroke, fill) {
+  const al = sc.textAlign, bl = sc.textBaseline, lj = sc.lineJoin, k = font + '|' + lw + '|' + stroke + '|' + fill + '|' + al + bl + lj + '|' + text;
+  let c = TXT.get(k);
+  if (!c) {
+    const m = txtCtx; m.font = font; m.textAlign = al; m.textBaseline = bl;
+    const q = m.measureText(text), pad = Math.ceil(lw / 2) + 2;
+    const L = Math.ceil(q.actualBoundingBoxLeft) + pad, R = Math.ceil(q.actualBoundingBoxRight) + pad, A = Math.ceil(q.actualBoundingBoxAscent) + pad, D = Math.ceil(q.actualBoundingBoxDescent) + pad;
+    const cv = mk(Math.max(1, L + R), Math.max(1, A + D)), x2 = cv.getContext('2d');
+    x2.font = font; x2.textAlign = al; x2.textBaseline = bl; x2.lineJoin = lj; x2.lineWidth = lw; x2.strokeStyle = stroke; x2.strokeText(text, L, A); x2.fillStyle = fill; x2.fillText(text, L, A);
+    c = { cv, L, A }; if (TXT.size > 400) TXT.clear(); TXT.set(k, c);
+  }
+  sc.drawImage(c.cv, Math.round(x) - c.L, Math.round(y) - c.A);
+}
 function render() {
   const cx = Math.round(cam.x + shk.x), cy = Math.round(cam.y + shk.y);
   lc.imageSmoothingEnabled = false;
@@ -225,8 +243,8 @@ function render() {
     sc.textAlign = 'center'; sc.textBaseline = 'middle'; sc.lineJoin = 'round';
     for (const t of texts) {
       const a = Math.min(1, t.life / t.max * 2.5), fs = Math.round(S * 4.1 * t.size * (1 + Math.max(0, t.life - t.max + 0.12) * 3));
-      sc.font = `800 ${fs}px "Rubik", system-ui, sans-serif`; sc.globalAlpha = a;
-      const x = (t.x - cx) * S, y = (t.y - cy) * S; sc.lineWidth = Math.max(3, S * 1.25); sc.strokeStyle = '#120d12'; sc.strokeText(t.text, x, y); sc.fillStyle = t.col; sc.fillText(t.text, x, y);
+      sc.globalAlpha = a;
+      outlinedText(t.text, (t.x - cx) * S, (t.y - cy) * S, `800 ${fs}px "Rubik", system-ui, sans-serif`, Math.max(3, S * 1.25), '#120d12', t.col);
     }
     sc.globalAlpha = 1;
   }
@@ -234,5 +252,5 @@ function render() {
   // enemy level tags
   sc.font = `600 ${Math.round(S * 3.1)}px "Rubik", system-ui, sans-serif`; sc.textAlign = 'center';
   if (mapOpen && state === 'play') drawMap();
-  for (const e of enemies) if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) { const x = (e.x + e.w / 2 - cx) * S, y = (e.y - cy - 9) * S; sc.lineWidth = Math.max(2, S * 0.8); sc.strokeStyle = '#120d12'; const s = `${ET[e.type].name} · Nv ${e.lvl}`; sc.strokeText(s, x, y); sc.fillStyle = '#efe2c4'; sc.fillText(s, x, y); }
+  for (const e of enemies) if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) outlinedText(`${ET[e.type].name} · Nv ${e.lvl}`, (e.x + e.w / 2 - cx) * S, (e.y - cy - 9) * S, sc.font, Math.max(2, S * 0.8), '#120d12', '#efe2c4');
 }

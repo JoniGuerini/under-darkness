@@ -375,11 +375,16 @@ function fpBgCover(e, cx, cy) {
     else { lc.fillStyle = '#141814'; lc.fillRect(tx * T - cx, ty * T - cy, T, T); }
   }
 }
+const FP_TINT = new Map();
 { const _de = drawEnemy; drawEnemy = function (e, cx, cy) {
   if (!e.bg) return _de(e, cx, cy);
   const k = clamp(e.bgK || 0, 0, 1);
-  lc.save(); lc.filter = `brightness(${Math.round(52 + 48 * k)}%) saturate(${Math.round(55 + 45 * k)}%)`; lc.globalAlpha = 0.85 + 0.15 * k;
-  try { _de(e, cx, cy); } finally { lc.restore(); }
+  // o tom do fundo sem lc.filter (js/342-tinta.js): o mesmo brightness/saturate, em 12 degraus de k
+  if (typeof tintDraw !== 'function') { lc.save(); lc.filter = `brightness(${Math.round(52 + 48 * k)}%) saturate(${Math.round(55 + 45 * k)}%)`; lc.globalAlpha = 0.85 + 0.15 * k; try { _de(e, cx, cy); } finally { lc.restore(); } fpBgCover(e, cx, cy); return; }   // a wiki não carrega o 342
+  const q = Math.round(k * 12) / 12, b = Math.round(52 + 48 * q), sa = Math.round(55 + 45 * q), key = b + ':' + sa;
+  const Tn = FP_TINT.get(key) || (FP_TINT.set(key, tintMake([['brightness', b / 100], ['saturate', sa / 100]])), FP_TINT.get(key));
+  lc.save(); lc.globalAlpha = 0.85 + 0.15 * k;
+  try { tintDraw(Tn, () => _de(e, cx, cy)); } finally { lc.restore(); }
   fpBgCover(e, cx, cy);
 }; }
 { const _dy = drawEyes; drawEyes = function (e, cx, cy) { if (e.bg) return; return _dy(e, cx, cy); }; }

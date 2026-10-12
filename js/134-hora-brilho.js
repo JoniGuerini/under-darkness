@@ -12,12 +12,11 @@
 
 const HOR_GL = { ring: glow(30, '#9ae8ff'), gold: glow(16, '#f0d080') };
 {
-  const _draw = drawEnemy, canF = 'filter' in lc;
+  // grayscale(1) sepia(0.9) brightness(1.08) contrast(1.15), sem lc.filter: js/342-tinta.js
+  const _draw = drawEnemy;
   drawEnemy = function (e, cx, cy) {
-    if (!canF || !(e.horT > 0)) return _draw(e, cx, cy);
-    const prev = lc.filter;
-    lc.filter = 'grayscale(1) sepia(0.9) brightness(1.08) contrast(1.15)';
-    try { _draw(e, cx, cy); } finally { lc.filter = prev; }
+    if (!(e.horT > 0)) return _draw(e, cx, cy);
+    tintDraw(TINTA.sepia, () => _draw(e, cx, cy));
   };
 }
 

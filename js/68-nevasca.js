@@ -274,11 +274,10 @@ HOOK.drawTop.push((cx, cy) => {
 });
 // resfriado: o inimigo desenhado num tom gelado; congelado, mais pálido ainda (o bloco vem depois, em drawWorld)
 {
-  const _draw = drawEnemy, canF = 'filter' in lc;
+  // os mesmos tons de antes (grayscale, sepia, hue-rotate, saturate, brightness), sem lc.filter: js/342-tinta.js
+  const _draw = drawEnemy;
   drawEnemy = function (e, cx, cy) {
-    if (!canF || !(nevFrozen(e) || nevChilled(e))) return _draw(e, cx, cy);
-    const prev = lc.filter;
-    lc.filter = nevFrozen(e) ? 'grayscale(0.7) sepia(0.4) hue-rotate(160deg) saturate(2.2) brightness(1.25)' : 'grayscale(0.4) sepia(0.35) hue-rotate(165deg) saturate(1.8) brightness(1.08)';
-    try { _draw(e, cx, cy); } finally { lc.filter = prev; }
+    if (!(nevFrozen(e) || nevChilled(e))) return _draw(e, cx, cy);
+    tintDraw(nevFrozen(e) ? TINTA.gelo : TINTA.frio, () => _draw(e, cx, cy));
   };
 }
