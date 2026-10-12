@@ -34,7 +34,7 @@ function abBuild() {
   AB_S0 = Math.min(WH - 12, UP.S0 + Math.min(UP.D, WH - 8 - UP.S0));
   const S0 = AB_S0, YB = Math.min(WH - 8, S0 + AB_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x6b1d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / AB_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const db = (x, y) => (y - S0) * AB_D / DB + (nz(x, y, 30, 0x6b2) - 0.5) * 10;
   const bandOf = d => d < AB_BANDS[1] ? 0 : d < AB_BANDS[2] ? 1 : d < AB_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
@@ -51,15 +51,16 @@ function abBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3) continue;
+      if (y >= YB) { tiles[i] = AB_BASALTO; walls[i] = AB_WALL_OF[AB_BASALTO]; continue; }   // under the layer: the same basalt without the noise
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x6b4);
       if (k < 1 && h > 0.35 + k * 0.6) { tiles[i] = UP.thin; walls[i] = UP.thinW; continue; }   // the rock above thins out
-      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x6a1), n2 = nz(x, y, 18, 0x6a2), n3 = nz(x, y, 50, 0x6a3);
+      // each noise only where the band reads it
+      const d = db(x, y), b = bandOf(d), n1 = () => nz(x, y, 34, 0x6a1), n2 = () => nz(x, y, 18, 0x6a2), n3 = () => nz(x, y, 50, 0x6a3);
       let t;
-      if (y >= YB) t = AB_BASALTO;
-      else if (b === 0) t = n1 > 0.66 ? AB_BASALTO : AB_CINZA;
-      else if (b === 1) t = n2 > 0.72 ? AB_OBSIDIANA : n3 > 0.8 ? AB_CINZA : AB_BASALTO;
-      else if (b === 2) t = n1 > 0.64 ? AB_OSSO : AB_CARNE;
-      else t = n2 > 0.7 ? AB_ENXOFRE : n3 > 0.78 ? AB_OBSIDIANA : AB_CAOS;
+      if (b === 0) t = n1() > 0.66 ? AB_BASALTO : AB_CINZA;
+      else if (b === 1) t = n2() > 0.72 ? AB_OBSIDIANA : n3() > 0.8 ? AB_CINZA : AB_BASALTO;
+      else if (b === 2) t = n1() > 0.64 ? AB_OSSO : AB_CARNE;
+      else t = n2() > 0.7 ? AB_ENXOFRE : n3() > 0.78 ? AB_OBSIDIANA : AB_CAOS;
       tiles[i] = t; walls[i] = AB_WALL_OF[t];
     }
   }
@@ -110,7 +111,7 @@ function abBuild() {
   const picks = [];
   for (let n = 0; n < furn.length && picks.length < 2; n++) { const c = furn[(n * 5 + ((R() * furn.length) | 0)) % furn.length]; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 80)) picks.push(c); }
   for (const c of furn) { if (picks.length >= 2) break; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 40)) picks.push(c); }
-  const landY = S0 + mb(14);
+  const landY = S0 + 14;   // a fenda tem o mesmo tamanho de antes: o salão de pouso fica logo no topo
   for (const c of picks) {
     const x0 = W1(Math.round(c.cx) - 2);
     abExits.push({ x0, fy: c.fy, top: c.fy - 2 });
@@ -127,7 +128,7 @@ function abBuild() {
   // the rooms per band: [count, wMin, wMax, hMin, hMax, top metre, bottom metre, kind]
   const PLAN = [[5, 18, 30, 8, 11, 8, 44, 'ruina'], [6, 30, 46, 12, 16, 52, 94, 'lago'], [6, 16, 26, 11, 16, 102, 146, 'carne'], [5, 22, 32, 10, 13, 154, 176, 'templo']];
   PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1, kind], band) => {
-    const n = n0 * WSC;
+    const n = n0 * WSC * LAYER_K;
     for (let k = 0, tries = 0; k < n && tries < n * 40; tries++) {
       const w = wa + ((R() * (wb - wa + 1)) | 0), h = Math.min(mb(hb), ha + ((R() * (hb - ha + 1)) | 0)), cx = (R() * WW) | 0, cy = S0 + mb(d0) + h / 2 + R() * Math.max(0, mb(d1 - d0) - h);
       if (busy(cx, cy, w, h)) continue;
@@ -139,18 +140,24 @@ function abBuild() {
   // tunnels: round each band, and a few down between bands (into a lake cavern from high up, above the lava)
   const RAD = [1.6, 1.9, 2.3, 1.8];
   const mouth = C => C.boss ? abBoss.fy - 2 : C.kind === 'lago' ? C.cy - C.h * 0.15 : C.fy ? C.fy - 2 : C.cy + C.h * 0.2;
-  for (let b = 0; b < 4; b++) {
-    const L = abChambers.filter(c => c.band === b).sort((a, c) => a.cx - c.cx);
+  // each band holds LAYER_K floors as tall as a whole old band: the tunnels run round each floor, and down from one floor
+  // to the next at a slant (the target off to the side, never right below: no wells)
+  const tierOf = y => { const d = clamp(Math.round(y) - S0, 0, DB - 1), b = bandOf(d), hb = (AB_BANDS[b + 1] - AB_BANDS[b]) / LAYER_K; return b * LAYER_K + Math.min(LAYER_K - 1, Math.floor((d - AB_BANDS[b]) / hb)); };
+  const NTi = 4 * LAYER_K, tierL = []; for (let t = 0; t < NTi; t++) tierL.push([]);
+  for (const c of abChambers) tierL[tierOf(mouth(c))].push(c);
+  for (let t = 0; t < NTi; t++) {
+    const b = (t / LAYER_K) | 0, L = tierL[t].sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue;
-      worm(A.boss ? A.cx - A.w / 2 : A.cx, mouth(A), B.boss ? B.cx + B.w / 2 : B.cx, mouth(B), RAD[b], 0x6700 + b * 50 + k);
+      worm(A.boss ? A.cx - A.w / 2 : A.cx, mouth(A), B.boss ? B.cx + B.w / 2 : B.cx, mouth(B), RAD[b], 0x6700 + t * 50 + k);
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = abChambers.filter(c => c.band === b && !c.boss), D = abChambers.filter(c => c.band === b + 1 && !c.boss);
+  const slant = (A, D) => { const ay = mouth(A); let Q = null, qd = 1e9; for (const c of D) { const dy = Math.max(6, mouth(c) - ay), dx = Math.abs(wdx(c.cx - A.cx)), e = dx < dy * 1.2 ? 400 + dy * 1.2 - dx : Math.abs(dx - dy * 1.6); if (e < qd) { qd = e; Q = c; } } return Q; };
+  for (let t = 0; t < NTi - 1; t++) {
+    const U = tierL[t].filter(c => !c.boss), D = tierL[t + 1].filter(c => !c.boss), b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
-      const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x67f0 + b * 9 + k);
+      const A = U[(R() * U.length) | 0], B = slant(A, D);
+      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b2]) + 0.2, 0x67f0 + t * 9 + k);
     }
   }
   // tiny pockets filled; little islands floating in the air cleared
@@ -231,7 +238,7 @@ function abBuild() {
     abLakes.push({ x0: a, x1: b, top: fy + 1, bot: fy + 3, by: fy, a, b });
   }
   // little pools in low dips of the Rios de Fogo
-  for (let y = S0 + mb(AB_BANDS[1]) + 2; y < S0 + mb(AB_BANDS[2]) - 2; y++) for (let x = 0; x < WW; x++) {
+  for (let y = S0 + AB_BANDS[1] + 2; y < S0 + AB_BANDS[2] - 2; y++) for (let x = 0; x < WW; x++) {
     if (tiles[I(x, y)] !== AIR || !SOLID[tiles[I(x, y + 1)]] || !SOLID[tiles[I(x - 1, y)]] || hash2(x, y, seed ^ 0x6d1) > 0.5) continue;
     let xe = x; while (xe - x < 9 && tiles[I(xe + 1, y)] === AIR) xe++;
     if (xe - x >= 2 && xe - x < 9 && SOLID[tiles[I(xe + 1, y)]]) lavaFill(x, xe, y, y);
@@ -249,14 +256,14 @@ function abBuild() {
       }
     }
   };
-  vein(AB_O_CARVAO, 90 * WSC, 0, 186, 3, 8, t => t === AB_BASALTO || t === AB_CINZA);                                     // coal and infernite in the abyss (102)
-  vein(AB_O_INFERNITA, 80 * WSC, 0, 186, 2, 5, t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS);
+  vein(AB_O_CARVAO, 90 * WSC * LAYER_K, 0, 186, 3, 8, t => t === AB_BASALTO || t === AB_CINZA);                                     // coal and infernite in the abyss (102)
+  vein(AB_O_INFERNITA, 80 * WSC * LAYER_K, 0, 186, 2, 5, t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS);
 }
 
 function abAfter() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = AB_S0, YB = Math.min(WH - 8, S0 + AB_D), DB = YB - S0, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R3 = mulberry32(seed ^ 0x6d3c1);
-  const mb = m => Math.round(m * DB / AB_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const abRow = y => y >= S0 && y < YB - 1;
   const open = t => !SOLID[t] && t !== LAVA;
   const dig = (x, y) => { if (!abRow(y)) return; const i = I(x, y); if (abKeep.has(i) || tiles[i] === LAVA) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WAB_BASALTO; };
@@ -277,15 +284,18 @@ function abAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = s0 => { if (reach[s0] || !open(tiles[s0])) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && open(tiles[nb])) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of abExits) flood(I(E.x0 + 2, E.fy - 1));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // the loose pockets, counted once and joined biggest first (counting them again every pass was slow)
+  const comps = [];
+  { const lab = new Uint8Array(NN);
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x; if (reach[i] || lab[i] || !open(tiles[i]) || !walls[i]) continue;
       const comp = []; lab[i] = 1; stack.push(i);
       while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && open(tiles[nb])) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      if (comp.length >= 20) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, c) => c.length - a.length); }
+  for (let pass = 0; pass < comps.length && pass < 60 * WSC * LAYER_K; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -445,21 +455,24 @@ function abExitClear() {
 }
 
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('pesadelo', () => {
   if (!ABISMO) return;
   abBuild(); abAfter();
   if (typeof abDress === 'function') try { abDress(); } catch (err) { console.error(err); }
   abExitClear(); abClimbFix();
+});
 }; }
 
 /* ---------- the far layer behind the abyss ---------- */
 { const _cd = cathedralDeep; cathedralDeep = function () {
   _cd();
   if (!ABISMO) return;
-  for (let y = AB_S0 - 4; y < WH; y++) for (let x = 0; x < WW; x++) {
+  // down to 4 rows under the abyss: the Darkness's pass runs after this one and rewrites every nonzero deep block from ES_S0 - 4 down
+  const Y1 = typeof ESCURO !== 'undefined' && ESCURO ? Math.min(WH, AB_S0 + AB_D + 4) : WH;
+  for (let y = Math.max(AB_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - AB_S0) + (depthNz(x, y, 25, seed ^ 0x6e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x6e12);
-    DEEPT[i] = d < 46 ? (n > 0.55 ? DP_AB_RUINAS : DP_AB_ROCHA) : d < 98 ? DP_AB_ROCHA : d < 150 ? (n > 0.35 ? DP_AB_CARNE : DP_AB_ROCHA) : (n > 0.5 ? DP_AB_RUINAS : DP_AB_ROCHA);
+    DEEPT[i] = d < AB_BANDS[1] ? (n > 0.55 ? DP_AB_RUINAS : DP_AB_ROCHA) : d < AB_BANDS[2] ? DP_AB_ROCHA : d < AB_BANDS[3] ? (n > 0.35 ? DP_AB_CARNE : DP_AB_ROCHA) : (n > 0.5 ? DP_AB_RUINAS : DP_AB_ROCHA);
   }
 }; }
 

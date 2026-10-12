@@ -20,26 +20,38 @@
    sinos e os domos; os sifões; as poças ferventes; o plâncton; os respiradouros), a decoração e os objetos (262). Por
    fim o mar do Leviatã (266: msDress), as bocas das descidas e a subida garantida (msClimbFix, que trata a água como
    escada). O 87 liga o resto depois.
+   A camada tem LAYER_K vezes a altura do desenho: o mar fica 3x mais fundo (as ilhas viram pilares de basalto, o fundo
+   ganha agulhas de recife e plataformas soltas, umas com bolsão de ar embaixo), as fendas descem 3x mais com LAYER_K
+   templos em pé nas paredes, as Chaminés têm LAYER_K andares de grutas, e os túneis secos descem em lances curtos com
+   uma salinha seca a cada tanto (msRest).
    Também: a terceira camada, as zonas 57 a 60, o spawn por meio (água, ar, fundo) e o nível (25 e 26 pela posição no
    129), as partículas. */
 
 const MS_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e objetos podem ficar
 for (const t of [MS_AREIA, MS_ROCHA, MS_CRACAS, MS_RECIFE, MS_CORAL, MS_LODO, MS_SULFETO, MS_CASCO, MS_CONVES, MS_TEMPLO, MS_O_CARVAO, MS_O_ORICALCO, MS_O_ORICALCO_S]) MS_SOILS[t] = 1;
-const MS_CLIMB = t => t === MS_CORDAME || t === MS_CORRENTE || t === CHAIN || t === msAbove().climb;
-let msVents = [], msSiphons = [], msPools = [], msTunnels = [];
+// (a escada da camada de cima fica guardada: msAbove() monta um objeto a cada chamada e isto roda por bloco)
+let msUpClimb = CHAIN;
+const MS_CLIMB = t => t === MS_CORDAME || t === MS_CORRENTE || t === CHAIN || t === msUpClimb;
+let msVents = [], msSiphons = [], msPools = [], msTunnels = [], msRest = [];
 const msDry = new Set();     // células secas de propósito abaixo do nível do mar (sinos de ar, domos, porões): a água não entra
 
 function msBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  const A = msAbove();
+  const A = msAbove(); msUpClimb = A.climb;
   MS_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   MS_NIVEL = MS_S0 + MS_NIVEL_D;
   const S0 = MS_S0, YB = Math.min(WH - 8, S0 + MS_D), DB = YB - S0, SL = MS_NIVEL;
   const R = mulberry32(seed ^ 0x6a51), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / MS_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
+  // as Chaminés têm LAYER_K andares, cada um com a altura da faixa no desenho de 186 metros (grutas do mesmo tamanho,
+  // 3x mais delas); md(j, m) põe o metro m do desenho dentro do andar j da faixa de m; sp(m0, m1) é o vão no andar.
+  // O mar fica 3x mais fundo (mb): a Floresta e a Fossa ganham as plataformas de recife, as agulhas e os templos em pé
+  const K = LAYER_K, BD = [0, 46, 98, 150, 186];
+  const md = (j, m) => { const b = m < BD[1] ? 0 : m < BD[2] ? 1 : m < BD[3] ? 2 : 3, r0 = mb(BD[b]), r1 = mb(BD[b + 1]); return S0 + Math.round(r0 + (j + (m - BD[b]) / (BD[b + 1] - BD[b])) * (r1 - r0) / K); };
+  const sp = (m0, m1) => md(0, m1) - md(0, m0);
   const bandOf = d => d < MS_BANDS[1] ? 0 : d < MS_BANDS[2] ? 1 : d < MS_BANDS[3] ? 2 : 3;
   msEntries = []; msLand = []; msExits = []; msBoss = null; msIslands = []; msShips = []; msHulls = []; msVillages = []; msTemples = []; msTrenches = []; msGrottos = [];
-  msVents = []; msSiphons = []; msPools = []; msTunnels = []; msKeep.clear(); msDry.clear();
+  msVents = []; msSiphons = []; msPools = []; msTunnels = []; msRest = []; msKeep.clear(); msDry.clear();
   const upSoil = t => (A.soils && A.soils[t]) || t === A.thin;
 
   // ---------- 1. a rocha ----------
@@ -51,15 +63,15 @@ function msBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
-      const d = y - S0 + (nz(x, y, 18, 0x6b3) - 0.5) * 8, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 26, 0x6a1), n2 = nz(x, y, 14, 0x6a2);
+      if (y >= YB) { tiles[i] = MS_SULFETO; walls[i] = WMS_SULFETO; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
+      const d = y - S0 + (nz(x, y, 18, 0x6b3) - 0.5) * 8, b = bandOf(Math.max(0, d)), n1 = () => nz(x, y, 26, 0x6a1), n2 = () => nz(x, y, 14, 0x6a2);   // cada faixa lê um ruído só
       let tt = MS_ROCHA, w = WMS_ROCHA;
-      if (y >= YB) { tt = MS_SULFETO; w = WMS_SULFETO; }
-      else if (b === 0) { if (n1 > 0.72) tt = MS_CRACAS; }
-      else if (b === 1) { if (n2 > 0.74) tt = MS_RECIFE; }
-      else if (b === 2) { if (n1 > 0.76) tt = MS_LODO; }
-      else { tt = n2 > 0.76 ? MS_ROCHA : MS_SULFETO; w = WMS_SULFETO; }
+      if (b === 0) { if (n1() > 0.72) tt = MS_CRACAS; }
+      else if (b === 1) { if (n2() > 0.74) tt = MS_RECIFE; }
+      else if (b === 2) { if (n1() > 0.76) tt = MS_LODO; }
+      else { tt = n2() > 0.76 ? MS_ROCHA : MS_SULFETO; w = WMS_SULFETO; }
       tiles[i] = tt; walls[i] = w;
-      if (y < YB && agua.length) agua[i] = 0;
+      if (agua.length) agua[i] = 0;
     }
   }
 
@@ -99,23 +111,35 @@ function msBuild() {
     const d = Math.abs(wdx(x - J.cx)) - J.ph + (nz(x, 0, 30, 0x6a9) - 0.5) * 2;
     if (d <= 0) return J.top;
     if (d <= J.hw - J.ph) return Math.round(J.top + d * 0.8);
-    const u = d - (J.hw - J.ph), shelfY = S0 + 46;
+    const u = d - (J.hw - J.ph), shelfY = S0 + 46;   // a plataforma fica a 14 do nível (tamanho, não fundura)
     const y1 = SL + Math.round(u * 3);
     if (y1 < shelfY) return y1;
     const u2 = u - (shelfY - SL) / 3;
     if (u2 < J.shelf) return shelfY;
-    return Math.round(shelfY + (u2 - J.shelf) * 7);
+    return Math.round(shelfY + (u2 - J.shelf) * 40);   // o pé de basalto desce quase reto até o fundo (3x mais fundo: o mar fica aberto)
   };
   for (let x = 0; x < WW; x++) {
     let c = S0 + 6 + Math.round((nz(x, 0, 18, 0x6a3) - 0.5) * 8);
-    // o fundo: ruído largo entre 56 e 108 m; no mar do Leviatã, plano a 48 do nível
-    // em patamares de 3 (trechos planos para os objetos e degraus para subir nadando)
-    let f = S0 + 56 + Math.round((nz(x, 0, 20, 0x6a4) * 44 + nz(x, 0, 60, 0x6a5) * 8) / 3) * 3;
+    // o fundo: ruído largo entre 56 e 108 m (do desenho: mb, com o ruído mais largo para o fundo 3x mais fundo não virar
+    // serrote); no mar do Leviatã, plano a 48 do nível; em patamares de 3 (trechos planos para os objetos e degraus)
+    let f = S0 + mb(56) + Math.round((nz(x, 0, 55, 0x6a4) * mb(40) + nz(x, 0, 18, 0x6a5) * mb(12)) / 3) * 3;
     const bd = Math.abs(wdx(x - bcx));
     if (bd < BHW + 2) f = SL + 48; else if (bd < BHW + 24) f = Math.round(lerp(SL + 48, f, (bd - BHW - 2) / 22));
     let bi = -1;
     for (let k = 0; k < msIslands.length; k++) { const h = islandH(msIslands[k], x); if (h < f) { f = h; bi = k; } }
     ceil[x] = c; bot[x] = Math.min(f, YB - 30); isl[x] = bi;
+  }
+  // as agulhas de recife: torres finas subindo do fundo (o mar fundo não fica um poço vazio; dão onde pousar nadando)
+  for (let k = 0, tries = 0; k < 2 * WSC * K && tries < 400 * K; tries++) {
+    const cx = (R() * WW) | 0, hw = 3 + R() * 5, h = 18 + R() * 36;
+    if (nearBoss(cx, hw + 30)) continue;
+    let okS = true; for (let x = Math.floor(cx - hw) - 2; x <= cx + hw + 2 && okS; x++) { const X = W1(x); if (isl[X] >= 0 || bot[X] - h < SL + 16) okS = false; }
+    if (!okS) continue;
+    for (let x = Math.floor(cx - hw); x <= cx + hw; x++) {
+      const X = W1(x), q = 1 - Math.pow(Math.abs(x + 0.5 - cx) / hw, 2); if (q <= 0) continue;
+      bot[X] = Math.min(bot[X], Math.round(bot[X] - h * Math.sqrt(q) + (nz(X, k, 6, 0x6aa) - 0.5) * 3));
+    }
+    k++;
   }
   // as estalactites grandes: nunca sobre o platô das descidas, nunca a menos de 4 da água (12 sobre as ilhas)
   for (let k = 0; k < 16 * WSC; k++) {
@@ -134,28 +158,52 @@ function msBuild() {
   const seaM = new Uint8Array(NN);     // o vão e o mar (o que a busca dos túneis secos não pode encostar)
   const dig = (x, y) => { if (y < S0 + 1 || y > YB - 2) return; cv[I(x, y)] = 1; };
   for (let x = 0; x < WW; x++) for (let y = ceil[x]; y < bot[x]; y++) { const i = I(x, y); cv[i] = 1; seaM[i] = 1; }
-
-  // ---------- 3. as fendas da Fossa e os templos ----------
   const busyL = [];   // caixas ocupadas { x0, x1, y0, y1 }
   const busy = (x0, x1, y0, y1, m = 3) => busyL.some(b => wdx(x0 - b.x1) <= m && wdx(b.x0 - x1) <= m && y0 <= b.y1 + m && b.y0 <= y1 + m);
   const take = (x0, x1, y0, y1) => busyL.push({ x0, x1, y0, y1 });
+  // as plataformas de recife: lajes soltas no meio da água funda, com tufos em cima; um terço delas tem as bordas viradas
+  // para baixo e guarda um bolsão de ar embaixo (respira-se ali, como no sino dos cascos)
+  const slabs = [], cups = [];
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 600 * K; tries++) {
+    const w = 16 + ((R() * 37) | 0), x0 = (R() * WW) | 0, y = SL + 26 + ((R() * Math.max(1, mb(98) - SL)) | 0), th = 2 + ((R() * 3) | 0);
+    let okS = true; for (let x = x0 - 3; x < x0 + w + 3 && okS; x++) { const X = W1(x); if (nearBoss(X, 12) || bot[X] - y < 16 || ceil[X] > y - 12) okS = false; }
+    if (!okS || busy(W1(x0 - 4), W1(x0 + w + 4), y - 10, y + th + 10, 2)) continue;
+    const cup = w >= 20 && R() < 0.35;
+    for (let j = 0; j < w; j++) {
+      const u = Math.abs((j + 0.5) / w * 2 - 1), t = Math.max(1, Math.round(th * (1 - Math.pow(u, 4)) + (nz(x0 + j, y, 8, 0x6ab) - 0.5) * 2));
+      const lip = cup && (j < 2 || j >= w - 2) ? 4 : 0;
+      for (let yy = y; yy < y + t + lip; yy++) { const i = I(x0 + j, yy); cv[i] = 0; seaM[i] = 0; }
+    }
+    if (cup) for (let j = 2; j < w - 2; j++) for (let yy = y + th; yy < y + th + 3; yy++) { const i = I(x0 + j, yy); if (cv[i]) cups.push(i); }
+    slabs.push({ x0: W1(x0), w, y, th, cup }); take(W1(x0 - 2), W1(x0 + w + 2), y - 6, y + th + 5); k++;
+  }
+
+  // ---------- 3. as fendas da Fossa e os templos ----------
   const TB = S0 + mb(141);
   for (let k = 0, tries = 0; k < 2 * WSC && tries < 500; tries++) {
     const cx = (R() * WW) | 0, w = 8 + ((R() * 7) | 0);
-    let ok = !nearBoss(cx, 40); for (let x = cx - w; x <= cx + w && ok; x++) if (bot[W1(x)] < S0 + 84) ok = false;
+    let ok = !nearBoss(cx, 40); for (let x = cx - (w >> 1); x <= cx + (w >> 1) && ok; x++) if (bot[W1(x)] < S0 + mb(62)) ok = false;
     if (!ok || msTrenches.some(t => Math.abs(wdx(t.cx - cx)) < 60)) continue;
     let top = 9999; for (let x = cx - (w >> 1); x <= cx + (w >> 1); x++) top = Math.min(top, bot[W1(x)]);
     for (let y = top - 2; y < TB; y++) {
       const hw = w / 2 + (nz(cx, y, 40, 0x6b8) - 0.5) * 3 - (y > TB - 4 ? (y - TB + 4) * 0.5 : 0);
       for (let x = Math.floor(cx - hw); x <= cx + hw; x++) { const i = I(x, y); cv[i] = 1; seaM[i] = 1; }
     }
-    const T0 = { cx: W1(cx), w, top, bot: TB };
-    msTrenches.push(T0); take(W1(cx - w), W1(cx + w), top - 4, TB + 2); k++;
-    // o templo no pé da fenda, de um lado: a sala de pedra entalhada; a porta debaixo da água, o domo de ar em cima
-    const side = R() < 0.5 ? -1 : 1, tw = 16 + ((R() * 9) | 0), th = 9, wallX = side > 0 ? Math.ceil(cx + w / 2) + 1 : Math.floor(cx - w / 2) - 1;
-    const tx0 = side > 0 ? wallX + 2 : wallX - 1 - tw, tfy = TB;
-    const Tp = { x0: W1(tx0), w: tw, fy: tfy, top: tfy - th, dome: tfy - 5, side, door: W1(wallX + side), trench: T0 };
-    msTemples.push(Tp); T0.temple = Tp; take(W1(tx0 - 3), W1(tx0 + tw + 3), tfy - th - 3, tfy + 3);
+    const T0 = { cx: W1(cx), w, top, bot: TB, temples: [] };
+    msTrenches.push(T0); k++;
+    // os templos: um no pé da fenda e, na fenda 3x mais funda, outros cavados nas paredes mais acima (lados alternados):
+    // a sala de pedra entalhada; a porta debaixo da água, o domo de ar em cima
+    const side0 = R() < 0.5 ? -1 : 1, gap = Math.round((TB - top) / K);
+    for (let q = 0; q < K; q++) {
+      const side = q & 1 ? -side0 : side0, tw = 16 + ((R() * 9) | 0), th = 9, tfy = TB - q * gap;
+      if (q && tfy - th - 4 < top + 6) break;
+      let ex = cx; while (Math.abs(ex - cx) < w + 4 && cv[I(ex, tfy - 2)]) ex += side;   // a parede da fenda nessa altura
+      const wallX = ex + side, tx0 = side > 0 ? wallX + 2 : wallX - 1 - tw;
+      if (q && busy(W1(tx0 - 3), W1(tx0 + tw + 3), tfy - th - 3, tfy + 3, 2)) continue;
+      const Tp = { x0: W1(tx0), w: tw, fy: tfy, top: tfy - th, dome: tfy - 5, side, door: W1(wallX + side), trench: T0 };
+      msTemples.push(Tp); T0.temples.push(Tp); if (!q) T0.temple = Tp; take(W1(tx0 - 3), W1(tx0 + tw + 3), tfy - th - 3, tfy + 3);
+    }
+    take(W1(cx - w), W1(cx + w), top - 4, TB + 2);   // (depois dos templos: os de cima encostam na própria fenda)
   }
 
   // ---------- 4. as Chaminés Negras: grutas secas largas ----------
@@ -169,37 +217,46 @@ function msBuild() {
   };
   // os dois Poços de Vapor primeiro (a saída para baixo), longe um do outro
   for (let tries = 0; msExits.length < 2 && tries < 600; tries++) {
-    const w = 18 + ((R() * 8) | 0), h = 9, cx = (R() * WW) | 0, fy = S0 + mb(170) + ((R() * mb(6)) | 0);
+    const w = 18 + ((R() * 8) | 0), h = 9, cx = (R() * WW) | 0, fy = md(K - 1, 170) + ((R() * sp(170, 176)) | 0);
     if (msExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || gBusy(cx, fy - h / 2, w, h, 6)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
-    const C = { cx: W1(cx), cy: fy - h / 2, w, h, x0: W1(x0), fy, top: fy - h, exit: true };
+    const C = { cx: W1(cx), cy: fy - h / 2, w, h, x0: W1(x0), fy, top: fy - h, exit: true, t: K - 1 };
     msGrottos.push(C);
     const sx = W1(cx - 1);
     for (let y = fy; y < YB - 1; y++) for (let x = sx; x < sx + 3; x++) dig(x, y);
     msExits.push({ x0: sx, x1: W1(sx + 2), cx: W1(cx), w: 3, fy: YB - 1, top: fy, C });
   }
-  for (let k = 0, tries = 0; msGrottos.length < 5 * WSC + 2 && tries < 800; tries++) {
-    const w = 18 + ((R() * 13) | 0), h = 10 + ((R() * 8) | 0), cx = (R() * WW) | 0, cy = S0 + mb(156) + h / 2 + R() * Math.max(0, mb(24) - h);
+  for (let k = 0, tries = 0; msGrottos.length < 5 * WSC * K + 2 && tries < 800 * K; tries++) {
+    const j = k % K, w = 18 + ((R() * 13) | 0), h = 10 + ((R() * 8) | 0), cx = (R() * WW) | 0, cy = md(j, 156) + h / 2 + R() * Math.max(0, sp(156, 180) - h);
     if (gBusy(cx, cy, w, h, 8) || cy + h / 2 > YB - 5) continue;
     blob(cx, cy, w, h, 0x6c00 + k, 2.4);
-    const C = { cx: W1(cx), cy, w, h, fy: Math.round(cy + h / 2), top: Math.round(cy - h / 2) };
+    const C = { cx: W1(cx), cy, w, h, fy: Math.round(cy + h / 2), top: Math.round(cy - h / 2), t: j };
     // uma poça fervente em 40% delas, perto de uma ponta (3 de largura: dá para pular)
     if (R() < 0.4) C.pool = { x: Math.round(cx + (R() < 0.5 ? -1 : 1) * w * 0.22) - 1 };
     msGrottos.push(C); k++;
   }
-  // as grutas ligadas em anel por túneis de rocha quente
+  // as grutas ligadas em anel por túneis de rocha quente, um anel por andar; nunca mais íngreme que uns 35 graus (com
+  // o alvo embaixo, ziguezague)
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 1600; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 2400; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.5) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.7 + Math.sin(n * 0.09 + s) * 0.3;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.45;
+      let vx = Math.cos(a), vy = Math.sin(a);
+      if (Math.abs(vy) > 0.72 && Math.abs(ddy) > 3) { if (Math.abs(ddx) > 7) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.72; vx = side * 0.7; }
+      x += vx * 0.8; y += vy * 0.45;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.8 + dy * dy <= r * r) { const yy = Math.round(y) + dy; if (yy >= S0 + mb(146)) dig(Math.round(x) + dx, yy); }
     }
   };
-  {
-    const L = msGrottos.slice().sort((a, b) => a.cx - b.cx);
-    for (let k = 0; k < L.length; k++) { const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue; worm(P.cx + P.w / 2 - 2, P.fy - 2, Q.cx - Q.w / 2 + 2, Q.fy - 2, 1.45, 0x6c80 + k); }
+  for (let t = 0; t < K; t++) {
+    const L = msGrottos.filter(c => c.t === t).sort((a, b) => a.cx - b.cx);
+    for (let k = 0; k < L.length; k++) { const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue; worm(P.cx + P.w / 2 - 2, P.fy - 2, Q.cx - Q.w / 2 + 2, Q.fy - 2, 1.45, 0x6c80 + t * 97 + k); }
+    // entre os andares: 2 x WSC túneis da gruta de cima até a de baixo mais perto
+    const D = msGrottos.filter(c => c.t === t + 1);
+    for (let k = 0; k < 2 * WSC && L.length && D.length; k++) {
+      const P = L[(R() * L.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
+      worm(P.cx + (R() < 0.5 ? -1 : 1) * (P.w / 2 - 2), P.fy - 2, Q.cx, Q.fy - 2, 1.45, 0x6cf0 + t * 31 + k);
+    }
   }
 
   // ---------- 5. os túneis secos: por dentro das ilhas, dos templos, até as Chaminés ----------
@@ -262,6 +319,33 @@ function msBuild() {
     msTunnels.push(T0);
     return T0;
   };
+  // um túnel comprido desce em lances curtos: um ponto de passagem a cada 12 linhas, alternando os lados (sem poço de
+  // cordame de 100 linhas); um ponto perto do mar é puxado para o meio, um trecho que não dá é pulado
+  let zigPts = [];
+  // as grutas secas no caminho: a cada 3 pontos de passagem do túnel comprido, uma salinha (o descanso da descida)
+  const restRooms = (pts, s) => {
+    for (let k = 1; k < pts.length - 1; k += 3) {
+      const [px, py] = pts[k], w = 10 + ((R() * 7) | 0), h = 5 + ((R() * 3) | 0), x0 = px - (w >> 1), fy = py + 1;
+      let okR = true; for (let y = fy - h - 3; y <= fy + 3 && okR; y++) for (let x = x0 - 3; x < x0 + w + 3; x++) if (near[I(x, y)] || y > YB - 4) { okR = false; break; }
+      if (!okR || busy(W1(x0 - 2), W1(x0 + w + 2), fy - h - 2, fy + 2, 2)) continue;
+      for (let y = fy - h; y < fy; y++) for (let x = x0; x < x0 + w; x++) { dig(x, y); tun[I(x, y)] = 1; }
+      take(W1(x0 - 2), W1(x0 + w + 2), fy - h - 2, fy + 2); msRest.push({ x0: W1(x0), w, fy, top: fy - h });
+    }
+  };
+  const zigPath = (sx, sy, tx, ty, ok0) => {
+    const n = Math.max(0, Math.floor(Math.abs(ty - sy) / 12) - 1), dX = wdx(tx - sx), pts = [];
+    let side = R() < 0.5 ? -1 : 1;
+    for (let k = 1; k <= n; k++) {
+      const wy = Math.round(sy + (ty - sy) * k / (n + 1)), bx = sx + Math.round(dX * k / (n + 1)); side = -side;
+      for (const z of [7 + ((R() * 6) | 0), 4, 0]) { const wx = W1(bx + side * z); if (!near[I(wx, wy)] && !near[I(wx, wy - 1)] && !near[I(wx, wy - 2)]) { pts.push([wx, wy]); break; } }
+    }
+    zigPts = [];
+    let P = null, ax = sx, ay = sy, okA = ok0;
+    for (const [wx, wy] of pts) { const Q = path(ax, ay, wx, wy, okA); if (!Q) continue; P = P ? P.concat(Q.slice(1)) : Q; ax = wx; ay = wy; okA = (rx, y) => rx === 0 && y === wy; zigPts.push([wx, wy]); }
+    const Q = path(ax, ay, tx, ty, okA);
+    if (Q) return (P ? P.concat(Q.slice(1)) : Q).map(([x, y]) => [W1(x), y]);
+    zigPts = []; return path(sx, sy, tx, ty, ok0);
+  };
   const nearestGrotto = (x, y) => { let best = null, bd = 1e9; for (const C of msGrottos) { const d = Math.abs(wdx(C.cx - x)) + Math.abs(C.fy - y) * 0.3; if (d < bd) { bd = d; best = C; } } return best; };
   // das ilhas: um túnel (dois nas grandes), da boca no platô até a gruta mais perto
   for (const J of msIslands) {
@@ -269,21 +353,16 @@ function msBuild() {
     for (let k = 0; k < n; k++) {
       const off = J.entry ? -Math.sign(wdx(J.entry.x0 + 1 - J.cx)) * Math.max(2, J.ph - 4) : (k ? 1 : -1) * Math.max(1, (J.ph >> 1)), sx = W1(J.cx + off), sy = J.top - 1;
       const C = nearestGrotto(sx, sy); if (!C) continue;
-      // dois pontos de passagem para o túnel serpentear por dentro da rocha (se um trecho não dá, vai direto)
-      const dX = wdx(C.cx - sx), ty = C.fy - 1, wps = [[sx + ((R() - 0.5) * 30) | 0, Math.round(sy + (ty - sy) * 0.38)], [sx + Math.round(dX * 0.6 + (R() - 0.5) * 30), Math.round(sy + (ty - sy) * 0.72)]];
-      let P = null, ax = sx, ay = sy, okA = (rx, y) => Math.abs(rx) <= 2 && y <= J.top + 3, all = [];
-      for (const [wx, wy] of wps) { if (near[I(wx, wy)] || near[I(wx, wy - 2)]) continue; const Q = path(ax, ay, wx, wy, okA); if (!Q) continue; all = all.concat(all.length ? Q.slice(1).map(([x, y]) => [ax + wdx(x - ax) + (all.length ? 0 : 0), y]) : Q); ax = all[all.length - 1][0]; ay = wy; okA = (rx, y) => Math.abs(rx) <= 1 && Math.abs(y - wy) <= 0; }
-      { const Q = path(ax, ay, C.cx, ty, all.length ? okA : (rx, y) => Math.abs(rx) <= 2 && y <= J.top + 3); if (Q) P = all.concat(all.length ? Q.slice(1) : Q); }
-      if (!P) P = path(sx, sy, C.cx, ty, (rx, y) => Math.abs(rx) <= 2 && y <= J.top + 3);
-      if (P) { const T0 = carveTunnel(P); T0.island = J; J.tunnel = J.tunnel || T0; }
+      const P = zigPath(sx, sy, C.cx, C.fy - 1, (rx, y) => Math.abs(rx) <= 2 && y <= J.top + 3);
+      if (P) { const T0 = carveTunnel(P); T0.island = J; J.tunnel = J.tunnel || T0; restRooms(zigPts); }
     }
   }
   // dos templos: o túnel de trás sai do domo, acima da água de dentro, e desce até as Chaminés
   for (const Tp of msTemples) {
     const sx = Tp.side > 0 ? Tp.x0 + Tp.w + 2 : Tp.x0 - 3, sy = Tp.dome;
     const C = nearestGrotto(sx, sy); if (!C) continue;
-    const P = path(sx, sy, C.cx, C.fy - 1, (rx, y) => Math.abs(rx) <= 2 && Math.abs(y - sy) <= 2);
-    if (P) { const T0 = carveTunnel(P); T0.temple = Tp; Tp.tunnel = T0; Tp.exitX = W1(sx); }
+    const P = zigPath(sx, sy, C.cx, C.fy - 1, (rx, y) => Math.abs(rx) <= 2 && Math.abs(y - sy) <= 2);
+    if (P) { const T0 = carveTunnel(P); T0.temple = Tp; Tp.tunnel = T0; Tp.exitX = W1(sx); restRooms(zigPts); }
   }
 
   // ---------- 6a. as descidas: a Raiz que pende do teto até o platô, e a Câmara de Pouso ----------
@@ -330,7 +409,7 @@ function msBuild() {
       msHulls.push({ x0: W1(x0), w, top, bot: b, air: SL + 2, float: true }); take(W1(x0 - 3), W1(x0 + w + 3), top - 2, b + 3); k++;
     } else {
       let fl = 0; for (let j = 0; j < w; j++) fl = Math.max(fl, bot[W1(x0 + j)]);
-      if (!shallowRun(x0 - 2, w + 4, SL + 26, S0 + 96) || fl - SL < 26) continue;
+      if (!shallowRun(x0 - 2, w + 4, SL + 26, S0 + mb(96)) || fl - SL < 26) continue;
       let lo = 9999; for (let j = 0; j < w; j++) lo = Math.min(lo, bot[W1(x0 + j)]);
       if (fl - lo > 4) continue;
       const b = lo, top = b - 11;
@@ -340,6 +419,7 @@ function msBuild() {
   }
   // ---------- os furos de verdade (o que foi aberto vira ar) ----------
   for (let i = S0 * WW; i < YB * WW; i++) if (cv[i]) tiles[i] = AIR;
+  for (const i of cups) if (tiles[i] === AIR) msDry.add(i);   // os bolsões de ar debaixo das plataformas
 
   // ---------- as cascas e os materiais da superfície ----------
   const at = (x, y) => tiles[I(x, y)];
@@ -355,7 +435,7 @@ function msBuild() {
       if (b < SL - 1 && J && Math.abs(wdx(x - J.cx)) <= J.ph) t = k < 1 && n > 0.55 ? MS_AREIA : MS_ROCHA;   // o platô
       else if (depth < 14) t = k < 3 ? MS_AREIA : MS_ROCHA;                                              // a praia e os rasos
       else if (b === S0 + 46 || depth < 30) t = k < 2 ? (n > 0.6 ? MS_CORAL : MS_RECIFE) : MS_RECIFE;     // a plataforma de recife
-      else if (b < S0 + 98) t = k < 2 ? (n > 0.5 ? MS_AREIA : MS_ROCHA) : MS_ROCHA;
+      else if (b < S0 + mb(98)) t = k < 2 ? (n > 0.5 ? MS_AREIA : MS_ROCHA) : MS_ROCHA;
       else t = k < 4 ? MS_LODO : MS_ROCHA;
       tiles[i] = t;
     }
@@ -364,9 +444,14 @@ function msBuild() {
     // o teto: rocha com cracas nas pontas das estalactites
     for (let y = ceil[x] - 2; y < ceil[x]; y++) { const i = I(x, y); if (SOLID[tiles[i]] && nz(x, y, 16, 0x6e2) > 0.62) tiles[i] = MS_CRACAS; }
   }
-  // o coral vivo em tufos nos recifes da Floresta
-  for (let k = 0; k < 60 * WSC; k++) {
-    const x = (R() * WW) | 0, b = bot[x]; if (b - SL < 12 || b > S0 + 98 || nearBoss(x, 4)) continue;
+  // as plataformas de recife soltas: recife com coral por cima, cracas por baixo
+  for (const P of slabs) for (let j = -1; j <= P.w; j++) for (let yy = P.y - 1; yy < P.y + P.th + 5; yy++) {
+    const i = I(P.x0 + j, yy); if (!SOLID[tiles[i]] || !MS_SOILS[tiles[i]]) continue;
+    tiles[i] = !SOLID[tiles[i - WW]] && nz(P.x0 + j, yy, 10, 0x6ac) > 0.45 ? MS_CORAL : SOLID[tiles[i + WW]] ? MS_RECIFE : MS_CRACAS;
+  }
+  // o coral vivo em tufos nos recifes da Floresta (o fundo e as agulhas, 3x mais fundo: o dobro de tufos)
+  for (let k = 0; k < 60 * WSC * 2; k++) {
+    const x = (R() * WW) | 0, b = bot[x]; if (b - SL < 12 || b > S0 + mb(98) || nearBoss(x, 4)) continue;
     const r = 1 + R() * 2.2;
     for (let yy = b - 2; yy <= b + 1; yy++) for (let xx = x - 3; xx <= x + 3; xx++) { if (Math.hypot(xx - x, (yy - b) * 1.4) > r) continue; const i = I(xx, yy); if (yy < b && tiles[i] === AIR) tiles[i] = MS_CORAL; else if (yy >= b && SOLID[tiles[i]] && !tun[i]) tiles[i] = MS_CORAL; }
   }
@@ -525,10 +610,10 @@ function msBuild() {
       }
     }
   };
-  vein(MS_O_CARVAO, 28 * WSC, 8, 98, 3, 8, t => t === MS_ROCHA);
-  vein(MS_O_CARVAO, 12 * WSC, 146, 186, 3, 7, t => t === MS_ROCHA || t === MS_SULFETO);
-  vein(t => t === MS_SULFETO ? MS_O_ORICALCO_S : MS_O_ORICALCO, 13 * WSC, 150, 186, 2, 5, t => t === MS_SULFETO || t === MS_ROCHA);
-  vein(MS_O_ORICALCO, 13 * WSC, 98, 150, 2, 5, t => t === MS_ROCHA || t === MS_CRACAS);
+  vein(MS_O_CARVAO, 28 * WSC * K, 8, 98, 3, 8, t => t === MS_ROCHA);
+  vein(MS_O_CARVAO, 12 * WSC * K, 146, 186, 3, 7, t => t === MS_ROCHA || t === MS_SULFETO);
+  vein(t => t === MS_SULFETO ? MS_O_ORICALCO_S : MS_O_ORICALCO, 13 * WSC * K, 150, 186, 2, 5, t => t === MS_SULFETO || t === MS_ROCHA);
+  vein(MS_O_ORICALCO, 13 * WSC * K, 98, 150, 2, 5, t => t === MS_ROCHA || t === MS_CRACAS);
   // o que fica para o msAfter
   msBuild.tun = tun; msBuild.bot = bot; msBuild.ceil = ceil; if (window.MS_DEBUG) { msBuild.path = path; msBuild.near = near; }
 }
@@ -612,11 +697,13 @@ function msAfter() {
   const tun = msBuild.tun;
   const dig = (x, y) => { if (!msRow(y)) return; const i = I(x, y); if (msKeep.has(i) || inBox(W1(x), y)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) { tiles[i] = AIR; if (y >= SL && tun) tun[i] = 1; } if (!walls[i]) walls[i] = WMS_ROCHA; };
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 900; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 1500; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.2) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.9;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.6;
+      let vx = Math.cos(a), vy = Math.sin(a);   // em ziguezague quando o alvo está bem embaixo ou em cima (sem poço reto)
+      if (Math.abs(vy) > 0.75 && Math.abs(ddy) > 4) { if (Math.abs(ddx) > 6) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.75; vx = side * 0.66; }
+      x += vx * 0.8; y += vy * 0.6;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
@@ -627,30 +714,37 @@ function msAfter() {
   const flood = (s0, again) => { if ((reach[s0] && !again) || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of msEntries) flood(I(E.x0 + 1, E.fy - 1));
   if (!msEntries.length) flood(I(0, S0 + 20));
-  for (let pass = 0; pass < 40 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // (um só rótulo para todas as passadas, marcado com o número da passada; cada passada junta todos os bolsões de 16 ou
+  // mais e liga um por um, do maior ao menor, pulando os que uma ligação anterior já alcançou)
+  const LO = S0 * WW, lab = new Uint16Array((YB - S0) * WW);
+  for (let pass = 0, nw = 0; pass < 40; pass++) {
+    const P1 = pass + 1, comps = [];
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - LO] === P1 || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - LO] = P1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= LO && nb < YB * WW && lab[nb - LO] !== P1 && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - LO] = P1; stack.push(nb); } }
+      if (comp.length >= 16) comps.push(comp);
     }
-    if (!bestC) break;
-    // liga pelo caminho seco: só a outra parte seca (nunca abre o mar num túnel seco)
-    let best = null, bd = 1e9;
-    for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
-      const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
-      for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
-        const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
-        const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
-        const wet = !tun[i] && y >= SL && !msDry.has(i) && (msBuild.bot[W1(cx + dx)] > y && msBuild.ceil[W1(cx + dx)] <= y);
-        const d = Math.abs(dx) + Math.abs(dy) * 1.4 + (wet ? 40 : 0); if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
+    if (!comps.length) break;
+    comps.sort((a, b) => b.length - a.length);
+    for (const bestC of comps) {
+      if (reach[bestC[0]]) continue;
+      // liga pelo caminho seco: só a outra parte seca (nunca abre o mar num túnel seco)
+      let best = null, bd = 1e9;
+      for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
+        const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
+        for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
+          const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
+          const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
+          const wet = !tun[i] && y >= SL && !msDry.has(i) && (msBuild.bot[W1(cx + dx)] > y && msBuild.ceil[W1(cx + dx)] <= y);
+          const d = Math.abs(dx) + Math.abs(dy) * 1.4 + (wet ? 40 : 0); if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
+        }
       }
+      if (!best) { for (const c of bestC) reach[c] = 1; continue; }
+      worm(best[0], best[1], best[2], best[3], 1.3, 0x66a0 + nw++);
+      flood(I(best[2], best[3]), true);
+      if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
-    if (!best) { for (const c of bestC) reach[c] = 1; continue; }
-    worm(best[0], best[1], best[2], best[3], 1.3, 0x66a0 + pass);
-    flood(I(best[2], best[3]), true);
-    if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
   }
 
   // ---------- 2. a água ----------
@@ -718,19 +812,35 @@ function msClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = MS_S0, YB = Math.min(WH - 8, S0 + MS_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => MS_CLIMB(tiles[I(x, y)]) || !!agua[I(x, y)];
   const ok = (x, y) => !S(x, y) && !S(x, y - 1), H = YB - Y0;
-  const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
+  // a busca anda em tabelas (sólido, escada, cabe em pé) e não nos tiles: o repair atualiza a coluna que mexe. seen e
+  // any guardam o número da busca (stamp), sem limpar os arrays a cada busca; a sala do chefe entra na tabela
+  const N = WW * H, Sa = new Uint8Array(N + WW), La = new Uint8Array(N + WW), Ok = new Uint8Array(N);
+  const hall = new Uint8Array(WW * H); if (msBoss) for (let y = Y0; y < YB; y++) for (let x = 0; x < WW; x++) if (inMsHall(x, y)) hall[(y - Y0) * WW + x] = 1;
+  for (let y = Y0; y <= YB; y++) for (let x = 0; x < WW; x++) { const j = (y - Y0) * WW + x; Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; }
+  for (let j = WW; j < N; j++) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0;
+  const refresh = (x, y0, y1) => {
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= 0 && j < N + WW) { Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; } }
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= WW && j < N) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0; }
+  };
+  const seen = new Uint16Array(N * 5), any = new Uint16Array(N), from = new Int32Array(N * 5), good = new Uint8Array(N * 5), stk = new Int32Array(N * 5);
+  let st = 0;
   const search = (sx, sy) => {
-    seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || inMsHall(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
+    if (++st > 65000) { seen.fill(0); any.fill(0); st = 1; }
+    let sp = 0, cur = -1, hit = -1, jLim = N;   // (a busca não desce mais de 40 abaixo do começo: voltar não pede isso)
+    const push = (j, r) => { if (j >= jLim || !Ok[j]) return; if (Sa[j + WW] || La[j] || La[j - WW]) r = 4; const k = j * 5 + r; if (seen[k] === st) return; seen[k] = st; from[k] = cur; any[j] = st; stk[sp++] = k; if (good[k] && hit < 0) hit = k; };
     const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
-    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++; push(sx, y, 4);
-    while (q.length) {
+    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++;
+    if (y <= Y0 || y >= YB) return false;
+    jLim = Math.min(N, (y + 41 - Y0) * WW); push((y - Y0) * WW + sx, 4);
+    const goal = (S0 - 2 - Y0) * WW;
+    while (sp) {
       if (hit >= 0) return win(hit);
-      const r = q.pop(), yy = q.pop(), x = q.pop(); cur = ((yy - Y0) * WW + x) * 5 + r; if (yy <= S0 - 3) return win(cur);
-      const gr = S(x, yy + 1) || L(x, yy);
-      push(x - 1, yy, r === 4 && !gr ? 0 : r); push(x + 1, yy, r === 4 && !gr ? 0 : r);
-      if (r > 0) push(x, yy - 1, L(x, yy) || L(x, yy - 1) ? 4 : r === 4 ? 3 : r - 1);
-      if (!S(x, yy + 1)) push(x, yy + 1, L(x, yy + 1) ? 4 : 0);
+      const k = stk[--sp], j = (k / 5) | 0, r = k - j * 5; cur = k; if (j < goal) return win(cur);
+      const x = j % WW, row = j - x, gr = Sa[j + WW] || La[j], rs = r === 4 && !gr ? 0 : r;
+      // (a pilha tira o último primeiro: descer entra antes e subir por último, a busca tenta subir antes de tudo)
+      if (!Sa[j + WW]) push(j + WW, La[j + WW] ? 4 : 0);
+      push(row + (x === 0 ? WW - 1 : x - 1), rs); push(row + (x === WW - 1 ? 0 : x + 1), rs);
+      if (r > 0) push(j - WW, La[j] || La[j - WW] ? 4 : r === 4 ? 3 : r - 1);
     }
     return hit >= 0 ? win(hit) : false;
   };
@@ -738,30 +848,52 @@ function msClimbFix() {
   const repair = () => {
     let best = null;
     for (let y = Y0 + 2; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      if (!any[(y - Y0) * WW + x] || !S(x, y + 1) || msKeep.has(I(x, y)) || inMsHall(x, y, 1)) continue;
+      if (any[(y - Y0) * WW + x] !== st || !S(x, y + 1) || msKeep.has(I(x, y)) || inMsHall(x, y, 1)) continue;
       for (let t = y - 1, n = 0; t > Y0 + 1 && n < 30 && !S(x, t - 1); t--, n++) {
         if (n < 3) continue;
-        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && !any[(t - Y0) * WW + sx]) side = true; }
+        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && any[(t - Y0) * WW + sx] !== st) side = true; }
         if (side) { if (!best || t < best[1]) best = [x, t, y]; break; }
       }
       for (let t = y - 1, n = 0; t > Y0 + 2 && n < 6; t--, n++) {
         if (!S(x, t)) continue;
         const tt = tiles[I(x, t)];
-        if (soft(tt) && !msKeep.has(I(x, t)) && !inMsHall(x, t, 4) && ok(x, t - 1) && !any[(t - 1 - Y0) * WW + x] && (!best || t - 1 < best[1])) best = [x, t - 1, y];
+        if (soft(tt) && !msKeep.has(I(x, t)) && !inMsHall(x, t, 4) && ok(x, t - 1) && any[(t - 1 - Y0) * WW + x] !== st && (!best || t - 1 < best[1])) best = [x, t - 1, y];
         break;
       }
     }
     if (!best) return false;
     const [x, top, bot] = best;
     for (let y = top; y <= bot; y++) { const i = I(x, y); if (!SOLID[tiles[i]] || soft(tiles[i])) { if (agua.length && agua[i] && SOLID[tiles[i]]) agua[i] = 0; tiles[i] = MS_CORDAME; if (!walls[i]) walls[i] = WMS_ROCHA; } }
+    refresh(x, top, bot);
     return true;
   };
+  // os estados que já sobem até a boca, de uma vez: uma busca de trás para frente a partir das linhas de cima (antes,
+  // cada começo andava pela camada inteira atrás da boca); a busca de cada começo acha um destes logo no primeiro passo
+  {
+    const q = stk;   // (a pilha das buscas ainda está livre)
+    const norm = (j, r) => Sa[j + WW] || La[j] || La[j - WW] ? 4 : r;
+    let qh = 0, qt = 0;
+    const mark = k => { good[k] = 1; q[qt++] = k; };
+    for (let j = WW; j < (S0 - 2 - Y0) * WW; j++) if (Ok[j]) for (let r = 0; r < 5; r++) mark(j * 5 + r);
+    while (qh < qt) {
+      const k = q[qh++], j = (k / 5) | 0, r = k - j * 5, x = j % WW, row = j - x;
+      for (const pj of [row + (x === 0 ? WW - 1 : x - 1), row + (x === WW - 1 ? 0 : x + 1)]) {   // de lado
+        if (!Ok[pj]) continue; const gr = Sa[pj + WW] || La[pj];
+        for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, rp === 4 && !gr ? 0 : rp) === r) mark(pj * 5 + rp);
+      }
+      { const pj = j + WW;   // subindo, de baixo
+        if (pj < N && Ok[pj]) for (let rp = 1; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, La[pj] || La[j] ? 4 : rp === 4 ? 3 : rp - 1) === r) mark(pj * 5 + rp); }
+      { const pj = j - WW;   // caindo, de cima
+        if (pj >= WW && Ok[pj] && norm(j, La[j] ? 4 : 0) === r) for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp]) mark(pj * 5 + rp); }
+    }
+  }
   const starts = [];
   for (const Tp of msTemples) starts.push([Tp.x0 + (Tp.w >> 1), Tp.fy - 1]);
   for (const C of msGrottos) starts.push([Math.round(C.cx), C.fy - 1]);
   for (const J of msIslands) starts.push([J.cx, J.top - 1]);
   for (const X of msExits) starts.push([X.x0 + 2, X.top - 1]);
   for (const S2 of msShips) starts.push([S2.x0 + (S2.len >> 1) + 1, S2.keel - 1]);
+  starts.sort((a, b) => a[1] - b[1]);   // de cima para baixo: as de baixo acham logo o caminho bom das de cima
   let fixes = 0, ns = 0;
   for (const [x, y] of starts) { if (SOLID[tiles[I(x, y)]]) continue; for (let k = 0; k < 12 && (ns++, !search(W1(x), y)); k++) { if (!repair()) break; fixes++; } }
   msClimbFix.last = [starts.length, ns, fixes];
@@ -845,10 +977,11 @@ function msPlaceProps() {
 
 // a ordem: a camada (com a água), o mar do Leviatã (266: msDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('mar', () => {
   if (!MAR) return;
   try { msBuild(); msAfter(); if (typeof msDress === 'function') msDress(); msExitClear(); msClimbFix(); } catch (err) { console.error(err); }
   msBuild.tun = null;
+});
 }; }
 
 /* ---------- a terceira camada atrás do mar: o horizonte com as ilhas e os cascos no vão, o fundo com os vultos na
@@ -857,10 +990,10 @@ function msPlaceProps() {
   _cd();
   if (!MAR) return;
   const Y1 = Math.min(WH, MS_S0 + MS_D + 4);
-  for (let y = MS_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(MS_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - MS_S0) + (depthNz(x, y, 25, seed ^ 0x6e11) - 0.5) * 8, n = depthNz(x, y, 20, seed ^ 0x6e12);
-    DEEPT[i] = y < MS_NIVEL + 2 ? DP_MS_HORIZONTE : d < 150 ? (n > 0.8 ? DP_MS_CHAMINES : DP_MS_FUNDO) : (n > 0.7 ? DP_MS_FUNDO : DP_MS_CHAMINES);
+    DEEPT[i] = y < MS_NIVEL + 2 ? DP_MS_HORIZONTE : d < MS_BANDS[3] ? (n > 0.8 ? DP_MS_CHAMINES : DP_MS_FUNDO) : (n > 0.7 ? DP_MS_FUNDO : DP_MS_CHAMINES);
   }
 }; }
 

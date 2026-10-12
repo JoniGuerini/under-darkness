@@ -24,7 +24,7 @@
    Carrega depois do mundo da camada de cima e antes do 103 (o Abismo começa onde a última camada do meio termina). */
 
 const ANTIGOS = true;
-const AT_D = 186;                                   // metros de camada
+const AT_D = LAYER_D;                                   // metros de camada
 /* a camada logo acima: a primeira linha, a altura, o chão natural (o material dela afina nas nossas primeiras linhas)
    e os poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }). Quem ainda não existe é pulado: o Ossário,
    o Covil, o Mar Sem Sol e o Reino Élfico, nessa ordem (as cinco camadas novas foram feitas ao mesmo tempo). */
@@ -41,9 +41,9 @@ function atAbove() {
     return { id: 'nave', S0: NV_S0, D: NV_D, TOP: NV_TOP, soils: typeof NV_SOILS !== 'undefined' ? NV_SOILS : null, halls: nvExits, boss: nvBoss };
   return { id: 'mina', S0: MN_S0, D: MN_D, TOP: typeof MN_TOP !== 'undefined' ? MN_TOP : 558, soils: MN_SOILS, halls: [], boss: null };
 }
-const AT_TOP = (() => { const a = atAbove(); return (a.TOP !== null ? a.TOP : 2418) + 186; })();   // metros abaixo do chão do vilarejo
+const AT_TOP = (() => { const a = atAbove(); return (a.TOP !== null ? a.TOP : 2418) + LAYER_D; })();   // metros abaixo do chão do vilarejo
 // topo de cada faixa em metros abaixo do AT_TOP: As Escadarias, A Cidade Inversa, As Máquinas, A Cratera da Estrela
-const AT_BANDS = [0, 46, 98, 150, 186];
+const AT_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AT_BAND_NAMES = ['escadarias', 'inversa', 'maquinas', 'cratera'];
 const AT_ZONE0 = 69;                                // zonas 69..72 (o 299 põe os nomes)
 let AT_S0 = (() => { const a = atAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (atBuild acerta)

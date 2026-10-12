@@ -16,10 +16,10 @@
    Loads after 78-gelo-novos (and before 49, so the monsters get the same BAL scaling). */
 
 const MINA = true;
-const MN_D = 186;                                  // metres of mine
-const MN_TOP = (typeof IC_TOP !== 'undefined' ? IC_TOP : 372) + 186;   // where the mine starts, metres below the village floor (under the ice)
+const MN_D = LAYER_D;                                  // metres of mine
+const MN_TOP = (typeof IC_TOP !== 'undefined' ? IC_TOP : 372) + LAYER_D;   // where the mine starts, metres below the village floor (under the ice)
 // band tops in metres below MN_TOP: Galerias Escoradas, Poços e Andaimes, Acampamento Goblin, Fornalhas Esquecidas, (bedrock)
-const MN_BANDS = [0, 46, 98, 150, 186];
+const MN_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const MN_BAND_NAMES = ['galerias', 'pocos', 'acampamento', 'fornalhas'];
 const MN_ZONE0 = ZONE_NAMES.length;                // zone ids 17..20 (84 pushes the names)
 let MN_S0 = IC_S0 + IC_D;                          // the first mine row of the current world (set by mnBuild)

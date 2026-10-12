@@ -17,21 +17,30 @@
    Depois (elAfter): tudo alcançável das descidas, Escada de Corda ou Cipó em todo desnível de 5, os estragos (entulho e
    espinheiros na Corte), a decoração de 1 bloco, os objetos (252) e a água que brilha nos poços. Por fim o Espelho
    (256: elDress), as bocas das descidas e a subida garantida (elClimbFix). O 87 liga o resto depois.
+   A camada tem LAYER_K vezes a altura do desenho: cada faixa vira LAYER_K andares da altura da faixa no desenho, cada
+   andar com as suas salas (do mesmo tamanho) e o seu anel; entre os andares, túneis de raiz em ziguezague e escadarias.
    Também: a terceira camada, as zonas 53 a 56, o spawn por faixa e o nível (23 e 24 pela posição no 129), as
    partículas e a lunarita na fornalha e nas lojas. */
 
 const EL_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e objetos podem ficar
 for (const t of [EL_SOLO, EL_MADEIRA, EL_FOLHAGEM, EL_MARMORE, EL_LAVRADA, EL_TABUA, EL_PROFANO, EL_MORTA, EL_CRISTAL_SANGUE, EL_PEDRA_POCO, EL_RAIZ, EL_CRISTAL_LUA, EL_O_CARVAO, EL_O_LUNARITA]) EL_SOILS[t] = 1;
 let elChambers = [], elCorr = [], elBridges = [], elDead = [];
-const EL_CLIMB = t => t === EL_ESCADA || t === EL_CIPO || t === CHAIN || t === elAbove().climb;
+// (a escada da camada de cima fica guardada: elAbove() monta um objeto a cada chamada e isto roda por bloco)
+let elUpClimb = CHAIN;
+const EL_CLIMB = t => t === EL_ESCADA || t === EL_CIPO || t === CHAIN || t === elUpClimb;
 
 function elBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  const A = elAbove();
+  const A = elAbove(); elUpClimb = A.climb;
   EL_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = EL_S0, YB = Math.min(WH - 8, S0 + EL_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x51f3), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / EL_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
+  // cada faixa tem LAYER_K andares, cada um com a altura da faixa no desenho de 186 metros (salas do mesmo tamanho,
+  // 3x mais delas); md(j, m) põe o metro m do desenho dentro do andar j da faixa de m; sp(m0, m1) é o vão no andar
+  const K = LAYER_K, BD = [0, 46, 98, 150, 186];
+  const md = (j, m) => { const b = m < BD[1] ? 0 : m < BD[2] ? 1 : m < BD[3] ? 2 : 3, r0 = mb(BD[b]), r1 = mb(BD[b + 1]); return S0 + Math.round(r0 + (j + (m - BD[b]) / (BD[b + 1] - BD[b])) * (r1 - r0) / K); };
+  const sp = (m0, m1) => md(0, m1) - md(0, m0);
   const bandOf = d => d < EL_BANDS[1] ? 0 : d < EL_BANDS[2] ? 1 : d < EL_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   elChambers = []; elCorr = []; elBridges = []; elDead = [];
@@ -47,15 +56,15 @@ function elBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
+      if (y >= YB) { tiles[i] = EL_PEDRA_POCO; walls[i] = WEL_POCO; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
       const d = y - S0 + (nz(x, y, 18, 0x5b3) - 0.5) * 10, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 26, 0x5a1), n2 = nz(x, y, 14, 0x5a2);
       let tt = EL_SOLO, w = WEL_MATA;
-      if (y >= YB) { tt = EL_PEDRA_POCO; w = WEL_POCO; }
-      else if (b === 0) { if (n1 > 0.66 || (d > 36 && n2 > 0.6)) tt = EL_MARMORE; }
+      if (b === 0) { if (n1 > 0.66 || (d > mb(36) && n2 > 0.6)) tt = EL_MARMORE; }
       else if (b === 1) { tt = n2 > 0.78 ? EL_SOLO : EL_MARMORE; w = WEL_SALAO; }
       else if (b === 2) { tt = n1 > 0.8 ? EL_MARMORE : EL_PROFANO; w = WEL_PROFANO; }
       else { const rib = Math.abs(nz(x, y, 22, 0x5a4) - 0.5); tt = rib < 0.028 ? EL_RAIZ : n1 > 0.82 ? EL_MARMORE : EL_PEDRA_POCO; w = WEL_POCO; }
       tiles[i] = tt; walls[i] = w;
-      if (y < YB && agua.length) agua[i] = 0;
+      if (agua.length) agua[i] = 0;
     }
   }
 
@@ -80,13 +89,16 @@ function elBuild() {
       if (dx * dx + dy * dy < 1 + (hash2(W1(x) >> 1, y >> 1, s) - 0.5) * 0.18 + (nz(x, y, 40, s) - 0.5) * 0.25) dig(x, y);
     }
   };
-  // túnel de raiz (Mata e Poço): anda para o alvo com curvas suaves; r ~1.4 dá 3 de altura
+  // túnel de raiz (Mata e Poço): anda para o alvo com curvas suaves; r ~1.4 dá 3 de altura. Nunca mais íngreme que
+  // uns 35 graus: com o alvo embaixo ele vai em ziguezague (side), sem poço reto
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 1200; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 2000; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.5) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.7 + Math.sin(n * 0.09 + s) * 0.3;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.5;
+      let vx = Math.cos(a), vy = Math.sin(a);
+      if (Math.abs(vy) > 0.72 && Math.abs(ddy) > 3) { if (Math.abs(ddx) > 7) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.72; vx = side * 0.7; }
+      x += vx * 0.8; y += vy * 0.5;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.8 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
@@ -122,7 +134,7 @@ function elBuild() {
       // uma grota de folha logo depois da porta: o primeiro pedaço da mata que o herói vê
       const w = 16 + ((R() * 8) | 0), h = 8, x0 = side > 0 ? door + 1 : door - w;
       room(x0, landFy, w, h);
-      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, kind: 'grota', x0: W1(x0), fy: landFy, top: landFy - h };
+      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, t: 0, kind: 'grota', x0: W1(x0), fy: landFy, top: landFy - h };
       elChambers.push(H);
       elChambers.push({ cx: hx + 6, cy: landFy - 3, w: 12, h: 6, band: 0, kind: 'pouso', nolink: true });
       elEntries.push({ x0: xs, fy: c.fy, top: c.fy - 2, land: L });
@@ -133,7 +145,7 @@ function elBuild() {
   {
     const w = 64, h = 26;
     const ax = elEntries.length ? elEntries.reduce((s, e) => s + wdx(e.x0 - elEntries[0].x0), 0) / elEntries.length + elEntries[0].x0 : SPX;
-    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 30)), fy = Math.min(YB - 16, S0 + mb(168)), top = fy - h;   // longe das 10 linhas que o Abismo afina
+    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 30)), fy = Math.min(YB - 16, md(K - 1, 168)), top = fy - h;   // longe das 10 linhas que o Abismo afina
     const x0 = W1(cx - 32), x1 = W1(cx + 31);
     elBoss = { cx, x0, x1, w, h, top, fy,
       doors: [{ side: -1, x: W1(cx - 35), fy }, { side: 1, x: W1(cx + 34), fy }],
@@ -153,7 +165,7 @@ function elBuild() {
       // uma gruta da lua no fim do corredor
       const gw = 18 + ((R() * 6) | 0), gh = 12, gx0 = D.side > 0 ? x - 1 : x - gw + 2;
       room(gx0, fyD, gw, gh);
-      const C = { cx: gx0 + gw / 2, cy: fyD - gh / 2, w: gw, h: gh, band: 3, kind: 'gruta', x0: W1(gx0), fy: fyD, top: fyD - gh, flat: true };
+      const C = { cx: gx0 + gw / 2, cy: fyD - gh / 2, w: gw, h: gh, band: 3, t: 4 * K - 1, kind: 'gruta', x0: W1(gx0), fy: fyD, top: fyD - gh, flat: true };
       elGrottos.push(C); elChambers.push(C);
     }
   }
@@ -161,10 +173,10 @@ function elBuild() {
 
   // ---------- 2c. as Raízes Fundas: duas grutas da lua no fundo, longe uma da outra e do Espelho ----------
   for (let tries = 0; elExits.length < 2 && tries < 600; tries++) {
-    const w = 16 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = S0 + mb(166) + ((R() * mb(10)) | 0);
+    const w = 16 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = md(K - 1, 166) + ((R() * sp(166, 176)) | 0);
     if (!awayFromBoss(cx, fy, 40) || elExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
-    const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'gruta', x0: W1(x0), fy, top: fy - h, exit: true, flat: true };
+    const C = { cx, cy: fy - h / 2, w, h, band: 3, t: 4 * K - 1, kind: 'gruta', x0: W1(x0), fy, top: fy - h, exit: true, flat: true };
     elGrottos.push(C); elChambers.push(C);
     const sx = W1(cx - 1);
     for (let y = fy; y < YB - 1; y++) for (let x = sx - 1; x <= sx + 3; x++) seal[I(x, y)] = x >= sx && x < sx + 3 ? 0 : 1;
@@ -173,8 +185,9 @@ function elBuild() {
   }
 
   // ---------- 2d. a Mata de Prata: clareiras com árvores de prata e grotas de folha ----------
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 400; tries++) {
-    const w = 34 + ((R() * 23) | 0), h = 14 + ((R() * 7) | 0), cx = (R() * WW) | 0, cy = S0 + mb(22 + R() * 22) - h / 2;   // o chão entre 22 e 44 m
+  // (por andar: k % K escolhe o andar, as contas por camada vezes K)
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 34 + ((R() * 23) | 0), h = 14 + ((R() * 7) | 0), cx = (R() * WW) | 0, cy = md(j, 22 + R() * 22) - h / 2;   // o chão entre 22 e 44 m do andar
     if (busy(cx, cy, w, h, 6)) continue;
     // a clareira: o teto alto e largo (a copa vai colada nele), o chão quase plano
     for (let y = Math.floor(cy - h / 2) - 1; y <= cy + h / 2 + 1; y++) for (let x = Math.floor(cx - w / 2) - 1; x <= cx + w / 2 + 1; x++) {
@@ -183,85 +196,86 @@ function elBuild() {
     }
     const fy = Math.round(cy + h / 2), trees = [], n = w > 46 ? 3 : w > 38 ? 2 : 1;
     for (let j = 0; j < n; j++) trees.push(Math.round(cx - w / 2 + w * (j + 0.5) / n + (R() - 0.5) * 4) - 1);
-    const G = { cx, cy, w, h, band: 0, kind: 'clareira', fy, trees };
+    const G = { cx, cy, w, h, band: 0, t: j, kind: 'clareira', fy, trees };
     elGlades.push(G); elChambers.push(G); k++;
   }
-  for (let k = 0, tries = 0; k < 8 * WSC && tries < 400; tries++) {
-    const w = 10 + ((R() * 9) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = S0 + mb(6) + h / 2 + R() * Math.max(0, mb(38) - h);
+  for (let k = 0, tries = 0; k < 8 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 10 + ((R() * 9) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = md(j, 6) + h / 2 + R() * Math.max(0, sp(6, 44) - h);
     if (busy(cx, cy, w, h, 5)) continue;
     blob(cx, cy, w, h, 0x5d00 + k, 1.4);
-    elChambers.push({ cx, cy, w, h, band: 0, kind: 'grota' }); k++;
+    elChambers.push({ cx, cy, w, h, band: 0, t: j, kind: 'grota' }); k++;
   }
 
   // ---------- 2e. os Salões do Rei: salões lavrados com abóbada, abismos com ponte, galerias ----------
   const hallsOf = (band, n, d0, d1, ruin) => {
-    for (let k = 0, tries = 0; k < n && tries < 400; tries++) {
-      const w = (ruin ? 24 : 28) + ((R() * (ruin ? 17 : 17)) | 0), h = (ruin ? 9 : 10) + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(d0 + R() * (d1 - d0));
-      if (fy - h < S0 + mb(EL_BANDS[band]) + 2 || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
+    for (let k = 0, tries = 0; k < n * K && tries < 400 * K; tries++) {
+      const j = k % K, w = (ruin ? 24 : 28) + ((R() * (ruin ? 17 : 17)) | 0), h = (ruin ? 9 : 10) + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = md(j, d0 + R() * (d1 - d0));
+      if (fy - h < md(j, BD[band]) + 2 || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
       const arc = Math.min(4, h >> 2);
       vault(x0, fy, w, h, arc);
-      const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band, kind: ruin ? 'ruina' : 'salao', x0: W1(x0), fy, top: fy - h, arc, ruin: !!ruin };
+      const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band, t: band * K + j, kind: ruin ? 'ruina' : 'salao', x0: W1(x0), fy, top: fy - h, arc, ruin: !!ruin };
       elHalls.push(H); elChambers.push(H); k++;
     }
   };
   hallsOf(1, 5 * WSC, 58, 96, false);
-  for (let k = 0, tries = 0; k < 2 * WSC && tries < 300; tries++) {
-    const w = 18 + ((R() * 9) | 0), h = 16 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(70 + R() * 26);
-    if (fy - h < S0 + mb(48) || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
+  for (let k = 0, tries = 0; k < 2 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, w = 18 + ((R() * 9) | 0), h = 16 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = md(j, 70 + R() * 26);
+    if (fy - h < md(j, 48) || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
     room(x0, fy, w, h);
     const by = fy - Math.round(h / 2) - 1;
-    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, kind: 'abismo', x0: W1(x0), fy, top: fy - h, by };
+    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, t: K + j, kind: 'abismo', x0: W1(x0), fy, top: fy - h, by };
     elBridges.push(H); elChambers.push(H); k++;
   }
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 500; tries++) {
-    const len = 30 + ((R() * 41) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(54 + R() * 42);
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 500 * K; tries++) {
+    const j = k % K, len = 30 + ((R() * 41) | 0), x0 = (R() * WW) | 0, fy = md(j, 54 + R() * 42);
     if (busy(x0 + len / 2, fy - 3, len, 5, 3)) continue;
     for (let j = 0; j < len; j++) { for (let y = fy - 5; y < fy; y++) dig(x0 + j, y); hard(x0 + j, fy); }
-    const C = { cx: x0 + len / 2, cy: fy - 3, w: len, h: 5, band: 1, kind: 'galeria', x0: W1(x0), fy, top: fy - 5, len };
+    const C = { cx: x0 + len / 2, cy: fy - 3, w: len, h: 5, band: 1, t: K + j, kind: 'galeria', x0: W1(x0), fy, top: fy - 5, len };
     elCorr.push({ x0: W1(x0), len, fy }); elChambers.push(C); k++;
   }
 
   // ---------- 2f. a Corte Desterrada: salões em ruína e bosques mortos ----------
   hallsOf(2, 5 * WSC, 108, 148, true);
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 300; tries++) {
-    const w = 26 + ((R() * 15) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(104) + h / 2 + R() * Math.max(0, mb(42) - h);
+  for (let k = 0, tries = 0; k < 3 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, w = 26 + ((R() * 15) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = md(j, 104) + h / 2 + R() * Math.max(0, sp(104, 146) - h);
     if (busy(cx, cy, w, h, 6) || !awayFromBoss(cx, cy, w / 2 + 6)) continue;
     blob(cx, cy, w, h, 0x5e00 + k, 2.2);
     const fy = Math.round(cy + h / 2), trees = [], n = w > 34 ? 2 : 1;
     for (let j = 0; j < n; j++) trees.push(Math.round(cx - w / 2 + w * (j + 0.5) / n + (R() - 0.5) * 6));
-    const G = { cx, cy, w, h, band: 2, kind: 'bosque', fy, trees, dead: true };
+    const G = { cx, cy, w, h, band: 2, t: 2 * K + j, kind: 'bosque', fy, trees, dead: true };
     elGlades.push(G); elDead.push(G); elChambers.push(G); k++;
   }
 
   // ---------- 2g. o Poço da Lua: grutas redondas com um poço no fundo ----------
-  for (let k = 0, tries = 0; elGrottos.length < 5 * WSC + 4 && tries < 500; tries++) {
-    const w = 18 + ((R() * 11) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(152) + h / 2 + R() * Math.max(0, mb(30) - h);
+  for (let k = 0, tries = 0; elGrottos.length < 5 * WSC * K + 4 && tries < 500 * K; tries++) {
+    const j = k % K, w = 18 + ((R() * 11) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = md(j, 152) + h / 2 + R() * Math.max(0, sp(152, 182) - h);
     if (busy(cx, cy, w, h, 6) || !awayFromBoss(cx, cy, Math.max(w, h) / 2 + 6) || cy + h / 2 > YB - 4) continue;
     blob(cx, cy, w, h, 0x5f00 + k, 1.8);
-    const C = { cx, cy, w, h, band: 3, kind: 'gruta', fy: Math.round(cy + h / 2), pool: R() < 0.75 };
+    const C = { cx, cy, w, h, band: 3, t: 3 * K + j, kind: 'gruta', fy: Math.round(cy + h / 2), pool: R() < 0.75 };
     elGrottos.push(C); elChambers.push(C); k++;
   }
 
   // ---------- 3. as ligações ----------
   const mouth = C => C.fy ? C.fy : Math.round(C.cy + C.h * 0.3);
   const ends = (C, right) => [Math.round(right ? C.cx + C.w / 2 - 2 : C.cx - C.w / 2 + 2), mouth(C)];
-  for (let b = 0; b < 4; b++) {
-    const L = elChambers.filter(c => c.band === b && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
+  // um anel por andar (como era um por faixa), no estilo da faixa
+  for (let t = 0; t < 4 * K; t++) {
+    const b = (t / K) | 0, L = elChambers.filter(c => c.t === t && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
       if (b === 1 || b === 2) gallery(ax, ay, bx, by, elCorr);   // os salões: galerias e escadarias
-      else worm(ax, ay - 2, bx, by - 2, b === 0 ? 1.5 : 1.35, 0x5700 + b * 90 + k);   // a mata e o poço: túneis de raiz
+      else worm(ax, ay - 2, bx, by - 2, b === 0 ? 1.5 : 1.35, 0x5700 + t * 90 + k);   // a mata e o poço: túneis de raiz
     }
   }
-  // entre as faixas: túneis de raiz e escadarias longas (2 x WSC de cada por divisa)
-  for (let b = 0; b < 3; b++) {
-    const U = elChambers.filter(c => c.band === b && !c.nolink && !c.boss), D = elChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss);
+  // entre os andares: túneis de raiz (2 x WSC por divisa) e escadarias (2 x WSC entre faixas, WSC entre andares da mesma)
+  for (let t = 0; t < 4 * K - 1; t++) {
+    const b = t, U = elChambers.filter(c => c.t === t && !c.nolink && !c.boss), D = elChambers.filter(c => c.t === t + 1 && !c.nolink && !c.boss), nl = (t + 1) % K ? WSC : 2 * WSC;
     for (let k = 0; k < 2 * WSC && U.length && D.length; k++) {
       const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
       const [ax, ay] = ends(P, R() < 0.5); worm(ax, ay - 2, Q.cx, mouth(Q) - 2, 1.35, 0x57f0 + b * 9 + k);
     }
-    for (let k = 0, tries = 0; k < 2 * WSC && tries < 80; tries++) {
+    for (let k = 0, tries = 0; k < nl && tries < 80; tries++) {
       const P = U[(R() * U.length) | 0]; if (!P) continue;
       const Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
       const [ax, ay] = ends(P, R() < 0.5), by = mouth(Q); if (by - ay < 6 || by - ay > 60 || !awayFromBoss(Q.cx, by, 6)) continue;
@@ -421,7 +435,7 @@ function elBuild() {
       const i = I(x, y), edge = y === L.fy - L.h - 1 || y === L.fy || x === L.x0 - 1 || x === L.x0 + L.w;
       if (W1(x) === L.door && y >= L.fy - 3 && y < L.fy) { tiles[i] = AIR; walls[i] = WEL_MATA; }
       else if (edge && !(y === L.fy - L.h - 1 && W1(x) >= x0 && wdx(x - x0) < 3)) tiles[i] = y === L.fy ? EL_TABUA : EL_MADEIRA;
-      else if (!edge) { tiles[i] = AIR; walls[i] = WEL_FOLHAS; }
+      else if (!edge) { tiles[i] = W1(x) === W1(x0 + 1) ? EL_ESCADA : AIR; walls[i] = WEL_FOLHAS; }   // a escada desce até o chão (sem ela, o posto era um poço sem volta)
       else { tiles[i] = W1(x) === W1(x0 + 1) ? EL_ESCADA : AIR; walls[i] = WEL_MATA; }
       elKeep.add(i);
     }
@@ -451,11 +465,11 @@ function elBuild() {
       }
     }
   };
-  vein(EL_O_CARVAO, 22 * WSC, 0, 60, 3, 8, t => t === EL_SOLO);
-  vein(EL_O_CARVAO, 6 * WSC, 98, 150, 3, 7, t => t === EL_PROFANO || t === EL_MORTA);
-  vein(EL_O_LUNARITA, 13 * WSC, 46, 98, 2, 5, t => t === EL_MARMORE);
-  vein(EL_O_LUNARITA, 7 * WSC, 98, 150, 2, 5, t => t === EL_PROFANO || t === EL_MARMORE);
-  vein(EL_O_LUNARITA, 6 * WSC, 150, 186, 2, 5, t => t === EL_PEDRA_POCO || t === EL_MARMORE);
+  vein(EL_O_CARVAO, 22 * WSC * K, 0, 60, 3, 8, t => t === EL_SOLO);
+  vein(EL_O_CARVAO, 6 * WSC * K, 98, 150, 3, 7, t => t === EL_PROFANO || t === EL_MORTA);
+  vein(EL_O_LUNARITA, 13 * WSC * K, 46, 98, 2, 5, t => t === EL_MARMORE);
+  vein(EL_O_LUNARITA, 7 * WSC * K, 98, 150, 2, 5, t => t === EL_PROFANO || t === EL_MARMORE);
+  vein(EL_O_LUNARITA, 6 * WSC * K, 150, 186, 2, 5, t => t === EL_PEDRA_POCO || t === EL_MARMORE);
 }
 
 function elAfter() {
@@ -464,11 +478,13 @@ function elAfter() {
   const elRow = y => y >= S0 && y < YB - 1;
   const dig = (x, y) => { if (!elRow(y)) return; const i = I(x, y); if (elKeep.has(i) || inElHall(W1(x), y, 4)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WEL_MATA; };
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 900; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 1500; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.2) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.9;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.6;
+      let vx = Math.cos(a), vy = Math.sin(a);   // em ziguezague quando o alvo está bem embaixo ou em cima (sem poço reto)
+      if (Math.abs(vy) > 0.75 && Math.abs(ddy) > 4) { if (Math.abs(ddx) > 6) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.75; vx = side * 0.66; }
+      x += vx * 0.8; y += vy * 0.6;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
@@ -482,40 +498,50 @@ function elAfter() {
   for (const E of elEntries) flood(I(E.x0 + 1, E.fy - 1));
   if (!elEntries.length && elChambers.length) flood(I(elChambers[0].cx, Math.round(elChambers[0].cy)));
   if (B) for (let y = B.top - 4; y <= B.fy + 4; y++) for (let x = B.cx - 36; x <= B.cx + 35; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // (um só rótulo para todas as passadas, marcado com o número da passada; cada passada junta todos os bolsões de 16 ou
+  // mais e liga um por um, do maior ao menor, pulando os que uma ligação anterior já alcançou)
+  const LO = S0 * WW, lab = new Uint16Array((YB - S0) * WW);
+  let org = null; const orgT = [];
+  for (let pass = 0, nw = 0; pass < 60; pass++) {
+    const P1 = pass + 1, comps = [];
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - LO] === P1 || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - LO] = P1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= LO && nb < YB * WW && lab[nb - LO] !== P1 && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - LO] = P1; stack.push(nb); } }
+      if (comp.length >= 16) comps.push(comp);
     }
-    if (!bestC) break;
-    let best = null, bd = 1e9;
-    for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
-      const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
-      for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
-        const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
-        const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
-        const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
-      }
-    }
-    if (!best) { for (const c of bestC) reach[c] = 1; continue; }
-    worm(best[0], best[1], best[2], best[3], 1.3, 0x56a0 + pass);
-    flood(I(best[2], best[3]), true);
-    if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
-      for (let h = 0; h < q.length && hit < 0; h++) {
-        const c = q[h], x = c % WW, row = c - x;
-        for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
-          if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || elKeep.has(nb) || elKeep.has(nb - WW) || tiles[nb] === BEDROCK || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
-          org[nb] = c; if (reach[nb] && !SOLID[tiles[nb]]) { hit = nb; break; }
-          q.push(nb);
+    if (!comps.length) break;
+    comps.sort((a, b) => b.length - a.length);
+    for (const bestC of comps) {
+      if (reach[bestC[0]]) continue;
+      let best = null, bd = 1e9;
+      for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
+        const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
+        for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
+          const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
+          const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
+          const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
         }
       }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
-      if (hit >= 0) flood(hit, true);
-      if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
+      if (!best) { for (const c of bestC) reach[c] = 1; continue; }
+      worm(best[0], best[1], best[2], best[3], 1.3, 0x56a0 + nw++);
+      flood(I(best[2], best[3]), true);
+      if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
+        if (!org) org = new Int32Array(NN).fill(-1);
+        for (const c of orgT) org[c] = -1; orgT.length = 0;
+        const q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); orgT.push(c); }
+        for (let h = 0; h < q.length && hit < 0; h++) {
+          const c = q[h], x = c % WW, row = c - x;
+          for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
+            if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || elKeep.has(nb) || elKeep.has(nb - WW) || tiles[nb] === BEDROCK || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
+            org[nb] = c; orgT.push(nb); if (reach[nb] && !SOLID[tiles[nb]]) { hit = nb; break; }
+            q.push(nb);
+          }
+        }
+        for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+        if (hit >= 0) flood(hit, true);
+        if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
+      }
     }
   }
 
@@ -613,19 +639,35 @@ function elClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = EL_S0, YB = Math.min(WH - 8, S0 + EL_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => EL_CLIMB(tiles[I(x, y)]);
   const ok = (x, y) => !S(x, y) && !S(x, y - 1), H = YB - Y0;
-  const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
+  // a busca anda em tabelas (sólido, escada, cabe em pé) e não nos tiles: o repair atualiza a coluna que mexe. seen e
+  // any guardam o número da busca (stamp), sem limpar os arrays a cada busca; a sala do chefe entra na tabela
+  const N = WW * H, Sa = new Uint8Array(N + WW), La = new Uint8Array(N + WW), Ok = new Uint8Array(N);
+  const hall = new Uint8Array(WW * H); if (elBoss) for (let y = Y0; y < YB; y++) for (let x = 0; x < WW; x++) if (inElHall(x, y)) hall[(y - Y0) * WW + x] = 1;
+  for (let y = Y0; y <= YB; y++) for (let x = 0; x < WW; x++) { const j = (y - Y0) * WW + x; Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; }
+  for (let j = WW; j < N; j++) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0;
+  const refresh = (x, y0, y1) => {
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= 0 && j < N + WW) { Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; } }
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= WW && j < N) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0; }
+  };
+  const seen = new Uint16Array(N * 5), any = new Uint16Array(N), from = new Int32Array(N * 5), good = new Uint8Array(N * 5), stk = new Int32Array(N * 5);
+  let st = 0;
   const search = (sx, sy) => {
-    seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || inElHall(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
+    if (++st > 65000) { seen.fill(0); any.fill(0); st = 1; }
+    let sp = 0, cur = -1, hit = -1, jLim = N;   // (a busca não desce mais de 40 abaixo do começo: voltar não pede isso)
+    const push = (j, r) => { if (j >= jLim || !Ok[j]) return; if (Sa[j + WW] || La[j] || La[j - WW]) r = 4; const k = j * 5 + r; if (seen[k] === st) return; seen[k] = st; from[k] = cur; any[j] = st; stk[sp++] = k; if (good[k] && hit < 0) hit = k; };
     const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
-    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++; push(sx, y, 4);
-    while (q.length) {
+    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++;
+    if (y <= Y0 || y >= YB) return false;
+    jLim = Math.min(N, (y + 41 - Y0) * WW); push((y - Y0) * WW + sx, 4);
+    const goal = (S0 - 2 - Y0) * WW;
+    while (sp) {
       if (hit >= 0) return win(hit);
-      const r = q.pop(), yy = q.pop(), x = q.pop(); cur = ((yy - Y0) * WW + x) * 5 + r; if (yy <= S0 - 3) return win(cur);
-      const gr = S(x, yy + 1) || L(x, yy);
-      push(x - 1, yy, r === 4 && !gr ? 0 : r); push(x + 1, yy, r === 4 && !gr ? 0 : r);
-      if (r > 0) push(x, yy - 1, L(x, yy) || L(x, yy - 1) ? 4 : r === 4 ? 3 : r - 1);
-      if (!S(x, yy + 1)) push(x, yy + 1, L(x, yy + 1) ? 4 : 0);
+      const k = stk[--sp], j = (k / 5) | 0, r = k - j * 5; cur = k; if (j < goal) return win(cur);
+      const x = j % WW, row = j - x, gr = Sa[j + WW] || La[j], rs = r === 4 && !gr ? 0 : r;
+      // (a pilha tira o último primeiro: descer entra antes e subir por último, a busca tenta subir antes de tudo)
+      if (!Sa[j + WW]) push(j + WW, La[j + WW] ? 4 : 0);
+      push(row + (x === 0 ? WW - 1 : x - 1), rs); push(row + (x === WW - 1 ? 0 : x + 1), rs);
+      if (r > 0) push(j - WW, La[j] || La[j - WW] ? 4 : r === 4 ? 3 : r - 1);
     }
     return hit >= 0 ? win(hit) : false;
   };
@@ -633,30 +675,52 @@ function elClimbFix() {
   const repair = () => {
     let best = null;
     for (let y = Y0 + 2; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      if (!any[(y - Y0) * WW + x] || !S(x, y + 1) || elKeep.has(I(x, y)) || inElHall(x, y, 1)) continue;
+      if (any[(y - Y0) * WW + x] !== st || !S(x, y + 1) || elKeep.has(I(x, y)) || inElHall(x, y, 1)) continue;
       for (let t = y - 1, n = 0; t > Y0 + 1 && n < 30 && !S(x, t - 1); t--, n++) {
         if (n < 3) continue;
-        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && !any[(t - Y0) * WW + sx]) side = true; }
+        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && any[(t - Y0) * WW + sx] !== st) side = true; }
         if (side) { if (!best || t < best[1]) best = [x, t, y]; break; }
       }
       for (let t = y - 1, n = 0; t > Y0 + 2 && n < 6; t--, n++) {
         if (!S(x, t)) continue;
         const tt = tiles[I(x, t)];
-        if (soft(tt) && !elKeep.has(I(x, t)) && !inElHall(x, t, 4) && ok(x, t - 1) && !any[(t - 1 - Y0) * WW + x] && (!best || t - 1 < best[1])) best = [x, t - 1, y];
+        if (soft(tt) && !elKeep.has(I(x, t)) && !inElHall(x, t, 4) && ok(x, t - 1) && any[(t - 1 - Y0) * WW + x] !== st && (!best || t - 1 < best[1])) best = [x, t - 1, y];
         break;
       }
     }
     if (!best) return false;
     const [x, top, bot] = best;
     for (let y = top; y <= bot; y++) { const i = I(x, y); if (!SOLID[tiles[i]] || soft(tiles[i])) { tiles[i] = EL_ESCADA; if (!walls[i]) walls[i] = WEL_MATA; } }
+    refresh(x, top, bot);
     return true;
   };
+  // os estados que já sobem até a boca, de uma vez: uma busca de trás para frente a partir das linhas de cima (antes,
+  // cada começo andava pela camada inteira atrás da boca); a busca de cada começo acha um destes logo no primeiro passo
+  {
+    const q = stk;   // (a pilha das buscas ainda está livre)
+    const norm = (j, r) => Sa[j + WW] || La[j] || La[j - WW] ? 4 : r;
+    let qh = 0, qt = 0;
+    const mark = k => { good[k] = 1; q[qt++] = k; };
+    for (let j = WW; j < (S0 - 2 - Y0) * WW; j++) if (Ok[j]) for (let r = 0; r < 5; r++) mark(j * 5 + r);
+    while (qh < qt) {
+      const k = q[qh++], j = (k / 5) | 0, r = k - j * 5, x = j % WW, row = j - x;
+      for (const pj of [row + (x === 0 ? WW - 1 : x - 1), row + (x === WW - 1 ? 0 : x + 1)]) {   // de lado
+        if (!Ok[pj]) continue; const gr = Sa[pj + WW] || La[pj];
+        for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, rp === 4 && !gr ? 0 : rp) === r) mark(pj * 5 + rp);
+      }
+      { const pj = j + WW;   // subindo, de baixo
+        if (pj < N && Ok[pj]) for (let rp = 1; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, La[pj] || La[j] ? 4 : rp === 4 ? 3 : rp - 1) === r) mark(pj * 5 + rp); }
+      { const pj = j - WW;   // caindo, de cima
+        if (pj >= WW && Ok[pj] && norm(j, La[j] ? 4 : 0) === r) for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp]) mark(pj * 5 + rp); }
+    }
+  }
   const starts = [];
   if (elBoss) for (const D of elBoss.doors) starts.push([D.x + D.side * 3, D.fy - 1]);
   for (const c of elHalls) starts.push([Math.round(c.cx), c.fy - 1]);
   for (const c of elGrottos) starts.push([Math.round(c.cx), c.fy ? c.fy - 1 : Math.round(c.cy)]);
   for (const X of elExits) starts.push([X.x0 + 2, X.top - 1]);
   for (const H of elBridges) starts.push([Math.round(H.cx), H.fy - 1]);
+  starts.sort((a, b) => a[1] - b[1]);   // de cima para baixo: as de baixo acham logo o caminho bom das de cima
   let fixes = 0, ns = 0;
   for (const [x, y] of starts) { if (SOLID[tiles[I(x, y)]]) continue; for (let k = 0; k < 12 && (ns++, !search(W1(x), y)); k++) { if (!repair()) break; fixes++; } }
   elClimbFix.last = [starts.length, ns, fixes];
@@ -729,9 +793,10 @@ function elPlaceProps() {
 
 // a ordem: a camada, o Espelho (256: elDress), as bocas e a subida, a água; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('elfos', () => {
   if (!ELFOS) return;
   try { elBuild(); elAfter(); if (typeof elDress === 'function') elDress(); elExitClear(); elClimbFix(); elWater(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás do Reino: a mata ao longe com a Lua Presa na Mata, os salões ao longe nos Salões
@@ -740,10 +805,10 @@ function elPlaceProps() {
   _cd();
   if (!ELFOS) return;
   const Y1 = Math.min(WH, EL_S0 + EL_D + 4);
-  for (let y = EL_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(EL_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - EL_S0) + (depthNz(x, y, 25, seed ^ 0x5e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x5e12);
-    DEEPT[i] = d < 46 ? DP_EL_MATA : d < 98 ? (n > 0.7 ? DP_EL_MATA : DP_EL_SALOES) : d < 150 ? (n > 0.6 ? DP_EL_RAIZES : DP_EL_SALOES) : (n > 0.75 ? DP_EL_SALOES : DP_EL_RAIZES);
+    DEEPT[i] = d < EL_BANDS[1] ? DP_EL_MATA : d < EL_BANDS[2] ? (n > 0.7 ? DP_EL_MATA : DP_EL_SALOES) : d < EL_BANDS[3] ? (n > 0.6 ? DP_EL_RAIZES : DP_EL_SALOES) : (n > 0.75 ? DP_EL_SALOES : DP_EL_RAIZES);
   }
 }; }
 

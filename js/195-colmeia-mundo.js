@@ -22,7 +22,9 @@ const CM_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e 
 for (const t of [CM_CERA, CM_CERA_NOVA, CM_FAVO, CM_FAVO_MEL, CM_RESINA, CM_AMBAR, CM_AMBAR_FOSSIL, CM_PEDRA_TOMADA, CM_CERA_REAL, CM_QUITINA, CM_O_CARVAO, CM_O_AMBRITA, CM_PO_CERA]) CM_SOILS[t] = 1;
 const cmKeep = new Set();   // as brechas, o pouso, os escorredouros, as galerias reais: túneis e decoração não mexem
 let cmChambers = [], cmLand = [], cmHalls = [], cmFavos = [], cmAmbar = [], cmNinhos = [], cmReais = [];
-const CM_CLIMB = t => t === CM_ESCADA_FAVO || t === CM_FIO_CERA || t === CHAIN || t === cmAbove().climb;
+// a escada da camada de cima não muda depois da carga: uma vez só (o cmAbove() monta um objeto a cada chamada)
+const CM_UP_CLIMB = cmAbove().climb;
+const CM_CLIMB = t => t === CM_ESCADA_FAVO || t === CM_FIO_CERA || t === CHAIN || t === CM_UP_CLIMB;
 // a caixa da esfera da Rainha (o 196 escreve dentro), com margem m
 function inCmHall(tx, ty, m = 0) { const B = cmBoss; if (!B) return false; const dx = wdx(tx - B.cx); return dx >= -22 - m && dx <= 21 + m && ty >= B.top - m && ty <= B.bot + m; }
 const inCmLand = (tx, ty, m = 0) => cmLand.some(L => wdx(tx - L.x0) >= -m && wdx(tx - L.x0) < L.w + m && ty >= L.fy - L.h - m && ty <= L.fy);
@@ -34,9 +36,12 @@ function cmBuild() {
   CM_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = CM_S0, YB = Math.min(WH - 8, S0 + CM_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7c3a), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / CM_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < CM_BANDS[1] ? 0 : d < CM_BANDS[2] ? 1 : d < CM_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
+  // cada faixa é LAYER_K andares iguais à faixa do desenho (CBD, metros de desenho): a linha da profundidade d (desenho)
+  // no andar s da faixa b; o andar de uma sala: lv = b * LAYER_K + s
+  const CBD = CM_BANDS.map(v => v / LAYER_K), lvY = (b, s, d) => S0 + CM_BANDS[b] + s * (CBD[b + 1] - CBD[b]) + (d - CBD[b]);
   cmChambers = []; cmLand = []; cmHalls = []; cmFavos = []; cmAmbar = []; cmNinhos = []; cmReais = [];
   cmEntries = []; cmExits = []; cmBoss = null; cmFunnels = []; cmKeep.clear();
   const upSoil = t => (A.soils && A.soils[t]) || (A.host && A.host[t]);
@@ -50,15 +55,15 @@ function cmBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
-      const d = y - S0 + (nz(x, y, 18, 0x7b3) - 0.5) * 10, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 26, 0x7a1), n2 = nz(x, y, 14, 0x7a2);
+      if (y >= YB) { tiles[i] = CM_CERA_REAL; walls[i] = WCM_REAL; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
+      const d = y - S0 + (nz(x, y, 18, 0x7b3) - 0.5) * 10, b = bandOf(Math.max(0, d)), n1 = () => nz(x, y, 26, 0x7a1), n2 = () => nz(x, y, 14, 0x7a2);   // cada ruído só onde a faixa lê
       let tt = CM_CERA, w = WCM_CERA;
-      if (y >= YB) { tt = CM_CERA_REAL; w = WCM_REAL; }
-      else if (b === 0) { if (d < 10 + n1 * 12) { tt = CM_PEDRA_TOMADA; w = WCM_PEDRA; } else if (n2 > 0.78) tt = CM_CERA_NOVA; }
-      else if (b === 1) { if (n2 > 0.72) tt = CM_CERA_NOVA; w = n1 > 0.6 ? WCM_FAVO : WCM_CERA; }
-      else if (b === 2) { tt = n1 > 0.74 ? CM_CERA : CM_RESINA; w = WCM_RESINA; }
+      if (b === 0) { if (d < 10 + n1() * 12) { tt = CM_PEDRA_TOMADA; w = WCM_PEDRA; } else if (n2() > 0.78) tt = CM_CERA_NOVA; }
+      else if (b === 1) { if (n2() > 0.72) tt = CM_CERA_NOVA; w = n1() > 0.6 ? WCM_FAVO : WCM_CERA; }
+      else if (b === 2) { tt = n1() > 0.74 ? CM_CERA : CM_RESINA; w = WCM_RESINA; }
       else { tt = CM_CERA_REAL; w = WCM_REAL; }
       tiles[i] = tt; walls[i] = w;
-      if (y < YB && agua.length) agua[i] = 0;
+      if (agua.length) agua[i] = 0;
     }
   }
 
@@ -117,7 +122,7 @@ function cmBuild() {
     if (!picks.length) picks.push({ cx: (R() * WW) | 0, fy: S0 - 2 });
     for (const c of picks) {
       const xs = W1(Math.round(c.cx) - 1), side = R() < 0.5 ? -1 : 1;
-      const landFy = clamp(c.fy + 20 + ((R() * 9) | 0), S0 + 9, S0 + mb(34));
+      const landFy = clamp(c.fy + 20 + ((R() * 9) | 0), S0 + 9, lvY(0, 0, 34));
       const hx = side > 0 ? xs - 1 : xs - 8;   // o tubo cai numa ponta do pouso (12 x 6)
       for (let y = landFy - 7; y <= landFy + 1; y++) for (let x = hx - 1; x <= hx + 12; x++) seal[I(x, y)] = 1;
       for (let y = landFy - 6; y < landFy; y++) for (let x = hx; x < hx + 12; x++) { const i = I(x, y); cv[i] = 1; keep[i] = 1; }
@@ -130,7 +135,7 @@ function cmBuild() {
       // um salão anão logo depois da porta do pouso, no mesmo chão
       const w = 20 + ((R() * 10) | 0), h = 7, x0 = side > 0 ? door + 1 : door - w;
       room(x0, landFy, w, h, 0);
-      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, kind: 'salao', x0: W1(x0), fy: landFy, top: landFy - h };
+      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, lv: 0, kind: 'salao', x0: W1(x0), fy: landFy, top: landFy - h };
       cmHalls.push(H); cmChambers.push(H);
       cmChambers.push({ cx: hx + 6, cy: landFy - 3, w: 12, h: 6, band: 0, kind: 'pouso', nolink: true });
       cmEntries.push({ x0: xs, fy: c.fy, top: c.fy - 2, land: L });
@@ -166,17 +171,17 @@ function cmBuild() {
       // a câmara de ovos no fim da galeria
       const w = 14 + ((R() * 5) | 0), h = 9, x0 = D.side > 0 ? x - 1 : x - w + 2;
       room(x0, f, w, h, 2);
-      const C = { cx: x0 + w / 2, cy: f - h / 2, w, h, band: 3, kind: 'ninho', x0: W1(x0), fy: f, top: f - h };
+      const C = { cx: x0 + w / 2, cy: f - h / 2, w, h, band: 3, lv: 4 * LAYER_K - 1, kind: 'ninho', x0: W1(x0), fy: f, top: f - h };
       cmNinhos.push(C); cmChambers.push(C);
     }
   }
 
   // ---------- 2c. os escorredouros de mel: duas câmaras de ovos no fundo, longe uma da outra e da esfera ----------
   for (let tries = 0; cmExits.length < 2 && tries < 600; tries++) {
-    const w = 14 + ((R() * 5) | 0), h = 9, cx = (R() * WW) | 0, fy = S0 + mb(160) + ((R() * mb(14)) | 0);
+    const w = 14 + ((R() * 5) | 0), h = 9, cx = (R() * WW) | 0, fy = lvY(3, LAYER_K - 1, 160) + ((R() * 14) | 0);
     if (Math.abs(wdx(cx - cmBoss.cx)) < 22 + 50 || cmExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h, 2);
-    const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'ninho', x0: W1(x0), fy, top: fy - h, exit: true };
+    const C = { cx, cy: fy - h / 2, w, h, band: 3, lv: 4 * LAYER_K - 1, kind: 'ninho', x0: W1(x0), fy, top: fy - h, exit: true };
     cmNinhos.push(C); cmChambers.push(C);
     // o poço: 3 de largura do chão da câmara até a última linha (o Abismo continua de lá)
     const sx = W1(cx - 1);
@@ -186,23 +191,23 @@ function cmBuild() {
   }
 
   // ---------- 2d. a Brecha Tomada: salões anões retos, comidos pela cera nas pontas ----------
-  for (let k = 0, tries = 0; k < 7 * WSC && tries < 400; tries++) {
-    const w = 20 + ((R() * 15) | 0), h = 6 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(12 + R() * 28);
+  for (let k = 0, tries = 0; k < 7 * WSC * LAYER_K && tries < 400 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 20 + ((R() * 15) | 0), h = 6 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = Math.round(lvY(0, s, 12 + R() * 28));
     if (fy - h < S0 + 3 || busy(x0 + w / 2, fy - h / 2, w, h, 5)) continue;
     room(x0, fy, w, h, 0);
-    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 0, kind: 'salao', x0: W1(x0), fy, top: fy - h };
+    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 0, lv: s, kind: 'salao', x0: W1(x0), fy, top: fy - h };
     cmHalls.push(H); cmChambers.push(H); k++;
   }
 
   // ---------- 2e. as Galerias de Cera: favais (3 a 6 salas hexagonais coladas) ----------
-  for (let k = 0, tries = 0; k < 8 * WSC && tries < 500; tries++) {
-    const n = 3 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = S0 + mb(50 + R() * 36);
+  for (let k = 0, tries = 0; k < 8 * WSC * LAYER_K && tries < 500 * LAYER_K; tries++) {
+    const lv = k % LAYER_K, n = 3 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = lvY(1, lv, 50 + R() * 36);
     if (busy(cx, cy, 34, 18, 5)) continue;
     const group = [];
     let x = cx - 16, fy = Math.round(cy + 4);
     for (let j = 0; j < n; j++) {
       const w = 9 + ((R() * 4) | 0), h = 6 + ((R() * 3) | 0);
-      if (fy - h < S0 + mb(44) || fy > S0 + mb(90)) break;
+      if (fy - h < lvY(1, lv, 44) || fy > lvY(1, lv, 90)) break;
       room(x, fy, w, h, 2);
       // a passagem para a sala seguinte: a parede compartilhada abre 2 x 3 rente ao chão
       const C = { cx: x + w / 2, cy: fy - h / 2, w, h, band: 1, kind: 'favo', x0: W1(x), fy, top: fy - h };
@@ -214,41 +219,41 @@ function cmBuild() {
     }
     if (!group.length) continue;
     const gx0 = Math.min(...group.map(c => c.cx - c.w / 2)), gx1 = Math.max(...group.map(c => c.cx + c.w / 2)), gy0 = Math.min(...group.map(c => c.top)), gy1 = Math.max(...group.map(c => c.fy));
-    cmChambers.push({ cx: (gx0 + gx1) / 2, cy: (gy0 + gy1) / 2, w: gx1 - gx0, h: gy1 - gy0, band: 1, kind: 'faval', fy: group[0].fy, rooms: group });
+    cmChambers.push({ cx: (gx0 + gx1) / 2, cy: (gy0 + gy1) / 2, w: gx1 - gx0, h: gy1 - gy0, band: 1, lv: LAYER_K + lv, kind: 'faval', fy: group[0].fy, rooms: group });
     k++;
   }
   // o labirinto: galerias de degraus que se ramificam, com gargalos
-  for (let k = 0; k < 30 * WSC; k++) {
-    const x0 = (R() * WW) | 0, f0 = S0 + mb(48 + R() * 40), len = 16 + ((R() * 30) | 0), dir = R() < 0.5 ? -1 : 1;
+  for (let k = 0; k < 30 * WSC * LAYER_K; k++) {
+    const lv = k % LAYER_K, x0 = (R() * WW) | 0, f0 = Math.round(lvY(1, lv, 48 + R() * 40)), len = 16 + ((R() * 30) | 0), dir = R() < 0.5 ? -1 : 1;
     if (cv[I(x0, f0 - 1)] || cv[I(x0, f0 - 3)]) continue;
     const pts = stepTunnel(x0, f0, len, dir, 3, 0x7d00 + k, true);
     if (R() < 0.5 && pts.length > 10) { const [bx, bf] = pts[(pts.length / 2) | 0]; stepTunnel(bx, bf, 10 + ((R() * 20) | 0), -dir, 3, 0x7e00 + k, true); }
     const [ex, ef] = pts[pts.length - 1];
-    cmChambers.push({ cx: x0 + dir * len / 2, cy: f0 - 2, w: len, h: 3, band: 1, kind: 'galeria', fy: ef, ends: [[W1(x0), f0], [ex, ef]], link: true });
+    cmChambers.push({ cx: x0 + dir * len / 2, cy: f0 - 2, w: len, h: 3, band: 1, lv: LAYER_K + lv, kind: 'galeria', fy: ef, ends: [[W1(x0), f0], [ex, ef]], link: true });
   }
 
   // ---------- 2f. as Câmaras de Âmbar: redondas, forradas de resina, com 1 a 3 massas de âmbar ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 400; tries++) {
-    const w = 14 + ((R() * 9) | 0), h = 10 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(98) + h / 2 + R() * Math.max(0, mb(34) - h);
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 400 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 14 + ((R() * 9) | 0), h = 10 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = lvY(2, s, 98) + h / 2 + R() * Math.max(0, 34 - h);
     if (busy(cx, cy, w, h, 6) || inCmHall(W1(cx), cy, w / 2 + 8)) continue;
     blob(cx, cy, w, h, 0x7f00 + k, 1.6);
-    const C = { cx, cy, w, h, band: 2, kind: 'camara' };
+    const C = { cx, cy, w, h, band: 2, lv: 2 * LAYER_K + s, kind: 'camara' };
     cmAmbar.push(C); cmChambers.push(C); k++;
   }
   // túneis curtos de resina entre as câmaras (a faixa é a que mais tem rocha)
   // ---------- 2g. o Berçário: mais câmaras de ovos e as outras galerias reais ----------
-  for (let k = 0, tries = 0; cmNinhos.length < 6 * WSC && tries < 500; tries++) {
-    const w = 12 + ((R() * 7) | 0), h = 8 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = S0 + mb(146) + ((R() * mb(34)) | 0);
-    if (fy - h < S0 + CM_BANDS[3] + 1 || busy(cx, fy - h / 2, w, h, 6) || inCmHall(W1(cx), fy - h / 2, w / 2 + 6)) continue;
+  for (let k = 0, tries = 0; cmNinhos.length < 6 * WSC * LAYER_K && tries < 500 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 12 + ((R() * 7) | 0), h = 8 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = Math.min(YB - 4, lvY(3, s, 146) + ((R() * 34) | 0));
+    if (fy - h < lvY(3, s, CBD[3]) + 1 || busy(cx, fy - h / 2, w, h, 6) || inCmHall(W1(cx), fy - h / 2, w / 2 + 6)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h, 2);
-    const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'ninho', x0: W1(x0), fy, top: fy - h };
-    cmNinhos.push(C); cmChambers.push(C);
+    const C = { cx, cy: fy - h / 2, w, h, band: 3, lv: 3 * LAYER_K + s, kind: 'ninho', x0: W1(x0), fy, top: fy - h };
+    cmNinhos.push(C); cmChambers.push(C); k++;
   }
   {   // galerias reais entre câmaras de ovos vizinhas (4 x WSC no total, contando as duas da esfera)
     const L = cmNinhos.slice().sort((a, b) => a.cx - b.cx);
-    for (let k = 0, n = 0; k < L.length && n < 4 * WSC - 2; k++) {
+    for (let k = 0, n = 0; k < L.length && n < 4 * WSC * LAYER_K - 2; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
-      const d = wdx(Q.cx - P.cx); if (d < 10 || d > 90 || inCmHall(W1(P.cx + d / 2), P.fy, 6)) continue;
+      const d = wdx(Q.cx - P.cx); if (d < 10 || d > 90 || Math.abs(Q.fy - P.fy) > d / 3 || inCmHall(W1(P.cx + d / 2), P.fy, 6)) continue;   // só entre vizinhas do mesmo andar (ou quase)
       const xa = Math.round(P.cx + P.w / 2 - 1), xb = Math.round(P.cx + d - Q.w / 2 + 1); let f = P.fy;
       for (let x = xa; x <= xb; x++) {
         const t = (x - xa) / Math.max(1, xb - xa), want = Math.round(P.fy + (Q.fy - P.fy) * t);
@@ -266,29 +271,32 @@ function cmBuild() {
   const mouth = C => C.fy ? C.fy - 2 : C.cy + C.h * 0.25;
   const ends = (C, right) => C.ends ? (right ? C.ends[1] : C.ends[0]) : [right ? C.cx + C.w / 2 - 1 : C.cx - C.w / 2 + 1, mouth(C)];
   const RAD = [1.2, 1.15, 1.3, 1.3];
-  for (let b = 0; b < 4; b++) {
-    const L = cmChambers.filter(c => c.band === b && !c.nolink && !c.boss && c.kind !== 'galeria').sort((a, c) => a.cx - c.cx);
+  const NLV = 4 * LAYER_K, lvOf = c => c.lv !== undefined ? c.lv : (c.band * LAYER_K + clamp(Math.floor((c.cy - S0 - CM_BANDS[c.band]) / (CBD[c.band + 1] - CBD[c.band])), 0, LAYER_K - 1));
+  for (let lv = 0; lv < NLV; lv++) {   // um anel em volta do mundo em cada andar
+    const b = (lv / LAYER_K) | 0, L = cmChambers.filter(c => lvOf(c) === lv && !c.nolink && !c.boss && c.kind !== 'galeria').sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
-      worm(ax, ay, bx, by, RAD[b], 0x7700 + b * 90 + k);
+      worm(ax, ay, bx, by, RAD[b], 0x7700 + lv * 90 + k);
     }
   }
-  // os túneis que furam os salões anões (Brecha): 10 x WSC, estreitos
-  for (let k = 0; k < 10 * WSC; k++) { const x = (R() * WW) | 0, y = S0 + mb(6 + R() * 34); worm(x, y, x + (R() < 0.5 ? -1 : 1) * (20 + R() * 30), S0 + mb(6 + R() * 34), 1.1, 0x7a80 + k); }
-  for (let b = 0; b < 3; b++) {
-    const U = cmChambers.filter(c => c.band === b && !c.nolink && !c.boss), D = cmChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss);
+  // os túneis que furam os salões anões (Brecha): 10 x WSC por andar, estreitos
+  for (let k = 0; k < 10 * WSC * LAYER_K; k++) { const s = k % LAYER_K, x = (R() * WW) | 0, y = lvY(0, s, 6 + R() * 34); worm(x, y, x + (R() < 0.5 ? -1 : 1) * (20 + R() * 30), lvY(0, s, 6 + R() * 34), 1.1, 0x7a80 + k); }
+  for (let lv = 0; lv + 1 < NLV; lv++) {
+    const U = cmChambers.filter(c => lvOf(c) === lv && !c.nolink && !c.boss), D = cmChambers.filter(c => lvOf(c) === lv + 1 && !c.nolink && !c.boss);
+    // túneis em rampa: a sala de baixo afastada de lado ~2 vezes o desnível (nunca um poço reto)
     for (let k = 0; k < 3 * WSC && U.length && D.length; k++) {
-      const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
-      worm(P.cx, mouth(P), Q.cx, mouth(Q), 1.3, 0x77f0 + b * 9 + k);
+      const P = U[(R() * U.length) | 0], cost = c => { const dy = Math.abs(mouth(c) - mouth(P)), dx = Math.abs(wdx(c.cx - P.cx)); return Math.abs(dx - 2 * dy) + (dx < 1.4 * dy ? 400 : 0); };
+      const Q = D.reduce((m, c) => cost(c) < cost(m) ? c : m);
+      worm(P.cx, mouth(P), Q.cx, mouth(Q), 1.3, 0x77f0 + lv * 9 + k);
     }
-    // os poços de 3 com escada entre as faixas (2 x WSC por divisa): de um chão de cima até um túnel de baixo
+    // os poços de 3 com escada entre os andares (2 x WSC por divisa): de um chão de cima até um túnel de baixo
     for (let k = 0, tries = 0; k < 2 * WSC && tries < 60; tries++) {
       const P = U[(R() * U.length) | 0]; if (!P || !P.fy) continue;
       const sx = W1(Math.round(P.cx) + ((R() * 5) | 0) - 2), Q = D.reduce((m, c) => Math.abs(wdx(c.cx - sx)) < Math.abs(wdx(m.cx - sx)) ? c : m);
-      const yb = Math.round(mouth(Q)) + 1; if (yb - P.fy < 8 || yb - P.fy > 60 || inCmHall(sx, yb, 4)) continue;
+      const yb = Math.round(mouth(Q)) + 1; if (yb - P.fy < 8 || yb - P.fy > 40 || inCmHall(sx, yb, 4)) continue;
       for (let y = P.fy - 1; y <= yb; y++) for (let x = sx; x < sx + 3; x++) dig(x, y);
-      worm(sx + 1, yb - 1, Q.cx, mouth(Q), 1.3, 0x7af0 + b * 17 + k);
+      worm(sx + 1, yb - 1, Q.cx, mouth(Q), 1.3, 0x7af0 + lv * 17 + k);
       k++;
     }
   }
@@ -430,9 +438,9 @@ function cmBuild() {
       }
     }
   };
-  vein(CM_O_CARVAO, 40 * WSC, 0, 186, 3, 8, t => t === CM_RESINA || t === CM_PEDRA_TOMADA);
-  vein(CM_O_AMBRITA, 17 * WSC, 92, 138, 2, 5, t => t === CM_RESINA || t === CM_AMBAR);
-  vein(CM_O_AMBRITA, 9 * WSC, 0, 186, 2, 4, t => t === CM_RESINA || t === CM_AMBAR);
+  vein(CM_O_CARVAO, 40 * WSC * LAYER_K, 0, 186, 3, 8, t => t === CM_RESINA || t === CM_PEDRA_TOMADA);
+  vein(CM_O_AMBRITA, 17 * WSC * LAYER_K, 92, 138, 2, 5, t => t === CM_RESINA || t === CM_AMBAR);
+  vein(CM_O_AMBRITA, 9 * WSC * LAYER_K, 0, 186, 2, 4, t => t === CM_RESINA || t === CM_AMBAR);
 }
 
 function cmAfter() {
@@ -458,13 +466,18 @@ function cmAfter() {
   for (const E of cmEntries) flood(I(E.x0 + 1, E.fy - 1));
   if (!cmEntries.length && cmChambers.length) flood(I(cmChambers[0].cx, Math.round(cmChambers[0].cy)));
   if (cmBoss) for (let y = cmBoss.top; y <= cmBoss.bot; y++) for (let x = cmBoss.cx - 22; x <= cmBoss.cx + 21; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+  // o pedaço solto mais alto primeiro: tudo acima dele já está ligado, então a ligação sai curta (e a busca continua
+  // da linha onde parou)
+  const lab = new Uint16Array(NN);   // marcado com o número da passada (uma alocação só)
+  let yScan = S0;
+  let org = null;
+  for (let pass = 0; pass < 60 * WSC * LAYER_K; pass++) {
+    const P = pass + 1; let bestC = null;
+    for (let y = yScan; y < YB - 1 && !bestC; y++) for (let x = 0; x < WW; x++) {
+      const i = y * WW + x; if (reach[i] || lab[i] === P || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i] = P; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && lab[nb] !== P && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = P; stack.push(nb); } }
+      if (comp.length >= 16) { bestC = comp; yScan = y; break; }
     }
     if (!bestC) break;
     let best = null, bd = 1e9;
@@ -480,7 +493,8 @@ function cmAfter() {
     worm(best[0], best[1], best[2], best[3], 1.2, 0x76a0 + pass);
     flood(I(best[2], best[3]), true);
     if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
+      if (!org) org = new Int32Array(NN).fill(-1);
+      const q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
       for (let h = 0; h < q.length && hit < 0; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -490,6 +504,7 @@ function cmAfter() {
         }
       }
       for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      for (const c of q) org[c] = -1; if (hit >= 0) org[hit] = -1;   // limpa só o que usou
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
@@ -530,7 +545,7 @@ function cmAfter() {
       if (R3() < 0.55) put(x, y, CM_POCA_MEL);
     }
   }
-  for (let k = 0, tries = 0; k < 14 * WSC && tries < 400 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 14 * WSC * LAYER_K && tries < 400 * WSC * LAYER_K; tries++) {
     const x = (R3() * WW) | 0, y = S0 + CM_BANDS[1] + ((R3() * (CM_BANDS[2] - CM_BANDS[1])) | 0);
     if (at(x, y) !== AIR || !SOLID[at(x, y + 1)] || at(x, y - 1) !== AIR || at(x, y - 2) !== AIR || SOLID[at(x, y - 3)] === 0) continue;
     if (!SOLID[at(x, y - 3)]) continue;   // dentro de um túnel de 3: o monte tapa a metade de baixo
@@ -552,7 +567,7 @@ function cmAfter() {
         if (run >= 2 * r + 3) cand.push([W1(x - r - 1), fy0]);
       }
     }
-    for (let k = 0, tries = 0; k < 3 * WSC && tries < 400 && cand.length; tries++) {
+    for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 400 * LAYER_K && cand.length; tries++) {
       const [cx, fy0] = cand[(R3() * cand.length) | 0];
       if (inCmHall(cx, fy0, 8) || inCmLand(cx, fy0, 6) || cmFunnels.some(F => Math.abs(wdx(F.cx - cx)) < 24 && Math.abs(F.fy - fy0) < 12)) continue;
       let ok = true; for (let dx = -r - 1; dx <= r + 1 && ok; dx++) for (let y = fy0 - 2; y <= fy0 + 4 && ok; y++) if (cmKeep.has(I(cx + dx, y)) || CM_CLIMB(at(cx + dx, y))) ok = false;
@@ -728,9 +743,10 @@ function cmPlaceProps() {
 
 // a ordem: a camada, a esfera da Rainha (196: cmDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('colmeia', () => {
   if (!COLMEIA) return;
   try { cmBuild(); cmAfter(); if (typeof cmDress === 'function') cmDress(); cmExitClear(); cmClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da colmeia: salões anões afogados na Brecha, favos gigantes, âmbar com sombras ---------- */
@@ -738,10 +754,10 @@ function cmPlaceProps() {
   _cd();
   if (!COLMEIA) return;
   const Y1 = Math.min(WH, CM_S0 + CM_D + 4);
-  for (let y = CM_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(CM_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - CM_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 40 ? (n > 0.4 ? DP_CM_FORTALEZA : DP_CM_FAVOS) : d < 92 ? DP_CM_FAVOS : d < 138 ? (n > 0.45 ? DP_CM_AMBAR : DP_CM_FAVOS) : (n > 0.6 ? DP_CM_AMBAR : DP_CM_FAVOS);
+    DEEPT[i] = d < 40 * LAYER_K ? (n > 0.4 ? DP_CM_FORTALEZA : DP_CM_FAVOS) : d < CM_BANDS[2] ? DP_CM_FAVOS : d < CM_BANDS[3] ? (n > 0.45 ? DP_CM_AMBAR : DP_CM_FAVOS) : (n > 0.6 ? DP_CM_AMBAR : DP_CM_FAVOS);
   }
 }; }
 

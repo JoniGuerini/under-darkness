@@ -35,9 +35,12 @@ function fpBuild() {
   FP_S0 = Math.min(WH - 12, CD_S0 + Math.min(CD_D, WH - 8 - CD_S0));
   const S0 = FP_S0, YB = Math.min(WH - 8, S0 + FP_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7f1a), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / FP_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < FP_BANDS[1] ? 0 : d < FP_BANDS[2] ? 1 : d < FP_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
+  // cada faixa é LAYER_K andares, cada um do tamanho da faixa no desenho (FPB, em metros de desenho): a linha da
+  // profundidade d (desenho) no andar s da faixa b; o andar de uma sala: lv = b * LAYER_K + s
+  const FPB = FP_BANDS.map(v => v / LAYER_K), lvY = (b, s, d) => S0 + FP_BANDS[b] + s * (FPB[b + 1] - FPB[b]) + (d - FPB[b]);
   fpChambers = []; fpClearings = []; fpNets = []; fpHalls = []; fpLand = []; fpTrunks = [];
   fpEntries = []; fpExits = []; fpBoss = null; fpCamp = null; fpKeep.clear();
 
@@ -50,6 +53,7 @@ function fpBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3 || !FP_HOST[tiles[i]]) continue;
+      if (y >= YB) { tiles[i] = FP_GRANITO; walls[i] = WFP_GRANITO; continue; }   // abaixo da camada: o granito, sem ruído (a de baixo escreve por cima)
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x7b3);
       if (k < 1 && h > 0.45 + k * 0.6) { tiles[i] = CD_ATERRO; walls[i] = WCD_TIJOLO; continue; }
       // as faixas se misturam nas bordas por ruído
@@ -59,14 +63,14 @@ function fpBuild() {
       else if (bj === 1) { t = FP_GRANITO; w = n2 > 0.72 ? WFP_CRISTAL : WFP_GRANITO; }
       else if (bj === 2) { t = n1 > 0.62 ? FP_GRANITO : FP_RAIZ; w = n1 > 0.62 ? WFP_GRANITO : WFP_RAIZ; if (n2 > 0.86) t = FP_SEIVA; }
       else { t = n2 > 0.8 ? FP_CERNE : FP_GRANITO; w = n1 > 0.6 ? WFP_CASCA : WFP_GRANITO; }
-      if (y >= YB) { t = FP_GRANITO; w = WFP_GRANITO; }
       tiles[i] = t; walls[i] = w;
+      if (agua.length) agua[i] = 0;   // a água do mundo de antes não fica presa na rocha nova (a subida e os degraus olham para ela)
     }
   }
   // a floresta enterrada: troncos inteiros dentro da rocha (o que as salas cortarem vira toco no chão ou raiz no teto;
   // a correção da estrutura no fim tira os pedaços soltos no ar)
   const R2 = mulberry32(seed ^ 0x7c2e);
-  for (let x = 2; x < WW; x += 6 + ((R2() * 9) | 0)) {
+  for (let pass = 0; pass < LAYER_K; pass++) for (let x = 2 + pass * 3; x < WW; x += 6 + ((R2() * 9) | 0)) {
     const y0 = S0 + 4 + ((R2() * (DB - 30)) | 0), len = 14 + ((R2() * 26) | 0), b = bandOf(y0 - S0), tw = b === 3 ? 4 + ((R2() * 3) | 0) : 2 + ((R2() * 2) | 0);
     const lean = R2() < 0.2 ? (R2() < 0.5 ? -1 : 1) * (0.36 + R2() * 0.34) : 0;
     for (let k = 0; k < len; k++) {
@@ -106,7 +110,7 @@ function fpBuild() {
   // ---------- 2a. as duas entradas: debaixo de cada adega da Cidade, uma raiz-mestra petrificada com degraus ----------
   const cd = (typeof cdDown !== 'undefined' ? cdDown : []).filter(c => c.fy);
   for (const C of cd.slice(0, 2)) {
-    const xs = W1(Math.round(C.cx) - 2), landFy = S0 + mb(20);   // xs..xs+3: o poço dentro da raiz
+    const xs = W1(Math.round(C.cx) - 2), landFy = lvY(0, 0, 20);   // xs..xs+3: o poço dentro da raiz
     const side = R() < 0.5 ? -1 : 1, hx = side < 0 ? xs - 12 : xs;   // o pouso 12 x 6 ao pé da raiz, aberto para um lado
     for (let y = landFy - 7; y <= landFy; y++) for (let x = hx - 1; x <= hx + 12; x++) seal[I(x, y)] = 1;
     for (let y = landFy - 6; y < landFy; y++) for (let x = hx; x < hx + 12; x++) { const i = I(x, y); cv[i] = 1; keep[i] = 1; }
@@ -115,14 +119,14 @@ function fpBuild() {
     fpLand.push({ x0: W1(hx), fy: landFy, w: 12, h: 6, door: W1(door), side });
     for (let y = C.fy; y < landFy - 6; y++) for (let x = xs; x < xs + 4; x++) { const i = I(x, y); seal[i] = 0; if (y >= S0 + 1) { cv[i] = 1; keep[i] = 1; } }
     fpEntries.push({ x: xs + 1, x0: xs, fy: C.fy, top: C.fy - 2, land: fpLand[fpLand.length - 1], C });
-    fpChambers.push({ cx: hx + 6, cy: landFy - 3, w: 12, h: 6, band: 0, kind: 'pouso', fy: landFy, x0: W1(hx) });
+    fpChambers.push({ cx: hx + 6, cy: landFy - 3, w: 12, h: 6, band: 0, lv: 0, kind: 'pouso', fy: landFy, x0: W1(hx) });
   }
   const awayFromEntries = (cx, m) => fpEntries.every(E => Math.abs(wdx(E.x0 - cx)) > m);
 
   // ---------- 2b. a clareira do Cervo: 120 x 24 na Clareira dos Gigantes, do outro lado do mundo em relação às entradas ----------
   {
     const w = 120, h = 24, ax = fpEntries.length ? fpEntries.reduce((s, e) => s + wdx(e.x0 - fpEntries[0].x0), 0) / fpEntries.length + fpEntries[0].x0 : SPX;
-    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 40)), fy = Math.min(YB - 6, S0 + mb(178)), top = fy - h, x0 = cx - (w >> 1);
+    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 40)), fy = Math.min(YB - 6, lvY(3, LAYER_K - 1, 178)), top = fy - h, x0 = cx - (w >> 1);
     for (let y = top - 3; y <= fy + 9; y++) for (let x = x0 - 3; x <= x0 + w + 2; x++) seal[I(x, y)] = 1;
     for (let y = top; y < fy; y++) for (let x = x0; x < x0 + w; x++) { const i = I(x, y); cv[i] = 1; keep[i] = 1; }
     // as entradas nas duas pontas (4 de altura), um corredor curto para fora
@@ -131,7 +135,7 @@ function fpBuild() {
       for (let k = 0; k < 3; k++) for (let y = fy - 4; y < fy; y++) { const i = I(xe + s * k, y); seal[i] = 0; cv[i] = 1; keep[i] = 1; }
       const xa = s < 0 ? x0 - 3 - len : x0 + w + 3;
       for (let x = xa; x < xa + len; x++) { for (let y = fy - 4; y < fy; y++) dig(x, y); hard(x, fy); }
-      fpChambers.push({ cx: xa + len / 2, cy: fy - 2, w: len, h: 4, band: 3, kind: 'boca', fy, x0: W1(xa) });
+      fpChambers.push({ cx: xa + len / 2, cy: fy - 2, w: len, h: 4, band: 3, lv: 4 * LAYER_K - 1, kind: 'boca', fy, x0: W1(xa) });
     }
     // sete troncos gigantes de 4, a cada 14 a 16; a fenda de 10 no meio (o 146 põe os espinhos e o tronco caído)
     const T7 = [], rift = { x0: W1(x0 + (w >> 1) - 5), w: 10, depth: 6 };
@@ -145,10 +149,10 @@ function fpBuild() {
 
   // ---------- 2c. as duas escadarias dos anões: no chão da Clareira, longe do Cervo e uma da outra ----------
   for (let tries = 0; fpExits.length < 2 && tries < 600; tries++) {
-    const w = 14, cx = (R() * WW) | 0, fy = S0 + mb(176) + ((R() * mb(6)) | 0);
+    const w = 14, cx = (R() * WW) | 0, fy = Math.min(YB - 6, lvY(3, LAYER_K - 1, 176) + ((R() * 6) | 0));
     if (Math.abs(wdx(cx - fpBoss.cx)) < fpBoss.w / 2 + (tries < 400 ? 120 : 60) || fpExits.some(c => Math.abs(wdx(c.cx - cx)) < (tries < 400 ? 200 : 80)) || busy(cx, fy - 4, w, 8, 6)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, 8, 1);
-    const C = { cx, cy: fy - 4, w, h: 8, band: 3, kind: 'escadaria', fy, x0: W1(x0), x1: W1(x0 + w - 1), top: fy - 8 };
+    const C = { cx, cy: fy - 4, w, h: 8, band: 3, lv: 4 * LAYER_K - 1, kind: 'escadaria', fy, x0: W1(x0), x1: W1(x0 + w - 1), top: fy - 8 };
     fpExits.push(C); fpChambers.push(C);
   }
   // o acampamento anão abandonado: 16 x 7 perto de uma escadaria
@@ -159,53 +163,53 @@ function fpBuild() {
       if (busy(x0 + 8, fy - 3, 16, 7, 2)) continue;
       room(x0, fy, 16, 7, 1);
       fpCamp = { x0, w: 16, fy, cx: x0 + 8 };
-      fpChambers.push({ cx: x0 + 8, cy: fy - 3, w: 16, h: 7, band: 3, kind: 'acampamento', fy, x0 });
+      fpChambers.push({ cx: x0 + 8, cy: fy - 3, w: 16, h: 7, band: 3, lv: 4 * LAYER_K - 1, kind: 'acampamento', fy, x0 });
     }
   }
 
   // ---------- 2d. o Bosque Soterrado: grutas de terra baixas e compridas, presas entre troncos deitados ----------
-  for (let k = 0, tries = 0; k < 8 * WSC && tries < 800; tries++) {
-    const w = 12 + ((R() * 15) | 0), h = 6 + ((R() * 5) | 0), cx = (R() * WW) | 0, fy = S0 + mb(12) + ((R() * mb(32)) | 0);
+  for (let k = 0, tries = 0; k < 8 * WSC * LAYER_K && tries < 800 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 12 + ((R() * 15) | 0), h = 6 + ((R() * 5) | 0), cx = (R() * WW) | 0, fy = lvY(0, s, 12) + ((R() * 32) | 0);
     if (fy - h < S0 + 3 || busy(cx, fy - h / 2, w, h, 4)) continue;
     blob(cx, fy - h / 2, w, h, 0x7e00 + k, 1.9);
-    const C = { cx, cy: fy - h / 2, w, h, band: 0, kind: 'gruta', fy, x0: W1(cx - (w >> 1)) };
+    const C = { cx, cy: fy - h / 2, w, h, band: 0, lv: s, kind: 'gruta', fy, x0: W1(cx - (w >> 1)) };
     fpChambers.push(C); k++;
     if (R() < 0.6) trunks.push([C.x0 + ((R() * (w - 6)) | 0), 2, fy - h - 2, fy + 1, (R() < 0.5 ? -1 : 1) * (1.4 + R() * 1.2)]);   // um tronco deitado atravessando
   }
   // ---------- 2e. a Mata de Cristal: clareiras ocas com troncos do chão ao teto e andares de folhagem ----------
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 600; tries++) {
-    const w = 30 + ((R() * 21) | 0), h = 16 + ((R() * 11) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(70) + ((R() * mb(24)) | 0);
-    if (fy - h < S0 + FP_BANDS[1] - 2 || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
+  for (let k = 0, tries = 0; k < 5 * WSC * LAYER_K && tries < 600 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 30 + ((R() * 21) | 0), h = 16 + ((R() * 11) | 0), x0 = (R() * WW) | 0, fy = lvY(1, s, 70) + ((R() * 24) | 0);
+    if (fy - h < lvY(1, s, FPB[1]) - 2 || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
     room(x0, fy, w, h, 4);
-    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, kind: 'clareira', fy, x0: W1(x0), top: fy - h, trunks: [] };
+    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, lv: LAYER_K + s, kind: 'clareira', fy, x0: W1(x0), top: fy - h, trunks: [] };
     const n = 2 + ((R() * 3) | 0);
     for (let j = 0; j < n; j++) { const tx = x0 + Math.round((j + 0.5) * w / n + (R() - 0.5) * 4) - 1, tw = 2 + ((R() * 2) | 0); C.trunks.push([tx, tw]); trunks.push([tx, tw, fy - h - 3, fy, 0]); }
     fpClearings.push(C); fpChambers.push(C); k++;
   }
   // ---------- 2f. as Raízes Profundas: redes de raiz e raízes ocas ----------
-  for (let k = 0, tries = 0; k < 7 * WSC && tries < 700; tries++) {
-    const w = 14 + ((R() * 11) | 0), h = 10 + ((R() * 7) | 0), cx = (R() * WW) | 0, fy = S0 + mb(110) + ((R() * mb(34)) | 0);
-    if (fy - h < S0 + FP_BANDS[2] || busy(cx, fy - h / 2, w, h, 4)) continue;
+  for (let k = 0, tries = 0; k < 7 * WSC * LAYER_K && tries < 700 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 14 + ((R() * 11) | 0), h = 10 + ((R() * 7) | 0), cx = (R() * WW) | 0, fy = lvY(2, s, 110) + ((R() * 34) | 0);
+    if (fy - h < lvY(2, s, FPB[2]) || busy(cx, fy - h / 2, w, h, 4)) continue;
     blob(cx, fy - h / 2, w, h, 0x7f00 + k, 1.3);
-    const C = { cx, cy: fy - h / 2, w, h, band: 2, kind: 'rede', fy, x0: W1(cx - (w >> 1)), top: fy - h };
+    const C = { cx, cy: fy - h / 2, w, h, band: 2, lv: 2 * LAYER_K + s, kind: 'rede', fy, x0: W1(cx - (w >> 1)), top: fy - h };
     fpNets.push(C); fpChambers.push(C); k++;
   }
   const hollow = [];   // as raízes ocas: [pontos], escritas depois
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 200; tries++) {
-    let x = (R() * WW) | 0, y = S0 + mb(104) + ((R() * mb(40)) | 0);
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 200 * LAYER_K; tries++) {
+    const lv = k % LAYER_K; let x = (R() * WW) | 0, y = lvY(2, lv, 104) + ((R() * 40) | 0);
     if (busy(x, y, 8, 8, 2)) continue;
     const pts = [], len = 30 + ((R() * 31) | 0); let a = R() < 0.5 ? 0 : Math.PI;
-    for (let s = 0; s < len; s++) { a += (R() - 0.5) * 0.5; a = clamp(a, -0.5, 0.5) + (Math.cos(a) < 0 ? Math.PI : 0); x += Math.cos(a); y = clamp(y + Math.sin(a) * 0.5, S0 + FP_BANDS[2] + 3, S0 + mb(148)); pts.push([Math.round(x), Math.round(y)]); }
+    for (let s = 0; s < len; s++) { a += (R() - 0.5) * 0.5; a = clamp(a, -0.5, 0.5) + (Math.cos(a) < 0 ? Math.PI : 0); x += Math.cos(a); y = clamp(y + Math.sin(a) * 0.5, lvY(2, lv, FPB[2]) + 3, lvY(2, lv, 148)); pts.push([Math.round(x), Math.round(y)]); }
     for (const [px, py] of pts) for (let dy = -1; dy <= 1; dy++) for (let dx = 0; dx <= 1; dx++) dig(px + dx, py + dy);
     hollow.push(pts);
-    fpChambers.push({ cx: pts[pts.length >> 1][0], cy: pts[pts.length >> 1][1], w: 8, h: 4, band: 2, kind: 'oca', pts, fy: pts[0][1] + 2 }); k++;
+    fpChambers.push({ cx: pts[pts.length >> 1][0], cy: pts[pts.length >> 1][1], w: 8, h: 4, band: 2, lv: 2 * LAYER_K + lv, kind: 'oca', pts, fy: pts[0][1] + 2 }); k++;
   }
   // ---------- 2g. a Clareira dos Gigantes: salões de troncos de 4 a 6 ----------
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 500; tries++) {
-    const w = 40 + ((R() * 21) | 0), h = 20 + ((R() * 9) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(170) + ((R() * mb(10)) | 0);
-    if (fy - h < S0 + FP_BANDS[3] - 4 || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 500 * LAYER_K; tries++) {
+    const s = k % LAYER_K, w = 40 + ((R() * 21) | 0), h = 20 + ((R() * 9) | 0), x0 = (R() * WW) | 0, fy = Math.min(YB - 6, lvY(3, s, 170) + ((R() * 10) | 0));
+    if (fy - h < lvY(3, s, FPB[3]) - 4 || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
     room(x0, fy, w, h, 5);
-    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, kind: 'gigantes', fy, x0: W1(x0), top: fy - h };
+    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, lv: 3 * LAYER_K + s, kind: 'gigantes', fy, x0: W1(x0), top: fy - h };
     for (let x = x0 + 6; x < x0 + w - 8; x += 12 + ((R() * 6) | 0)) trunks.push([x, 4 + ((R() * 3) | 0), fy - h - 4, fy, 0]);
     fpHalls.push(C); fpChambers.push(C); k++;
   }
@@ -223,15 +227,24 @@ function fpBuild() {
   const mouth = C => C.fy ? C.fy - 2 : C.cy + C.h * 0.2;
   const ends = (C, right) => right ? C.cx + C.w / 2 - 1 : C.cx - C.w / 2 + 1;
   const RAD = [1.5, 1.7, 1.6, 1.8];
-  for (let b = 0; b < 4; b++) {
-    const L = fpChambers.filter(c => c.band === b && !c.nolink).sort((a, c) => a.cx - c.cx);
-    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x7700 + b * 50 + k); }
+  const NLV = 4 * LAYER_K;
+  for (let lv = 0; lv < NLV; lv++) {   // um anel em volta do mundo em cada andar
+    const b = (lv / LAYER_K) | 0, L = fpChambers.filter(c => c.lv === lv && !c.nolink).sort((a, c) => a.cx - c.cx);
+    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x7700 + lv * 50 + k); }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = fpChambers.filter(c => c.band === b && !c.nolink), D = fpChambers.filter(c => c.band === b + 1 && !c.nolink);
+  // de um andar ao de baixo: rampas (a sala de baixo afastada de lado ~1,8 vez o desnível), nunca um poço reto
+  for (let lv = 0; lv + 1 < NLV; lv++) {
+    const b = (lv / LAYER_K) | 0, b2 = ((lv + 1) / LAYER_K) | 0;
+    const U = fpChambers.filter(c => c.lv === lv && !c.nolink), D = fpChambers.filter(c => c.lv === lv + 1 && !c.nolink);
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
-      const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x77f0 + b * 9 + k);
+      const A = U[(R() * U.length) | 0], cost = c => { const dy = Math.abs(mouth(c) - mouth(A)), dx = Math.abs(wdx(c.cx - A.cx)) - (A.w + c.w) / 2 - 14; return Math.abs(dx - 1.8 * dy) + (dx < 1.2 * dy ? 400 : 0); };
+      const B = D.reduce((m, c) => cost(c) < cost(m) ? c : m);
+      // das pontas que se olham, na altura da boca: o chão das salas não se cava (hardc), então a rampa sai reta pela
+      // parede do lado, desce na rocha e entra reta na sala de baixo (nunca abre a parede alta de uma sala)
+      const r = wdx(B.cx - A.cx) > 0, sg = r ? 1 : -1, xa = ends(A, r), xb = ends(B, !r), rr = Math.max(RAD[b], RAD[b2]) + 0.2;
+      worm(xa, mouth(A), xa + sg * 7, mouth(A), rr, 0x77f0 + lv * 9 + k);
+      worm(xa + sg * 7, mouth(A), xb - sg * 7, mouth(B), rr, 0x78f0 + lv * 9 + k);
+      worm(xb - sg * 7, mouth(B), xb, mouth(B), rr, 0x79f0 + lv * 9 + k);
     }
   }
   // bolsinhas fechadas; ilhas soltas no ar
@@ -287,7 +300,9 @@ function fpBuild() {
       // cada coluna do tronco começa no seu próprio teto (a abóbada da sala não é reta)
       const tops = []; for (let j = 0; j < tw; j++) { let y = top; while (y < fy - 3 && at(x0 + j, y) !== AIR) y++; tops.push(y); }
       if (tops.some(y => y >= fy - 3) || tops.some((y, j) => fpKeep.has(I(x0 + j, y)))) continue;
-      for (let j = 0; j < tw; j++) for (let y = tops[j]; y < fy; y++) { const i = I(x0 + j, y); if (fpKeep.has(i)) continue; tiles[i] = j === 0 || j === tw - 1 ? FP_CASCA : FP_CERNE; walls[i] = walls[i] || WFP_CASCA; }
+      // de pé sobre as raízes: um arco de 3 debaixo de cada tronco (como os gigantes da clareira do Cervo), para a sala
+      // não virar uma fileira de baias fechadas
+      for (let j = 0; j < tw; j++) for (let y = tops[j]; y < fy - 3; y++) { const i = I(x0 + j, y); if (fpKeep.has(i)) continue; tiles[i] = j === 0 || j === tw - 1 ? FP_CASCA : FP_CERNE; walls[i] = walls[i] || WFP_CASCA; }
       fpTrunks.push({ x: W1(x0), w: tw, top: Math.min(...tops), fy });
     } else {   // deitado: de um teto ao chão, 2 de grossura, inclinado (de 20 a 35 graus: 1 bloco para baixo a cada 1,4 a 2,6)
       const dir = Math.sign(lean), run = Math.abs(lean), H = fy - top;
@@ -352,6 +367,8 @@ function fpBuild() {
       for (const x of [x0 - 2, x0 - 1, x0 + 4, x0 + 5]) { const i = I(x, y); if (y > E.fy) { if (y >= S0 - 2 || !SOLID[tiles[i]]) tiles[i] = FP_RAIZ; fpKeep.add(i); } }
     }
     for (let y = E.fy; y < L.fy; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = FP_RAIZ_ESCADA; fpKeep.add(i); } }
+    // patamares de raiz a cada 10 no poço (só a coluna da escada fica livre): quem cai não despenca o poço inteiro
+    for (let y = E.fy + 10; y <= bot - 6; y += 10) for (const x of [x0, x0 + 2, x0 + 3]) { const i = I(x, y); tiles[i] = FP_RAIZ; walls[i] = y < S0 ? WCD_TIJOLO : WFP_RAIZ; fpKeep.add(i); }
     for (let y = L.fy - L.h - 1; y <= L.fy; y++) for (let x = L.x0 - 1; x <= L.x0 + L.w; x++) {
       const i = I(x, y), inShaft = wdx(x - x0) >= 0 && wdx(x - x0) < 4 && y < L.fy, edge = y === L.fy - L.h - 1 || y === L.fy || x === L.x0 - 1 || x === L.x0 + L.w;
       if (inShaft) { if (tiles[i] !== FP_RAIZ_ESCADA) tiles[i] = AIR; walls[i] = WFP_RAIZ; }
@@ -374,11 +391,11 @@ function fpBuild() {
       }
     }
   };
-  vein(FP_O_CARVAO, 80 * WSC, 0, 150, 3, 8, t => t === FP_SOLO || t === FP_GRANITO);
-  vein(FP_O_PLATINA, 40 * WSC, 0, 98, 2, 4, t => t === FP_GRANITO || t === FP_RAIZ);
-  vein(FP_O_PLATINA, 70 * WSC, 98, 186, 3, 7, t => t === FP_GRANITO || t === FP_RAIZ);
+  vein(FP_O_CARVAO, 80 * WSC * LAYER_K, 0, 150, 3, 8, t => t === FP_SOLO || t === FP_GRANITO);
+  vein(FP_O_PLATINA, 40 * WSC * LAYER_K, 0, 98, 2, 4, t => t === FP_GRANITO || t === FP_RAIZ);
+  vein(FP_O_PLATINA, 70 * WSC * LAYER_K, 98, 186, 3, 7, t => t === FP_GRANITO || t === FP_RAIZ);
   // os geodos: bolhas de 3x3 a 5x5, casca de granito, miolo de cristal; 3 vezes mais na Mata
-  for (let k = 0; k < 90 * WSC; k++) {
+  for (let k = 0; k < 90 * WSC * LAYER_K; k++) {
     const inMata = k % 2 === 0, d = inMata ? FP_BANDS[1] + R4() * (FP_BANDS[2] - FP_BANDS[1]) : R4() * 186;
     if (!inMata && R4() < 0.33) continue;
     const s = 3 + ((R4() * 3) | 0), x0 = (R4() * WW) | 0, y0 = S0 + mb(d);
@@ -414,13 +431,18 @@ function fpAfter() {
   for (const E of fpEntries) { for (let y = E.fy - 1; y < E.land.fy; y++) for (let x = E.x0; x < E.x0 + 4; x++) flood(I(x, y)); for (let x = E.land.x0; x < E.land.x0 + E.land.w; x++) flood(I(x, E.land.fy - 1)); }
   if (!fpEntries.length) flood(I(fpChambers[0].cx, Math.round(fpChambers[0].cy)));
   if (fpBoss) for (let y = fpBoss.top; y < fpBoss.fy + 8; y++) for (let k = 0; k < fpBoss.w; k++) reach[I(fpBoss.x0 + k, y)] = 1;   // a clareira: o 146 cuida
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+  // o pedaço solto mais alto primeiro: tudo acima dele já está ligado, então a ligação sai curta (e a busca continua
+  // da linha onde parou)
+  const lab = new Uint16Array(NN);   // marcado com o número da passada (uma alocação só)
+  let yScan = S0;
+  let org = null;
+  for (let pass = 0; pass < 60 * WSC * LAYER_K; pass++) {
+    const P = pass + 1; let bestC = null;
+    for (let y = yScan; y < YB - 1 && !bestC; y++) for (let x = 0; x < WW; x++) {
+      const i = y * WW + x; if (reach[i] || lab[i] === P || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i] = P; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && lab[nb] !== P && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = P; stack.push(nb); } }
+      if (comp.length >= 20) { bestC = comp; yScan = y; break; }
     }
     if (!bestC) break;
     let best = null, bd = 1e9;
@@ -434,7 +456,8 @@ function fpAfter() {
     }
     if (best) { worm(best[0], best[1], best[2], best[3], 1.6, 0x76a0 + pass); flood(I(best[2], best[3]), true); }
     if (!reach[bestC[0]]) {   // longe demais, ou a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
+      if (!org) org = new Int32Array(NN).fill(-1);
+      const q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
       for (let h = 0; h < q.length && hit < 0; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -444,6 +467,7 @@ function fpAfter() {
         }
       }
       for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      for (const c of q) org[c] = -1; if (hit >= 0) org[hit] = -1;   // limpa só o que usou
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
@@ -595,10 +619,18 @@ function fpClimbFix() {
   const starts = [];
   if (fpBoss) for (const s of [-1, 1]) starts.push([s < 0 ? fpBoss.x0 - 8 : fpBoss.x0 + fpBoss.w + 8, fpBoss.fy - 1]);
   if (fpCamp) starts.push([fpCamp.x0 + 8, fpCamp.fy - 1]);
-  for (const c of fpChambers) if (c.kind === 'gigantes' || c.kind === 'escadaria' || c.kind === 'clareira') starts.push([Math.round(c.cx), c.fy - 1]);
+  // o chão livre mais perto do meio da sala (o meio pode ser um tronco)
+  const freeX = (cx, y) => { for (let d = 0; d < 12; d++) for (const x of [cx + d, cx - d]) if (ok(W1(x), y)) return x; return cx; };
+  for (const c of fpChambers) if (c.kind === 'gigantes' || c.kind === 'escadaria' || c.kind === 'clareira') starts.push([freeX(Math.round(c.cx), c.fy - 1), c.fy - 1]);
   for (const c of fpChambers) if (c.kind === 'oca') { const p = c.pts[c.pts.length - 1]; starts.push([p[0], p[1]]); }
-  let fixes = 0;
-  for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }
+  // duas voltas: um degrau posto para uma sala pode mudar o caminho já achado de outra (o atalho `good` da primeira volta)
+  let fixes = 0; const log = [];
+  for (let volta = 0; volta < 2; volta++) {
+    good.fill(0); let n0 = fixes;
+    for (const [x, y] of starts) { let n = 0; for (let k = 0; k < 12 * LAYER_K && !search(W1(x), y); k++) { if (!repair()) break; fixes++; n++; } if (n) log.push([W1(x), y - S0, n]); }
+    if (fixes === n0) break;
+  }
+  fpClimbFix.last = [starts.length, fixes, log, starts.map(([x, y]) => [W1(x), y - S0])];
   return fixes;
 }
 
@@ -685,9 +717,10 @@ function fpPlaceProps() {
 
 // a ordem: a camada, a clareira do chefe (146: fpDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('floresta', () => {
   if (!FLORESTA) return;
   try { fpBuild(); fpAfter(); if (typeof fpDress === 'function') fpDress(); fpExitClear(); fpClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da floresta ---------- */
@@ -695,10 +728,10 @@ function fpPlaceProps() {
   _cd();
   if (!FLORESTA) return;
   const Y1 = Math.min(WH, FP_S0 + FP_D + 4);
-  for (let y = FP_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(FP_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - FP_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 46 ? (n > 0.55 ? DP_FP_RAIZES : DP_FP_TRONCOS) : d < 98 ? (n > 0.45 ? DP_FP_COPAS : DP_FP_TRONCOS) : d < 150 ? (n > 0.4 ? DP_FP_RAIZES : DP_FP_TRONCOS) : (n > 0.6 ? DP_FP_COPAS : DP_FP_TRONCOS);
+    DEEPT[i] = d < FP_BANDS[1] ? (n > 0.55 ? DP_FP_RAIZES : DP_FP_TRONCOS) : d < FP_BANDS[2] ? (n > 0.45 ? DP_FP_COPAS : DP_FP_TRONCOS) : d < FP_BANDS[3] ? (n > 0.4 ? DP_FP_RAIZES : DP_FP_TRONCOS) : (n > 0.6 ? DP_FP_COPAS : DP_FP_TRONCOS);
   }
 }; }
 

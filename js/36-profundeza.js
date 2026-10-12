@@ -19,19 +19,53 @@ const DP_ANTIGA = 1, DP_ARDOSIA = 2, DP_BASALTO = 3, DP_FOSSIL = 4, DP_CRISTAL =
 const DEEP_NAMES = ['', 'Rocha antiga', 'Ardósia funda', 'Basalto', 'Pedra fóssil', 'Veio de cristal apagado'];
 
 // value noise that repeats around the world (period = WW tiles)
+// the lattice values are kept per (cells, seed) and lattice row, filled as they are first read (2026-10-12: the
+// world got 3x taller and this was the slowest thing in generation); the cache is emptied around each generate
+// the lattice rows of each (cells, seed), found through a small open hash table (a Map with number keys was most of the cost)
+const NZH = 4096, NZH_C = new Float64Array(NZH), NZH_S = new Int32Array(NZH), NZH_R = new Array(NZH); let nzhN = 0;
+function nzClear() { NZH_C.fill(0); NZH_R.fill(undefined); nzhN = 0; }
+function nzRows(cells, s) {
+  s |= 0; let h = Math.imul(s ^ Math.imul(cells | 0, 0x45d9f3b), 0x9e3779b1) >>> 20;
+  for (;;) {
+    const c = NZH_C[h];
+    if (c === cells && NZH_S[h] === s) return NZH_R[h];
+    if (c === 0) { if (++nzhN > NZH * 0.7) { nzClear(); return nzRows(cells, s); } NZH_C[h] = cells; NZH_S[h] = s; return NZH_R[h] = []; }
+    h = (h + 1) & (NZH - 1);
+  }
+}
+function nzRow(rows, j, cells, s) { let r = rows[j]; if (!r) { r = rows[j] = new Float64Array(cells); for (let a = 0; a < cells; a++) r[a] = hash2(a, j, s); } return r; }
 function depthNz(x, y, cells, s) {
   cells *= WSC;   // same feature size whatever the world width
   const f = x / WW * cells, ix = Math.floor(f), ux = sm3(f - ix), g = y / (WW / cells), iy = Math.floor(g), uy = sm3(g - iy);
-  const w = (a, b) => hash2(((a % cells) + cells) % cells, b, s);
-  const A = w(ix, iy), B = w(ix + 1, iy), C = w(ix, iy + 1), D = w(ix + 1, iy + 1);
+  const a0 = ((ix % cells) + cells) % cells, a1 = a0 + 1 === cells ? 0 : a0 + 1;
+  let A, B, C, D;
+  if (iy >= 0) { const rows = nzRows(cells, s), r0 = nzRow(rows, iy, cells, s), r1 = nzRow(rows, iy + 1, cells, s); A = r0[a0]; B = r0[a1]; C = r1[a0]; D = r1[a1]; }
+  else { A = hash2(a0, iy, s); B = hash2(a1, iy, s); C = iy + 1 >= 0 ? nzRow(nzRows(cells, s), iy + 1, cells, s)[a0] : hash2(a0, iy + 1, s); D = iy + 1 >= 0 ? nzRow(nzRows(cells, s), iy + 1, cells, s)[a1] : hash2(a1, iy + 1, s); }
   return A + (B - A) * ux + (C - A) * uy + (A - B - C + D) * ux * uy;
 }
+// the same noise for a whole row (x = 0..WW-1) into out: what buildDepth needs for every tile, without the per call cost
+function depthNzRow(y, cells, s, out) {
+  cells *= WSC;
+  const g = y / (WW / cells), iy = Math.floor(g), uy = sm3(g - iy), rows = nzRows(cells, s), r0 = nzRow(rows, iy, cells, s), r1 = nzRow(rows, iy + 1, cells, s);
+  for (let x = 0; x < WW; x++) {
+    const f = x / WW * cells, ix = Math.floor(f), ux = sm3(f - ix), a0 = ix % cells, a1 = a0 + 1 === cells ? 0 : a0 + 1;
+    const A = r0[a0], B = r0[a1], C = r1[a0], D = r1[a1];
+    out[x] = A + (B - A) * ux + (C - A) * uy + (A - B - C + D) * ux * uy;
+  }
+  return out;
+}
+{ const _g = generate; generate = function (sd) { nzClear(); try { return _g.apply(this, arguments); } finally { nzClear(); } }; }
 
-function buildDepth() {
-  const NN = WW * WH; DF = new Float32Array(NN).fill(-1); FAR = new Uint8Array(NN); DEEPT = new Uint8Array(NN); depthCache.clear(); deepCache.clear();
+// yA: only from this row down (a layer generated later, js/312); the rows above stay as they are
+function buildDepth(yA = 0, yB = WH) {   // yB: down to this row (the rows below are not generated yet)
+  const NN = WW * WH;
+  if (!yA || !DF || DF.length !== NN) { yA = 0; DF = new Float32Array(NN).fill(-1); FAR = new Uint8Array(NN); DEEPT = new Uint8Array(NN); }
+  else { DF.fill(-1, yA * WW); FAR.fill(0, yA * WW); DEEPT.fill(0, yA * WW); }
+  depthCache.clear(); deepCache.clear();
   // how open the rock around each tile is (a wide window), so the big caverns open up and narrow tunnels stay walled
-  const RX = 6, RY = 4, air = new Uint16Array((WW + 1) * (WH + 1)), W1 = WW + 1;
-  for (let y = 0; y < WH; y++) { let run = 0; for (let x = 0; x < WW; x++) { const i = y * WW + x; run += !SOLID[tiles[i]] && walls[i] ? 1 : 0; air[(y + 1) * W1 + x + 1] = air[y * W1 + x + 1] + run; } }
+  // (summed from the first row the window can reach; 32 bits, a 16 bit sum wrapped around in the tall world)
+  const RX = 6, RY = 4, ys = Math.max(0, yA - RY - 1), air = new Int32Array((WW + 1) * (WH + 1)), W1 = WW + 1;
+  for (let y = ys, ye = Math.min(WH, yB + RY + 1); y < ye; y++) { let run = 0; for (let x = 0; x < WW; x++) { const i = y * WW + x; run += !SOLID[tiles[i]] && walls[i] ? 1 : 0; air[(y + 1) * W1 + x + 1] = air[y * W1 + x + 1] + run; } }
   const box = (x0, y0, x1, y1) => air[y1 * W1 + x1] - air[y0 * W1 + x1] - air[y1 * W1 + x0] + air[y0 * W1 + x0];
   const openAt = (x, y) => {
     const y0 = Math.max(0, y - RY), y1 = Math.min(WH, y + RY + 1); let n = 0;
@@ -41,19 +75,20 @@ function buildDepth() {
     else n = box(xa, y0, xb, y1);
     return n / ((xb - xa) * (y1 - y0));
   };
-  for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
+  const nA = new Float64Array(WW), nB = new Float64Array(WW);
+  for (let y = yA, ye = Math.min(WH - 8, yB); y < ye; y++) { depthNzRow(y, 25, seed ^ 0x6d31, nA); depthNzRow(y, 60, seed ^ 0x6d32, nB); for (let x = 0; x < WW; x++) {
     const i = y * WW + x, w = walls[i];
     if (!w || w === 4 || y < surf[x] + 13 || y > WH - 9) continue;
-    const n = depthNz(x, y, 25, seed ^ 0x6d31) * 0.65 + depthNz(x, y, 60, seed ^ 0x6d32) * 0.35;
+    const n = nA[x] * 0.65 + nB[x] * 0.35;
     const k = clamp((y - surf[x] - 13) / 10, 0, 1);       // the openings ease in below the surface
     DF[i] = (n * 0.62 + openAt(x, y) * 0.62 + clamp((y - Z1) / 400, -0.05, 0.08)) * k;
-  }
+  } }
   // tiles an opening (or its rim) can reach
-  for (let y = 1; y < WH - 1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(1, yA + 1), ye = Math.min(WH - 1, yB); y < ye; y++) for (let x = 0; x < WW; x++) {
     let m = -1; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const v = DF[(y + dy) * WW + wrapX(x + dx)]; if (v > m) m = v; }
     if (m > DEPTH_THR - 0.09) FAR[y * WW + x] = 1;
   }
-  buildDeepTiles();
+  buildDeepTiles(yA, yB);
 }
 
 // is the back wall open at this world pixel? bilinear openness between tile centres, plus a little grain on the edge
@@ -91,17 +126,22 @@ function depthTileCalc(gx, gy) {
 }
 
 /* ---------- the deep blocks: generated from the seed ---------- */
-function buildDeepTiles() {
+function buildDeepTiles(yA = 0, yB = WH) {
   const zb = (x, y, s) => (depthNz(x, y, 30, seed ^ s) - 0.5) * 10;
-  for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
-    const i = y * WW + x; if (y < surf[x] + 3) continue;
-    // hollows: a far cave system of its own, a little sparser than the near one
-    if (depthNz(x, y, 50, seed ^ 0x7e01) * 0.7 + depthNz(x, y, 100, seed ^ 0x7e02) * 0.3 > 0.66) continue;
-    let t = y < Z1 + 6 + zb(x, y, 0x7e03) ? DP_ANTIGA : y < Z2 + zb(x, y, 0x7e04) ? DP_ARDOSIA : DP_BASALTO;
-    const h = hash2(x, y, seed ^ 0x7e05);
-    if (t !== DP_BASALTO && h < 0.022) t = DP_FOSSIL;
-    else if (t !== DP_ANTIGA && depthNz(x, y, 75, seed ^ 0x7e06) > 0.8 && h < 0.5) t = DP_CRISTAL;
-    DEEPT[i] = t;
+  const nA = new Float64Array(WW), nB = new Float64Array(WW), nC = new Float64Array(WW);
+  for (let y = yA, ye = Math.min(WH, yB); y < ye; y++) {
+    // row by row (same values as depthNz per tile); the band edges (zb) only matter near Z1/Z2, so they stay per tile
+    depthNzRow(y, 50, seed ^ 0x7e01, nA); depthNzRow(y, 100, seed ^ 0x7e02, nB); depthNzRow(y, 75, seed ^ 0x7e06, nC);
+    for (let x = 0; x < WW; x++) {
+      const i = y * WW + x; if (y < surf[x] + 3) continue;
+      // hollows: a far cave system of its own, a little sparser than the near one
+      if (nA[x] * 0.7 + nB[x] * 0.3 > 0.66) continue;
+      let t = y < Z1 + 6 - 5 ? DP_ANTIGA : y < Z1 + 6 + 5 && y < Z1 + 6 + zb(x, y, 0x7e03) ? DP_ANTIGA : y < Z2 - 5 ? DP_ARDOSIA : y < Z2 + 5 && y < Z2 + zb(x, y, 0x7e04) ? DP_ARDOSIA : DP_BASALTO;
+      const h = hash2(x, y, seed ^ 0x7e05);
+      if (t !== DP_BASALTO && h < 0.022) t = DP_FOSSIL;
+      else if (t !== DP_ANTIGA && nC[x] > 0.8 && h < 0.5) t = DP_CRISTAL;
+      DEEPT[i] = t;
+    }
   }
 }
 

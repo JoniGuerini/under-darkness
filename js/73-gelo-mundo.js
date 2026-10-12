@@ -24,10 +24,10 @@ for (const t of [CT_CALCARIO, CT_CALC_TERRA, COAL, COPPER, IRON, GOLD, CRYSTAL, 
 
 function icBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  IC_S0 = CB_S0 + Math.round(186 * CB_F);
+  IC_S0 = CB_S0 + Math.round(LAYER_D * CB_F);
   const S0 = IC_S0, YB = Math.min(WH - 8, S0 + IC_D), DB = YB - S0;   // the ice: rows S0..YB-1 (squeezed if the world is short)
   const R = mulberry32(seed ^ 0x1ce5), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / IC_D);   // metres of the design -> rows of this world
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);   // metres of the design -> rows of this world
   const db = (x, y) => (y - S0) * IC_D / DB + (nz(x, y, 30, 0x1b1) - 0.5) * 10;   // band depth in metres, its borders wobble
   const bandOf = d => d < IC_BANDS[1] ? 0 : d < IC_BANDS[2] ? 1 : d < IC_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
@@ -41,24 +41,30 @@ function icBuild() {
       if ((tiles[i] === CT_CALCARIO || tiles[i] === CT_CALC_TERRA) && h < k * 0.9) tiles[i] = IC_CALC_GELO;
       if (walls[i] === WCT_CALCARIO && h < k * 0.7) walls[i] = WIC_CALC;
     }
+    const yBed = WH - 3 - ((hash2(x, 0, seed) * 2) | 0);   // the bedrock row only depends on the column
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
-      if (y >= WH - 3 - ((hash2(x, 0, seed) * 2) | 0)) { tiles[i] = BEDROCK; walls[i] = 3; continue; }
+      if (y >= yBed) { tiles[i] = BEDROCK; walls[i] = 3; continue; }
       if (!IC_HOST[tiles[i]] && y < S0 + 3) continue;   // something of the cathedral reaches down here: leave it
-      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x1a1), n2 = nz(x, y, 18, 0x1a2), n3 = nz(x, y, 50, 0x1a3);
+      // under the layer (8 rows of margin) the mine writes over every tile (they are all MN_HOST) without reading them:
+      // plain black ice there, no noise (the wall is the deepest band's anyway)
+      if (y >= YB + 8) { tiles[i] = IC_GELO_NEGRO; walls[i] = WIC_NEGRO; continue; }
+      // n2 and n3 only where a branch reads them
+      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x1a1), n2 = () => nz(x, y, 18, 0x1a2), n3 = () => nz(x, y, 50, 0x1a3);
       let t, w;
       if (b === 0) {
-        const k = clamp(d / 30, 0, 1);
-        t = n1 > 0.25 + k * 0.6 ? IC_CALC_GELO : n2 > 0.7 ? IC_GELO : n3 > 0.55 ? IC_ROCHA : IC_PERMA;
+        const k = clamp(d / mb(30), 0, 1);
+        t = n1 > 0.25 + k * 0.6 ? IC_CALC_GELO : n2() > 0.7 ? IC_GELO : n3() > 0.55 ? IC_ROCHA : IC_PERMA;
         w = t === IC_CALC_GELO ? WIC_CALC : WIC_ROCHA;
       } else if (b === 1) {
-        t = n1 > 0.7 ? IC_ROCHA : n2 > 0.68 ? IC_GELO : IC_GELO_AZUL;
+        t = n1 > 0.7 ? IC_ROCHA : n2() > 0.68 ? IC_GELO : IC_GELO_AZUL;
         w = t === IC_ROCHA ? WIC_ROCHA : WIC_GELO;
       } else if (b === 2) {
-        t = n1 > 0.62 ? IC_ROCHA : n2 > 0.6 ? IC_NEVE_DURA : n3 > 0.7 ? IC_GELO : n2 < 0.25 ? IC_NEVE : IC_PERMA;
+        if (n1 > 0.62) t = IC_ROCHA;
+        else { const m2 = n2(); t = m2 > 0.6 ? IC_NEVE_DURA : n3() > 0.7 ? IC_GELO : m2 < 0.25 ? IC_NEVE : IC_PERMA; }
         w = t === IC_ROCHA || t === IC_PERMA ? WIC_ROCHA : WIC_NEVE;
       } else {
-        t = n1 > 0.72 ? IC_ROCHA : n2 > 0.8 ? IC_GELO_AZUL : IC_GELO_NEGRO;
+        t = n1 > 0.72 ? IC_ROCHA : n2() > 0.8 ? IC_GELO_AZUL : IC_GELO_NEGRO;
         w = WIC_NEGRO;
       }
       tiles[i] = t; walls[i] = w;
@@ -124,34 +130,50 @@ function icBuild() {
     icBoss = { x0: W1(x0), x1: W1(x0 + w - 1), w, h, top, fy, cx };
     icChambers.push({ cx, cy: fy - (h >> 1), w, h, band: 3, boss: true });
   }
-  // chambers per band: [count, wMin, wMax, hMin, hMax, top metre, bottom metre, kind]
+  // chambers per band: [count per level, wMin, wMax, hMin, hMax, top metre, bottom metre, kind] (metres of the 186 m design).
+  // Each band holds LAYER_K levels of chambers stacked, each as tall as the band used to be (2026-10-12: a longer biome, not a stretched one)
   const PLAN = [[12, 10, 18, 5, 8, 6, 42, 'gruta'], [7, 28, 55, 14, 24, 52, 100, 'salao'], [10, 14, 24, 8, 12, 110, 152, 'covil'], [7, 14, 26, 8, 12, 160, 182, 'gruta']];
+  const NT4 = 4 * LAYER_K, tierOf = (band, cy) => { const a = S0 + mb(PLAN[band][5]), span = (mb(PLAN[band][6]) - mb(PLAN[band][5])) / LAYER_K; return band * LAYER_K + clamp(Math.floor((cy - a) / span), 0, LAYER_K - 1); };
+  for (const c of icChambers) c.tier = tierOf(c.band, c.cy);   // the exits' grottos and the boss hall
   PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1, kind], band) => {
-    const n = n0 * WSC;
-    for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
-      const w = wa + ((R() * (wb - wa + 1)) | 0), h = Math.min(mb(hb), ha + ((R() * (hb - ha + 1)) | 0)), cx = (R() * WW) | 0, cy = S0 + mb(d0) + h / 2 + R() * Math.max(0, mb(d1 - d0) - h);
-      if (overlaps(cx, cy, w, h)) continue;
-      blob(cx, cy, w, h, 0x1900 + band * 40 + k, kind === 'salao' ? 2.2 : 1.7); icChambers.push({ cx, cy, w, h, band, kind }); k++;
+    const n = n0 * WSC, a = mb(d0), span = (mb(d1) - mb(d0)) / LAYER_K;
+    for (let lv = 0; lv < LAYER_K; lv++) {
+      const top = a + Math.round(span * lv), bot = a + Math.round(span * (lv + 1)), tier = band * LAYER_K + lv;
+      for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
+        const w = wa + ((R() * (wb - wa + 1)) | 0), h = ha + ((R() * (hb - ha + 1)) | 0), cx = (R() * WW) | 0, cy = S0 + top + h / 2 + R() * Math.max(0, bot - top - h);
+        if (overlaps(cx, cy, w, h)) continue;
+        blob(cx, cy, w, h, 0x1900 + tier * 40 + k, kind === 'salao' ? 2.2 : 1.7); icChambers.push({ cx, cy, w, h, band, kind, tier }); k++;
+      }
     }
   });
-  // the Fendas: tall narrow fissures, as if the ground had been split by the cold
-  for (let k = 0, tries = 0; k < 14 * WSC && tries < 200 * WSC; tries++) {
-    const x = (R() * WW) | 0, y0 = S0 + 3 + ((R() * mb(14)) | 0), hgt = mb(14) + ((R() * mb(12)) | 0), w = 4 + ((R() * 5) | 0);
+  // the Fendas: tall narrow fissures, as if the ground had been split by the cold; every few rows a lip of
+  // frozen stone sticks out of one wall or the other, so they are climbed down and not fallen down
+  const lips = [];
+  for (let k = 0, tries = 0; k < 14 * WSC * LAYER_K && tries < 200 * WSC * LAYER_K; tries++) {
+    const hgt = 14 + ((R() * 12) | 0), x = (R() * WW) | 0, y0 = S0 + 3 + ((R() * Math.max(1, mb(40) - hgt)) | 0), w = 4 + ((R() * 5) | 0);
     if (icChambers.some(c => Math.abs(wdx(c.cx - x)) < c.w / 2 + w && Math.abs(c.cy - (y0 + hgt / 2)) < c.h / 2 + hgt / 2)) continue;
-    for (let y = y0; y < y0 + hgt; y++) { const t = (y - y0) / hgt, half = w / 2 * Math.sin(Math.PI * (0.15 + t * 0.85)) + 0.6, cx = x + Math.sin(y * 0.2 + k) * 1.4 + t * 2; for (let xx = Math.floor(cx - half); xx <= cx + half; xx++) dig(xx, y); }
-    icChambers.push({ cx: x, cy: y0 + hgt / 2, w, h: hgt, band: 0, kind: 'fenda' }); k++;
+    for (let y = y0; y < y0 + hgt; y++) {
+      const t = (y - y0) / hgt, half = w / 2 * Math.sin(Math.PI * (0.15 + t * 0.85)) + 0.6, cx = x + Math.sin(y * 0.2 + k) * 1.4 + t * 2, xa = Math.floor(cx - half), xb = Math.floor(cx + half);
+      for (let xx = xa; xx <= xb; xx++) dig(xx, y);
+      const j = y - y0; if (j >= 5 && j < hgt - 3 && j % 6 === 5 && xb - xa >= 3) { const left = ((j / 6) | 0) % 2 === 0; for (let q = 0; q < 2; q++) lips.push(I(left ? xa + q : xb - q, y)); }
+    }
+    icChambers.push({ cx: x, cy: y0 + hgt / 2, w, h: hgt, band: 0, kind: 'fenda', tier: tierOf(0, y0 + hgt / 2) }); k++;
   }
-  // tunnels: along each band round the world (wide in the dens), and a few between bands
+  for (const i of lips) { cv[i] = 0; keep[i] = 0; }
+  // tunnels: along each level round the world (wide in the dens), and a few between levels; those slope down sideways
+  // (to a chamber at least as far across as it is down) so the way between levels is a ramp, not a well
   const RAD = [1.5, 1.9, 2.2, 1.7];
-  for (let b = 0; b < 4; b++) {
-    const L = icChambers.filter(c => c.band === b).sort((a, c) => a.cx - c.cx);
-    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(A.boss ? A.cx - A.w / 2 : A.cx, A.boss ? icBoss.fy - 2 : A.cy + A.h * 0.2, B.boss ? B.cx + B.w / 2 : B.cx, B.boss ? icBoss.fy - 2 : B.cy + B.h * 0.2, RAD[b], 0x1700 + b * 50 + k); }
+  for (let t = 0; t < NT4; t++) {
+    const L = icChambers.filter(c => c.tier === t).sort((a, c) => a.cx - c.cx), b = (t / LAYER_K) | 0;
+    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(A.boss ? A.cx - A.w / 2 : A.cx, A.boss ? icBoss.fy - 2 : A.cy + A.h * 0.2, B.boss ? B.cx + B.w / 2 : B.cx, B.boss ? icBoss.fy - 2 : B.cy + B.h * 0.2, RAD[b], 0x1700 + t * 50 + k); }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = icChambers.filter(c => c.band === b && !c.boss), D = icChambers.filter(c => c.band === b + 1 && !c.boss);
+  for (let t = 0; t < NT4 - 1; t++) {
+    const U = icChambers.filter(c => c.tier === t && !c.boss), D = icChambers.filter(c => c.tier === t + 1 && !c.boss), b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
-      const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, A.cy, B.cx, B.cy, Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x17f0 + b * 9 + k);
+      const A = U[(R() * U.length) | 0], ax = c => Math.abs(wdx(c.cx - A.cx));
+      let B = null; for (const c of D) if (ax(c) >= Math.abs(c.cy - A.cy) * 0.9 && (!B || ax(c) < ax(B))) B = c;
+      if (!B) B = D.reduce((m, c) => ax(c) < ax(m) ? c : m);
+      worm(A.cx, A.cy, B.cx, B.cy, Math.max(RAD[b], RAD[b2]) + 0.2, 0x17f0 + t * 9 + k);
     }
   }
   // tiny pockets the automaton left get filled; little islands of ice floating in the air are cleared
@@ -171,6 +193,8 @@ function icBuild() {
       if (open && comp.length < 24) for (const c of comp) cv[c] = 1;
     }
   }
+  // shelves of rock across the tall open wells, so a hall or a crossing of tunnels is not a cliff (not in the boss hall)
+  caveShelves(cv, S0 + 4, YB - 3, seed ^ 0x1e1f, (x, y) => Math.abs(wdx(x - icBoss.cx)) <= (icBoss.w >> 1) + 3 && y >= icBoss.top - 6 && y <= icBoss.fy);
   for (let i = S0 * WW; i < YB * WW; i++) if (cv[i]) tiles[i] = AIR;
 
   // ---------- 3. the fissures down from the crypts: the floor broken open, ledges of frozen stone to climb back ----------
@@ -204,7 +228,7 @@ function icBuild() {
     }
   };
   const rocky = t => t === IC_ROCHA || t === IC_PERMA || t === IC_CALC_GELO || t === IC_NEVE_DURA, blackish = t => t === IC_GELO_NEGRO || t === IC_ROCHA;
-  vein(IC_O_CARVAO, 90 * WSC, 0, 186, 3, 7, rocky); vein(IC_O_OURO, 100 * WSC, 0, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO);   // coal and gold in the ice (102)
+  vein(IC_O_CARVAO, 90 * WSC * LAYER_K, 0, 186, 3, 7, rocky); vein(IC_O_OURO, 100 * WSC * LAYER_K, 0, 186, 2, 5, t => rocky(t) || t === IC_GELO_NEGRO);   // coal and gold in the ice (102)
 }
 
 /* the props of the crypt rooms that lost their footing when the floor broke open: dropped */
@@ -218,7 +242,7 @@ function icPruneProps() {
 function icAfter() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = IC_S0, YB = Math.min(WH - 8, S0 + IC_D), DB = YB - S0, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R3 = mulberry32(seed ^ 0x1d3c1);
-  const mb = m => Math.round(m * DB / IC_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const iceRow = y => y >= S0 && y < YB - 1;
   const dig = (x, y) => { if (!iceRow(y)) return; const i = I(x, y); if (icLedge.has(i)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WIC_ROCHA; };
   const worm = (xa, ya, xb, yb, r, s) => {
@@ -236,15 +260,18 @@ function icAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = s0 => { if (reach[s0] || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= S0 * WW - 40 * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of icExits) flood(I(E.x0 + 3, E.fy - 2));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
-    }
-    if (!bestC) break;
+  // the pockets still cut off, labelled once, biggest first (a tunnel may join several: the flood tells)
+  const lab = new Uint8Array(NN), comps = [];
+  for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
+    const comp = []; lab[i] = 1; stack.push(i);
+    while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
+    if (comp.length >= 20) comps.push(comp);
+  }
+  comps.sort((a, b) => b.length - a.length);
+  for (let q = 0, pass = 0; q < comps.length && pass < 60 * WSC * LAYER_K; q++) {
+    const bestC = comps[q]; if (reach[bestC[0]]) continue;
+    pass++;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -381,16 +408,19 @@ function icPlaceProps() {
   }
 }
 
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (GELO) { icBuild(); icAfter(); } }; }
+{ const _bc = buildCathedral; buildCathedral = function () { _bc(); genStage('gelo', () => { if (GELO) { icBuild(); icAfter(); } }); }; }
 
 /* ---------- the far layer behind the ice ---------- */
 { const _cd = cathedralDeep; cathedralDeep = function () {
   _cd();
   if (!GELO) return;
-  for (let y = IC_S0 - 4; y < WH; y++) for (let x = 0; x < WW; x++) {
+  // down to 4 rows under the ice, like the other layers: the mine's pass (after this one) rewrites every deep block from
+  // MN_S0 - 4 down, and all these values are nonzero, so what this one wrote further down never showed
+  const Y1 = typeof MINA !== 'undefined' && MINA ? Math.min(WH, IC_S0 + IC_D + 4) : WH;
+  for (let y = Math.max(IC_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - IC_S0) + (depthNz(x, y, 25, seed ^ 0x1e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x1e12);
-    DEEPT[i] = d < 46 ? DP_IC_ROCHA : d < 104 ? (n > 0.55 ? DP_IC_SINCELOS : DP_IC_GELO) : d < 156 ? (n > 0.7 ? DP_IC_GELO : DP_IC_ROCHA) : DP_IC_NEGRO;
+    DEEPT[i] = d < IC_BANDS[1] ? DP_IC_ROCHA : d < IC_BANDS[2] ? (n > 0.55 ? DP_IC_SINCELOS : DP_IC_GELO) : d < IC_BANDS[3] ? (n > 0.7 ? DP_IC_GELO : DP_IC_ROCHA) : DP_IC_NEGRO;
   }
 }; }
 

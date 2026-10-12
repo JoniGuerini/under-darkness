@@ -7,8 +7,14 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.34.5';
+const VERSAO = '0.35.0';
 const NOVIDADES = [
+  { v: '0.35.0', data: '12/10/2026', titulo: 'Mundo mais fundo', itens: [
+    'Cada camada ficou três vezes mais alta: tem muito mais para explorar até o fundo do mundo.',
+    'Menos penhascos e quedas longas, e carvão e metal aparecem mais perto das bordas das cavernas.',
+    'O jogo novo abre bem mais rápido: as camadas de baixo são geradas aos poucos, quando você chega perto delas.',
+    'Mundos de antes são refeitos; nível, itens, ouro e o baú da vila continuam.'
+  ] },
   { v: '0.34.5', data: '12/10/2026', titulo: 'Desempenho', itens: [
     'Ataques em área sobre muitos monstros resfriados, congelados ou parados no tempo não travam mais o jogo: o tom de gelo e de sépia é pintado uma vez e reaproveitado.'
   ] },

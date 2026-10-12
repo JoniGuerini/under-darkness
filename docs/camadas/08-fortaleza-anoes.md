@@ -1,6 +1,8 @@
 # A Fortaleza dos Anões: ficha de implementação
 
-A oitava camada, debaixo da Floresta Petrificada, de 1302 a 1488 m. É Brasafunda, a fortaleza do clã de anões que ensinou a forja à superfície: salões de pedra e bronze, canais de lava em linha reta e forjas de runas que ainda funcionam sozinhas. Os anões não morreram lutando aqui dentro: foram expulsos por algo que subiu de baixo, e só ficaram as máquinas e os fantasmas.
+> **2026-10-12:** a camada tem 558 m, de 3906 a 4464 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A oitava camada, debaixo da Floresta Petrificada, de 3906 a 4464 m. É Brasafunda, a fortaleza do clã de anões que ensinou a forja à superfície: salões de pedra e bronze, canais de lava em linha reta e forjas de runas que ainda funcionam sozinhas. Os anões não morreram lutando aqui dentro: foram expulsos por algo que subiu de baixo, e só ficaram as máquinas e os fantasmas.
 
 **O que a diferencia:** aqui o fogo é domado. A lava corre em canais retos de pedra, coberta por grades, e serve para trabalhar; no Abismo o fogo é caos e carne, e no Covil do Dragão é vulcão vivo. É a camada mais construída e mais ordenada do jogo depois da Catedral, mas é uma oficina, não um templo.
 
@@ -18,8 +20,8 @@ A oitava camada, debaixo da Floresta Petrificada, de 1302 a 1488 m. É Brasafund
 
 ## 2. Lugar no mundo
 
-- **Profundidade:** 1302 a 1488 m. Zonas 37 a 40. Nome no código `ANOES`, prefixo `AN_`.
-- **Nível dos monstros:** 17 na metade de cima da camada e 18 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 18, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 19.
+- **Profundidade:** 3906 a 4464 m. Zonas 37 a 40. Nome no código `ANOES`, prefixo `AN_`.
+- **Nível dos monstros:** 17 na metade de cima da camada e 18 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 18, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 19.
 
 | Zona | Faixa | Metros | Massa | Caráter |
 |---|---|---|---|---|
@@ -36,7 +38,7 @@ A oitava camada, debaixo da Floresta Petrificada, de 1302 a 1488 m. É Brasafund
 
 ## 3. Estrutura e geração (`js/155-anoes-mundo.js`)
 
-`AN_D = 186`, topo dado pelo `LAYERS`. Gerado em pedaços, na ordem de `regras-de-bioma.md`. A fortaleza é **construída**: salas retangulares em grade, alinhadas em andares, ao contrário da Floresta.
+`AN_D = LAYER_D` (558), topo dado pelo `LAYERS`. Gerado em pedaços, na ordem de `regras-de-bioma.md`. A fortaleza é **construída**: salas retangulares em grade, alinhadas em andares, ao contrário da Floresta.
 
 1. **Rocha por faixa.** Granito anão em tudo, com bolsões de rocha natural. Nas primeiras 8 linhas o granito verde da Floresta afina por ruído.
 2. **A planta da fortaleza:** cada faixa tem 2 ou 3 **andares** fixos (linhas de piso a cada 14 a 18 blocos), e as salas se alinham neles, como a mina faz com as galerias.
@@ -265,7 +267,7 @@ Os autômatos são de bronze com runas azuis; os fantasmas, na rampa da runa com
 
 | Arquivo | O que tem |
 |---|---|
-| `js/150-anoes-api.js` | ids, `AN_BANDS`, `AN_D = 186`, `AN_ZONE0`, `dwarfBand`, `anExits`, `anBoss`, entrada no `LAYERS`. `ANOES = false` desliga a camada. |
+| `js/150-anoes-api.js` | ids, `AN_BANDS`, `AN_D = LAYER_D` (558), `AN_ZONE0`, `dwarfBand`, `anExits`, `anBoss`, entrada no `LAYERS`. `ANOES = false` desliga a camada. |
 | `js/151-anoes-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, grade translúcida na luz, escada e corrente escaláveis |
 | `js/152-anoes-objetos.js` | 28 objetos e `AN_PROP_PLAN` |
 | `js/153-anoes-automatos.js` | soldado, engrenagens, fornalha, runa viva, coruja, bomba de lava |

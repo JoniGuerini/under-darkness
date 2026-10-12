@@ -22,8 +22,9 @@ function cvBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = surf[SPX], YB = S0 + CAVE_D; CV_S0 = S0;
   const R = mulberry32(seed ^ 0xca7e5), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
+  const mb = m => Math.round(m * CAVE_D / LAYER_DESIGN);   // metres of the 186 m design -> rows of this (LAYER_K times longer) layer
   const db = (x, y) => y - S0 + (nz(x, y, 30, 0xb1) - 0.5) * 9;   // band depth, its borders wobble
-  const bandAt = (x, y) => { const d = db(x, y); return d < 60 ? 0 : d < 120 ? 1 : d < 168 ? 2 : 3; };
+  const bandOf = d => d < CV_BANDS[1] ? 0 : d < CV_BANDS[2] ? 1 : d < CV_BANDS[3] ? 2 : 3, bandAt = (x, y) => bandOf(db(x, y));
   const nearVil = x => Math.abs(wdx(W1(x) - SPX)) <= VIL_HALF + 6;
   const portalX = SPX + VIL_HALF + 5, nearPortal = x => { const d = wdx(W1(x) - portalX); return d > -8 && d < 34; };
   const minY = x => surf[W1(x)] + (nearVil(x) || nearPortal(x) ? 15 : 8);   // keep a solid crust under the village and the portal
@@ -36,22 +37,24 @@ function cvBuild() {
     for (let y = sx; y < YB; y++) {
       const i = y * WW + x, dl = y - sx;
       if (dl < 4) { if (!SOLID[tiles[i]] && y > sx) tiles[i] = DIRT; continue; }   // the surface crust stays as the village made it
-      const d = db(x, y), b = d < 60 ? 0 : d < 120 ? 1 : d < 168 ? 2 : 3, n1 = nz(x, y, 34, 0xa1), n2 = nz(x, y, 18, 0xa2), n3 = nz(x, y, 50, 0xa3);
+      if (dl < 7) { tiles[i] = DIRT; walls[i] = WCV_TERRA; continue; }   // (the crust reads no noise)
+      // n2 and n3 only where a branch reads them (n2 kept: band 1 reads it twice)
+      let m2 = -1;
+      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0xa1), n2 = () => m2 < 0 ? (m2 = nz(x, y, 18, 0xa2)) : m2, n3 = () => nz(x, y, 50, 0xa3);
       let t, w;
-      if (dl < 7) { t = DIRT; w = WCV_TERRA; }
-      else if (b === 0) {
-        const k = clamp((d - 12) / 48, 0, 1);
-        t = n1 > 0.74 - k * 0.32 ? CV_ROCHA : n2 > 0.66 ? CV_ARGILA : n3 > 0.82 ? CV_CASCALHO : CV_TERRA;
+      if (b === 0) {
+        const k = clamp((d - mb(12)) / mb(48), 0, 1);
+        t = n1 > 0.74 - k * 0.32 ? CV_ROCHA : n2() > 0.66 ? CV_ARGILA : n3() > 0.82 ? CV_CASCALHO : CV_TERRA;
         w = t === CV_ROCHA ? WCV_ROCHA : WCV_TERRA;
       } else if (b === 1) {
-        t = n1 < 0.3 - (d - 60) / 60 * 0.18 ? CV_TERRA : n2 > 0.72 ? CV_CALCITA : n3 > 0.84 ? CV_CASCALHO : n2 < 0.14 ? CV_ARGILA : CV_ROCHA;
+        t = n1 < 0.3 - (d - CV_BANDS[1]) / mb(60) * 0.18 ? CV_TERRA : n2() > 0.72 ? CV_CALCITA : n3() > 0.84 ? CV_CASCALHO : n2() < 0.14 ? CV_ARGILA : CV_ROCHA;
         w = t === CV_TERRA ? WCV_TERRA : nz(x, y, 14, 0xa4) > 0.64 ? WCV_CALCITA : WCV_ROCHA;
       } else if (b === 2) {
-        t = n1 > 0.66 ? CV_ROCHA : n3 > 0.86 ? CV_CASCALHO : CV_XISTO;
+        t = n1 > 0.66 ? CV_ROCHA : n3() > 0.86 ? CV_CASCALHO : CV_XISTO;
         w = WCV_XISTO;
       } else {
-        const p = clamp((d - 168) / 18, 0, 1);
-        t = nz(x, y, 40, 0xa5) < 0.12 + p * 0.9 ? (n2 > 0.62 ? CT_CALC_TERRA : CT_CALCARIO) : n1 > 0.45 ? CV_ROCHA : CV_XISTO;
+        const p = clamp((d - CV_BANDS[3]) / mb(18), 0, 1);
+        t = nz(x, y, 40, 0xa5) < 0.12 + p * 0.9 ? (n2() > 0.62 ? CT_CALC_TERRA : CT_CALCARIO) : n1 > 0.45 ? CV_ROCHA : CV_XISTO;
         w = t === CT_CALCARIO || t === CT_CALC_TERRA ? WCT_CALCARIO : WCV_ROCHA;
       }
       tiles[i] = t; walls[i] = w;
@@ -96,39 +99,48 @@ function cvBuild() {
     }
   };
   const overlaps = (cx, cy, w, h) => cvChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + 5 && Math.abs(c.cy - cy) < (c.h + h) / 2 + 4);
-  // chambers per band: [count, wMin, wMax, hMin, hMax, top metre, bottom metre]
+  // chambers per band: [count per level, wMin, wMax, hMin, hMax, top metre, bottom metre] (metres of the 186 m design).
+  // Since the layers got LAYER_K times longer (2026-10-12) each band holds LAYER_K levels of chambers stacked one under
+  // the other, each level as tall as the whole band used to be: a longer biome, not a stretched one
   const PLAN = [[16, 8, 18, 5, 9, 12, 56], [8, 20, 45, 10, 22, 66, 116], [9, 12, 24, 7, 12, 124, 162], [7, 10, 20, 5, 8, 171, 180]];
+  const NT4 = 4 * LAYER_K, tierOf = (band, cy) => { const a = S0 + mb(PLAN[band][5]), span = (mb(PLAN[band][6]) - mb(PLAN[band][5])) / LAYER_K; return band * LAYER_K + clamp(Math.floor((cy - a) / span), 0, LAYER_K - 1); };
   // the Mãe-Teia's chamber first: in the Ninho, across the world from the village
   {
-    const w = 34, h = 14, cx = W1(SPX + (WW >> 1) + ((R() - 0.5) * 40 | 0)), fy = S0 + 158, x0 = cx - (w >> 1), top = fy - h;
+    const w = 34, h = 14, cx = W1(SPX + (WW >> 1) + ((R() - 0.5) * 40 | 0)), fy = S0 + mb(158), x0 = cx - (w >> 1), top = fy - h;
     for (let y = top; y < fy; y++) for (let x = x0; x < x0 + w; x++) { const k = x - x0, arch = Math.round(3 * Math.pow(Math.abs((k + 0.5) / w * 2 - 1), 2)); if (y >= top + arch) dig(x, y); }
     cvBoss = { x0: W1(x0), x1: W1(x0 + w - 1), w, top, fy, cx };
-    cvChambers.push({ cx, cy: fy - (h >> 1), w, h, band: 2, boss: true });
+    cvChambers.push({ cx, cy: fy - (h >> 1), w, h, band: 2, tier: tierOf(2, fy - (h >> 1)), boss: true });
   }
   PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1], band) => {
-    const n = n0 * WSC;
-    for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
-      const w = wa + ((R() * (wb - wa + 1)) | 0), h = ha + ((R() * (hb - ha + 1)) | 0), cx = (R() * WW) | 0, cy = S0 + d0 + h / 2 + R() * Math.max(0, d1 - d0 - h);
-      if (overlaps(cx, cy, w, h) || cy - h / 2 < minY(cx) + 1) continue;
-      blob(cx, cy, w, h, 0x900 + band * 40 + k, band === 1 ? 1.9 : 1.6); cvChambers.push({ cx, cy, w, h, band }); k++;
+    const n = n0 * WSC, a = mb(d0), span = (mb(d1) - mb(d0)) / LAYER_K;
+    for (let lv = 0; lv < LAYER_K; lv++) {
+      const top = a + Math.round(span * lv), bot = a + Math.round(span * (lv + 1)), tier = band * LAYER_K + lv;
+      for (let k = 0, tries = 0; k < n && tries < n * 30; tries++) {
+        const w = wa + ((R() * (wb - wa + 1)) | 0), h = ha + ((R() * (hb - ha + 1)) | 0), cx = (R() * WW) | 0, cy = S0 + top + h / 2 + R() * Math.max(0, bot - top - h);
+        if (overlaps(cx, cy, w, h) || cy - h / 2 < minY(cx) + 1) continue;
+        blob(cx, cy, w, h, 0x900 + tier * 40 + k, band === 1 ? 1.9 : 1.6); cvChambers.push({ cx, cy, w, h, band, tier }); k++;
+      }
     }
   });
-  // worm tunnels: along each band round the world, and a few between bands
+  // worm tunnels: along each level round the world, and a few between levels; those slope down sideways
+  // (a chamber at least as far across as it is down) so the way between levels is a ramp, not a well
   const RAD = [1.5, 1.9, 1.4, 1.6];
-  for (let b = 0; b < 4; b++) {
-    const L = cvChambers.filter(c => c.band === b).sort((a, c) => a.cx - c.cx);
-    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(A.boss ? A.cx - A.w / 2 : A.cx, A.boss ? cvBoss.fy - 2 : A.cy + A.h * 0.2, B.boss ? B.cx + B.w / 2 : B.cx, B.boss ? cvBoss.fy - 2 : B.cy + B.h * 0.2, RAD[b], 0x700 + b * 50 + k); }
+  for (let t = 0; t < NT4; t++) {
+    const L = cvChambers.filter(c => c.tier === t).sort((a, c) => a.cx - c.cx), b = (t / LAYER_K) | 0;
+    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(A.boss ? A.cx - A.w / 2 : A.cx, A.boss ? cvBoss.fy - 2 : A.cy + A.h * 0.2, B.boss ? B.cx + B.w / 2 : B.cx, B.boss ? cvBoss.fy - 2 : B.cy + B.h * 0.2, RAD[b], 0x700 + t * 50 + k); }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = cvChambers.filter(c => c.band === b && !c.boss), D = cvChambers.filter(c => c.band === b + 1 && !c.boss);
+  for (let t = 0; t < NT4 - 1; t++) {
+    const U = cvChambers.filter(c => c.tier === t && !c.boss), D = cvChambers.filter(c => c.tier === t + 1 && !c.boss), b = (t / LAYER_K) | 0;
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
-      const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, A.cy, B.cx, B.cy, RAD[b] + 0.2, 0x7f0 + b * 9 + k);
+      const A = U[(R() * U.length) | 0], ax = c => Math.abs(wdx(c.cx - A.cx));
+      let B = null; for (const c of D) if (ax(c) >= Math.abs(c.cy - A.cy) * 0.9 && (!B || ax(c) < ax(B))) B = c;
+      if (!B) B = D.reduce((m, c) => ax(c) < ax(m) ? c : m);
+      worm(A.cx, A.cy, B.cx, B.cy, RAD[b] + 0.2, 0x7f0 + t * 9 + k);
     }
   }
-  // the Galerias' shafts: straight down out of a hall floor
-  for (const H of cvChambers.filter(c => c.band === 1).slice(0, 4 * WSC)) {
-    const x = Math.round(H.cx + (R() - 0.5) * H.w * 0.5), ya = Math.round(H.cy), yb = Math.min(YB - 6, ya + 16 + ((R() * 16) | 0));
+  // the Galerias' shafts: down out of a hall floor, short enough to drop without a fall (Jonathan 2026-10-12: fewer cliffs)
+  for (const H of cvChambers.filter(c => c.band === 1).slice(0, 4 * WSC * LAYER_K)) {
+    const x = Math.round(H.cx + (R() - 0.5) * H.w * 0.5), ya = Math.round(H.cy), yb = Math.min(YB - 6, ya + 9 + ((R() * 5) | 0));
     for (let y = ya; y <= yb; y++) { const xx = x + Math.round(Math.sin(y * 0.3) * 0.8); for (let dx = -1; dx <= 1; dx++) dig(xx + dx, y); }
   }
   // the way down: two grottos in the Fundações; the cathedral opens a stairway out of each one's right-hand wall
@@ -174,12 +186,14 @@ function cvBuild() {
       if (open && comp.length < 24) for (const c of comp) cv[c] = 1;
     }
   }
+  // shelves of rock across the tall open wells, so a hall or a crossing of tunnels is not a cliff (not in the Mãe-Teia's hall)
+  caveShelves(cv, S0 + 8, YB - 3, seed ^ 0x5e1f, (x, y) => Math.abs(wdx(x - cvBoss.cx)) <= (cvBoss.w >> 1) + 3 && y >= cvBoss.top - 6 && y <= cvBoss.fy);
   for (let i = 0; i < NN; i++) if (cv[i]) tiles[i] = AIR;
 
   // ---------- 3. ore veins in the cave rock (the rock right around a vein turns to stone) ----------
   const R4 = mulberry32(seed ^ 0x0ca7e);
   const host = t => t === CV_TERRA || t === CV_ROCHA || t === CV_XISTO || t === CV_ARGILA || t === CV_CASCALHO || t === CT_CALCARIO;
-  const vein = (ore, n, d0, d1, lmin, lmax) => {
+  const vein = (ore, n, d0, d1, lmin, lmax) => {   // d0, d1: rows below S0
     for (let k = 0; k < n; k++) {
       let x = (R4() * WW) | 0, y = S0 + d0 + ((R4() * (d1 - d0)) | 0); const len = lmin + ((R4() * (lmax - lmin + 1)) | 0);
       for (let s = 0; s < len; s++) {
@@ -192,12 +206,13 @@ function cvBuild() {
       }
     }
   };
-  vein(CV_O_CARVAO, 150 * WSC, 6, 186, 3, 7); vein(CV_O_COBRE, 150 * WSC, 6, 186, 2, 6);   // only coal and copper up here (102: one metal per layer)
+  vein(CV_O_CARVAO, 150 * WSC * LAYER_K, mb(6), CAVE_D, 3, 7); vein(CV_O_COBRE, 150 * WSC * LAYER_K, mb(6), CAVE_D, 2, 6);   // only coal and copper up here (102: one metal per layer)
 }
 
 function cvAfter() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = CV_S0, YB = S0 + CAVE_D, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R = mulberry32(seed ^ 0xca7e6);
+  const mb = m => Math.round(m * CAVE_D / LAYER_DESIGN);
   const caveRow = (x, y) => y >= surf[W1(x)] + 4 && y < YB - 1;
   const dig = (x, y) => { if (!caveRow(x, y) || y < surf[W1(x)] + 8) return; const i = I(x, y); if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; };
   const worm = (xa, ya, xb, yb, r, s) => {
@@ -239,16 +254,18 @@ function cvAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = (s0) => { if (reach[s0]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   flood(I(ex + 1, ey - 2));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    // the biggest cave pocket still cut off
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !caveRow(x, y) || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
-    }
-    if (!bestC) break;
+  // the cave pockets still cut off, labelled once, biggest first (a tunnel may join several: the flood tells)
+  const lab = new Uint8Array(NN), comps = [];
+  for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !caveRow(x, y) || !walls[i]) continue;
+    const comp = []; lab[i] = 1; stack.push(i);
+    while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
+    if (comp.length >= 20) comps.push(comp);
+  }
+  comps.sort((a, b) => b.length - a.length);
+  for (let q = 0, pass = 0; q < comps.length && pass < 60 * WSC * LAYER_K; q++) {
+    const bestC = comps[q]; if (bestC.some(c => reach[c])) continue;
+    pass++;
     // the nearest reached spot to any of its tiles (a sample of them), and a tunnel across
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
@@ -318,15 +335,30 @@ function cvAfter() {
       else if (q < 0.082 && typeof CT_CACOS !== 'undefined') put(x, y, CT_CACOS);
     }
   }
-  // a few narrow nest tunnels plugged with a wall of solid web (it breaks in a blink)
+  // a few narrow nest tunnels plugged with a wall of solid web (it breaks in a blink); only where the caves go round it
+  // close by, so a plug never cuts a part of the nest off from the rest
+  const bypass = (x, y, h) => {
+    const RX = 40, RY = 30, Wd = RX * 2 + 1, seen = new Uint8Array(Wd * (RY * 2 + 1)), q = [[x - 1, y]]; seen[RY * Wd + RX - 1] = 1;
+    while (q.length) {
+      const [cx, cy] = q.pop();
+      if (cx === x + 1 && cy === y) return true;
+      for (const [nx, ny] of [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]]) {
+        const lx = nx - x + RX, ly = ny - y + RY; if (lx < 0 || lx >= Wd || ly < 0 || ly > RY * 2 || seen[ly * Wd + lx]) continue;
+        if (SOLID[at(nx, ny)] || (nx === x && ny <= y && ny > y - h)) continue;
+        seen[ly * Wd + lx] = 1; q.push([nx, ny]);
+      }
+    }
+    return false;
+  };
   {
     let n = 0;
-    for (let tries = 0; tries < 4000 * WSC && n < 14 * WSC; tries++) {
-      const x = (R3() * WW) | 0, y = S0 + 124 + ((R3() * 42) | 0), i = I(x, y);
+    for (let tries = 0; tries < 4000 * WSC * LAYER_K && n < 14 * WSC * LAYER_K; tries++) {
+      const x = (R3() * WW) | 0, y = S0 + mb(124) + ((R3() * mb(42)) | 0), i = I(x, y);
       if (tiles[i] !== AIR || !SOLID[at(x, y + 1)]) continue;
       let h = 0; while (h < 5 && at(x, y - h) === AIR) h++;
       if (h < 2 || h > 4 || !SOLID[at(x, y - h)] || SOLID[at(x - 1, y)] || SOLID[at(x + 1, y)] || at(x - 1, y) !== AIR || at(x + 1, y) !== AIR) continue;
       if (cvBoss && Math.abs(wdx(x - cvBoss.cx)) < cvBoss.w / 2 + 8 && Math.abs(y - cvBoss.fy) < 20) continue;
+      if (!bypass(x, y, h)) continue;
       for (let k = 0; k < h; k++) put(x, y - k, CV_TEIA);
       n++;
     }
@@ -397,10 +429,10 @@ function cvPlaceProps() {
   _cd();
   if (!CAVERNA) return;
   const S0 = CV_S0, YB = S0 + CAVE_D;
-  for (let y = 0; y < YB; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(0, genDeepA); y < YB; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i] || y < surf[x] + 3) continue;
     const d = y - S0 + (depthNz(x, y, 25, seed ^ 0xe11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0xe12);
-    DEEPT[i] = d < 60 ? (n > 0.7 ? DP_CV_ROCHA : DP_CV_TERRA) : d < 120 ? (n > 0.6 ? DP_CV_ESTALAC : DP_CV_ROCHA) : d < 168 ? (n > 0.45 ? DP_CV_TEIA : DP_CV_ROCHA) : d < 178 ? DP_CV_ROCHA : DP_CT_CALCARIO;
+    DEEPT[i] = d < CV_BANDS[1] ? (n > 0.7 ? DP_CV_ROCHA : DP_CV_TERRA) : d < CV_BANDS[2] ? (n > 0.6 ? DP_CV_ESTALAC : DP_CV_ROCHA) : d < CV_BANDS[3] ? (n > 0.45 ? DP_CV_TEIA : DP_CV_ROCHA) : d < CAVE_D - 8 * LAYER_K ? DP_CV_ROCHA : DP_CT_CALCARIO;
   }
 }; }
 
@@ -416,14 +448,14 @@ Object.assign(CATH_SPAWN, {
 });
 // loot by real depth: Grutas and Galerias 1, Ninho and Fundações 2; in the cathedral Átrio and Nave 2, Claustro 3, Criptas 4
 { const _lz = lootZone; lootZone = function (tx, ty) { const z = zoneAt(tx, ty); if (CAVERNA && z >= CV_ZONE0 && z <= CV_ZONE0 + 3) return z <= CV_ZONE0 + 1 ? 1 : 2; if (CAVERNA && z === 5) return 2; return _lz(tx, ty); }; }
-// levels by real depth: caves 1 + 1 per 50 m (to 4), cathedral 5-6 (layerLvl in 52); 30% of them one higher, never past the layer's top
+// levels by real depth: caves 1 + 1 per 50 m of the design (to 4), cathedral 5-6 (layerLvl in 52); 30% of them one higher, never past the layer's top
 let cvPacking = false;
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!CAVERNA || e.boss || D.boss || zone === 4 || e.reiMinion) return e;
   const d = Math.floor((py + e.h) / T) - CV_S0;
   if (d >= 6) {
-    const lvl = d < CAVE_D ? Math.min(4, 1 + Math.min(3, Math.floor(d / 50)) + (Math.random() < 0.3 ? 1 : 0)) : layerLvl(5, d - CAVE_D), m = 1 + 0.3 * (lvl - 1);
+    const lvl = d < CAVE_D ? Math.min(4, 1 + Math.min(3, Math.floor(d / (50 * LAYER_K))) + (Math.random() < 0.3 ? 1 : 0)) : layerLvl(5, d - CAVE_D), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   if (zone >= CV_ZONE0 && zone <= CV_ZONE0 + 3) {

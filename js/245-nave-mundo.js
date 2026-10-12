@@ -17,22 +17,32 @@
    Depois (nvAfter): tudo alcançável das descidas, Escada de Serviço ou cabo em todo desnível de 5, os estragos (piso
    afundado em rampa de destroços, poças de gosma), a decoração de 1 bloco e os objetos (242). Por fim o Planetário
    (246: nvDress), as bocas das descidas e a subida garantida (nvClimbFix). O 87 liga o resto depois.
+   A camada tem LAYER_K vezes a altura do desenho: cada faixa vira LAYER_K andares da altura da faixa no desenho, cada
+   andar com as suas salas (do mesmo tamanho) e o seu anel; entre os andares, túneis em ziguezague e elevadores de feixe;
+   os dutos descem em lances de até 10 com patamar (nada de poço comprido).
    Também: a terceira camada, as zonas 49 a 52, o spawn por faixa e o nível (21 e 22 pela posição no 129), as
    partículas e a xenita na fornalha e nas lojas. */
 
 const NV_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e objetos podem ficar
 for (const t of [NV_VIDRO_IMPACTO, NV_ESCORIA, NV_CASCO, NV_PAINEL_NEON, NV_GRADE, NV_LIGA, NV_VIDRO, NV_GOSMA, NV_PLASMA, NV_REATOR, NV_O_CARVAO, NV_O_XENITA]) NV_SOILS[t] = 1;
 let nvChambers = [], nvCorr = [], nvHangars = [], nvLabs = [], nvReatores = [], nvCraters = [], nvWrecks = [], nvGaleria = [];
-const NV_CLIMB = t => t === NV_ESCADA || t === NV_CABO || t === NV_FEIXE || t === CHAIN || t === nvAbove().climb;
+// (a escada da camada de cima fica guardada: nvAbove() monta um objeto a cada chamada e isto roda por bloco)
+let nvUpClimb = CHAIN;
+const NV_CLIMB = t => t === NV_ESCADA || t === NV_CABO || t === NV_FEIXE || t === CHAIN || t === nvUpClimb;
 const nvBossOf = a => a.boss || null;
 
 function nvBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  const A = nvAbove();
+  const A = nvAbove(); nvUpClimb = A.climb;
   NV_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = NV_S0, YB = Math.min(WH - 8, S0 + NV_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x4e5a), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / NV_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
+  // cada faixa tem LAYER_K andares, cada um com a altura da faixa no desenho de 186 metros (salas do mesmo tamanho,
+  // 3x mais delas); md(j, m) põe o metro m do desenho dentro do andar j da faixa de m; sp(m0, m1) é o vão no andar
+  const K = LAYER_K, BD = [0, 46, 98, 150, 186];
+  const md = (j, m) => { const b = m < BD[1] ? 0 : m < BD[2] ? 1 : m < BD[3] ? 2 : 3, r0 = mb(BD[b]), r1 = mb(BD[b + 1]); return S0 + Math.round(r0 + (j + (m - BD[b]) / (BD[b + 1] - BD[b])) * (r1 - r0) / K); };
+  const sp = (m0, m1) => md(0, m1) - md(0, m0);
   const bandOf = d => d < NV_BANDS[1] ? 0 : d < NV_BANDS[2] ? 1 : d < NV_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   nvChambers = []; nvCorr = []; nvHangars = []; nvLabs = []; nvReatores = []; nvCraters = []; nvWrecks = []; nvGaleria = [];
@@ -48,15 +58,15 @@ function nvBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
+      if (y >= YB) { tiles[i] = NV_REATOR; walls[i] = WNV_REATOR; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
       const d = y - S0 + (nz(x, y, 18, 0x4b3) - 0.5) * 10, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 26, 0x4a1), n2 = nz(x, y, 14, 0x4a2);
       let tt = NV_VIDRO_IMPACTO, w = WNV_ROCHA;
-      if (y >= YB) { tt = NV_REATOR; w = WNV_REATOR; }
-      else if (b === 0) { if (n1 > 0.62 || (d > 34 && n2 > 0.55)) tt = NV_ESCORIA; }
+      if (b === 0) { if (n1 > 0.62 || (d > mb(34) && n2 > 0.55)) tt = NV_ESCORIA; }
       else if (b === 1) { tt = n1 > 0.76 ? NV_ESCORIA : NV_CASCO; w = WNV_CASCO; }
       else if (b === 2) { tt = n2 > 0.74 ? NV_CASCO : NV_LIGA; w = WNV_LAB; }
       else { tt = n1 > 0.8 ? NV_LIGA : NV_REATOR; w = WNV_REATOR; }
       tiles[i] = tt; walls[i] = w;
-      if (y < YB && agua.length) agua[i] = 0;
+      if (agua.length) agua[i] = 0;
     }
   }
 
@@ -73,24 +83,39 @@ function nvBuild() {
       if (dx * dx + dy * dy < 1 + (hash2(W1(x) >> 1, y >> 1, s) - 0.5) * 0.18 + (nz(x, y, 40, s) - 0.5) * 0.25) dig(x, y);
     }
   };
-  // túnel de impacto (Cratera e Núcleo): anda para o alvo com curvas; r ~1.3 dá 3 de altura
+  // túnel de impacto (Cratera e Núcleo): anda para o alvo com curvas; r ~1.3 dá 3 de altura. Nunca mais íngreme que
+  // uns 35 graus: com o alvo embaixo ele vai em ziguezague (side), sem poço reto
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 1200; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 2000; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.5) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.8 + Math.sin(n * 0.13 + s) * 0.25;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.5;
+      let vx = Math.cos(a), vy = Math.sin(a);
+      if (Math.abs(vy) > 0.72 && Math.abs(ddy) > 3) { if (Math.abs(ddx) > 7) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.72; vx = side * 0.7; }
+      x += vx * 0.8; y += vy * 0.5;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.8 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
-  // duto da nave: um corredor reto de 4 no chão fa de xa até xb, depois um poço de 3 até o chão fb (a escada vem no nvAfter)
+  // duto da nave: um corredor reto de 4 no chão fa de xa até xb, depois um poço de 3 até o chão fb (a escada vem no
+  // nvAfter); desnível grande desce em ziguezague: lances de até 10 com um patamar de 6 entre eles, nada de poço comprido
   const duct = (xa, fa, xb, fb, list) => {
     const d = wdx(xb - xa), s = d < 0 ? -1 : 1, x1 = xa + d;
     for (let x = xa; x !== x1 + s; x += s) { for (let y = fa - 4; y < fa; y++) dig(x, y); hard(x, fa); }
     if (list) list.push({ x0: W1(Math.min(xa, x1)), len: Math.abs(d) + 1, fy: fa });
-    const ya = Math.min(fa - 4, fb - 3), yb = Math.max(fa, fb);
-    if (Math.abs(fb - fa) > 1) for (let y = ya; y < yb; y++) for (let x = x1 - 1; x <= x1 + 1; x++) dig(x, y);
-    if (Math.abs(fb - fa) > 1) for (let y = fb - 3; y < fb; y++) for (let x = x1 - 1; x <= x1 + 1; x++) dig(x, y);
+    if (Math.abs(fb - fa) <= 1) return;
+    const n = Math.max(1, Math.ceil(Math.abs(fb - fa) / 10)), up = fb < fa;
+    let cx = x1, f = fa;
+    for (let k = 1; k <= n; k++) {
+      const g = k === n ? fb : fa + Math.round((fb - fa) * k / n);
+      for (let y = Math.min(f - 4, g - 3); y < Math.max(f, g); y++) for (let x = cx - 1; x <= cx + 1; x++) dig(x, y);
+      if (k < n) {   // o patamar no chão g, 6 para trás; subindo, o poço que chega não leva chão
+        const nx = cx - s * 6;
+        for (let x = Math.min(cx, nx) - 1; x <= Math.max(cx, nx) + 1; x++) { for (let y = g - 4; y < g; y++) dig(x, y); if (!up || Math.abs(x - cx) > 1) hard(x, g); }
+        cx = nx;
+      }
+      f = g;
+    }
+    for (let x = Math.min(cx, x1) - 1; x <= Math.max(cx, x1) + 1; x++) for (let y = fb - 3; y < fb; y++) dig(x, y);
   };
 
   // ---------- 2a. as duas descidas: dos escorredouros da Colmeia, um tubo de chapa rasgada até a Cápsula de Pouso ----------
@@ -114,7 +139,7 @@ function nvBuild() {
       // um destroço do casco logo depois da porta: o primeiro pedaço da nave que o herói vê
       const w = 18 + ((R() * 10) | 0), h = 6, x0 = side > 0 ? door + 1 : door - w;
       room(x0, landFy, w, h);
-      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, kind: 'destroco', x0: W1(x0), fy: landFy, top: landFy - h };
+      const H = { cx: x0 + w / 2, cy: landFy - h / 2, w, h, band: 0, t: 0, kind: 'destroco', x0: W1(x0), fy: landFy, top: landFy - h };
       nvWrecks.push(H); nvChambers.push(H);
       nvChambers.push({ cx: hx + 6, cy: landFy - 3, w: 12, h: 6, band: 0, kind: 'pouso', nolink: true });
       nvEntries.push({ x0: xs, fy: c.fy, top: c.fy - 2, land: L });
@@ -144,7 +169,7 @@ function nvBuild() {
       // uma sala do reator no fim do corredor
       const w = 18 + ((R() * 6) | 0), h = 12, x0 = D.side > 0 ? x - 1 : x - w + 2;
       room(x0, fy, w, h);
-      const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, kind: 'reator', x0: W1(x0), fy, top: fy - h };
+      const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, t: 4 * K - 1, kind: 'reator', x0: W1(x0), fy, top: fy - h };
       nvReatores.push(C); nvChambers.push(C);
     }
   }
@@ -152,10 +177,10 @@ function nvBuild() {
 
   // ---------- 2c. os Rasgos no Casco: duas salas do reator no fundo, longe uma da outra e do Planetário ----------
   for (let tries = 0; nvExits.length < 2 && tries < 600; tries++) {
-    const w = 16 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = S0 + mb(166) + ((R() * mb(10)) | 0);
+    const w = 16 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = md(K - 1, 166) + ((R() * sp(166, 176)) | 0);
     if (!awayFromBoss(cx, fy, 40) || nvExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
-    const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'reator', x0: W1(x0), fy, top: fy - h, exit: true };
+    const C = { cx, cy: fy - h / 2, w, h, band: 3, t: 4 * K - 1, kind: 'reator', x0: W1(x0), fy, top: fy - h, exit: true };
     nvReatores.push(C); nvChambers.push(C);
     const sx = W1(cx - 1);
     for (let y = fy; y < YB - 1; y++) for (let x = sx - 1; x <= sx + 3; x++) seal[I(x, y)] = x >= sx && x < sx + 3 ? 0 : 1;
@@ -164,108 +189,110 @@ function nvBuild() {
   }
 
   // ---------- 2d. a Cratera: tigelas de vidro, cavernas de impacto e destroços do casco enfiados na rocha ----------
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 400; tries++) {
-    const w = 30 + ((R() * 21) | 0), h = 10 + ((R() * 7) | 0), cx = (R() * WW) | 0, cy = S0 + mb(10) + h / 2 + R() * Math.max(0, mb(32) - h);
+  // (por andar: k % K escolhe o andar, as contas por camada vezes K)
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 30 + ((R() * 21) | 0), h = 10 + ((R() * 7) | 0), cx = (R() * WW) | 0, cy = md(j, 10) + h / 2 + R() * Math.max(0, sp(10, 42) - h);
     if (busy(cx, cy, w, h, 6)) continue;
     // a tigela: a metade de baixo de uma elipse, com o teto em arco baixo
     for (let y = Math.floor(cy - h / 2); y <= cy + h / 2; y++) for (let x = Math.floor(cx - w / 2); x <= cx + w / 2; x++) {
       const dx = (x + 0.5 - cx) / (w / 2), dy = (y + 0.5 - cy) / (h / 2), e = dy > 0 ? dx * dx + dy * dy : dx * dx * 0.85 + dy * dy * 1.6;
       if (e < 1 + (nz(x, y, 20, 0x4c0 + k) - 0.5) * 0.3) dig(x, y);
     }
-    const C = { cx, cy, w, h, band: 0, kind: 'cratera', fy: Math.round(cy + h / 2) };
+    const C = { cx, cy, w, h, band: 0, t: j, kind: 'cratera', fy: Math.round(cy + h / 2) };
     nvCraters.push(C); nvChambers.push(C); k++;
   }
-  for (let k = 0, tries = 0; k < 4 * WSC && tries < 300; tries++) {
-    const w = 10 + ((R() * 8) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = S0 + mb(8) + h / 2 + R() * Math.max(0, mb(34) - h);
+  for (let k = 0, tries = 0; k < 4 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, w = 10 + ((R() * 8) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = md(j, 8) + h / 2 + R() * Math.max(0, sp(8, 42) - h);
     if (busy(cx, cy, w, h, 5)) continue;
     blob(cx, cy, w, h, 0x4d00 + k, 1.3);
-    nvChambers.push({ cx, cy, w, h, band: 0, kind: 'caverna' }); k++;
+    nvChambers.push({ cx, cy, w, h, band: 0, t: j, kind: 'caverna' }); k++;
   }
   // destroços: pedaços retangulares do casco, ocos por dentro, enfiados tortos (inclinação de até 20 graus)
-  for (let k = 0, tries = 0; k < 4 * WSC && tries < 300; tries++) {
-    const w = 10 + ((R() * 8) | 0), h = 5 + ((R() * 3) | 0), cx = (R() * WW) | 0, cy = S0 + mb(12) + R() * mb(28), a = (R() - 0.5) * 0.7;
+  for (let k = 0, tries = 0; k < 4 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, w = 10 + ((R() * 8) | 0), h = 5 + ((R() * 3) | 0), cx = (R() * WW) | 0, cy = md(j, 12) + R() * sp(12, 40), a = (R() - 0.5) * 0.7;
     if (busy(cx, cy, w + 4, h + 6, 5)) continue;
     const ca = Math.cos(a), sa = Math.sin(a), hw = w / 2, hh = h / 2;
     for (let y = Math.floor(cy - w); y <= cy + w; y++) for (let x = Math.floor(cx - w); x <= cx + w; x++) {
       const dx = x + 0.5 - cx, dy = y + 0.5 - cy, u = dx * ca + dy * sa, v = -dx * sa + dy * ca;
       if (Math.abs(u) < hw - 1 && Math.abs(v) < hh - 1) dig(x, y);
     }
-    const C = { cx, cy, w, h, a, band: 0, kind: 'casco' };
+    const C = { cx, cy, w, h, a, band: 0, t: j, kind: 'casco' };
     nvWrecks.push(C); nvChambers.push(C); k++;
   }
 
   // ---------- 2e. o Casco: corredores retos, hangares e Salas sem Peso ----------
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 300; tries++) {
-    const w = 36 + ((R() * 15) | 0), h = 12 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(62 + R() * 32);
-    if (fy - h < S0 + mb(48) || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
+  for (let k = 0, tries = 0; k < 3 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, w = 36 + ((R() * 15) | 0), h = 12 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = md(j, 62 + R() * 32);
+    if (fy - h < md(j, 48) || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
     room(x0, fy, w, h);
-    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, kind: 'hangar', x0: W1(x0), fy, top: fy - h };
+    const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, t: K + j, kind: 'hangar', x0: W1(x0), fy, top: fy - h };
     nvHangars.push(H); nvChambers.push(H); k++;
   }
-  for (let k = 0, tries = 0; k < 2 * WSC && tries < 300; tries++) {
-    const s = 14 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(64 + R() * 30);
-    if (fy - s < S0 + mb(48) || busy(x0 + s / 2, fy - s / 2, s, s, 6)) continue;
+  for (let k = 0, tries = 0; k < 2 * WSC * K && tries < 300 * K; tries++) {
+    const j = k % K, s = 14 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = md(j, 64 + R() * 30);
+    if (fy - s < md(j, 48) || busy(x0 + s / 2, fy - s / 2, s, s, 6)) continue;
     room(x0, fy, s, s);
-    const H = { cx: x0 + s / 2, cy: fy - s / 2, w: s, h: s, band: 1, kind: 'sempeso', x0: W1(x0), fy, top: fy - s };
+    const H = { cx: x0 + s / 2, cy: fy - s / 2, w: s, h: s, band: 1, t: K + j, kind: 'sempeso', x0: W1(x0), fy, top: fy - s };
     nvSemPeso.push({ x0: W1(x0), x1: W1(x0 + s - 1), top: fy - s, fy }); nvChambers.push(H); k++;
   }
-  for (let k = 0, tries = 0; k < 10 * WSC && tries < 600; tries++) {
-    const len = 40 + ((R() * 51) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(52 + R() * 42);
+  for (let k = 0, tries = 0; k < 10 * WSC * K && tries < 600 * K; tries++) {
+    const j = k % K, len = 40 + ((R() * 51) | 0), x0 = (R() * WW) | 0, fy = md(j, 52 + R() * 42);
     if (busy(x0 + len / 2, fy - 2, len, 4, 3)) continue;
     // um corredor pode descer ou subir 1 a 2 num ponto (a nave entortou na queda)
     const mid = 12 + ((R() * (len - 24)) | 0), st = R() < 0.4 ? (R() < 0.5 ? -1 : 1) * (1 + ((R() * 2) | 0)) : 0;
     for (let j = 0; j < len; j++) { const f = j < mid ? fy : fy + st; for (let y = f - 4; y < f; y++) dig(x0 + j, y); hard(x0 + j, f); }
-    const C = { cx: x0 + len / 2, cy: fy - 2, w: len, h: 4, band: 1, kind: 'corredor', x0: W1(x0), fy, top: fy - 4, len, step: [mid, st], ends: [[W1(x0), fy], [W1(x0 + len - 1), fy + st]] };
+    const C = { cx: x0 + len / 2, cy: fy - 2, w: len, h: 4, band: 1, t: K + j, kind: 'corredor', x0: W1(x0), fy, top: fy - 4, len, step: [mid, st], ends: [[W1(x0), fy], [W1(x0 + len - 1), fy + st]] };
     nvCorr.push({ x0: W1(x0), len, fy, step: [mid, st] }); nvChambers.push(C); k++;
   }
 
   // ---------- 2f. os Laboratórios: salas brancas retas e a Galeria dos Espécimes ----------
-  for (let k = 0; k < WSC; k++) {
-    for (let tries = 0; tries < 200; tries++) {
-      const w = 60 + ((R() * 21) | 0), h = 8, x0 = (R() * WW) | 0, fy = S0 + mb(112 + R() * 30);
+  for (let k = 0; k < WSC * K; k++) {
+    for (let tries = 0, j = k % K; tries < 200; tries++) {
+      const w = 60 + ((R() * 21) | 0), h = 8, x0 = (R() * WW) | 0, fy = md(j, 112 + R() * 30);
       if (busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
       room(x0, fy, w, h);
-      const G = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, kind: 'galeria', x0: W1(x0), fy, top: fy - h };
+      const G = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, t: 2 * K + j, kind: 'galeria', x0: W1(x0), fy, top: fy - h };
       nvGaleria.push(G); nvLabs.push(G); nvChambers.push(G); break;
     }
   }
-  for (let k = 0, tries = 0; k < 7 * WSC && tries < 500; tries++) {
-    const w = 20 + ((R() * 11) | 0), h = 8 + ((R() * 4) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(108 + R() * 38);
-    if (fy - h < S0 + mb(100) || busy(x0 + w / 2, fy - h / 2, w, h, 5) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
+  for (let k = 0, tries = 0; k < 7 * WSC * K && tries < 500 * K; tries++) {
+    const j = k % K, w = 20 + ((R() * 11) | 0), h = 8 + ((R() * 4) | 0), x0 = (R() * WW) | 0, fy = md(j, 108 + R() * 38);
+    if (fy - h < md(j, 100) || busy(x0 + w / 2, fy - h / 2, w, h, 5) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
     room(x0, fy, w, h);
-    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, kind: 'lab', x0: W1(x0), fy, top: fy - h, glass: R() < 0.5 ? -1 : 1 };
+    const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, t: 2 * K + j, kind: 'lab', x0: W1(x0), fy, top: fy - h, glass: R() < 0.5 ? -1 : 1 };
     nvLabs.push(C); nvChambers.push(C); k++;
   }
 
   // ---------- 2g. o Núcleo: salas redondas do reator ----------
-  for (let k = 0, tries = 0; nvReatores.length < 5 * WSC && tries < 500; tries++) {
-    const w = 18 + ((R() * 9) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(152) + h / 2 + R() * Math.max(0, mb(30) - h);
+  for (let k = 0, tries = 0; nvReatores.length < 5 * WSC * K && tries < 500 * K; tries++) {
+    const j = k % K, w = 18 + ((R() * 9) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = md(j, 152) + h / 2 + R() * Math.max(0, sp(152, 182) - h);
     if (busy(cx, cy, w, h, 6) || !awayFromBoss(cx, cy, Math.max(w, h) / 2 + 6) || cy + h / 2 > YB - 4) continue;
     blob(cx, cy, w, h, 0x4f00 + k, 1.7);
-    const C = { cx, cy, w, h, band: 3, kind: 'reator', round: true };
+    const C = { cx, cy, w, h, band: 3, t: 3 * K + j, kind: 'reator', round: true };
     nvReatores.push(C); nvChambers.push(C); k++;
   }
 
   // ---------- 3. as ligações ----------
   const mouth = C => C.fy ? C.fy : Math.round(C.cy + C.h * 0.3);
   const ends = (C, right) => C.ends ? (right ? C.ends[1] : C.ends[0]) : [Math.round(right ? C.cx + C.w / 2 - 2 : C.cx - C.w / 2 + 2), mouth(C)];
-  for (let b = 0; b < 4; b++) {
-    const L = nvChambers.filter(c => c.band === b && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
+  // um anel por andar (como era um por faixa), no estilo da faixa
+  for (let t = 0; t < 4 * K; t++) {
+    const b = (t / K) | 0, L = nvChambers.filter(c => c.t === t && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
       if (b === 1 || b === 2) duct(ax, ay, bx, by, b === 1 ? nvCorr : null);   // a nave: dutos retos
-      else worm(ax, ay - 2, bx, by - 2, b === 0 ? 1.4 : 1.3, 0x4700 + b * 90 + k);   // a cratera e o núcleo: túneis de impacto e de plasma
+      else worm(ax, ay - 2, bx, by - 2, b === 0 ? 1.4 : 1.3, 0x4700 + t * 90 + k);   // a cratera e o núcleo: túneis de impacto e de plasma
     }
   }
-  // entre as faixas: dutos curtos e os elevadores de feixe (2 x WSC por divisa)
-  for (let b = 0; b < 3; b++) {
-    const U = nvChambers.filter(c => c.band === b && !c.nolink && !c.boss), D = nvChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss);
+  // entre os andares: túneis curtos e os elevadores de feixe (2 x WSC por divisa de faixa, WSC entre andares da mesma)
+  for (let t = 0; t < 4 * K - 1; t++) {
+    const b = t, U = nvChambers.filter(c => c.t === t && !c.nolink && !c.boss), D = nvChambers.filter(c => c.t === t + 1 && !c.nolink && !c.boss), nl = (t + 1) % K ? WSC : 2 * WSC;
     for (let k = 0; k < 2 * WSC && U.length && D.length; k++) {
       const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
       const [ax, ay] = ends(P, R() < 0.5); worm(ax, ay - 2, Q.cx, mouth(Q) - 2, 1.3, 0x47f0 + b * 9 + k);
     }
-    for (let k = 0, tries = 0; k < 2 * WSC && tries < 80; tries++) {
+    for (let k = 0, tries = 0; k < nl && tries < 80; tries++) {
       const P = U[(R() * U.length) | 0]; if (!P || !P.fy) continue;
       const sx = W1(Math.round(P.cx) + ((R() * 7) | 0) - 3), Q = D.reduce((m, c) => Math.abs(wdx(c.cx - sx)) < Math.abs(wdx(m.cx - sx)) ? c : m);
       const yb = Math.round(mouth(Q)); if (yb - P.fy < 10 || yb - P.fy > 70 || !awayFromBoss(sx, yb, 4) || nvLifts.some(L => Math.abs(wdx(L.x - sx)) < 12)) continue;
@@ -396,7 +423,7 @@ function nvBuild() {
       const i = I(x, y), edge = y === L.fy - L.h - 1 || y === L.fy || x === L.x0 - 1 || x === L.x0 + L.w;
       if (W1(x) === L.door && y >= L.fy - 3 && y < L.fy) { tiles[i] = AIR; walls[i] = WNV_CASCO; }
       else if (edge && !(y === L.fy - L.h - 1 && W1(x) >= x0 && wdx(x - x0) < 3)) tiles[i] = y === L.fy ? NV_GRADE : NV_CASCO;
-      else if (!edge) { tiles[i] = AIR; walls[i] = (x - L.x0) % 4 === 1 ? WNV_NEON : WNV_CASCO; }
+      else if (!edge) { tiles[i] = W1(x) === W1(x0 + 1) ? NV_ESCADA : AIR; walls[i] = (x - L.x0) % 4 === 1 ? WNV_NEON : WNV_CASCO; }   // a escada desce até o chão (sem ela, a cápsula era um poço sem volta)
       else { tiles[i] = W1(x) === W1(x0 + 1) ? NV_ESCADA : AIR; walls[i] = WNV_CASCO; }
       nvKeep.add(i);
     }
@@ -420,6 +447,8 @@ function nvBuild() {
     Lf.y1 = yb;
     for (let y = Lf.y0; y <= yb; y++) { const i = I(Lf.x, y); if (tiles[i] === AIR) { tiles[i] = y === yb ? NV_EMISSOR : NV_FEIXE; nvKeep.add(i); } if (!walls[i] || y > Lf.y0 + 2) walls[i] = WNV_NEON; }
     for (let y = Lf.y0; y <= yb; y++) for (const x of [Lf.x - 2, Lf.x + 2]) { const i = I(x, y); if (SOLID[tiles[i]] && NV_SOILS[tiles[i]] && !nvKeep.has(i) && (y - Lf.y0) % 5 === 2) tiles[i] = NV_PAINEL_NEON; }
+    // as colunas dos lados do feixe: um degrau de grade a cada 8, alternando os lados (quem cai fora do feixe para logo)
+    for (let y = Lf.y0 + 5; y < yb - 2; y++) for (const [x, o] of [[Lf.x - 1, 0], [Lf.x + 1, 4]]) if ((y - Lf.y0 + o) % 8 === 0) { const i = I(x, y); if (tiles[i] === AIR) { tiles[i] = NV_GRADE; nvKeep.add(i); } }
   }
 
   // ---------- 5. os veios ----------
@@ -435,9 +464,9 @@ function nvBuild() {
     }
   };
   // a escória também aparece no casco amassado, então o carvão segue ela pela camada toda
-  vein(NV_O_CARVAO, 30 * WSC, 0, 186, 3, 8, t => t === NV_ESCORIA);
-  vein(NV_O_XENITA, 13 * WSC, 98, 186, 2, 5, t => t === NV_LIGA || t === NV_ESCORIA || t === NV_REATOR);
-  vein(NV_O_XENITA, 13 * WSC, 0, 98, 2, 5, t => t === NV_VIDRO_IMPACTO || t === NV_ESCORIA);
+  vein(NV_O_CARVAO, 30 * WSC * K, 0, 186, 3, 8, t => t === NV_ESCORIA);
+  vein(NV_O_XENITA, 13 * WSC * K, 98, 186, 2, 5, t => t === NV_LIGA || t === NV_ESCORIA || t === NV_REATOR);
+  vein(NV_O_XENITA, 13 * WSC * K, 0, 98, 2, 5, t => t === NV_VIDRO_IMPACTO || t === NV_ESCORIA);
 }
 
 function nvAfter() {
@@ -446,11 +475,13 @@ function nvAfter() {
   const nvRow = y => y >= S0 && y < YB - 1;
   const dig = (x, y) => { if (!nvRow(y)) return; const i = I(x, y); if (nvKeep.has(i) || inNvHall(W1(x), y, 4)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WNV_CASCO; };
   const worm = (xa, ya, xb, yb, r, s) => {
-    let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
-    for (let n = 0; n < 900; n++) {
+    let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
+    for (let n = 0; n < 1500; n++) {
       const ddx = tx - x, ddy = yb - y, d = Math.hypot(ddx, ddy); if (d < 1.2) break;
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.9;
-      x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.6;
+      let vx = Math.cos(a), vy = Math.sin(a);   // em ziguezague quando o alvo está bem embaixo ou em cima (sem poço reto)
+      if (Math.abs(vy) > 0.75 && Math.abs(ddy) > 4) { if (Math.abs(ddx) > 6) side = ddx > 0 ? 1 : -1; vy = Math.sign(vy) * 0.75; vx = side * 0.66; }
+      x += vx * 0.8; y += vy * 0.6;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
@@ -464,40 +495,51 @@ function nvAfter() {
   for (const E of nvEntries) flood(I(E.x0 + 1, E.fy - 1));
   if (!nvEntries.length && nvChambers.length) flood(I(nvChambers[0].cx, Math.round(nvChambers[0].cy)));
   if (B) for (let y = B.cy - B.r - 3; y <= B.cy + B.r + 3; y++) for (let x = B.cx - B.r - 3; x <= B.cx + B.r + 3; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // (um só rótulo para todas as passadas, marcado com o número da passada: nada de um Uint8Array do mundo por passada)
+  const LO = S0 * WW, lab = new Uint16Array((YB - S0) * WW);
+  let org = null; const orgT = [];
+  // (cada passada junta todos os bolsões de 16 ou mais e liga um por um, do maior ao menor, pulando os que uma ligação
+  // anterior já alcançou: poucas passadas pela camada inteira)
+  for (let pass = 0, nw = 0; pass < 60; pass++) {
+    const P1 = pass + 1, comps = [];
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - LO] === P1 || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - LO] = P1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= LO && nb < YB * WW && lab[nb - LO] !== P1 && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - LO] = P1; stack.push(nb); } }
+      if (comp.length >= 16) comps.push(comp);
     }
-    if (!bestC) break;
-    let best = null, bd = 1e9;
-    for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
-      const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
-      for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
-        const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
-        const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
-        const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
-      }
-    }
-    if (!best) { for (const c of bestC) reach[c] = 1; continue; }
-    worm(best[0], best[1], best[2], best[3], 1.3, 0x46a0 + pass);
-    flood(I(best[2], best[3]), true);
-    if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
-      for (let h = 0; h < q.length && hit < 0; h++) {
-        const c = q[h], x = c % WW, row = c - x;
-        for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
-          if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || nvKeep.has(nb) || nvKeep.has(nb - WW) || tiles[nb] === BEDROCK || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
-          org[nb] = c; if (reach[nb] && !SOLID[tiles[nb]]) { hit = nb; break; }
-          q.push(nb);
+    if (!comps.length) break;
+    comps.sort((a, b) => b.length - a.length);
+    for (const bestC of comps) {
+      if (reach[bestC[0]]) continue;
+      let best = null, bd = 1e9;
+      for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
+        const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
+        for (let dy = -30; dy <= 30; dy++) for (let dx = -50; dx <= 50; dx++) {
+          const y = cy + dy; if (y < S0 || y >= YB - 1) continue;
+          const i = I(cx + dx, y); if (!reach[i] || SOLID[tiles[i]] || inBox(W1(cx + dx), y, 2)) continue;
+          const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
         }
       }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
-      if (hit >= 0) flood(hit, true);
-      if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
+      if (!best) { for (const c of bestC) reach[c] = 1; continue; }
+      worm(best[0], best[1], best[2], best[3], 1.3, 0x46a0 + nw++);
+      flood(I(best[2], best[3]), true);
+      if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
+        if (!org) org = new Int32Array(NN).fill(-1);
+        for (const c of orgT) org[c] = -1; orgT.length = 0;
+        const q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); orgT.push(c); }
+        for (let h = 0; h < q.length && hit < 0; h++) {
+          const c = q[h], x = c % WW, row = c - x;
+          for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
+            if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || nvKeep.has(nb) || nvKeep.has(nb - WW) || tiles[nb] === BEDROCK || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
+            org[nb] = c; orgT.push(nb); if (reach[nb] && !SOLID[tiles[nb]]) { hit = nb; break; }
+            q.push(nb);
+          }
+        }
+        for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+        if (hit >= 0) flood(hit, true);
+        if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
+      }
     }
   }
 
@@ -586,19 +628,35 @@ function nvClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = NV_S0, YB = Math.min(WH - 8, S0 + NV_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => NV_CLIMB(tiles[I(x, y)]);
   const ok = (x, y) => !S(x, y) && !S(x, y - 1), H = YB - Y0;
-  const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
+  // a busca anda em tabelas (sólido, escada, cabe em pé) e não nos tiles: o repair atualiza a coluna que mexe. seen e
+  // any guardam o número da busca (stamp), sem limpar os arrays a cada busca; a sala do chefe entra na tabela
+  const N = WW * H, Sa = new Uint8Array(N + WW), La = new Uint8Array(N + WW), Ok = new Uint8Array(N);
+  const hall = new Uint8Array(WW * H); if (nvBoss) for (let y = Y0; y < YB; y++) for (let x = 0; x < WW; x++) if (inNvHall(x, y)) hall[(y - Y0) * WW + x] = 1;
+  for (let y = Y0; y <= YB; y++) for (let x = 0; x < WW; x++) { const j = (y - Y0) * WW + x; Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; }
+  for (let j = WW; j < N; j++) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0;
+  const refresh = (x, y0, y1) => {
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= 0 && j < N + WW) { Sa[j] = S(x, y) ? 1 : 0; La[j] = L(x, y) ? 1 : 0; } }
+    for (let y = y0; y <= y1 + 1; y++) { const j = (y - Y0) * WW + x; if (j >= WW && j < N) Ok[j] = !Sa[j] && !Sa[j - WW] && !hall[j] ? 1 : 0; }
+  };
+  const seen = new Uint16Array(N * 5), any = new Uint16Array(N), from = new Int32Array(N * 5), good = new Uint8Array(N * 5), stk = new Int32Array(N * 5);
+  let st = 0;
   const search = (sx, sy) => {
-    seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || inNvHall(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
+    if (++st > 65000) { seen.fill(0); any.fill(0); st = 1; }
+    let sp = 0, cur = -1, hit = -1, jLim = N;   // (a busca não desce mais de 40 abaixo do começo: voltar não pede isso)
+    const push = (j, r) => { if (j >= jLim || !Ok[j]) return; if (Sa[j + WW] || La[j] || La[j - WW]) r = 4; const k = j * 5 + r; if (seen[k] === st) return; seen[k] = st; from[k] = cur; any[j] = st; stk[sp++] = k; if (good[k] && hit < 0) hit = k; };
     const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
-    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++; push(sx, y, 4);
-    while (q.length) {
+    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++;
+    if (y <= Y0 || y >= YB) return false;
+    jLim = Math.min(N, (y + 41 - Y0) * WW); push((y - Y0) * WW + sx, 4);
+    const goal = (S0 - 2 - Y0) * WW;
+    while (sp) {
       if (hit >= 0) return win(hit);
-      const r = q.pop(), yy = q.pop(), x = q.pop(); cur = ((yy - Y0) * WW + x) * 5 + r; if (yy <= S0 - 3) return win(cur);
-      const gr = S(x, yy + 1) || L(x, yy);
-      push(x - 1, yy, r === 4 && !gr ? 0 : r); push(x + 1, yy, r === 4 && !gr ? 0 : r);
-      if (r > 0) push(x, yy - 1, L(x, yy) || L(x, yy - 1) ? 4 : r === 4 ? 3 : r - 1);
-      if (!S(x, yy + 1)) push(x, yy + 1, L(x, yy + 1) ? 4 : 0);
+      const k = stk[--sp], j = (k / 5) | 0, r = k - j * 5; cur = k; if (j < goal) return win(cur);
+      const x = j % WW, row = j - x, gr = Sa[j + WW] || La[j], rs = r === 4 && !gr ? 0 : r;
+      // (a pilha tira o último primeiro: descer entra antes e subir por último, a busca tenta subir antes de tudo)
+      if (!Sa[j + WW]) push(j + WW, La[j + WW] ? 4 : 0);
+      push(row + (x === 0 ? WW - 1 : x - 1), rs); push(row + (x === WW - 1 ? 0 : x + 1), rs);
+      if (r > 0) push(j - WW, La[j] || La[j - WW] ? 4 : r === 4 ? 3 : r - 1);
     }
     return hit >= 0 ? win(hit) : false;
   };
@@ -606,30 +664,52 @@ function nvClimbFix() {
   const repair = () => {
     let best = null;
     for (let y = Y0 + 2; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      if (!any[(y - Y0) * WW + x] || !S(x, y + 1) || nvKeep.has(I(x, y)) || inNvHall(x, y, 1)) continue;
+      if (any[(y - Y0) * WW + x] !== st || !S(x, y + 1) || nvKeep.has(I(x, y)) || inNvHall(x, y, 1)) continue;
       for (let t = y - 1, n = 0; t > Y0 + 1 && n < 30 && !S(x, t - 1); t--, n++) {
         if (n < 3) continue;
-        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && !any[(t - Y0) * WW + sx]) side = true; }
+        let side = false; for (const d of [-1, 1]) { const sx = W1(x + d); if (ok(sx, t) && S(sx, t + 1) && any[(t - Y0) * WW + sx] !== st) side = true; }
         if (side) { if (!best || t < best[1]) best = [x, t, y]; break; }
       }
       for (let t = y - 1, n = 0; t > Y0 + 2 && n < 6; t--, n++) {
         if (!S(x, t)) continue;
         const tt = tiles[I(x, t)];
-        if (soft(tt) && !nvKeep.has(I(x, t)) && !inNvHall(x, t, 4) && ok(x, t - 1) && !any[(t - 1 - Y0) * WW + x] && (!best || t - 1 < best[1])) best = [x, t - 1, y];
+        if (soft(tt) && !nvKeep.has(I(x, t)) && !inNvHall(x, t, 4) && ok(x, t - 1) && any[(t - 1 - Y0) * WW + x] !== st && (!best || t - 1 < best[1])) best = [x, t - 1, y];
         break;
       }
     }
     if (!best) return false;
     const [x, top, bot] = best;
     for (let y = top; y <= bot; y++) { const i = I(x, y); if (!SOLID[tiles[i]] || soft(tiles[i])) { tiles[i] = NV_ESCADA; if (!walls[i]) walls[i] = WNV_CASCO; } }
+    refresh(x, top, bot);
     return true;
   };
+  // os estados que já sobem até a boca, de uma vez: uma busca de trás para frente a partir das linhas de cima (antes,
+  // cada começo andava pela camada inteira atrás da boca); a busca de cada começo acha um destes logo no primeiro passo
+  {
+    const q = stk;   // (a pilha das buscas ainda está livre)
+    const norm = (j, r) => Sa[j + WW] || La[j] || La[j - WW] ? 4 : r;
+    let qh = 0, qt = 0;
+    const mark = k => { good[k] = 1; q[qt++] = k; };
+    for (let j = WW; j < (S0 - 2 - Y0) * WW; j++) if (Ok[j]) for (let r = 0; r < 5; r++) mark(j * 5 + r);
+    while (qh < qt) {
+      const k = q[qh++], j = (k / 5) | 0, r = k - j * 5, x = j % WW, row = j - x;
+      for (const pj of [row + (x === 0 ? WW - 1 : x - 1), row + (x === WW - 1 ? 0 : x + 1)]) {   // de lado
+        if (!Ok[pj]) continue; const gr = Sa[pj + WW] || La[pj];
+        for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, rp === 4 && !gr ? 0 : rp) === r) mark(pj * 5 + rp);
+      }
+      { const pj = j + WW;   // subindo, de baixo
+        if (pj < N && Ok[pj]) for (let rp = 1; rp < 5; rp++) if (!good[pj * 5 + rp] && norm(j, La[pj] || La[j] ? 4 : rp === 4 ? 3 : rp - 1) === r) mark(pj * 5 + rp); }
+      { const pj = j - WW;   // caindo, de cima
+        if (pj >= WW && Ok[pj] && norm(j, La[j] ? 4 : 0) === r) for (let rp = 0; rp < 5; rp++) if (!good[pj * 5 + rp]) mark(pj * 5 + rp); }
+    }
+  }
   const starts = [];
   if (nvBoss) for (const D of nvBoss.doors) starts.push([D.x + D.side * 3, D.fy - 1]);
   for (const c of nvLabs) starts.push([Math.round(c.cx), c.fy - 1]);
   for (const c of nvReatores) starts.push([Math.round(c.cx), c.fy ? c.fy - 1 : Math.round(c.cy)]);
   for (const X of nvExits) starts.push([X.x0 + 2, X.top - 1]);
   for (const S2 of nvSemPeso) starts.push([S2.x0 + 2, S2.fy - 1]);
+  starts.sort((a, b) => a[1] - b[1]);   // de cima para baixo: as de baixo acham logo o caminho bom das de cima
   let fixes = 0, ns = 0;
   for (const [x, y] of starts) { if (SOLID[tiles[I(x, y)]]) continue; for (let k = 0; k < 12 && (ns++, !search(W1(x), y)); k++) { if (!repair()) break; fixes++; } }
   nvClimbFix.last = [starts.length, ns, fixes];
@@ -700,9 +780,10 @@ function nvPlaceProps() {
 
 // a ordem: a camada, o Planetário (246: nvDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('nave', () => {
   if (!NAVE) return;
   try { nvBuild(); nvAfter(); if (typeof nvDress === 'function') nvDress(); nvExitClear(); nvClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da nave: o céu holográfico na Cratera e nos rasgos, as costelas da nave no Casco
@@ -711,10 +792,10 @@ function nvPlaceProps() {
   _cd();
   if (!NAVE) return;
   const Y1 = Math.min(WH, NV_S0 + NV_D + 4);
-  for (let y = NV_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(NV_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - NV_S0) + (depthNz(x, y, 25, seed ^ 0x4e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x4e12);
-    DEEPT[i] = d < 46 ? (n > 0.45 ? DP_NV_CEU : DP_NV_COSTELAS) : d < 98 ? (n > 0.62 ? DP_NV_CEU : DP_NV_COSTELAS) : d < 150 ? (n > 0.4 ? DP_NV_TANQUES : DP_NV_COSTELAS) : (n > 0.55 ? DP_NV_CEU : DP_NV_COSTELAS);
+    DEEPT[i] = d < NV_BANDS[1] ? (n > 0.45 ? DP_NV_CEU : DP_NV_COSTELAS) : d < NV_BANDS[2] ? (n > 0.62 ? DP_NV_CEU : DP_NV_COSTELAS) : d < NV_BANDS[3] ? (n > 0.4 ? DP_NV_TANQUES : DP_NV_COSTELAS) : (n > 0.55 ? DP_NV_CEU : DP_NV_COSTELAS);
   }
 }; }
 

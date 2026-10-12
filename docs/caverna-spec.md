@@ -1,12 +1,14 @@
 # As Cavernas: especificação
 
-A primeira camada debaixo do vilarejo, de 6 a 186 m. A catedral começa logo abaixo, no Átrio (186 m). A ficha do bioma está em `docs/biomas.md` (parte 2); as regras gerais em `docs/regras-de-bioma.md`.
+> **2026-10-12:** a camada tem 558 m e as grutas vão de 18 a 558 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A primeira camada debaixo do vilarejo, de 18 a 558 m. A catedral começa logo abaixo, no Átrio (558 m). A ficha do bioma está em `docs/biomas.md` (parte 2); as regras gerais em `docs/regras-de-bioma.md`.
 
 ## 1. Arquivos
 
 | Arquivo | O que tem |
 |---|---|
-| `js/52-caverna-api.js` | ids de blocos (54 a 73), paredes (13 a 17), camada distante (10 a 13), faixas `CV_BANDS`, `CAVE_D = 186`, zonas 9 a 12, `caveBand`, `cavePortalEnd`, `caveExits`. `CAVERNA = false` desliga a camada inteira. |
+| `js/52-caverna-api.js` | ids de blocos (54 a 73), paredes (13 a 17), camada distante (10 a 13), faixas `CV_BANDS`, `CAVE_D = LAYER_D` (558), zonas 9 a 12, `caveBand`, `cavePortalEnd`, `caveExits`. `CAVERNA = false` desliga a camada inteira. |
 | `js/53-caverna-blocos.js` | texturas (terra úmida, argila, rocha, musgo, calcita, cascalho, xisto, teia), paredes, camada distante, minérios na rocha, decoração de 1 bloco, itens de bloco. Exporta `CVART`. |
 | `js/54-caverna-objetos.js` | 20 objetos de cena (`caverna: true`) e o plano por faixa `CV_PROP_PLAN`. |
 | `js/76-cavernas-novos.js` | fungo esporento (nuvem de esporos, veneno), centopeia das rochas (anda em parede e teto), goblin dinamiteiro (dinamite que quebra blocos); arte, IA, sons, drops, materiais (esporo, patas de centopeia, pólvora), missões e o spawn novo das faixas. |

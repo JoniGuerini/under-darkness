@@ -86,8 +86,9 @@ let testesFecha = () => { };
   });
   $('tBands').addEventListener('click', e => {
     const b = e.target.closest('.tb'), L = __tp.LAYERS().find(C => C.nome === camada); if (!b || !L) return;
-    const F = L.faixas[+b.dataset.f], s = __tp.spot(F, L.entrada());
-    if (s) __tp.go(s[0] * T + T / 2, (s[1] + 1) * T);
+    // a camada pode ainda não ter sido gerada (312): gera o que falta até ela e só então procura o lugar
+    const F = L.faixas[+b.dataset.f];
+    genAteLinha(F.y0, () => { const s = __tp.spot(F, L.entrada()); if (s) __tp.go(s[0] * T + T / 2, (s[1] + 1) * T); });
   });
 
   /* batalhão */

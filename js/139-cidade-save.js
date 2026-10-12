@@ -10,7 +10,7 @@ ZONE_SUB.push('a água negra não corre para lugar nenhum', 'alguém fecha uma j
 if (ZONE_NAMES.length !== CD_ZONE0 + 4) console.error('zonas da Cidade Afundada fora do lugar', ZONE_NAMES.length);
 
 // a água negra das cisternas é cheia de novo depois do 87 (que ainda pode abrir túneis): cdWater no 136
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (CIDADE) try { cdWater(); } catch (err) { console.error(err); } }; }
+genPos(() => { if (CIDADE) try { cdWater(); } catch (err) { console.error(err); } }, 'cidade');   // depois das ligações da leva que gerou a cidade (129)
 
 // a água da cidade é negra (171): 80% opaca no desenho
 aguaTom(ty => CIDADE && ty >= CD_S0 - 2 && ty < CD_S0 + CD_D, ['#040506', '#08090c', '#0c0e12', '#121418', '#181c20', '#22262c']);

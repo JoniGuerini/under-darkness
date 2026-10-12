@@ -1,5 +1,7 @@
 # Biomas de Under Darkness
 
+> **2026-10-12:** os metros deste documento são os do desenho, com camadas de 186 m. No jogo cada camada tem 558 m (o desenho vezes `LAYER_K = 3`), e a camada na posição N começa a (N − 1) x 558 m do chão do vilarejo; as profundidades de hoje estão em [camadas/00-geral.md](camadas/00-geral.md), seção 1.
+
 Documento para ler e validar. O que já existe no jogo são as Cavernas (parte 2), a Catedral (parte 3), as Cavernas de Gelo (parte 4) e a Mina Abandonada (parte 5); o resto é ideia.
 
 - Parte 1: o que é um bioma e a ficha com todas as variáveis.

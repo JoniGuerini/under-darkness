@@ -36,8 +36,14 @@ function dgBuild() {
   DG_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = DG_S0, YB = Math.min(WH - 8, S0 + DG_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7d2a), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / DG_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < DG_BANDS[1] ? 0 : d < DG_BANDS[2] ? 1 : d < DG_BANDS[3] ? 2 : 3;
+  // a camada é LAYER_K vezes mais alta que o desenho (186 metros): cada faixa vira K andares da altura de antes, um
+  // embaixo do outro. lv(d, j): a linha da profundidade d do desenho, no andar j da faixa de d; lvOf(y): o andar
+  // (0 a 4K - 1) de uma linha
+  const K = LAYER_K, BD = DG_BANDS.map(v => v / K);
+  const lv = (d, j) => { let b = 0; while (b < 3 && d >= BD[b + 1]) b++; return S0 + Math.round((BD[b] * K + j * (BD[b + 1] - BD[b]) + d - BD[b]) * DB / DG_D); };
+  const lvOf = y => { const d = (y - S0) * DG_D / DB, b = bandOf(d), h = (DG_BANDS[b + 1] - DG_BANDS[b]) / K; return b * K + clamp(Math.floor((d - DG_BANDS[b]) / h), 0, K - 1); };
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   dgChambers = []; dgCorr = []; dgChim = [];
   dgEntries = []; dgLand = []; dgExits = []; dgBoss = null; dgDens = []; dgTubes = []; dgNests = []; dgHoards = []; dgVents = []; dgKeep.clear();
@@ -52,10 +58,10 @@ function dgBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
+      if (y >= YB) { tiles[i] = DG_OBSIDIANA; walls[i] = WDG_OBSIDIANA; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
       const d = y - S0 + (nz(x, y, 18, 0x7b3) - 0.5) * 10, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 26, 0x7a1), n2 = nz(x, y, 14, 0x7a2);
       let tt = DG_TUFO, w = WDG_TUFO;
-      if (y >= YB) { tt = DG_OBSIDIANA; w = WDG_OBSIDIANA; }
-      else if (b === 0) { if (n1 > 0.72 || (d > 36 && n2 > 0.62)) { tt = DG_ANDESITO; w = WDG_ANDESITO; } }
+      if (b === 0) { if (n1 > 0.72 || (d > 36 && n2 > 0.62)) { tt = DG_ANDESITO; w = WDG_ANDESITO; } }
       else if (b === 1) { tt = n2 > 0.8 ? DG_POMES : n1 > 0.84 ? DG_TUFO : DG_ANDESITO; w = WDG_ANDESITO; }
       else if (b === 2) { tt = n1 > 0.62 ? DG_OBSIDIANA : n2 > 0.86 ? DG_POMES : DG_LAVA_CORDA; w = WDG_LAVA; }
       else { const rib = Math.abs(nz(x, y, 22, 0x7a4) - 0.5); tt = rib < 0.03 ? DG_OSSO : n1 > 0.8 ? DG_LAVA_CORDA : DG_OBSIDIANA; w = WDG_OBSIDIANA; }
@@ -83,6 +89,15 @@ function dgBuild() {
       const a = Math.atan2(ddy, ddx) + (Rw() - 0.5) * 0.7 + Math.sin(n * 0.09 + s) * 0.3;
       x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.5;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.8 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
+    }
+  };
+  // rampa: a minhoca em zigue-zague de xa,ya até xb,yb, cada perna desce no máximo ~11 andando 14 a 23 de lado
+  const ramp = (xa, ya, xb, yb, r, s) => {
+    const Rr = mulberry32(seed ^ s ^ 0x5a17), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 11));
+    let x = xa, y = ya, dir = wdx(xb - xa) < 0 ? -1 : 1;
+    for (let k = 1; k <= n; k++) {
+      const ny = Math.round(ya + dy * k / n), nx = k === n ? xa + wdx(xb - xa) : x + dir * (14 + ((Rr() * 10) | 0));
+      worm(x, y, nx, ny, r, s + k * 131); x = nx; y = ny; dir = -dir;
     }
   };
   // galeria kobold: corredor reto de 4 no chão fa de xa até xb; se o chão de destino for outro, degraus (um a cada 2)
@@ -155,8 +170,9 @@ function dgBuild() {
 
   // ---------- 2c. os Tubos Frios: duas câmaras no Leito, longe uma da outra e da cratera, com o tubo frio descendo ----------
   for (let tries = 0; dgExits.length < 2 && tries < 600; tries++) {
-    const w = 18 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = S0 + mb(160) + ((R() * mb(10)) | 0);
-    if (!awayFromBoss(cx, fy, 40) || dgExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
+    const w = 18 + ((R() * 6) | 0), h = 10, cx = (R() * WW) | 0, fy = YB - 13 - ((R() * 8) | 0);   // no andar de baixo: o tubo frio é curto
+    if (!awayFromBoss(cx, fy, 64) ||   // longe o bastante para o Ossário aceitar a descida (ele pede w + 20 do centro da cratera)
+      dgExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
     const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'tubofrio', x0: W1(x0), fy, top: fy - h, exit: true };
     dgChambers.push(C);
@@ -167,43 +183,43 @@ function dgBuild() {
   }
 
   // ---------- 2d. as Chaminés de Vapor: chaminés verticais e grutas de vapor ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 400; tries++) {
-    const w = 4 + ((R() * 4) | 0), h = 20 + ((R() * 21) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(8) + h + ((R() * Math.max(1, mb(44) - h - mb(8))) | 0);
-    if (fy > S0 + mb(52) || busy(x0 + w / 2, fy - h / 2, w, h, 5)) continue;
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 4 + ((R() * 4) | 0), h = 18 + ((R() * 15) | 0), x0 = (R() * WW) | 0, fy = lv(8, j) + h + ((R() * Math.max(1, 36 - h)) | 0);
+    if (fy > lv(8, j) + 44 || busy(x0 + w / 2, fy - h / 2, w, h, 5)) continue;
     room(x0, fy, w, h);
     const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 0, kind: 'chamine', x0: W1(x0), fy, top: fy - h };
     dgChim.push(C); dgChambers.push(C); k++;
   }
-  for (let k = 0, tries = 0; k < 8 * WSC && tries < 400; tries++) {
-    const w = 14 + ((R() * 11) | 0), h = 7 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(6) + h / 2 + R() * Math.max(0, mb(38) - h);
+  for (let k = 0, tries = 0; k < 8 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 14 + ((R() * 11) | 0), h = 7 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = lv(6, j) + h / 2 + R() * Math.max(0, 32 - h);
     if (busy(cx, cy, w, h, 5)) continue;
     blob(cx, cy, w, h, 0x7d00 + k, 1.9);
     dgChambers.push({ cx, cy, w, h, band: 0, kind: 'vapor', fy: Math.round(cy + h / 2) }); k++;
   }
 
   // ---------- 2e. os Túneis Kobold: galerias retas, tocas, santuários ----------
-  for (let k = 0, tries = 0; k < 10 * WSC && tries < 600; tries++) {
-    const len = 30 + ((R() * 41) | 0), hh = 3 + ((R() * 2) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(52 + R() * 44);
+  for (let k = 0, tries = 0; k < 10 * WSC * K && tries < 600 * K; tries++) {
+    const len = 30 + ((R() * 41) | 0), hh = 3 + ((R() * 2) | 0), x0 = (R() * WW) | 0, fy = lv(52 + R() * 44, k % K);
     if (busy(x0 + len / 2, fy - 2, len, hh + 1, 3)) continue;
     for (let j = 0; j < len; j++) { for (let y = fy - hh; y < fy; y++) dig(x0 + j, y); hard(x0 + j, fy); }
     const C = { cx: x0 + len / 2, cy: fy - hh / 2, w: len, h: hh, band: 1, kind: 'galeria', x0: W1(x0), fy, top: fy - hh, len };
     dgCorr.push({ x0: W1(x0), len, fy, h: hh, kobold: true }); dgChambers.push(C); k++;
   }
   const dens = (n, shrine) => {
-    for (let k = 0, tries = 0; k < n && tries < 500; tries++) {
-      const w = shrine ? 16 : 8 + ((R() * 7) | 0), h = shrine ? 9 : 5 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(54 + R() * 42);
-      if (fy - h < S0 + mb(47) || busy(x0 + w / 2, fy - h / 2, w, h, 4) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2)) continue;
+    for (let k = 0, tries = 0; k < n && tries < 500 * K; tries++) {
+      const j = k % K, w = shrine ? 16 : 8 + ((R() * 7) | 0), h = shrine ? 9 : 5 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = lv(54 + R() * 42, j);
+      if (fy - h < lv(47, j) || busy(x0 + w / 2, fy - h / 2, w, h, 4) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2)) continue;
       room(x0, fy, w, h);
       if (!shrine) for (let x = x0 + 1; x < x0 + w - 1; x++) dig(x, fy - h - 1);   // a toca tem o teto em arco baixo
       const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 1, kind: shrine ? 'santuario' : 'toca', x0: W1(x0), fy, top: fy - h, shrine: !!shrine };
       dgDens.push(H); dgChambers.push(H); k++;
     }
   };
-  dens(3 * WSC, true); dens(14 * WSC, false);
+  dens(3 * WSC * K, true); dens(14 * WSC * K, false);
 
   // ---------- 2f. os Tubos de Lava: tubos compridos e redondos (um em cada três com o canal de magma), ninhos de draco ----------
-  for (let k = 0, tries = 0; k < 8 * WSC && tries < 500; tries++) {
-    const len = 40 + ((R() * 71) | 0), hh = 5 + ((R() * 4) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(106 + R() * 40);
+  for (let k = 0, tries = 0; k < 8 * WSC * K && tries < 500 * K; tries++) {
+    const len = 40 + ((R() * 71) | 0), hh = 5 + ((R() * 4) | 0), x0 = (R() * WW) | 0, fy = lv(106 + R() * 40, k % K);
     if (busy(x0 + len / 2, fy - hh / 2, len, hh, 5) || !awayFromBoss(x0 + len / 2, fy - hh / 2, len / 2)) continue;
     // a seção redonda: o teto em arco que sobe e desce devagar, o chão quase plano
     const ph = R() * 6, amp = 1 + R() * 2;
@@ -212,12 +228,12 @@ function dgBuild() {
       const f = fy + Math.round(Math.sin(j * 0.05 + ph * 2) * 1.2);
       for (let y = f - H; y < f; y++) dig(x0 + j, y); hard(x0 + j, f);
     }
-    const canal = k % 3 === 0;
+    const canal = ((k / K) | 0) % 3 === 0;   // um em cada três de cada andar
     const C = { cx: x0 + len / 2, cy: fy - hh / 2, w: len, h: hh, band: 2, kind: 'tubo', x0: W1(x0), fy, top: fy - hh, len, canal, ph };
     dgTubes.push(C); dgChambers.push(C); k++;
   }
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 400; tries++) {
-    const w = 12 + ((R() * 7) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = S0 + mb(102) + h / 2 + R() * Math.max(0, mb(44) - h);
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 400 * K; tries++) {
+    const w = 12 + ((R() * 7) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0, cy = lv(102, k % K) + h / 2 + R() * Math.max(0, 44 - h);
     if (busy(cx, cy, w, h, 5) || !awayFromBoss(cx, cy, w / 2)) continue;
     blob(cx, cy, w, h, 0x7e00 + k, 2.2);
     const C = { cx, cy, w, h, band: 2, kind: 'ninho', fy: Math.round(cy + h / 2) };
@@ -225,9 +241,9 @@ function dgBuild() {
   }
 
   // ---------- 2g. o Leito de Ouro: câmaras do tesouro ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 500; tries++) {
-    const w = 20 + ((R() * 17) | 0), h = 10 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(156 + R() * 24);
-    if (fy - h < S0 + mb(151) || fy > YB - 5 || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 500 * K; tries++) {
+    const j = k % K, w = 20 + ((R() * 17) | 0), h = 10 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = lv(156 + R() * 24, j);
+    if (fy - h < lv(151, j) || fy > YB - 5 || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
     blob(x0 + w / 2, fy - h / 2, w, h, 0x7f00 + k, 3.2);
     room(x0 + 2, fy, w - 4, 3);
     const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, kind: 'tesouro', x0: W1(x0), fy, top: fy - h };
@@ -237,21 +253,25 @@ function dgBuild() {
   // ---------- 3. as ligações ----------
   const mouth = C => C.fy ? C.fy : Math.round(C.cy + C.h * 0.3);
   const ends = (C, right) => [Math.round(right ? C.cx + C.w / 2 - 2 : C.cx - C.w / 2 + 2), mouth(C)];
-  for (let b = 0; b < 4; b++) {
-    const L = dgChambers.filter(c => c.band === b && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
+  // cada sala no seu andar (o da faixa dela que contém a boca); as salas de um andar ligadas em anel
+  const NL = 4 * K, byLv = []; for (let l = 0; l < NL; l++) byLv.push([]);
+  for (const c of dgChambers) if (!c.nolink && !c.boss) byLv[c.band * K + clamp(lvOf(mouth(c) - 1) - c.band * K, 0, K - 1)].push(c);
+  for (let l = 0; l < NL; l++) {
+    const b = (l / K) | 0, L = byLv[l].slice().sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
       if (b === 1) gallery(ax, ay, bx, by, dgCorr);   // os kobolds cavam reto
-      else worm(ax, ay - 2, bx, by - 2, b === 2 ? 1.6 : 1.4, 0x7700 + b * 90 + k);
+      else worm(ax, ay - 2, bx, by - 2, b === 2 ? 1.6 : 1.4, 0x7700 + l * 90 + k);
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = dgChambers.filter(c => c.band === b && !c.nolink && !c.boss), D = dgChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss);
+  // entre um andar e o de baixo: 3 x WSC rampas em zigue-zague (nada de poço reto: cada perna desce uns 11)
+  for (let l = 0; l < NL - 1; l++) {
+    const U = byLv[l], D = byLv[l + 1];
     for (let k = 0; k < 3 * WSC && U.length && D.length; k++) {
       const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
       if (!awayFromBoss(Q.cx, mouth(Q), 4)) continue;
-      const [ax, ay] = ends(P, R() < 0.5); worm(ax, ay - 2, Q.cx, mouth(Q) - 2, 1.4, 0x77f0 + b * 9 + k);
+      const [ax, ay] = ends(P, R() < 0.5); ramp(ax, ay - 2, Math.round(Q.cx), mouth(Q) - 2, 1.4, 0x77f0 + l * 9 + k);
     }
   }
   // bolsinhas fechadas viram rocha; ilhas soltas no ar somem
@@ -293,6 +313,10 @@ function dgBuild() {
     lining(x0, y0, x1, y1, DG_TUFO, WDG_TUFO, DG_TUFO, DG_TUFO);
     const lx = C.x0 + (hash2(C.x0, C.fy, seed ^ 0x72) < 0.5 ? 0 : C.w - 1);
     for (let y = C.top; y < C.fy; y++) { const i = I(lx, y); if (tiles[i] === AIR) tiles[i] = DG_ESCADA; }
+    // a cada 9 a 11 linhas um patamar de tufo de parede a parede: só a escada passa (um sim, um não, também a coluna
+    // ao lado dela); quem cai na chaminé cai pouco
+    for (let y = C.fy - 10, n = 0; y > C.top + 4; y -= 9 + ((hash2(C.x0, y, seed ^ 0x75) * 3) | 0), n++)
+      for (let x = C.x0; x < C.x0 + C.w; x++) { if (x === lx || (n % 2 === 0 && Math.abs(x - lx) === 1)) continue; const i = I(x, y); if (tiles[i] === AIR) { tiles[i] = DG_TUFO; walls[i] = WDG_TUFO; } }
   }
   // as grutas de vapor: tufo
   for (const C of dgChambers) if (C.kind === 'vapor') { const [x0, y0, x1, y1] = boxOf(C, 2); lining(x0, y0, x1, y1, DG_TUFO, WDG_TUFO, DG_TUFO, DG_TUFO); }
@@ -368,6 +392,8 @@ function dgBuild() {
       for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (y > E.fy) { tiles[i] = (y - E.fy) % 7 === 3 ? DG_ANDESITO : DG_TUFO; dgKeep.add(i); } }
     }
     for (let y = E.fy - 2; y < L.fy; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = DG_ESCADA; dgKeep.add(i); } }
+    // um patamar de tufo no meio do poço (só a escada passa): quem desce caindo cai a metade
+    if (y1 - E.fy > 14) { const my = (E.fy + y1) >> 1; for (const x of [x0, x0 + 2, x0 + 3]) { const i = I(x, my); tiles[i] = DG_TUFO; dgKeep.add(i); } }
     for (let y = E.fy - 3; y < E.fy; y++) for (let x = x0; x < x0 + 4; x++) dgKeep.add(I(x, y));
     for (let y = L.fy - L.h - 1; y <= L.fy; y++) for (let x = L.x0 - 1; x <= L.x0 + L.w; x++) {
       const i = I(x, y), edge = y === L.fy - L.h - 1 || y === L.fy || x === L.x0 - 1 || x === L.x0 + L.w;
@@ -389,6 +415,7 @@ function dgBuild() {
       if (y >= X.top) for (const x of [X.x0 - 1, X.x0 + 5]) { const i = I(x, y); tiles[i] = (y - X.top) > (X.fy - X.top) * 0.6 ? DG_OSSO : (y - X.top) % 6 === 3 ? DG_OBSIDIANA : DG_LAVA_CORDA; dgKeep.add(i); }
     }
     for (let y = X.C.top + 1; y < X.fy; y++) { const i = I(X.x0 + 1, y); if (!SOLID[tiles[i]]) { tiles[i] = DG_ESCADA; dgKeep.add(i); } }
+    if (X.fy - X.top > 8) { const my = (X.top + X.fy) >> 1; for (const x of [X.x0, X.x0 + 2, X.x0 + 3, X.x0 + 4]) { const i = I(x, my); tiles[i] = DG_OBSIDIANA; dgKeep.add(i); } }   // o patamar no meio
     for (let x = X.x0 - 2; x <= X.x0 + 6; x++) { dgKeep.add(I(x, X.top)); if (x < X.x0 || x > X.x0 + 4) { const i = I(x, X.top); if (SOLID[tiles[i]]) tiles[i] = DG_LAVA_CORDA; } }
     tiles[I(X.x0 + 1, X.fy)] = DG_OBSIDIANA;
   }
@@ -408,21 +435,21 @@ function dgBuild() {
       }
     }
   };
-  vein(DG_O_CARVAO, 22 * WSC, 0, 46, 3, 7, t => t === DG_TUFO);
-  vein(DG_O_CARVAO, 8 * WSC, 46, 98, 3, 7, t => t === DG_ANDESITO || t === DG_TUFO);
-  vein(DG_O_CARVAO, 8 * WSC, 98, 186, 3, 6, t => t === DG_ANDESITO || t === DG_LAVA_CORDA);   // o carvão está em todas as camadas (00-geral): menos aqui embaixo
+  vein(DG_O_CARVAO, 22 * WSC * K, 0, 46, 3, 7, t => t === DG_TUFO);
+  vein(DG_O_CARVAO, 8 * WSC * K, 46, 98, 3, 7, t => t === DG_ANDESITO || t === DG_TUFO);
+  vein(DG_O_CARVAO, 8 * WSC * K, 98, 186, 3, 6, t => t === DG_ANDESITO || t === DG_LAVA_CORDA);   // o carvão está em todas as camadas (00-geral): menos aqui embaixo
   // perto do fogo (obsidiana, osso e a lava cordada que o cerca); a pedra comum perto do fogo também serve
   const draHost = t => t === DG_OBSIDIANA || t === DG_OSSO || t === DG_LAVA_CORDA || t === DG_ANDESITO;
-  vein(DG_O_DRACONIO, 14 * WSC, 98, 150, 3, 6, draHost, true);
-  vein(DG_O_DRACONIO, 12 * WSC, 150, 186, 3, 7, draHost, true);
-  vein(DG_O_DRACONIO, 6 * WSC, 98, 186, 2, 5, t => t === DG_OBSIDIANA || t === DG_LAVA_CORDA, false);   // um pouco longe do fogo também, para quem não acha   // um pouco longe do fogo também, para quem não acha
+  vein(DG_O_DRACONIO, 14 * WSC * K, 98, 150, 3, 6, draHost, true);
+  vein(DG_O_DRACONIO, 12 * WSC * K, 150, 186, 3, 7, draHost, true);
+  vein(DG_O_DRACONIO, 6 * WSC * K, 98, 186, 2, 5, t => t === DG_OBSIDIANA || t === DG_LAVA_CORDA, false);   // um pouco longe do fogo também, para quem não acha
 }
 
 function dgAfter() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = DG_S0, YB = Math.min(WH - 8, S0 + DG_D), R3 = mulberry32(seed ^ 0x7d3c1);
   const dgRow = y => y >= S0 && y < YB - 1;
-  const dig = (x, y) => { if (!dgRow(y)) return; const i = I(x, y); if (dgKeep.has(i) || inDgHall(W1(x), y, 5)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WDG_TUFO; };
+  const dig = (x, y) => { if (!dgRow(y)) return; const i = I(x, y); if (dgKeep.has(i) || inDgHall(W1(x), y, 5)) return; if (y > 0 && tiles[I(x, y - 1)] === DG_OURO_SOLTO) tiles[I(x, y - 1)] = DG_OBSIDIANA; /* ouro solto sobre o túnel cairia e o taparia: vira teto firme */ if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WDG_TUFO; };
   const worm = (xa, ya, xb, yb, r, s) => {
     let x = xa, y = ya; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
     for (let n = 0; n < 900; n++) {
@@ -437,21 +464,51 @@ function dgAfter() {
   const B = dgBoss, inBox = (x, y, m = 0) => B && Math.abs(wdx(x - B.cx)) <= B.w / 2 + 5 + m && y >= B.top - 5 - m && y <= B.fy + 5 + m;
   const blocked = t => SOLID[t] || DG_HOT(t);
 
+  // o ouro solto sem apoio (um túnel passou embaixo) cai já na geração, antes do conserto: vira um monte assentado
+  for (let pass = 0; pass < 40; pass++) {
+    let moved = 0;
+    for (let y = YB - 2; y > S0; y--) for (let x = 0; x < WW; x++) {
+      const i = y * WW + x; if (tiles[i] !== DG_OURO_SOLTO || inBox(x, y)) continue;
+      const dn = i + WW; if (tiles[dn] === AIR) { tiles[dn] = DG_OURO_SOLTO; tiles[i] = AIR; moved++; continue; }
+      for (const d of [-1, 1]) { const s = I(x + d, y), sd = I(x + d, y + 1); if (tiles[s] === AIR && tiles[sd] === AIR) { tiles[sd] = DG_OURO_SOLTO; tiles[i] = AIR; moved++; break; } }
+    }
+    if (!moved) break;
+  }
+
   // ---------- 1. tudo alcançável das duas chaminés ----------
   const reach = new Uint8Array(NN), stack = [];
   const flood = (s0, again) => { if ((reach[s0] && !again) || blocked(tiles[s0])) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !blocked(tiles[nb])) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of dgEntries) flood(I(E.x0 + 1, E.fy - 1));
   if (!dgEntries.length && dgChambers.length) flood(I(dgChambers[0].cx, Math.round(dgChambers[0].cy)));
   if (B) for (let y = B.top - 5; y <= B.fy + 5; y++) for (let x = B.cx - 50; x <= B.cx + 49; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || blocked(tiles[i]) || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !blocked(tiles[nb])) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+  // as bolsas que não se alcançam, rotuladas uma vez só (só as linhas da camada), da maior para a menor; a que um
+  // conserto anterior já alcançou fica de fora
+  const RB = S0 * WW, lab = new Uint8Array((YB - S0) * WW), comps = [];
+  for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x; if (reach[i] || lab[i - RB] || blocked(tiles[i]) || !walls[i]) continue;
+    const comp = []; lab[i - RB] = 1; stack.push(i);
+    while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= RB && nb < YB * WW && !lab[nb - RB] && !reach[nb] && !blocked(tiles[nb])) { lab[nb - RB] = 1; stack.push(nb); } }
+    if (comp.length >= 16) comps.push(comp);
+  }
+  comps.sort((a, c) => c.length - a.length);
+  const org = new Int32Array((YB - S0) * WW);
+  // a busca pela rocha da bolsa inteira até o vão alcançado mais perto (contornando o que fica); devolve onde chegou
+  const bfs = C => {
+    org.fill(-1); const q = []; let hit = -1; for (const c of C) { org[c - RB] = c; q.push(c); }
+    for (let h = 0; h < q.length && hit < 0; h++) {
+      const c = q[h], x = c % WW, row = c - x;
+      for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
+        if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb - RB] >= 0 || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
+        if (reach[nb] && !blocked(tiles[nb])) { org[nb - RB] = c; hit = nb; break; }   // o vão alcançado vale mesmo guardado (a porta do pouso)
+        if (dgKeep.has(nb) || dgKeep.has(nb - WW) || tiles[nb] === BEDROCK || DG_HOT(tiles[nb])) continue;
+        org[nb - RB] = c;
+        q.push(nb);
+      }
     }
-    if (!bestC) break;
+    return hit;
+  };
+  for (let pass = 0; pass < comps.length && pass < 60 * WSC * LAYER_K; pass++) {
+    const bestC = comps[pass]; if (reach[bestC[0]]) continue;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -461,34 +518,24 @@ function dgAfter() {
         const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
       }
     }
+    if (!best) {   // nada perto: a ligação vai até o vão alcançado mais perto, por mais longe que esteja
+      const h = bfs(bestC); if (h >= 0) { let o = h; while (org[o - RB] !== o) o = org[o - RB]; best = [o % WW, (o / WW) | 0, h % WW, (h / WW) | 0]; }
+    }
     if (!best) { for (const c of bestC) reach[c] = 1; continue; }
-    worm(best[0], best[1], best[2], best[3], 1.3, 0x76a0 + pass);
+    {   // em zigue-zague quando a ligação é mais funda que 11: o conserto não abre poço
+      const [ax, ay, bx, by] = best, n = Math.max(1, Math.ceil(Math.abs(by - ay) / 11)); let x = ax, y = ay, dir = wdx(bx - ax) < 0 ? -1 : 1;
+      for (let k = 1; k <= n; k++) { const ny = Math.round(ay + (by - ay) * k / n), nx = k === n ? ax + wdx(bx - ax) : x + dir * 12; worm(x, y, nx, ny, 1.3, 0x76a0 + pass + (k - 1) * 977); x = nx; y = ny; dir = -dir; }
+    }
     flood(I(best[2], best[3]), true);
     if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
-      for (let h = 0; h < q.length && hit < 0; h++) {
-        const c = q[h], x = c % WW, row = c - x;
-        for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
-          if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || dgKeep.has(nb) || dgKeep.has(nb - WW) || tiles[nb] === BEDROCK || DG_HOT(tiles[nb]) || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
-          org[nb] = c; if (reach[nb] && !blocked(tiles[nb])) { hit = nb; break; }
-          q.push(nb);
-        }
-      }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      const hit = bfs(bestC);
+      for (let c = hit; c >= 0 && org[c - RB] !== c; c = org[c - RB]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
   }
-  // o ouro solto sem apoio (um túnel passou embaixo) cai já na geração: vira um monte assentado
-  for (let pass = 0; pass < 6; pass++) {
-    let moved = 0;
-    for (let y = YB - 2; y > S0; y--) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (tiles[i] !== DG_OURO_SOLTO || inBox(x, y)) continue;
-      const dn = i + WW; if (tiles[dn] === AIR) { tiles[dn] = DG_OURO_SOLTO; tiles[i] = AIR; moved++; continue; }
-      for (const d of [-1, 1]) { const s = I(x + d, y), sd = I(x + d, y + 1); if (tiles[s] === AIR && tiles[sd] === AIR) { tiles[sd] = DG_OURO_SOLTO; tiles[i] = AIR; moved++; break; } }
-    }
-    if (!moved) break;
-  }
+  // o ouro que o conserto ainda deixou sem apoio de lado não cai mais: endurece onde está (não tapa o caminho aberto)
+  for (let y = S0 + 1; y < YB - 1; y++) for (let x = 0; x < WW; x++) { const i = y * WW + x; if (tiles[i] !== DG_OURO_SOLTO || inBox(x, y)) continue; if (tiles[i + WW] === AIR || [-1, 1].some(d => tiles[I(x + d, y)] === AIR && tiles[I(x + d, y + 1)] === AIR)) tiles[i] = DG_OBSIDIANA; }
 
   // ---------- 2. escada de cravos (nos Túneis) ou corda de couro de draco (no resto) em todo desnível de 5 ou mais ----------
   {
@@ -551,7 +598,7 @@ function dgAfter() {
     else { if (q < 0.04) put(x, y, DG_MOEDAS); else if (q < 0.06) put(x, y, DG_ESCAMA); else if (q < 0.07) put(x, y, DG_FUMAROLA); }
   }
   // as bicas de vapor nas paredes das chaminés: guardadas para as partículas
-  for (let y = S0 + 1; y < S0 + mbOf(46); y++) for (let x = 0; x < WW; x++) if (tiles[y * WW + x] === DG_VAPOR) dgVents.push([x, y]);
+  for (let y = S0 + 1; y < S0 + mbOf(DG_BANDS[1]); y++) for (let x = 0; x < WW; x++) if (tiles[y * WW + x] === DG_VAPOR) dgVents.push([x, y]);
 
   // ---------- 5. os objetos ----------
   dgPlaceProps();
@@ -569,21 +616,55 @@ function dgClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = DG_S0, YB = Math.min(WH - 8, S0 + DG_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1 && tiles[I(x, y)] !== DG_OURO_SOLTO, Bk = (x, y) => SOLID[tiles[I(x, y)]] === 1 || DG_HOT(tiles[I(x, y)]), L = (x, y) => DG_CLIMB(tiles[I(x, y)]);
   const ok = (x, y) => !Bk(x, y) && !Bk(x, y - 1), H = YB - Y0;
-  const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
-  const search = (sx, sy) => {
-    seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || inDgHall(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
-    const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
-    let y = sy; while (y < YB - 1 && !Bk(sx, y + 1) && !L(sx, y)) y++; push(sx, y, 4);
-    while (q.length) {
-      if (hit >= 0) return win(hit);
-      const r = q.pop(), yy = q.pop(), x = q.pop(); cur = ((yy - Y0) * WW + x) * 5 + r; if (yy <= S0 - 3) return win(cur);
-      const gr = S(x, yy + 1) || L(x, yy);
-      push(x - 1, yy, r === 4 && !gr ? 0 : r); push(x + 1, yy, r === 4 && !gr ? 0 : r);
-      if (r > 0) push(x, yy - 1, L(x, yy) || L(x, yy - 1) ? 4 : r === 4 ? 3 : r - 1);
-      if (!Bk(x, yy + 1)) push(x, yy + 1, L(x, yy + 1) ? 4 : 0);
+  // os estados (célula, pulo que sobra 0 a 4) de onde se volta ao topo (y <= S0 - 3) saem de uma vez, andando de trás
+  // para frente a partir do topo (antes era uma busca inteira para cada ponto de partida). F guarda, por célula
+  // c = (y - Y0) * WW + x: 1 cabe o herói, 2 apoiado (pulo cheio), 4 chão ou escada aqui, 8 escada aqui ou acima
+  const NC = WW * H, F = new Uint8Array(NC), good = new Uint8Array(NC * 5), seen = new Uint8Array(NC * 5), any = new Uint8Array(NC), Q = new Int32Array(NC * 5);
+  const flag1 = (x, y) => {
+    let f = 0;
+    if (ok(x, y) && !inDgHall(x, y)) { f = 1; const lh = L(x, y), lu = lh || L(x, y - 1), sd = S(x, y + 1); if (sd || lu) f |= 2; if (sd || lh) f |= 4; if (lu) f |= 8; }
+    F[(y - Y0) * WW + x] = f;
+  };
+  const flags = () => { for (let y = Y0 + 1; y < YB; y++) for (let x = 0; x < WW; x++) flag1(x, y); };
+  // o pulo com que se chega em c vindo de p (dir 0 de lado, 1 subindo, 2 descendo); -1 não dá
+  const arrive = (p, r, c, dir) => { if (F[c] & 2) return dir === 1 && r === 0 ? -1 : 4; if (dir === 0) return r === 4 && !(F[p] & 4) ? 0 : r; if (dir === 1) return r === 0 ? -1 : F[p] & 8 ? 4 : r === 4 ? 3 : r - 1; return 0; };
+  const closure = () => {
+    good.fill(0); let qt = 0;
+    for (let y = Y0 + 1; y <= S0 - 3; y++) for (let x = 0; x < WW; x++) { const c = (y - Y0) * WW + x, f = F[c]; if (f & 1) for (let r = f & 2 ? 4 : 0; r <= 4; r++) { good[c * 5 + r] = 1; Q[qt++] = c * 5 + r; } }
+    spread(qt);
+  };
+  // depois de um conserto (escada na coluna x, de top a bot: só abre caminho, nunca fecha) basta refazer as marcas em
+  // volta e continuar a volta a partir dos estados bons de perto
+  const patch = (x, top, bot) => {
+    for (let y = Math.max(Y0 + 1, top - 2); y <= Math.min(YB - 1, bot + 2); y++) for (let dx = -1; dx <= 1; dx++) flag1(W1(x + dx), y);
+    let qt = 0;
+    for (let y = Math.max(Y0 + 1, top - 3); y <= Math.min(YB - 1, bot + 3); y++) for (let dx = -2; dx <= 2; dx++) { const c = (y - Y0) * WW + W1(x + dx); for (let r = 0; r < 5; r++) if (good[c * 5 + r]) Q[qt++] = c * 5 + r; }
+    spread(qt);
+  };
+  const spread = qt => {
+    let qh = 0;
+    while (qh < qt) {
+      const t = Q[qh++], c = (t / 5) | 0, rt = t - c * 5, x = c % WW, row = c - x;
+      for (let d = 0; d < 4; d++) {
+        const p = d === 0 ? row + (x === 0 ? WW - 1 : x - 1) : d === 1 ? row + (x === WW - 1 ? 0 : x + 1) : d === 2 ? c + WW : c - WW;
+        if (p < 0 || p >= NC || !(F[p] & 1)) continue;
+        const dir = d < 2 ? 0 : d === 2 ? 1 : 2;
+        for (let r = F[p] & 2 ? 4 : 0; r <= 4; r++) { const k = p * 5 + r; if (!good[k] && arrive(p, r, c, dir) === rt) { good[k] = 1; Q[qt++] = k; } }
+      }
     }
-    return hit >= 0 ? win(hit) : false;
+  };
+  // tudo o que se alcança de uma célula (para o conserto)
+  const forward = c0 => {
+    seen.fill(0); any.fill(0); let qh = 0, qt = 0; const s0 = c0 * 5 + 4; seen[s0] = 1; Q[qt++] = s0; any[c0] = 1;
+    while (qh < qt) {
+      const t = Q[qh++], c = (t / 5) | 0, r = t - c * 5, x = c % WW, row = c - x;
+      for (let d = 0; d < 4; d++) {
+        const n = d === 0 ? row + (x === 0 ? WW - 1 : x - 1) : d === 1 ? row + (x === WW - 1 ? 0 : x + 1) : d === 2 ? c - WW : c + WW;
+        if (n < 0 || n >= NC || !(F[n] & 1)) continue;
+        const r1 = arrive(c, r, n, d < 2 ? 0 : d === 2 ? 1 : 2); if (r1 < 0) continue;
+        const k = n * 5 + r1; if (!seen[k]) { seen[k] = 1; any[n] = 1; Q[qt++] = k; }
+      }
+    }
   };
   const soft = t => t === DG_TUFO || t === DG_ANDESITO || t === DG_POMES || t === DG_LAVA_CORDA || t === DG_TAIPA || t === DG_OBSIDIANA || t === DG_OSSO;
   const repair = () => {
@@ -605,7 +686,7 @@ function dgClimbFix() {
     if (!best) return false;
     const [x, top, bot] = best;
     for (let y = top; y <= bot; y++) { const i = I(x, y); if (!SOLID[tiles[i]] || soft(tiles[i])) { tiles[i] = DG_ESCADA; if (!walls[i]) walls[i] = WDG_TUFO; } }
-    return true;
+    return best;
   };
   const starts = [];
   if (dgBoss) for (const D of dgBoss.doors) starts.push([D.x + D.side * 3, D.fy - 1]);
@@ -614,7 +695,18 @@ function dgClimbFix() {
   for (const c of dgHoards) starts.push([Math.round(c.cx), c.fy - 1]);
   for (const X of dgExits) starts.push([X.x0 + 2, X.top - 1]);
   let fixes = 0, ns = 0;
-  for (const [x, y] of starts) { if (SOLID[tiles[I(x, y)]]) continue; for (let k = 0; k < 12 && (ns++, !search(W1(x), y)); k++) { if (!repair()) break; fixes++; } }
+  flags(); closure();
+  for (const [x0, y0] of starts) {
+    if (SOLID[tiles[I(x0, y0)]]) continue;
+    for (let k = 0; k < 12; k++) {
+      ns++;
+      const sx = W1(x0); let y = y0; while (y < YB - 1 && !Bk(sx, y + 1) && !L(sx, y)) y++;
+      const c = (y - Y0) * WW + sx;
+      if (F[c] & 1) { if (good[c * 5 + 4]) break; forward(c); } else any.fill(0);
+      const fx = repair(); if (!fx) break;
+      fixes++; patch(fx[0], fx[1], fx[2]);
+    }
+  }
   dgClimbFix.last = [starts.length, ns, fixes];
   return fixes;
 }
@@ -685,11 +777,12 @@ function dgPlaceProps() {
 
 // a ordem: a camada, a cratera (277: dgDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('dragao', () => {
   if (!DRAGAO) return;
   try { dgBuild(); dgAfter(); if (typeof dgDress === 'function') dgDress(); dgExitClear(); dgClimbFix(); } catch (err) { console.error(err); }
   // os tipos de dano do Covil (o 101 carrega depois deste arquivo)
   if (typeof DMG_KIND !== 'undefined') Object.assign(DMG_KIND, { kobfundidor: 'fogo', criadraco: 'fogo', serpe: 'fogo', cinzarel: 'fogo' });
+});
 }; }
 
 /* ---------- a terceira camada atrás do Covil: as paredes do vulcão nas Chaminés e nos Tubos, o paredão de tocas nos
@@ -698,10 +791,10 @@ function dgPlaceProps() {
   _cd();
   if (!DRAGAO) return;
   const Y1 = Math.min(WH, DG_S0 + DG_D + 4);
-  for (let y = DG_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(DG_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - DG_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 46 ? DP_DG_CHAMINE : d < 98 ? (n > 0.75 ? DP_DG_CHAMINE : DP_DG_TOCAS) : d < 150 ? (n > 0.7 ? DP_DG_OSSADA : DP_DG_CHAMINE) : (n > 0.72 ? DP_DG_CHAMINE : DP_DG_OSSADA);
+    DEEPT[i] = d < DG_BANDS[1] ? DP_DG_CHAMINE : d < DG_BANDS[2] ? (n > 0.75 ? DP_DG_CHAMINE : DP_DG_TOCAS) : d < DG_BANDS[3] ? (n > 0.7 ? DP_DG_OSSADA : DP_DG_CHAMINE) : (n > 0.72 ? DP_DG_CHAMINE : DP_DG_OSSADA);
   }
 }; }
 

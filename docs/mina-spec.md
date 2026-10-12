@@ -1,12 +1,14 @@
 # A Mina Abandonada: especificação
 
-A quarta camada, debaixo das Cavernas de Gelo, de 558 a 744 m. A ficha do bioma está em `docs/biomas.md` (parte 5); as regras gerais em `docs/regras-de-bioma.md`.
+> **2026-10-12:** a camada tem 558 m, de 1674 a 2232 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A quarta camada, debaixo das Cavernas de Gelo, de 1674 a 2232 m. A ficha do bioma está em `docs/biomas.md` (parte 5); as regras gerais em `docs/regras-de-bioma.md`.
 
 ## 1. Arquivos
 
 | Arquivo | O que tem |
 |---|---|
-| `js/79-mina-api.js` | ids de blocos (94 a 116), paredes (23 a 27), camada distante (18 a 20), faixas `MN_BANDS`, `MN_D = 186`, `MN_TOP`, zonas 17 a 20 (`MN_ZONE0`), `mineBand`, `mnExits`, `mnBoss`. `MINA = false` desliga a camada inteira. |
+| `js/79-mina-api.js` | ids de blocos (94 a 116), paredes (23 a 27), camada distante (18 a 20), faixas `MN_BANDS`, `MN_D = LAYER_D` (558), `MN_TOP`, zonas 17 a 20 (`MN_ZONE0`), `mineBand`, `mnExits`, `mnBoss`. `MINA = false` desliga a camada inteira. |
 | `js/80-mina-blocos.js` | texturas (rocha ferrosa, rejeito, entulho, tábua, viga, rocha cavada, tijolo de fornalha, escória, quartzito, grade do chefe), paredes, camada distante (rocha, andaimes, fornalhas), minérios (carvão e ferro na rocha ferrosa, ouro e cristal no quartzito; a geração só usa carvão e cristal), decoração de 1 bloco (escora, trilho, lampião, escada, ferramentas, pedras, corda, brasa, estaca com caveira), itens de bloco. |
 | `js/81-mina-objetos.js` | 28 objetos de cena (`mina: true`), o Trono do Rei Goblin e o plano por faixa `MN_PROP_PLAN`. |
 | `js/82-mina-bichos.js` | mineiro morto, carrinho assombrado, grisu, lampião assombrado, falso veio, golem de minério, rato-toupeira: arte, IA, sons, drops e materiais (engrenagem, pepita, núcleo de minério, óleo de lampião). Exporta `MNB`. |

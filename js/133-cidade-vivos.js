@@ -146,7 +146,7 @@ function cdvOnLadder(e) {
 }
 // a fresh route for an errand, on a timer or whenever the human changes cell
 function cdvRoute(e, dt, fn) {
-  const cell = Math.floor((e.x + e.w / 2) / T) * 4096 + Math.floor((e.y + e.h + 1) / T);
+  const cell = Math.floor((e.x + e.w / 2) / T) * 16384 + Math.floor((e.y + e.h + 1) / T);
   e.cdNavT = (e.cdNavT || 0) - dt;
   if (e.cdNavT <= 0 || cell !== e.cdNavCell) { e.cdNavT = 0.35 + Math.random() * 0.15; e.cdNavCell = cell; e.cdNav = fn(); }
   return e.cdNav;

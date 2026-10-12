@@ -3,11 +3,20 @@
 /* ================= map (Tab): a Diablo-style overlay of everything you've seen ================= */
 let seen = new Uint8Array(0), mapOpen = false, mapVer = 0, mapDrawn = -1, mapKey = '', mapT = -9;
 function packSeen() {
-  const b = new Uint8Array(Math.ceil(seen.length / 8)); for (let i = 0; i < seen.length; i++) if (seen[i]) b[i >> 3] |= 1 << (i & 7);
-  let s = ''; for (let i = 0; i < b.length; i += 4096) s += String.fromCharCode.apply(null, b.subarray(i, i + 4096));
-  try { return btoa(s); } catch (e) { return ''; }
+  // runs of unseen/seen tiles as varints (2026-10-12: the world got 3x taller and the plain bit map grew to 1.5 MB in the save)
+  const out = []; let cur = 0, run = 0;
+  const put = n => { while (n >= 128) { out.push((n & 127) | 128); n = Math.floor(n / 128); } out.push(n); };
+  for (let i = 0; i < seen.length; i++) { const v = seen[i] ? 1 : 0; if (v === cur) run++; else { put(run); cur = v; run = 1; } }
+  put(run);
+  const b = Uint8Array.from(out); let s = ''; for (let i = 0; i < b.length; i += 4096) s += String.fromCharCode.apply(null, b.subarray(i, i + 4096));
+  try { return 'r1:' + btoa(s); } catch (e) { return ''; }
 }
-function unpackSeen(str) { try { const s = atob(str); for (let i = 0; i < seen.length; i++) seen[i] = (s.charCodeAt(i >> 3) >> (i & 7)) & 1; mapVer++; } catch (e) { } }
+function unpackSeen(str) { try {
+  if (str.startsWith('r1:')) {
+    const s = atob(str.slice(3)); let i = 0, k = 0, cur = 0;
+    while (k < s.length && i < seen.length) { let n = 0, m = 1, c; do { c = s.charCodeAt(k++); n += (c & 127) * m; m *= 128; } while (c & 128 && k < s.length); const e = Math.min(seen.length, i + n); if (cur) seen.fill(1, i, e); i = e; cur ^= 1; }
+  } else { const s = atob(str); for (let i = 0; i < seen.length; i++) seen[i] = (s.charCodeAt(i >> 3) >> (i & 7)) & 1; }
+  mapVer++; } catch (e) { } }
 // the map is a small copy of the world itself: every explored tile is painted with its own texture
 // (MP pixels per tile, sampled from the same block art the chunks use), kept for the whole ring and
 // only repainted where something changed, so opening it costs one pass and walking costs almost nothing

@@ -35,7 +35,7 @@ function anBuild() {
   AN_S0 = Math.min(WH - 12, UP.S0 + Math.min(UP.D, WH - 8 - UP.S0));
   const S0 = AN_S0, YB = Math.min(WH - 8, S0 + AN_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x8a2f), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / AN_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < AN_BANDS[1] ? 0 : d < AN_BANDS[2] ? 1 : d < AN_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   anChambers = []; anLand = []; anEclusas = []; anLines = []; anEntries = []; anExits = []; anBoss = null; anOficina = null;
@@ -50,12 +50,14 @@ function anBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3) continue;
+      if (y >= YB) { tiles[i] = AN_GRANITO; walls[i] = WAN_GRANITO; continue; }   // abaixo da camada: o granito, sem ruído (a de baixo escreve por cima)
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x8b3);
       if (k < 1 && UP.thin && h > 0.4 + k * 0.6) { tiles[i] = UP.thin; walls[i] = UP.thinW || WAN_GRANITO; continue; }   // a rocha de cima afina
-      const n1 = nz(x, y, 30, 0x8a1), n2 = nz(x, y, 14, 0x8a2);
       // bolsões de rocha natural: o granito fica mais grosso e quebrado (entulho de pedra solta) em manchas
-      tiles[i] = y < YB && n1 > 0.74 && n2 > 0.55 ? AN_ENTULHO : AN_GRANITO;
+      // (o segundo ruído só onde o primeiro já passou)
+      tiles[i] = nz(x, y, 30, 0x8a1) > 0.74 && nz(x, y, 14, 0x8a2) > 0.55 ? AN_ENTULHO : AN_GRANITO;
       walls[i] = WAN_GRANITO;
+      if (agua.length) agua[i] = 0;   // a água do mundo de antes não fica presa na rocha nova
     }
   }
 
@@ -83,10 +85,14 @@ function anBuild() {
   const put = (x, y, t, w) => later.push([W1(x), y, t, w]);
   // uma sala retangular de chão plano: `fy` é a fileira do chão, o ar de fy - h a fy - 1
   const room = (x0, fy, w, h) => { for (let y = fy - h; y < fy; y++) for (let x = x0; x < x0 + w; x++) dig(x, y); for (let x = x0; x < x0 + w; x++) hard(x, fy); };
-  const lineY = m => S0 + mb(m);
+  // cada faixa é LAYER_K andares iguais à faixa do desenho (ABD, metros de desenho): a linha da profundidade m do desenho
+  // no andar s da faixa b; lineY(m) é a do último andar (onde ficam a Grande Forja, a Oficina e as brechas)
+  const ABD = AN_BANDS.map(v => v / LAYER_K), bOf = m => m < ABD[1] ? 0 : m < ABD[2] ? 1 : m < ABD[3] ? 2 : 3;
+  const lvY = (b, s, m) => S0 + AN_BANDS[b] + s * (ABD[b + 1] - ABD[b]) + (m - ABD[b]);
+  const lineY = m => Math.min(YB - 4, lvY(bOf(m), LAYER_K - 1, m));
 
   // ---------- 2a. as duas escadarias do clã: um poço quadrado de cantaria desce de cada descida da camada de cima ----------
-  const landM = 16, landFy = lineY(landM);
+  const landM = 16, landFy = lvY(0, 0, landM);
   const ups = (UP.exits || []).filter(c => c && c.fy);
   for (const F of ups.slice(0, 2)) {
     const xs = W1(Math.round(F.cx !== undefined ? F.cx : F.x0 + 2) - 2);   // xs..xs+3: o poço, a escada na coluna xs + 1
@@ -126,8 +132,8 @@ function anBuild() {
 
   // ---------- 2c. as eclusas: poços de 6 de largura entre as duas linhas dos Canais, com uma comporta na boca de cima (antes
   // das salas, que desviam delas) ----------
-  {
-    const ya = lineY(118), yb = lineY(146);
+  for (let s = 0; s < LAYER_K; s++) {   // em cada andar dos Canais
+    const ya = lvY(2, s, 118), yb = lvY(2, s, 146);
     for (let k = 0, tries = 0; k < 2 * WSC && tries < 3000; tries++) {
       const x0 = (R() * WW) | 0;
       if (busy(x0 + 3, (ya + yb) / 2, 10, yb - ya, 2) || inAnHall(x0, yb, 8)) continue;
@@ -149,8 +155,8 @@ function anBuild() {
   const kindCount = {};
   const avoidBoss = (x0, w, fy, h) => { const B = anBoss; return Math.abs(wdx(x0 + w / 2 - B.cx)) < (w + B.w) / 2 + 6 && fy >= B.top - 4 && fy - h <= B.fy + 4; };
   const avoidLand = (x0, w, fy, h) => anLand.some(L => Math.abs(wdx(x0 + w / 2 - (L.x0 + 6))) < w / 2 + 12 && Math.abs(fy - L.fy) < h + 8) || anEntries.some(E => Math.abs(wdx(x0 + w / 2 - (E.x0 + 2))) < w / 2 + 6 && fy - h <= landFy + 2 && fy >= E.fy);
-  for (let b = 0; b < 4; b++) for (const m of AN_FLOORS[b]) {
-    const fy = lineY(m), hmax = Math.min(AN_ROOM_H[m], fy - S0 - 3), Ln = { fy, band: b, m, rooms: [] };
+  for (let b = 0; b < 4; b++) for (let s = 0; s < LAYER_K; s++) for (const m of AN_FLOORS[b]) {
+    const fy = Math.min(YB - 4, lvY(b, s, m)), hmax = Math.min(AN_ROOM_H[m], fy - S0 - 3), Ln = { fy, band: b, m, rooms: [] };
     anLines.push(Ln);
     // o corredor: 3 de altura, laje no chão, cantaria no teto
     for (let x = 0; x < WW; x++) {
@@ -162,7 +168,7 @@ function anBuild() {
     let x = (R() * WW) | 0, done = 0;
     while (done < WW - 30) {
       const gap = 6 + ((R() * 16) | 0); x += gap; done += gap;
-      const opts = ROOMS[b].filter(o => (kindCount[o[0]] || 0) < o[6] * WSC && o[4] <= hmax), tot = opts.reduce((s, o) => s + o[1], 0);
+      const opts = ROOMS[b].filter(o => (kindCount[o[0]] || 0) < o[6] * WSC * LAYER_K && o[4] <= hmax), tot = opts.reduce((s, o) => s + o[1], 0);
       if (!opts.length) break;
       let q = R() * tot, o = opts[0]; for (const p of opts) { q -= p[1]; if (q <= 0) { o = p; break; } }
       const [kind, , wa, wb, ha, hb] = o, w = wa + ((R() * (wb - wa + 1)) | 0), h = Math.min(hmax, ha + ((R() * (hb - ha + 1)) | 0));
@@ -220,7 +226,7 @@ function anBuild() {
       if (dx * dx + dy * dy < 1 + (hash2(W1(x) >> 1, y >> 1, sd) - 0.5) * 0.3 + (nz(x, y, 40, sd) - 0.5) * 0.4) dig(x, y);
     }
   };
-  for (let k = 0, tries = 0; k < 10 * WSC && tries < 400; tries++) {
+  for (let k = 0, tries = 0; k < 10 * WSC * LAYER_K && tries < 400 * LAYER_K; tries++) {
     const w = 20 + ((R() * 22) | 0), h = 8 + ((R() * 7) | 0), cx = (R() * WW) | 0, cy = S0 + 6 + R() * (DB - 14);
     if (busy(cx, cy, w, h, 3) || inAnHall(cx, cy, w / 2 + 6)) continue;
     blob(cx, cy, w, h, 0x8f00 + k);
@@ -378,10 +384,10 @@ function anBuild() {
       }
     }
   };
-  vein(AN_O_CARVAO, 80 * WSC, 0, 184, 3, 8);
-  vein(AN_O_MITHRIL, 12 * WSC, 0, 46, 2, 4);
-  vein(AN_O_MITHRIL, 30 * WSC, 46, 98, 2, 5);
-  vein(AN_O_MITHRIL, 60 * WSC, 98, 184, 3, 7);
+  vein(AN_O_CARVAO, 80 * WSC * LAYER_K, 0, 184, 3, 8);
+  vein(AN_O_MITHRIL, 12 * WSC * LAYER_K, 0, 46, 2, 4);
+  vein(AN_O_MITHRIL, 30 * WSC * LAYER_K, 46, 98, 2, 5);
+  vein(AN_O_MITHRIL, 60 * WSC * LAYER_K, 98, 184, 3, 7);
   // a gruta que passou por dentro de uma sala levou a parede de fundo junto: a sala ganha de volta a parede que mais tem
   for (const C of anRooms) {
     const n = {}; let best = 0, bn = 0;
@@ -409,13 +415,17 @@ function anAfter() {
     const y0 = Math.min(ay, by), y1 = Math.max(ay, by);
     for (let y = y0 - 2; y <= y1; y++) { dig(bx, y); dig(bx + sx, y); const i = I(bx, y); if (tiles[i] === AIR && y > y0 - 2) tiles[i] = AN_ESCADA; }
   };
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+  // o pedaço solto mais alto primeiro: tudo acima dele já está ligado, então a ligação sai curta (e a busca continua
+  // da linha onde parou)
+  const lab = new Uint16Array(NN);   // marcado com o número da passada (uma alocação só)
+  let yScan = S0;
+  for (let pass = 0; pass < 60 * WSC * LAYER_K; pass++) {
+    const P = pass + 1; let bestC = null;
+    for (let y = yScan; y < YB - 1 && !bestC; y++) for (let x = 0; x < WW; x++) {
+      const i = y * WW + x; if (reach[i] || lab[i] === P || SOLID[tiles[i]] || tiles[i] === LAVA || !walls[i]) continue;   // o canal de lava não é um pedaço solto
+      const comp = []; lab[i] = P; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && lab[nb] !== P && !reach[nb] && !SOLID[tiles[nb]] && tiles[nb] !== LAVA) { lab[nb] = P; stack.push(nb); } }
+      if (comp.length >= 20) { bestC = comp; yScan = y; break; }
     }
     if (!bestC) break;
     let best = null, bd = 1e9;
@@ -556,8 +566,9 @@ function anClimbFix() {
   if (anOficina) starts.push([anOficina.cx, anOficina.fy - 1]);
   for (const E of anEclusas) starts.push([E.x0 + 3, E.yb - 1]);
   for (const c of anRooms) if (c.kind === 'tumulo' || c.brecha) starts.push([Math.round(c.cx), c.fy - 1]);
-  let fixes = 0;
-  for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }
+  let fixes = 0, bad = 0;
+  for (const [x, y] of starts) { let k = 0; for (; k < 12 * LAYER_K && !search(W1(x), y); k++) { if (!repair()) { bad++; break; } fixes++; } }
+  anClimbFix.last = [starts.length, fixes, bad];
   return fixes;
 }
 
@@ -643,9 +654,10 @@ function anPlaceProps() {
 
 // a ordem: a camada, a Grande Forja (186: anDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('anoes', () => {
   if (!ANOES) return;
   try { anBuild(); anAfter(); if (typeof anDress === 'function') anDress(); anExitClear(); anClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da fortaleza ---------- */
@@ -653,10 +665,10 @@ function anPlaceProps() {
   _cd();
   if (!ANOES) return;
   const Y1 = Math.min(WH, AN_S0 + AN_D + 4);
-  for (let y = AN_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(AN_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - AN_S0) + (depthNz(x, y, 25, seed ^ 0x8e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x8e12);
-    DEEPT[i] = d < 98 ? (n > 0.62 ? DP_AN_MAQUINAS : DP_AN_SALOES) : d < 150 ? (n > 0.4 ? DP_AN_MAQUINAS : DP_AN_SALOES) : (n > 0.5 ? DP_AN_FORJAS : DP_AN_MAQUINAS);
+    DEEPT[i] = d < AN_BANDS[2] ? (n > 0.62 ? DP_AN_MAQUINAS : DP_AN_SALOES) : d < AN_BANDS[3] ? (n > 0.4 ? DP_AN_MAQUINAS : DP_AN_SALOES) : (n > 0.5 ? DP_AN_FORJAS : DP_AN_MAQUINAS);
   }
 }; }
 

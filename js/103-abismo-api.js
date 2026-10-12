@@ -17,14 +17,14 @@
    Loads after 86-sapo-grutas and before 87-mundo-largo (whose worldLink must run after the abyss is built). */
 
 const ABISMO = true;
-const AB_D = 186;                                   // metres of abyss
+const AB_D = LAYER_D;                                   // metres of abyss
 // the abyss is always the last layer (129-camadas): it starts under whatever layer is above it, today the fungal mines (120)
 const AB_ANTIGOS = typeof ANTIGOS !== 'undefined' && ANTIGOS;   // a Cidade dos Antigos (290), 2026-10-11
 const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO, AB_CIDADE = typeof CIDADE !== 'undefined' && CIDADE, AB_FLORESTA = typeof FLORESTA !== 'undefined' && FLORESTA, AB_ANOES = typeof ANOES !== 'undefined' && ANOES, AB_COLMEIA = typeof COLMEIA !== 'undefined' && COLMEIA, AB_NAVE = typeof NAVE !== 'undefined' && NAVE, AB_ELFOS = typeof ELFOS !== 'undefined' && ELFOS, AB_TITAS = typeof TITAS !== 'undefined' && TITAS, AB_DRAGAO = typeof DRAGAO !== 'undefined' && DRAGAO;   // o Covil do Dragão (270), 2026-10-11
 const AB_MAR = typeof MAR !== 'undefined' && MAR;   // o Mar Sem Sol (260), 2026-10-11
-const AB_TOP = (typeof PS_TOP !== 'undefined' ? PS_TOP : AB_ANTIGOS ? AT_TOP : AB_TITAS ? TT_TOP : AB_DRAGAO ? DG_TOP : AB_MAR ? MS_TOP : AB_ELFOS ? EL_TOP : AB_NAVE ? NV_TOP : AB_COLMEIA ? CM_TOP : AB_ANOES ? AN_TOP : AB_FLORESTA ? FP_TOP : AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // where the abyss starts, metres below the village floor (930)
+const AB_TOP = (typeof PS_TOP !== 'undefined' ? PS_TOP : AB_ANTIGOS ? AT_TOP : AB_TITAS ? TT_TOP : AB_DRAGAO ? DG_TOP : AB_MAR ? MS_TOP : AB_ELFOS ? EL_TOP : AB_NAVE ? NV_TOP : AB_COLMEIA ? CM_TOP : AB_ANOES ? AN_TOP : AB_FLORESTA ? FP_TOP : AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + LAYER_D;   // where the abyss starts, metres below the village floor (930)
 // band tops in metres below AB_TOP: Portões de Cinza, Rios de Fogo, As Entranhas, Trono do Caos, (bedrock)
-const AB_BANDS = [0, 46, 98, 150, 186];
+const AB_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AB_BAND_NAMES = ['portoes', 'rios', 'entranhas', 'trono'];
 const AB_ZONE0 = ZONE_NAMES.length;                 // zone ids 21..24 (108 pushes the names)
 let AB_S0 = typeof PESADELO !== 'undefined' && PESADELO ? PS_S0 + PS_D : AB_ANTIGOS ? AT_S0 + AT_D : AB_TITAS ? TT_S0 + TT_D : AB_DRAGAO ? DG_S0 + DG_D : AB_MAR ? MS_S0 + MS_D : AB_ELFOS ? EL_S0 + EL_D : AB_NAVE ? NV_S0 + NV_D : AB_COLMEIA ? CM_S0 + CM_D : AB_ANOES ? AN_S0 + AN_D : AB_FLORESTA ? FP_S0 + FP_D : AB_CIDADE ? CD_S0 + CD_D : AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)

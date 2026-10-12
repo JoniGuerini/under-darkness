@@ -59,7 +59,7 @@ function yetiDress() {
   for (const [tx, v] of [[x0 + 4, 0], [x0 + 13, 1], [x1 - 15, 0], [x1 - 5, 1]]) put('ic_sincelos', v, tx, 'teto');
   put('ic_cristal_teto', 0, B.cx - 1, 'teto');
 }
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (GELO) { try { yetiDress(); } catch (err) { console.error(err); } } }; }
+{ const _bc = buildCathedral; buildCathedral = function () { _bc(); genStage('gelo', () => { if (GELO) { try { yetiDress(); } catch (err) { console.error(err); } } }); }; }
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone);
   if (type !== 'yetiancestral' && !e.yetiMinion && icBoss && inYetiHall(Math.floor((px + e.w / 2) / T), Math.floor((py + e.h / 2) / T), -2) && !(bossFight && bossFight.yeti)) yetiDrop(e);

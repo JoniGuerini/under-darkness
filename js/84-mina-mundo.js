@@ -32,7 +32,7 @@ function mnBuild() {
   MN_S0 = Math.min(WH - 12, IC_S0 + Math.min(IC_D, WH - 8 - IC_S0));
   const S0 = MN_S0, YB = Math.min(WH - 8, S0 + MN_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x3a1e), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / MN_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const db = (x, y) => (y - S0) * MN_D / DB + (nz(x, y, 30, 0x3b1) - 0.5) * 10;
   const bandOf = d => d < MN_BANDS[1] ? 0 : d < MN_BANDS[2] ? 1 : d < MN_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
@@ -50,15 +50,15 @@ function mnBuild() {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3) continue;
       if (!MN_HOST[tiles[i]]) continue;
+      if (y >= YB) { tiles[i] = MN_FERROSA; walls[i] = WMN_FERROSA; continue; }   // under the layer: the same rock without the noise (the next layer writes over it)
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x3b3);
       if (k < 1 && h > 0.35 + k * 0.6) { tiles[i] = h > 0.7 ? IC_GELO_NEGRO : IC_ROCHA; walls[i] = WIC_NEGRO; continue; }   // the ice thins out
-      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x3a1), n2 = nz(x, y, 18, 0x3a2), n3 = nz(x, y, 50, 0x3a3);
+      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x3a1), n2 = nz(x, y, 18, 0x3a2), n3 = () => nz(x, y, 50, 0x3a3);   // n3 only where a branch reads it
       let t;
-      if (y >= YB) t = MN_FERROSA;
-      else if (b === 0) t = n1 > 0.72 ? MN_REJEITO : n2 > 0.78 ? MN_QUARTZITO : MN_FERROSA;
+      if (b === 0) t = n1 > 0.72 ? MN_REJEITO : n2 > 0.78 ? MN_QUARTZITO : MN_FERROSA;
       else if (b === 1) t = n2 > 0.62 ? MN_QUARTZITO : n1 > 0.75 ? MN_REJEITO : MN_FERROSA;
-      else if (b === 2) t = n1 > 0.66 ? MN_REJEITO : n3 > 0.74 ? MN_ENTULHO : n2 > 0.8 ? MN_QUARTZITO : MN_FERROSA;
-      else t = n3 > 0.62 ? MN_ESCORIA : n2 > 0.76 ? MN_QUARTZITO : MN_FERROSA;
+      else if (b === 2) t = n1 > 0.66 ? MN_REJEITO : n3() > 0.74 ? MN_ENTULHO : n2 > 0.8 ? MN_QUARTZITO : MN_FERROSA;
+      else t = n3() > 0.62 ? MN_ESCORIA : n2 > 0.76 ? MN_QUARTZITO : MN_FERROSA;
       tiles[i] = t; walls[i] = t === MN_QUARTZITO ? WMN_QUARTZITO : WMN_FERROSA;
     }
   }
@@ -97,7 +97,18 @@ function mnBuild() {
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
-  const busy = (cx, cy, w, h, m = 4) => mnChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + m && Math.abs(c.cy - cy) < (c.h + h) / 2 + m);
+  // a tunnel that has to go far down: in legs of at most ~12 rows, swinging from side to side, so no stretch of it is
+  // a straight fall (the layers are three times taller now and the old straight worms became cliffs)
+  const zz = (xa, ya, xb, yb, r, s) => {
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) {
+      const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n;
+      worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny;
+    }
+  };
+  // mv: the rock kept above and below; the halls stack LAYER_K times deeper now, and halls that touch make one tall well
+  const busy = (cx, cy, w, h, m = 4, mv = m) => mnChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + m && Math.abs(c.cy - cy) < (c.h + h) / 2 + mv);
   // a straight gallery: 4 rows of air over a floor row, the ends tapering
   const gallery = (xa, len, fy, band) => {
     for (let k = 0; k < len; k++) { const x = xa + k, end = k < 2 || k > len - 3; for (let y = fy - (end ? 3 : 4); y < fy; y++) dig(x, y); fill(x, fy); }
@@ -107,11 +118,13 @@ function mnBuild() {
   };
 
   // the two shafts from the ice first: under two grottos of the Coração do Inverno, far apart and away from the Yeti's hall
-  const yb = icBoss, iceS = icChambers.filter(c => c.band === 3 && !c.boss && !c.exit && (!yb || Math.abs(wdx(c.cx - yb.cx)) > yb.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
+  const yb = icBoss, iceA = icChambers.filter(c => c.band === 3 && !c.boss && !c.exit && (!yb || Math.abs(wdx(c.cx - yb.cx)) > yb.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
+  // only the deepest grottos (the ice is LAYER_K times taller too: from a high one the shaft would be 150 rows of ladder)
+  const iceD = iceA.filter(c => c.cy > S0 - 50), iceS = iceD.length >= 4 ? iceD : iceA.slice().sort((a, b) => b.cy - a.cy).slice(0, Math.max(4, Math.ceil(iceA.length / 6))).sort((a, b) => a.cx - b.cx);
   const picks = [];
   for (let n = 0; n < iceS.length && picks.length < 2; n++) { const c = iceS[(n * 5 + ((R() * iceS.length) | 0)) % iceS.length]; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 80)) picks.push(c); }
   for (const c of iceS) { if (picks.length >= 2) break; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 40)) picks.push(c); }
-  const landY = S0 + mb(12);
+  const landY = S0 + 12;   // the first gallery close under the ice: the shaft from the grotto stays short
   for (const c of picks) {
     const x0 = W1(Math.round(c.cx) - 2);
     let fy = Math.round(c.cy); while (fy < S0 && !SOLID[tiles[I(x0 + 1, fy)]] && !SOLID[tiles[I(x0 + 2, fy)]]) fy++;
@@ -127,20 +140,26 @@ function mnBuild() {
     mnBoss = { x0: W1(x0), x1: W1(x0 + w - 1), w, h, top, fy, cx };
     mnChambers.push({ cx, cy: fy - (h >> 1), w, h, band: 3, boss: true });
   }
-  // the galleries: levels in metres, how many per level, length range
-  const LEV = [[22, 3, 30, 90, 0], [32, 3, 30, 90, 0], [42, 2, 30, 80, 0], [56, 2, 30, 70, 1], [70, 2, 30, 70, 1], [86, 2, 30, 70, 1], [112, 2, 26, 60, 2], [136, 2, 26, 60, 2]];
+  // the galleries: levels as rows below the band's top, how many per level, length range. The old 186-row mine had
+  // eight levels (22, 32, 42 | 56, 70, 86 | 112, 136); each band is LAYER_K times taller now, so it holds LAYER_K
+  // times the levels, the same distance apart as before (no gallery hangs 30 rows over the next)
+  const LEV = [];
+  [[22, 12, 3, 30, 90], [10, 15, 2, 30, 70], [14, 24, 2, 26, 60]].forEach(([off, step, n, la, lb], band) => {
+    const t0 = mb(MN_BANDS[band] / LAYER_K), t1 = mb(MN_BANDS[band + 1] / LAYER_K) - 6;
+    for (let r = t0 + off, j = 0; r < t1; r += step, j++) LEV.push([r, band === 0 && j > 2 ? 2 : n, la, lb, band]);
+  });
   for (const [m, n, la, lb, band] of LEV) for (let k = 0, tries = 0; k < n * WSC && tries < 40 * WSC; tries++) {
-    const len = la + ((R() * (lb - la)) | 0), xa = (R() * WW) | 0, fy = S0 + mb(m) + (((R() * 3) | 0) - 1);
+    const len = la + ((R() * (lb - la)) | 0), xa = (R() * WW) | 0, fy = S0 + m + (((R() * 3) | 0) - 1);
     if (busy(xa + len / 2, fy - 2, len, 4, 3)) continue;
     gallery(xa, len, fy, band); k++;
   }
   // chambers per band: [count, wMin, wMax, hMin, hMax, top metre, bottom metre, kind]
   const PLAN = [[5, 10, 16, 5, 7, 6, 44, 'gruta'], [6, 18, 32, 10, 14, 50, 96, 'camara'], [6, 28, 46, 12, 16, 102, 148, 'acampamento'], [6, 22, 34, 9, 12, 154, 182, 'fornalha']];
   PLAN.forEach(([n0, wa, wb, ha, hb, d0, d1, kind], band) => {
-    const n = n0 * WSC;
+    const n = n0 * WSC * LAYER_K;   // chambers by area: the band is LAYER_K times taller
     for (let k = 0, tries = 0; k < n && tries < n * 40; tries++) {
       const w = wa + ((R() * (wb - wa + 1)) | 0), h = Math.min(mb(hb), ha + ((R() * (hb - ha + 1)) | 0)), cx = (R() * WW) | 0, cy = S0 + mb(d0) + h / 2 + R() * Math.max(0, mb(d1 - d0) - h);
-      if (busy(cx, cy, w, h)) continue;
+      if (busy(cx, cy, w, h, 4, 9)) continue;
       if (kind === 'fornalha') {   // a hall built square, with a low vault
         const x0 = Math.round(cx - w / 2), top = Math.round(cy - h / 2), fy = top + h;
         for (let y = top; y < fy; y++) for (let x = x0; x < x0 + w; x++) { const kk = x - x0, arch = Math.round(2.5 * Math.pow(Math.abs((kk + 0.5) / w * 2 - 1), 2)); if (y >= top + arch) dig(x, y); }
@@ -150,33 +169,37 @@ function mnBuild() {
     }
   });
   // shafts between galleries: from a gallery's floor straight down to the next gallery under it (or a sump)
-  for (let k = 0, tries = 0; k < 16 * WSC && tries < 160 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 16 * WSC * LAYER_K && tries < 160 * WSC * LAYER_K; tries++) {
     const A = mnGalleries[(R() * mnGalleries.length) | 0]; if (!A || A.band > 2 || A.len < 14) continue;
     const wide = A.band === 1 ? 6 : 4, x0 = W1(A.x0 + 4 + ((R() * (A.len - 8 - wide)) | 0));
     if (mnShafts.some(s => Math.abs(wdx(s.x0 - x0)) < 14 && Math.abs(s.top - A.fy) < 40)) continue;
-    const below = mnGalleries.filter(B => B !== A && B.fy > A.fy + 8 && B.fy < A.fy + mb(52) && wdx(x0 - B.x0) >= 2 && wdx(x0 + wide - (B.x0 + B.len)) <= -2).sort((a, b) => a.fy - b.fy)[0];
+    const below = mnGalleries.filter(B => B !== A && B.fy > A.fy + 8 && B.fy < A.fy + 32 && wdx(x0 - B.x0) >= 2 && wdx(x0 + wide - (B.x0 + B.len)) <= -2).sort((a, b) => a.fy - b.fy)[0];
     let bot;
     if (below) bot = below.fy;
     else { bot = Math.min(YB - 6, A.fy + 14 + ((R() * 14) | 0)); if (mineBand(bot) > 2) continue; blob(x0 + wide / 2, bot - 3, 12 + wide, 6, 0x3a00 + k, 2.4); mnChambers.push({ cx: x0 + wide / 2, cy: bot - 3, w: 12 + wide, h: 6, band: mineBand(bot), kind: 'gruta' }); }
     for (let y = A.fy - 4; y < bot; y++) for (let x = x0; x < x0 + wide; x++) dig(x, y);
     mnShafts.push({ x0, w: wide, top: A.fy, bot, band: A.band }); k++;
   }
-  // tunnels: along each band round the world, and a few down between bands
-  const RAD = [1.5, 1.7, 2.0, 1.8];
-  for (let b = 0; b < 4; b++) {
-    const L = mnChambers.filter(c => c.band === b).sort((a, c) => a.cx - c.cx);
+  // tunnels: round the world along each tier (a band is LAYER_K tiers, each as tall as an old band), and a few
+  // down from tier to tier; every one in zig-zag legs
+  const RAD = [1.5, 1.7, 2.0, 1.8], NTR = 4 * LAYER_K;
+  const tierOf = c => { const b = c.band, t0 = MN_BANDS[b], h = (MN_BANDS[b + 1] - t0) / LAYER_K, cy = c.g ? c.g.fy : c.boss ? mnBoss.fy : c.cy; return b * LAYER_K + clamp(Math.floor((cy - S0 - t0) / h), 0, LAYER_K - 1); };
+  for (const c of mnChambers) c.tier = tierOf(c);
+  for (let t = 0; t < NTR; t++) {
+    const b = (t / LAYER_K) | 0, L = mnChambers.filter(c => c.tier === t).sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue;
       const ax = A.boss ? A.cx - A.w / 2 : A.g ? A.cx + A.w / 2 - 1 : A.cx, ay = A.boss ? mnBoss.fy - 2 : A.g ? A.g.fy - 2 : A.cy + A.h * 0.2;
       const bx = B.boss ? B.cx + B.w / 2 : B.g ? B.cx - B.w / 2 + 1 : B.cx, by = B.boss ? mnBoss.fy - 2 : B.g ? B.g.fy - 2 : B.cy + B.h * 0.2;
-      worm(ax, ay, bx, by, RAD[b], 0x3700 + b * 50 + k);
+      zz(ax, ay, bx, by, RAD[b], 0x3700 + t * 50 + k);
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = mnChambers.filter(c => c.band === b && !c.boss), D = mnChambers.filter(c => c.band === b + 1 && !c.boss);
+  for (let t = 0; t < NTR - 1; t++) {
+    const b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
+    const U = mnChambers.filter(c => c.tier === t && !c.boss), D = mnChambers.filter(c => c.tier === t + 1 && !c.boss);
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
       const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, A.cy, B.cx, B.cy, Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x37f0 + b * 9 + k);
+      zz(A.cx, A.g ? A.g.fy - 2 : A.cy, B.cx, B.g ? B.g.fy - 2 : B.cy, Math.max(RAD[b], RAD[b2]) + 0.2, 0x37f0 + t * 9 + k);
     }
   }
   // tiny pockets filled; little islands floating in the air cleared
@@ -208,6 +231,7 @@ function mnBuild() {
       if (y >= y1 - 4) { for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); tiles[i] = AIR; mnKeep.add(i); } continue; }   // open on both sides into the landing gallery
       for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (!SOLID[tiles[i]] || y === y0) tiles[i] = y === y0 ? MN_VIGA : MN_TABUA; mnKeep.add(i); }   // collar and lining
       if ((y - y0) % 6 === 5) for (const x of [x0 - 1, x0 + 4]) tiles[I(x, y)] = MN_VIGA;   // a set of timbers every six rows
+      if ((y - y0) % 10 === 9 && y < y1 - 6) for (const x of [x0, x0 + 2, x0 + 3]) { const i = I(x, y); tiles[i] = MN_TABUA; mnKeep.add(i); }   // a landing every ten: only the ladder goes through
     }
     for (let x = x0 - 3; x <= x0 + 6; x++) { const i = I(x, y1); if (!SOLID[tiles[i]]) tiles[i] = MN_TABUA; mnKeep.add(i); }   // the floor at the foot
     for (let y = y0 - 2; y < y1; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]]) { tiles[i] = MN_ESCADA; mnKeep.add(i); } }
@@ -227,14 +251,43 @@ function mnBuild() {
     }
   };
   const iron = t => t === MN_FERROSA || t === MN_REJEITO, quartz = t => t === MN_QUARTZITO;
-  vein(MN_O_CARVAO, 90 * WSC, 0, 186, 3, 8, iron);   // coal in the mine (102); the crystal is a gem now, placed by 117 like the others
-  vein(MN_O_COBALTO, 90 * WSC, 0, 186, 2, 5, t => quartz(t) || t === MN_FERROSA);   // cobalt, the mine's metal
+  vein(MN_O_CARVAO, 90 * WSC * LAYER_K, 0, 186, 3, 8, iron);   // coal in the mine (102); the crystal is a gem now, placed by 117 like the others
+  vein(MN_O_COBALTO, 90 * WSC * LAYER_K, 0, 186, 2, 5, t => quartz(t) || t === MN_FERROSA);   // cobalt, the mine's metal
+}
+
+/* ---------- shelves in tall open places (2026-10-12, the layers three times taller): where a column of open air
+   still falls 22 or more, a shelf (3 to 9) juts from the nearest wall every 11 rows, with air above, below and
+   past its end, so nothing is cut off. The mine, the fungus mines and the city call it with their own block. ---------- */
+function layerShelves(y0, y1, tile, skip) {
+  const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const air = (x, y) => { const i = I(x, y); return tiles[i] === AIR && walls[i] && !(agua.length && agua[i]) && !skip(W1(x), y, i); };
+  let n = 0;
+  for (let x = 0; x < WW; x++) {
+    let a = -1;
+    for (let y = y0; y <= y1; y++) {
+      if (y < y1 && air(x, y)) { if (a < 0) a = y; continue; }
+      if (a >= 0 && y - a >= 22) for (let r = a + 11; r < y - 8; r += 11) {
+        for (const d of hash2(x, r, seed ^ 0x5e1f) < 0.5 ? [-1, 1] : [1, -1]) {
+          let k = 1; while (k <= 9 && air(x + d * k, r)) k++;
+          if (k > 9 || !SOLID[tiles[I(x + d * k, r)]]) continue;   // no wall close by on this side
+          const len = Math.max(3, k), x1 = x + d * k - d * len;    // the shelf: from the wall back toward (and past) the column
+          let ok = air(x1 - d, r) && air(x1 - d, r - 1);
+          for (let j = 0; j < len && ok; j++) { const xx = x + d * k - d * (j + 1); if (!air(xx, r) || !air(xx, r - 1) || !air(xx, r - 2) || !air(xx, r + 1)) ok = false; }
+          if (!ok) continue;
+          for (let j = 0; j < len; j++) tiles[I(x + d * k - d * (j + 1), r)] = tile;
+          n++; break;
+        }
+      }
+      a = -1;
+    }
+  }
+  return n;
 }
 
 function mnAfter() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const S0 = MN_S0, YB = Math.min(WH - 8, S0 + MN_D), DB = YB - S0, nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s), R3 = mulberry32(seed ^ 0x3d3c1);
-  const mb = m => Math.round(m * DB / MN_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const mineRow = y => y >= S0 && y < YB - 1;
   const dig = (x, y) => { if (!mineRow(y)) return; const i = I(x, y); if (mnKeep.has(i)) return; if (SOLID[tiles[i]] || DECO[tiles[i]]) tiles[i] = AIR; if (!walls[i]) walls[i] = WMN_FERROSA; };
   const worm = (xa, ya, xb, yb, r, s) => {
@@ -246,6 +299,11 @@ function mnAfter() {
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
+  const zz = (xa, ya, xb, yb, r, s) => {   // in legs of at most ~12 rows, side to side (as in mnBuild)
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) { const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n; worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny; }
+  };
   const mnSolid = t => SOLID[t] && MN_SOILS[t];
   const at = (x, y) => tiles[I(x, y)], put = (x, y, t) => { tiles[I(x, y)] = t; };
   const inBoss = (x, y, m = 1) => mnBoss && Math.abs(wdx(x - mnBoss.cx)) < mnBoss.w / 2 + m && y >= mnBoss.top - 1 - m && y <= mnBoss.fy;
@@ -255,15 +313,20 @@ function mnAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = s0 => { if (reach[s0] || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   for (const E of mnExits) flood(I(E.x0 + 2, E.fy - 1));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // the cut-off pockets, labelled once (the mine is three times taller now: no full relabel per pass), biggest first
+  const comps = []; let orgB = null;
+  {
+    const lab = new Uint8Array((YB - S0) * WW), o = S0 * WW;
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - o] || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - o] = 1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= o && nb < YB * WW && !lab[nb - o] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - o] = 1; stack.push(nb); } }
+      if (comp.length >= 20) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, b) => b.length - a.length);
+  }
+  for (let pass = 0; pass < comps.length; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;   // an earlier tunnel already reached it
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -274,7 +337,7 @@ function mnAfter() {
       }
     }
     if (!best) {   // nothing reached close by: a breadth-first search out through the rock to the nearest reached cell
-      const org = new Int32Array(NN).fill(-1), q = []; for (const c of bestC) { org[c] = c; q.push(c); }
+      const org = orgB || (orgB = new Int32Array(NN).fill(-1)), q = []; for (const c of bestC) { org[c] = c; q.push(c); }   // one buffer, cleaned after use (a fresh 9M array per pocket was slow)
       for (let h = 0; h < q.length && !best; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -283,9 +346,10 @@ function mnAfter() {
           org[nb] = org[c]; q.push(nb);
         }
       }
+      for (const c of q) org[c] = -1;
       if (!best) { for (const c of bestC) reach[c] = 1; continue; }
     }
-    worm(best[0], best[1], best[2], best[3], 1.6, 0x36a0 + pass);
+    zz(best[0], best[1], best[2], best[3], 1.6, 0x36a0 + pass);
     flood(I(best[2], best[3]));
     if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
   }
@@ -334,11 +398,16 @@ function mnAfter() {
     const lx = S.x0 + 1;
     for (let y = S.top - 2; y < S.bot; y++) { const i = I(lx, y); if (!SOLID[tiles[i]] && !inBoss(lx, y)) { tiles[i] = MN_ESCADA; mnKeep.add(i); } }
     for (let y = S.top - 4; y < S.bot; y++) for (let x = S.x0; x < S.x0 + S.w; x++) { const i = I(x, y); if (!SOLID[tiles[i]] && walls[i] && y > S.top) walls[i] = WMN_TABUADO; }
-    if (S.w >= 6) for (let y = S.top + 6, k = 0; y < S.bot - 4; y += 7, k++) {   // platforms jutting from the far side, every seven rows
-      for (let x = S.x0 + 3; x < S.x0 + S.w; x++) { const i = I(x, y); if (tiles[i] === AIR) { tiles[i] = MN_TABUA; mnKeep.add(i); } }
-      const wx = S.x0 + S.w; if (!SOLID[at(wx, y)]) put(wx, y, MN_VIGA);
+    // a plank landing every seven rows, right across but for the ladder: nobody falls the whole shaft (never across a gallery)
+    for (let y = S.top + 6; y < S.bot - 4; y += 7) {
+      if (mnGalleries.some(G => G.fy - 5 <= y && y <= G.fy && wdx(S.x0 - G.x0) > -S.w && wdx(S.x0 - G.x0) < G.len)) continue;
+      for (let x = S.x0; x < S.x0 + S.w; x++) { const i = I(x, y); if (x !== lx && tiles[i] === AIR) { tiles[i] = MN_TABUA; mnKeep.add(i); } }
+      if (S.w >= 6) { const wx = S.x0 + S.w; if (!SOLID[at(wx, y)]) put(wx, y, MN_VIGA); }
     }
   }
+
+  // ---------- 4a. plank shelves where a stope or a cave still falls 22 or more ----------
+  layerShelves(S0 + 2, YB - 2, MN_TABUA, (x, y, i) => mnKeep.has(i) || inBoss(x, y, 3) || !!shaftAt(x, y));
 
   // ---------- 4b. a ladder at every drop too deep to jump back up (the miners left them everywhere) ----------
   {
@@ -474,7 +543,14 @@ function mnClimbFix() {
   if (mnBoss) starts.push([mnBoss.cx - 6, mnBoss.fy - 1]);
   for (const c of mnChambers) if (c.kind === 'fornalha' || c.kind === 'acampamento') starts.push([Math.round(c.cx), Math.round(c.cy)]);
   let fixes = 0;
-  for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }
+  // a start inside the ground a failed search already covered fails the same way (all it reaches, that one reached):
+  // skip it until a ladder changes something (there are LAYER_K times the starts now)
+  const dead = new Uint8Array(WW * H);
+  for (const [x0, y0] of starts) {
+    const x = W1(x0); let y = y0; while (y < YB - 1 && !S(x, y + 1)) y++;
+    if (y > Y0 && y < YB && dead[(y - Y0) * WW + x]) continue;
+    for (let k = 0; k < 12 && !search(x, y0); k++) { if (!repair()) { for (let i = 0; i < any.length; i++) if (any[i]) dead[i] = 1; break; } fixes++; dead.fill(0); }
+  }
   return fixes;
 }
 
@@ -535,16 +611,19 @@ function mnPlaceProps() {
   }
 }
 
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (MINA) { mnBuild(); mnAfter(); } }; }
+{ const _bc = buildCathedral; buildCathedral = function () { _bc(); genStage('mina', () => { if (MINA) { mnBuild(); mnAfter(); } }); }; }
 
 /* ---------- the far layer behind the mine ---------- */
 { const _cd = cathedralDeep; cathedralDeep = function () {
   _cd();
   if (!MINA) return;
-  for (let y = MN_S0 - 4; y < WH; y++) for (let x = 0; x < WW; x++) {
+  // down to 4 rows under the mine, like the other layers: the passes of the layers below (fungo, cidade... abismo,
+  // escuro, all on) run after this one and rewrite every nonzero deep block from their S0 - 4 down
+  const Y1 = typeof FUNGO !== 'undefined' && FUNGO ? Math.min(WH, MN_S0 + MN_D + 4) : WH;
+  for (let y = Math.max(MN_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - MN_S0) + (depthNz(x, y, 25, seed ^ 0x3e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x3e12);
-    DEEPT[i] = d < 46 ? (n > 0.62 ? DP_MN_ANDAIME : DP_MN_ROCHA) : d < 98 ? (n > 0.45 ? DP_MN_ANDAIME : DP_MN_ROCHA) : d < 150 ? (n > 0.7 ? DP_MN_ANDAIME : DP_MN_ROCHA) : (n > 0.5 ? DP_MN_FORNALHA : DP_MN_ROCHA);
+    DEEPT[i] = d < MN_BANDS[1] ? (n > 0.62 ? DP_MN_ANDAIME : DP_MN_ROCHA) : d < MN_BANDS[2] ? (n > 0.45 ? DP_MN_ANDAIME : DP_MN_ROCHA) : d < MN_BANDS[3] ? (n > 0.7 ? DP_MN_ANDAIME : DP_MN_ROCHA) : (n > 0.5 ? DP_MN_FORNALHA : DP_MN_ROCHA);
   }
 }; }
 

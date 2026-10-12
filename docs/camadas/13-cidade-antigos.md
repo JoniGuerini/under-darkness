@@ -1,6 +1,8 @@
 # A Cidade dos Antigos: ficha de implementação
 
-Camada 13, de 2232 a 2418 m, debaixo do Ossário dos Titãs e em cima dos Salões do Pesadelo. É a cidade de uma civilização mais velha que tudo: pedra lisa sem emenda, ângulos perfeitos, máquinas que ainda giram sem ninguém e, no fundo, a cratera onde caiu uma estrela.
+> **2026-10-12:** a camada tem 558 m, de 7812 a 8370 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+Camada 13, de 7812 a 8370 m, debaixo do Ossário dos Titãs e em cima dos Salões do Pesadelo. É a cidade de uma civilização mais velha que tudo: pedra lisa sem emenda, ângulos perfeitos, máquinas que ainda giram sem ninguém e, no fundo, a cratera onde caiu uma estrela.
 
 **O que a diferencia:** tudo aqui é frio, exato e inteiro. Não há ruína, sujeira nem fogo; a estranheza vem da ordem demais (prédios pendurados do teto, escadas que sobem para o nada, salas onde a gravidade vira de lado). O Ossário de cima é orgânico e quebrado, os Salões de baixo são moles e errados, e o Abismo é quente e caótico: a Cidade é o único lugar do jogo que parece ter sido medido com régua.
 
@@ -20,7 +22,7 @@ Camada 13, de 2232 a 2418 m, debaixo do Ossário dos Titãs e em cima dos Salõe
 | 59 | As Máquinas | 2330 a 2382 | chapa antiga, laje, blocos de engrenagem | salões de máquinas, condutos de luz, poços de pistão, passarelas de chapa |
 | 60 | A Cratera da Estrela | 2382 a 2418 | vidro de cratera, rocha fundida, rocha fria | crateras de vidro, lascas da estrela, veios de ferro estelar, a sala do Arquiteto |
 
-- **Monstros:** nível 27 na metade de cima da camada e 28 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 28, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Monstros:** nível 27 na metade de cima da camada e 28 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 28, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada:** duas descidas saem da última faixa do Ossário dos Titãs (a ficha 12 desenha o lado de cima). Do lado de cá, cada descida é um **Poço dos Antigos**: um poço quadrado perfeito de 4 blocos de largura, paredes de laje, com uma escada embutida (`AT_ESCADA`) correndo inteira por uma das paredes. As 3 últimas linhas do Ossário em volta da boca já são laje, como se o osso tivesse crescido em cima de uma construção. O poço desce uns 24 blocos e abre no teto da câmara de pouso, nas Escadarias. Volta-se pela mesma escada. As posições vêm de `ttExits` (camada 12) e ficam guardadas em `atEntry`.
 - **Saída:** duas **Escadas que Afundam** na Cratera da Estrela, longe uma da outra (pelo menos 250 blocos com `WSC = 3`) e do lado oposto da sala do chefe. Cada uma é um vão quadrado de laje com escada embutida; ao descer, as juntas da laje começam a entortar, os degraus ficam de tamanhos diferentes e a pedra vira pedra-sono (o material dos Salões do Pesadelo). As posições ficam em `atExits`, que a camada 14 lê.
 - **Câmara de pouso:** uma em cada chegada, 10 x 6, plana, piso de laje, duas lâmpadas de glifo; não nasce monstro. Reservada para os pontos de volta.

@@ -1,6 +1,8 @@
 # A Colmeia: o que foi feito
 
-A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m (2026-10-10). A ficha de desenho, com as faixas, os insetos, a Rainha e o loot, é [camadas/09-colmeia.md](camadas/09-colmeia.md). Este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha. Os números de arquivo da ficha (160 a 169) viraram 190 a 199.
+> **2026-10-12:** a camada tem 558 m, de 4464 a 5022 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A nona camada, debaixo da Fortaleza dos Anões, de 4464 a 5022 m (2026-10-10). A ficha de desenho, com as faixas, os insetos, a Rainha e o loot, é [camadas/09-colmeia.md](camadas/09-colmeia.md). Este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha. Os números de arquivo da ficha (160 a 169) viraram 190 a 199.
 
 ## 1. Arquivos
 

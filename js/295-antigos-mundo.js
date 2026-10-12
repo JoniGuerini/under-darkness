@@ -31,8 +31,14 @@ function atBuild() {
   AT_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = AT_S0, YB = Math.min(WH - 8, S0 + AT_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7a91), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / AT_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < AT_BANDS[1] ? 0 : d < AT_BANDS[2] ? 1 : d < AT_BANDS[3] ? 2 : 3;
+  // a camada é LAYER_K vezes mais alta que o desenho (186 metros): cada faixa vira K andares da altura de antes, um
+  // embaixo do outro. lv(d, j): a linha da profundidade d do desenho, no andar j da faixa de d; lvOf(y): o andar
+  // (0 a 4K - 1) de uma linha
+  const K = LAYER_K, BD = AT_BANDS.map(v => v / K);
+  const lv = (d, j) => { let b = 0; while (b < 3 && d >= BD[b + 1]) b++; return S0 + Math.round((BD[b] * K + j * (BD[b + 1] - BD[b]) + d - BD[b]) * DB / AT_D); };
+  const lvOf = y => { const d = (y - S0) * AT_D / DB, b = bandOf(d), h = (AT_BANDS[b + 1] - AT_BANDS[b]) / K; return b * K + clamp(Math.floor((d - AT_BANDS[b]) / h), 0, K - 1); };
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   atChambers = []; atCorr = [];
   atEntries = []; atLand = []; atExits = []; atBoss = null; atTerraces = []; atBlocks = []; atPrumos = []; atHalls = []; atShafts = []; atCraters = []; atKeep.clear();
@@ -48,7 +54,9 @@ function atBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
-      const d = y - S0 + (nz(x, y, 18, 0x7b3) - 0.5) * 8, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 24, 0x7a1);
+      // 8 linhas abaixo da camada: pedra lisa sem ruído; o Pesadelo escreve por cima de toda rocha ali sem olhar o que era
+      if (y >= YB + 8) { tiles[i] = AT_PEDRA; walls[i] = WAT_PEDRA; continue; }
+      const d = y >= YB ? AT_D : y - S0 + (nz(x, y, 18, 0x7b3) - 0.5) * 8, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 24, 0x7a1);   // abaixo da camada o ruído da faixa não muda nada
       let tt = AT_PEDRA;
       if (b === 3 ? n1 > 0.6 : n1 > 0.74) tt = AT_ROCHA_FRIA;
       tiles[i] = tt; walls[i] = WAT_PEDRA;
@@ -146,7 +154,7 @@ function atBuild() {
 
   // ---------- 2c. as Escadas que Afundam: dois vãos de laje no fundo, longe um do outro e do lado oposto ao chefe ----------
   for (let tries = 0; atExits.length < 2 && tries < 800; tries++) {
-    const w = 14 + ((R() * 6) | 0), h = 9, cx = (R() * WW) | 0, fy = S0 + mb(170) + ((R() * mb(8)) | 0);
+    const w = 14 + ((R() * 6) | 0), h = 9, cx = (R() * WW) | 0, fy = YB - 13 - ((R() * 8) | 0);   // no andar de baixo: a escada que afunda é curta
     const far = tries < 500 ? Math.min(250, WW / 3) : WW / 5;
     if (!awayFromBoss(cx, fy, tries < 400 ? WW / 4 - 20 : 40) || atExits.some(e => Math.abs(wdx(e.cx - cx)) < far) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
@@ -159,13 +167,13 @@ function atBuild() {
   }
 
   // ---------- 2d. as Escadarias: terraços em degraus de 3 (a cada 2, um degrau de 6 com escada) e câmaras quadradas ----------
-  for (let made = 0, tries = 0; made < 8 * WSC && tries < 300; tries++) {
-    const n = 2 + ((R() * 3) | 0), ws = [], hs = [];
+  for (let made = 0, chains = 0, tries = 0; made < 8 * WSC * K && tries < 300 * K; tries++) {
+    const n = 2 + ((R() * 3) | 0), ws = [], hs = [], lj = chains % K;
     for (let j = 0; j < n; j++) { ws.push(30 + ((R() * 21) | 0)); hs.push(8 + ((R() * 5) | 0)); }
     const total = ws.reduce((a, b) => a + b, 0), x0 = (R() * WW) | 0, dir = R() < 0.5 ? 1 : -1;
-    let fy = S0 + mb(dir > 0 ? 16 : 28) + ((R() * mb(8)) | 0);
+    let fy = lv(dir > 0 ? 16 : 28, lj) + ((R() * 8) | 0);
     const fys = [fy]; for (let j = 1; j < n; j++) { fy += dir * (j % 2 === 0 ? 6 : 3); fys.push(fy); }
-    if (Math.min(...fys) - Math.max(...hs) < S0 + 4 || Math.max(...fys) > S0 + mb(44)) continue;
+    if (Math.min(...fys) - Math.max(...hs) < lv(0, lj) + 4 || Math.max(...fys) > lv(44, lj)) continue;
     const cyM = (Math.min(...fys) + Math.max(...fys)) / 2 - 5;
     if (busy(x0 + total / 2, cyM, total, Math.max(...fys) - Math.min(...fys) + 12, 6) || !awayFromBoss(x0 + total / 2, cyM, total / 2)) continue;
     let x = x0;
@@ -174,10 +182,10 @@ function atBuild() {
       const H = { cx: x + ws[j] / 2, cy: fys[j] - hs[j] / 2, w: ws[j], h: hs[j], band: 0, kind: 'terraco', x0: W1(x), fy: fys[j], top: fys[j] - hs[j], chain: made, stair: j > 0 && j % 2 === 0 ? (dir > 0 ? 'l' : 'r') : null };
       atTerraces.push(H); atChambers.push(H); x += ws[j];
     }
-    made += n;
+    made += n; chains++;
   }
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 300; tries++) {
-    const x0 = (R() * WW) | 0, fy = S0 + mb(18 + R() * 24);
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 300 * K; tries++) {
+    const x0 = (R() * WW) | 0, fy = lv(18 + R() * 24, k % K);
     if (fy - 12 < S0 + 3 || busy(x0 + 6, fy - 6, 12, 12, 6)) continue;
     room(x0, fy, 12, 12);
     const H = { cx: x0 + 6, cy: fy - 6, w: 12, h: 12, band: 0, kind: 'camara', x0: W1(x0), fy, top: fy - 12 };
@@ -185,9 +193,9 @@ function atBuild() {
   }
 
   // ---------- 2e. a Cidade Inversa: quarteirões com os prédios no chão e os mesmos pendurados no teto ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 400; tries++) {
-    const w = 24 + ((R() * 17) | 0), h = 14 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(66 + R() * 28);
-    if (fy - h < S0 + mb(48) || busy(x0 + w / 2, fy - h / 2, w, h, 7)) continue;
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 24 + ((R() * 17) | 0), h = 14 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = lv(66 + R() * 28, j);
+    if (fy - h < lv(48, j) || busy(x0 + w / 2, fy - h / 2, w, h, 7)) continue;
     room(x0, fy, w, h);
     const houses = [], hmax = Math.max(4, Math.min(7, (h - 5) >> 1));
     for (let x = x0 + 3 + ((R() * 3) | 0); x < x0 + w - 7; ) {
@@ -200,9 +208,9 @@ function atBuild() {
     atBlocks.push(H); atChambers.push(H); k++;
   }
   // as Salas de Prumo: 14 x 14 fechadas (ladrilho), a porta no pé de uma parede; o 296 escreve o modelo dentro
-  for (let k = 0, tries = 0; k < 2 * WSC && tries < 400; tries++) {
-    const x0 = (R() * WW) | 0, fy = S0 + mb(70 + R() * 24), y0 = fy - 13;
-    if (y0 < S0 + mb(48) || busy(x0 + 7, y0 + 7, 14, 14, 8)) continue;
+  for (let k = 0, tries = 0; k < 2 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, x0 = (R() * WW) | 0, fy = lv(70 + R() * 24, j), y0 = fy - 13;
+    if (y0 < lv(48, j) || busy(x0 + 7, y0 + 7, 14, 14, 8)) continue;
     const near = atBlocks.filter(b => Math.abs(b.fy - fy) < 16).sort((a, b) => Math.abs(wdx(a.cx - x0 - 7)) - Math.abs(wdx(b.cx - x0 - 7)))[0];
     if (!near || Math.abs(wdx(near.cx - x0 - 7)) > 80) continue;
     const side = wdx(near.cx - x0 - 7) < 0 ? -1 : 1, dx = side > 0 ? x0 + 13 : x0;
@@ -217,25 +225,25 @@ function atBuild() {
   }
 
   // ---------- 2f. As Máquinas: salões com passarelas de chapa em andares, poços de pistão ----------
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 400; tries++) {
-    const w = 40 + ((R() * 21) | 0), h = 14 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(118 + R() * 28);
-    if (fy - h < S0 + mb(100) || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 400 * K; tries++) {
+    const j = k % K, w = 40 + ((R() * 21) | 0), h = 14 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = lv(118 + R() * 28, j);
+    if (fy - h < lv(100, j) || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
     room(x0, fy, w, h);
     const decks = []; for (let y = fy - 5; y > fy - h + 3; y -= 5) decks.push(y);
     const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, kind: 'maquina', x0: W1(x0), fy, top: fy - h, decks };
     atHalls.push(H); atChambers.push(H); k++;
   }
   // salas de serviço pequenas entre os salões
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 300; tries++) {
-    const w = 12 + ((R() * 8) | 0), h = 6 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(104 + R() * 44);
+  for (let k = 0, tries = 0; k < 5 * WSC * K && tries < 300 * K; tries++) {
+    const w = 12 + ((R() * 8) | 0), h = 6 + ((R() * 3) | 0), x0 = (R() * WW) | 0, fy = lv(104 + R() * 44, k % K);
     if (busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 6)) continue;
     room(x0, fy, w, h);
     atChambers.push({ cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, kind: 'servico', x0: W1(x0), fy, top: fy - h }); k++;
   }
 
   // ---------- 2g. A Cratera da Estrela: tigelas de vidro e bolsões naturais na rocha fria ----------
-  for (let k = 0, tries = 0; k < WSC && tries < 400; tries++) {
-    const w = 60 + ((R() * 31) | 0), h = 20 + ((R() * 9) | 0), cx = (R() * WW) | 0, top = S0 + mb(152), fy = Math.min(YB - 5, top + h);
+  for (let k = 0, tries = 0; k < WSC * K && tries < 400 * K; tries++) {
+    const w = 60 + ((R() * 31) | 0), h = 20 + ((R() * 9) | 0), cx = (R() * WW) | 0, top = lv(152, k % K), fy = Math.min(YB - 5, top + h);
     if (busy(cx, top + h / 2, w, h, 8) || !awayFromBoss(cx, top + h / 2, w / 2 + 8)) continue;
     // a tigela: chão em arco, a borda larga; o teto quase reto (a estrela caiu de cima: o buraco acima foi fechado)
     for (let x = Math.floor(cx - w / 2); x <= cx + w / 2; x++) {
@@ -246,9 +254,9 @@ function atBuild() {
     const C = { cx, cy: top + h / 2, w, h, band: 3, kind: 'cratera', x0: W1(Math.floor(cx - w / 2)), fy, top, bowl: true };
     atCraters.push(C); atChambers.push(C); k++;
   }
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 400; tries++) {   // os bolsões naturais (quase não há)
+  for (let k = 0, tries = 0; k < 6 * WSC * K && tries < 400 * K; tries++) {   // os bolsões naturais (quase não há)
     const b = R() < 0.6 ? 3 : (R() * 3) | 0, w = 10 + ((R() * 10) | 0), h = 6 + ((R() * 4) | 0), cx = (R() * WW) | 0;
-    const cy = S0 + mb(AT_BANDS[b] + 6) + h / 2 + R() * Math.max(0, mb(AT_BANDS[b + 1] - AT_BANDS[b] - 12) - h);
+    const cy = lv(BD[b] + 6, k % K) + h / 2 + R() * Math.max(0, BD[b + 1] - BD[b] - 12 - h);
     if (busy(cx, cy, w, h, 5) || !awayFromBoss(cx, cy, w / 2 + 6) || cy + h / 2 > YB - 5) continue;
     blob(cx, cy, w, h, 0x7d00 + k, 1.6);
     atChambers.push({ cx, cy, w, h, band: b, kind: 'natural', fy: Math.round(cy + h / 2) }); k++;
@@ -257,19 +265,22 @@ function atBuild() {
   // ---------- 3. as ligações ----------
   const mouth = C => C.fy ? C.fy : Math.round(C.cy + C.h * 0.3);
   const ends = (C, right) => [Math.round(right ? C.cx + C.w / 2 - 2 : C.cx - C.w / 2 + 2), mouth(C)];
-  for (let b = 0; b < 4; b++) {
-    const L = atChambers.filter(c => c.band === b && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
+  // cada sala no seu andar (o da faixa dela que contém a boca); as de um andar ligadas em fila
+  const NL = 4 * K, byLv = []; for (let l = 0; l < NL; l++) byLv.push([]);
+  for (const c of atChambers) if (!c.nolink && !c.boss) byLv[c.band * K + clamp(lvOf(mouth(c) - 1) - c.band * K, 0, K - 1)].push(c);
+  for (let l = 0; l < NL; l++) {
+    const b = (l / K) | 0, L = byLv[l].slice().sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       if (P.chain !== undefined && P.chain === Q.chain) continue;   // os terraços da mesma escadaria já se tocam
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
-      if (b === 3 && (P.kind === 'natural' || Q.kind === 'natural')) worm(ax, ay - 2, bx, by - 2, 1.35, 0x7700 + k);
+      if (b === 3 && (P.kind === 'natural' || Q.kind === 'natural')) worm(ax, ay - 2, bx, by - 2, 1.35, 0x7700 + l * 97 + k);
       else street(ax, ay, bx, by, b === 1 ? 4 : 5, atCorr);
     }
   }
-  // entre as faixas: escadarias longas (2 x WSC por divisa) e os poços de pistão (4 de largura, com a escada embutida)
-  for (let b = 0; b < 3; b++) {
-    const U = atChambers.filter(c => c.band === b && !c.nolink && !c.boss && c.kind !== 'natural'), D = atChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss && c.kind !== 'natural');
+  // entre um andar e o de baixo: escadarias longas (2 x WSC por divisa) e os poços de pistão (4 de largura, com a escada embutida)
+  for (let l = 0; l < NL - 1; l++) {
+    const U = byLv[l].filter(c => c.kind !== 'natural'), D = byLv[l + 1].filter(c => c.kind !== 'natural');
     for (let k = 0, tries = 0; k < 2 * WSC && tries < 80 && U.length && D.length; tries++) {
       const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
       const [ax, ay] = ends(P, R() < 0.5), by = mouth(Q); if (by - ay < 6 || by - ay > 70 || !awayFromBoss(Q.cx, by, 6)) continue;
@@ -278,7 +289,7 @@ function atBuild() {
   }
   {
     const pairs = [[1, 2], [2, 2], [2, 3]];
-    for (let k = 0, tries = 0; k < 4 * WSC && tries < 400; tries++) {
+    for (let k = 0, tries = 0; k < 4 * WSC * K && tries < 400 * K; tries++) {
       const [bu, bd] = pairs[k % 3];
       const U = atChambers.filter(c => c.band === bu && c.fy && !c.nolink && !c.boss && c.kind !== 'natural'), D = atChambers.filter(c => c.band === bd && c.top && !c.nolink && !c.boss && c.kind !== 'natural');
       const P = U[(R() * U.length) | 0]; if (!P) continue;
@@ -391,6 +402,8 @@ function atBuild() {
       for (let x = S.x0; x < S.x0 + 4; x++) { const i = I(x, y); if (!SOLID[tiles[i]]) walls[i] = WAT_MAQUINA; }
       const i = I(S.x0, y); if (y >= S.top - 1 && (tiles[i] === AIR || tiles[i] === AT_CHAPA)) { tiles[i] = AT_ESCADA; atKeep.add(i); }
     }
+    // a cada 10 linhas um patamar de chapa (um sim, um não, só a escada passa; no outro também a coluna ao lado)
+    for (let y = S.top + 10, n = 0; y < S.fy - 4; y += 10, n++) for (let x = S.x0 + (n % 2 ? 1 : 2); x < S.x0 + 4; x++) { const i = I(x, y); if (tiles[i] === AIR) tiles[i] = AT_CHAPA; }
   }
   // as crateras: vidro forrando, rocha fundida na borda, parede de vidro fosco, lascas no fundo
   for (const C of atCraters) {
@@ -442,6 +455,8 @@ function atBuild() {
       for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (y > E.fy) { tiles[i] = (y - E.fy) % 6 === 3 ? AT_GLIFO : AT_LAJE; atKeep.add(i); } }
     }
     for (let y = E.fy - 2; y < L.fy; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = AT_ESCADA; atKeep.add(i); } }
+    // um patamar de laje no meio do poço (só a escada passa): quem desce caindo cai a metade
+    if (y1 - E.fy > 14) { const my = (E.fy + y1) >> 1; for (const x of [x0, x0 + 2, x0 + 3]) { const i = I(x, my); tiles[i] = AT_LAJE; atKeep.add(i); } }
     for (let y = E.fy - 3; y < E.fy; y++) for (let x = x0; x < x0 + 4; x++) atKeep.add(I(x, y));
     for (let y = L.fy - L.h - 1; y <= L.fy; y++) for (let x = L.x0 - 1; x <= L.x0 + L.w; x++) {
       const i = I(x, y), edge = y === L.fy - L.h - 1 || y === L.fy || x === L.x0 - 1 || x === L.x0 + L.w;
@@ -461,6 +476,7 @@ function atBuild() {
       if (y >= X.top) for (const x of [X.x0 - 1, X.x0 + 3]) { const i = I(x, y); tiles[i] = (y - X.top) % 5 === 2 ? AT_GLIFO : AT_LAJE; atKeep.add(i); }
     }
     for (let y = X.C.top + 1; y < X.fy; y++) { const i = I(X.x0 + 1, y); if (!SOLID[tiles[i]]) { tiles[i] = AT_ESCADA; atKeep.add(i); } }
+    if (X.fy - X.top > 8) { const my = (X.top + X.fy) >> 1; for (const x of [X.x0, X.x0 + 2]) { const i = I(x, my); tiles[i] = AT_LAJE; atKeep.add(i); } }   // o patamar no meio
     for (let x = X.x0 - 2; x <= X.x0 + 4; x++) { atKeep.add(I(x, X.top)); if (x < X.x0 || x > X.x0 + 2) { const i = I(x, X.top); if (SOLID[tiles[i]]) tiles[i] = AT_LAJE; } }
     shellRect(X.C.x0 - 2, X.C.top - 2, X.C.x0 + X.C.w + 1, X.C.fy + 1, AT_LAJE, WAT_LAJE);
     tiles[I(X.x0 + 1, X.fy)] = AT_LAJE;
@@ -478,9 +494,9 @@ function atBuild() {
       }
     }
   };
-  vein(AT_O_CARVAO, 16 * WSC, 0, 186, 3, 7, t => t === AT_ROCHA_FRIA);
-  vein(AT_O_ESTELAR, 5 * WSC, 104, 150, 2, 3, t => t === AT_PEDRA);
-  vein(AT_O_ESTELAR, 14 * WSC, 150, 186, 3, 7, t => t === AT_VIDRO || t === AT_FUNDIDA || t === AT_PEDRA);
+  vein(AT_O_CARVAO, 16 * WSC * K, 0, 186, 3, 7, t => t === AT_ROCHA_FRIA);
+  vein(AT_O_ESTELAR, 5 * WSC * K, 104, 150, 2, 3, t => t === AT_PEDRA);
+  vein(AT_O_ESTELAR, 14 * WSC * K, 150, 186, 3, 7, t => t === AT_VIDRO || t === AT_FUNDIDA || t === AT_PEDRA);
   // veios grossos perto do fundo das crateras (onde ficam as lascas)
   for (const C of atCraters) if (C.bowl) for (let k = 0; k < 4; k++) {
     let x = Math.round(C.cx + (R4() - 0.5) * C.w * 0.5), y = C.fy + 1;
@@ -503,6 +519,8 @@ function atAfter() {
     const d = wdx(xb - xa), s = d < 0 ? -1 : 1;
     for (let k = 0; k <= Math.abs(d); k++) for (let yy = ya - 2; yy <= ya; yy++) dig(xa + k * s, yy);
     for (let yy = Math.min(ya, yb) - 2; yy <= Math.max(ya, yb); yy++) { dig(xb, yy); dig(xb - s, yy); }
+    // no poço de 2, um degrau de laje a cada 8 numa coluna (a escada vai na outra): quem cai, cai pouco
+    for (let yy = Math.min(ya, yb) + 6; yy < Math.max(ya, yb) - 3; yy += 8) { const i = I(xb - s, yy); if (tiles[i] === AIR && !atKeep.has(i) && atRow(yy)) tiles[i] = AT_LAJE; }
   };
 
   // ---------- 1. tudo alcançável das duas descidas ----------
@@ -513,15 +531,34 @@ function atAfter() {
   const B = atBoss;
   if (B) for (let y = B.y0 - 3; y <= B.fy + 3; y++) for (let x = B.x0 - 3; x <= B.x0 + 32; x++) reach[I(x, y)] = 1;
   for (const P of atPrumos) for (let y = P.y0; y <= P.fy; y++) for (let x = P.x0; x < P.x0 + 14; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
-    for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+  // as bolsas que não se alcançam, rotuladas uma vez só (só as linhas da camada), da maior para a menor; a que um
+  // conserto anterior já alcançou fica de fora
+  const RB = S0 * WW, lab = new Uint8Array((YB - S0) * WW), comps = [];
+  for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
+    const i = y * WW + x; if (reach[i] || lab[i - RB] || SOLID[tiles[i]] || !walls[i]) continue;
+    const comp = []; lab[i - RB] = 1; stack.push(i);
+    while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= RB && nb < YB * WW && !lab[nb - RB] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - RB] = 1; stack.push(nb); } }
+    if (comp.length >= 16) comps.push(comp);
+  }
+  comps.sort((a, c) => c.length - a.length);
+  const org = new Int32Array((YB - S0) * WW);
+  // a busca pela rocha da bolsa inteira até o vão alcançado mais perto (contornando o que fica); devolve onde chegou
+  const bfs = C => {
+    org.fill(-1); const q = []; let hit = -1; for (const c of C) { org[c - RB] = c; q.push(c); }
+    for (let h = 0; h < q.length && hit < 0; h++) {
+      const c = q[h], x = c % WW, row = c - x;
+      for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
+        if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb - RB] >= 0 || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
+        if (reach[nb] && !SOLID[tiles[nb]]) { org[nb - RB] = c; hit = nb; break; }   // o vão alcançado vale mesmo guardado (a porta do pouso)
+        if (atKeep.has(nb) || atKeep.has(nb - WW) || tiles[nb] === BEDROCK) continue;
+        org[nb - RB] = c;
+        q.push(nb);
+      }
     }
-    if (!bestC) break;
+    return hit;
+  };
+  for (let pass = 0; pass < comps.length && pass < 60 * WSC * LAYER_K; pass++) {
+    const bestC = comps[pass]; if (reach[bestC[0]]) continue;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -531,20 +568,15 @@ function atAfter() {
         const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
       }
     }
+    if (!best) {   // nada perto: a ligação vai até o vão alcançado mais perto, por mais longe que esteja
+      const h = bfs(bestC); if (h >= 0) { let o = h; while (org[o - RB] !== o) o = org[o - RB]; best = [o % WW, (o / WW) | 0, h % WW, (h / WW) | 0]; }
+    }
     if (!best) { for (const c of bestC) reach[c] = 1; continue; }
     tunnel(best[0], best[1], best[2], best[3]);
     flood(I(best[2], best[3]), true);
     if (!reach[bestC[0]]) {   // o túnel bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
-      for (let h = 0; h < q.length && hit < 0; h++) {
-        const c = q[h], x = c % WW, row = c - x;
-        for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
-          if (nb < (S0 + 2) * WW || nb >= (YB - 1) * WW || org[nb] >= 0 || atKeep.has(nb) || atKeep.has(nb - WW) || tiles[nb] === BEDROCK || inBox(nb % WW, (nb / WW) | 0, 2)) continue;
-          org[nb] = c; if (reach[nb] && !SOLID[tiles[nb]]) { hit = nb; break; }
-          q.push(nb);
-        }
-      }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      const hit = bfs(bestC);
+      for (let c = hit; c >= 0 && org[c - RB] !== c; c = org[c - RB]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
@@ -619,21 +651,55 @@ function atClimbFix() {
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => AT_CLIMB(tiles[I(x, y)]);
   const ok = (x, y) => !S(x, y) && !S(x, y - 1), H = YB - Y0;
   const box = (x, y, m = 0) => inAtHall(x, y, m) || inAtPrumo(x, y, m);
-  const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
-  const search = (sx, sy) => {
-    seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || box(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
-    const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
-    let y = sy; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++; push(sx, y, 4);
-    while (q.length) {
-      if (hit >= 0) return win(hit);
-      const r = q.pop(), yy = q.pop(), x = q.pop(); cur = ((yy - Y0) * WW + x) * 5 + r; if (yy <= S0 - 3) return win(cur);
-      const gr = S(x, yy + 1) || L(x, yy);
-      push(x - 1, yy, r === 4 && !gr ? 0 : r); push(x + 1, yy, r === 4 && !gr ? 0 : r);
-      if (r > 0) push(x, yy - 1, L(x, yy) || L(x, yy - 1) ? 4 : r === 4 ? 2 : r - 1);
-      if (!S(x, yy + 1)) push(x, yy + 1, L(x, yy + 1) ? 4 : 0);
+  // os estados (célula, pulo que sobra 0 a 4) de onde se volta ao topo (y <= S0 - 3) saem de uma vez, andando de trás
+  // para frente a partir do topo (antes era uma busca inteira para cada ponto de partida). F guarda, por célula
+  // c = (y - Y0) * WW + x: 1 cabe o herói, 2 apoiado (pulo cheio; aqui o pulo sobe 2), 4 chão ou escada aqui, 8 escada aqui ou acima
+  const NC = WW * H, F = new Uint8Array(NC), good = new Uint8Array(NC * 5), seen = new Uint8Array(NC * 5), any = new Uint8Array(NC), Q = new Int32Array(NC * 5);
+  const flag1 = (x, y) => {
+    let f = 0;
+    if (ok(x, y) && !box(x, y)) { f = 1; const lh = L(x, y), lu = lh || L(x, y - 1), sd = S(x, y + 1); if (sd || lu) f |= 2; if (sd || lh) f |= 4; if (lu) f |= 8; }
+    F[(y - Y0) * WW + x] = f;
+  };
+  const flags = () => { for (let y = Y0 + 1; y < YB; y++) for (let x = 0; x < WW; x++) flag1(x, y); };
+  // o pulo com que se chega em c vindo de p (dir 0 de lado, 1 subindo, 2 descendo); -1 não dá
+  const arrive = (p, r, c, dir) => { if (F[c] & 2) return dir === 1 && r === 0 ? -1 : 4; if (dir === 0) return r === 4 && !(F[p] & 4) ? 0 : r; if (dir === 1) return r === 0 ? -1 : F[p] & 8 ? 4 : r === 4 ? 2 : r - 1; return 0; };
+  const closure = () => {
+    good.fill(0); let qt = 0;
+    for (let y = Y0 + 1; y <= S0 - 3; y++) for (let x = 0; x < WW; x++) { const c = (y - Y0) * WW + x, f = F[c]; if (f & 1) for (let r = f & 2 ? 4 : 0; r <= 4; r++) { good[c * 5 + r] = 1; Q[qt++] = c * 5 + r; } }
+    spread(qt);
+  };
+  // depois de um conserto (escada na coluna x, de top a bot: só abre caminho, nunca fecha) basta refazer as marcas em
+  // volta e continuar a volta a partir dos estados bons de perto
+  const patch = (x, top, bot) => {
+    for (let y = Math.max(Y0 + 1, top - 2); y <= Math.min(YB - 1, bot + 2); y++) for (let dx = -1; dx <= 1; dx++) flag1(W1(x + dx), y);
+    let qt = 0;
+    for (let y = Math.max(Y0 + 1, top - 3); y <= Math.min(YB - 1, bot + 3); y++) for (let dx = -2; dx <= 2; dx++) { const c = (y - Y0) * WW + W1(x + dx); for (let r = 0; r < 5; r++) if (good[c * 5 + r]) Q[qt++] = c * 5 + r; }
+    spread(qt);
+  };
+  const spread = qt => {
+    let qh = 0;
+    while (qh < qt) {
+      const t = Q[qh++], c = (t / 5) | 0, rt = t - c * 5, x = c % WW, row = c - x;
+      for (let d = 0; d < 4; d++) {
+        const p = d === 0 ? row + (x === 0 ? WW - 1 : x - 1) : d === 1 ? row + (x === WW - 1 ? 0 : x + 1) : d === 2 ? c + WW : c - WW;
+        if (p < 0 || p >= NC || !(F[p] & 1)) continue;
+        const dir = d < 2 ? 0 : d === 2 ? 1 : 2;
+        for (let r = F[p] & 2 ? 4 : 0; r <= 4; r++) { const k = p * 5 + r; if (!good[k] && arrive(p, r, c, dir) === rt) { good[k] = 1; Q[qt++] = k; } }
+      }
     }
-    return hit >= 0 ? win(hit) : false;
+  };
+  // tudo o que se alcança de uma célula (para o conserto)
+  const forward = c0 => {
+    seen.fill(0); any.fill(0); let qh = 0, qt = 0; const s0 = c0 * 5 + 4; seen[s0] = 1; Q[qt++] = s0; any[c0] = 1;
+    while (qh < qt) {
+      const t = Q[qh++], c = (t / 5) | 0, r = t - c * 5, x = c % WW, row = c - x;
+      for (let d = 0; d < 4; d++) {
+        const n = d === 0 ? row + (x === 0 ? WW - 1 : x - 1) : d === 1 ? row + (x === WW - 1 ? 0 : x + 1) : d === 2 ? c - WW : c + WW;
+        if (n < 0 || n >= NC || !(F[n] & 1)) continue;
+        const r1 = arrive(c, r, n, d < 2 ? 0 : d === 2 ? 1 : 2); if (r1 < 0) continue;
+        const k = n * 5 + r1; if (!seen[k]) { seen[k] = 1; any[n] = 1; Q[qt++] = k; }
+      }
+    }
   };
   const soft = t => t === AT_PEDRA || t === AT_LAJE || t === AT_ROCHA_FRIA || t === AT_CHAPA || t === AT_VIDRO || t === AT_FUNDIDA || t === AT_ENGRENAGEM;
   const repair = () => {
@@ -655,7 +721,7 @@ function atClimbFix() {
     if (!best) return false;
     const [x, top, bot] = best, cr = antigosBand(bot) === 3;
     for (let y = top; y <= bot; y++) { const i = I(x, y); if (!SOLID[tiles[i]] || soft(tiles[i])) { tiles[i] = cr ? AT_CORRENTE : AT_ESCADA; if (!walls[i]) walls[i] = WAT_PEDRA; } }
-    return true;
+    return best;
   };
   const starts = [];
   if (atBoss) for (const D of atBoss.doors) starts.push([D.x + D.side * 3, D.fy - 1]);
@@ -665,7 +731,18 @@ function atClimbFix() {
   for (const c of atCraters) starts.push([Math.round(c.cx), c.fy - 1]);
   for (const X of atExits) starts.push([X.x0 + 2, X.top - 1]);
   let fixes = 0, ns = 0;
-  for (const [x, y] of starts) { if (SOLID[tiles[I(x, y)]]) continue; for (let k = 0; k < 12 && (ns++, !search(W1(x), y)); k++) { if (!repair()) break; fixes++; } }
+  flags(); closure();
+  for (const [x0, y0] of starts) {
+    if (SOLID[tiles[I(x0, y0)]]) continue;
+    for (let k = 0; k < 12; k++) {
+      ns++;
+      const sx = W1(x0); let y = y0; while (y < YB - 1 && !S(sx, y + 1) && !L(sx, y)) y++;
+      const c = (y - Y0) * WW + sx;
+      if (F[c] & 1) { if (good[c * 5 + 4]) break; forward(c); } else any.fill(0);
+      const fx = repair(); if (!fx) break;
+      fixes++; patch(fx[0], fx[1], fx[2]);
+    }
+  }
   atClimbFix.last = [starts.length, ns, fixes];
   return fixes;
 }
@@ -736,9 +813,10 @@ function atPlaceProps() {
 
 // a ordem: a camada, a arena (297: atDress), as Salas de Prumo (296: atPrumoDress), as bocas e a subida; o 87 liga o resto
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('antigos', () => {
   if (!ANTIGOS) return;
   try { atBuild(); atAfter(); if (typeof atDress === 'function') atDress(); if (typeof atPrumoDress === 'function') atPrumoDress(); atExitClear(); atClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da Cidade: torres ao longe nas Escadarias e na Cidade Inversa, engrenagens
@@ -747,10 +825,10 @@ function atPlaceProps() {
   _cd();
   if (!ANTIGOS) return;
   const Y1 = Math.min(WH, AT_S0 + AT_D + 4);
-  for (let y = AT_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(AT_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - AT_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 98 ? (d > 80 && n > 0.7 ? DP_AT_MAQUINAS : DP_AT_CIDADE) : d < 150 ? (n > 0.8 ? DP_AT_CIDADE : DP_AT_MAQUINAS) : (n > 0.78 ? DP_AT_MAQUINAS : DP_AT_ESTRELA);
+    DEEPT[i] = d < AT_BANDS[2] ? (d > AT_BANDS[2] - 18 * LAYER_K && n > 0.7 ? DP_AT_MAQUINAS : DP_AT_CIDADE) : d < AT_BANDS[3] ? (n > 0.8 ? DP_AT_CIDADE : DP_AT_MAQUINAS) : (n > 0.78 ? DP_AT_MAQUINAS : DP_AT_ESTRELA);
   }
 }; }
 

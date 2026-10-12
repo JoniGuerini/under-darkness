@@ -1,5 +1,7 @@
 # Catedral Abandonada: especificação compartilhada
 
+> **2026-10-12:** a camada tem 558 m, de 558 a 1116 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
 Camada nova e, por enquanto, **a única** debaixo do vilarejo. Três threads trabalham juntas:
 
 | Thread | Dona de | Arquivos (só ela edita) |

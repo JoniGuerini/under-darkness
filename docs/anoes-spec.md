@@ -1,6 +1,8 @@
 # A Fortaleza dos Anões: o que foi feito
 
-A oitava camada, debaixo da Floresta Petrificada, de 1302 a 1488 m (2026-10-10). A ficha de desenho, com as faixas, os monstros, o chefe e o loot, é [camadas/08-fortaleza-anoes.md](camadas/08-fortaleza-anoes.md); este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha. A ficha fala em arquivos 150 a 159; no disco eles são 180 a 189 (a numeração 150 já estava em uso).
+> **2026-10-12:** a camada tem 558 m, de 3906 a 4464 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A oitava camada, debaixo da Floresta Petrificada, de 3906 a 4464 m (2026-10-10). A ficha de desenho, com as faixas, os monstros, o chefe e o loot, é [camadas/08-fortaleza-anoes.md](camadas/08-fortaleza-anoes.md); este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha. A ficha fala em arquivos 150 a 159; no disco eles são 180 a 189 (a numeração 150 já estava em uso).
 
 ## 1. Arquivos
 

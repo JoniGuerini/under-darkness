@@ -24,7 +24,7 @@
    Carrega depois do mundo da Colmeia (195) e antes do 103 (o Abismo começa onde esta camada termina). */
 
 const NAVE = true;
-const NV_D = 186;                                   // metros de camada
+const NV_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam e os
 // escorredouros de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
 function nvAbove() {
@@ -34,9 +34,9 @@ function nvAbove() {
     return { id: 'anoes', S0: AN_S0, D: AN_D, soils: typeof AN_SOILS !== 'undefined' ? AN_SOILS : null, host: null, halls: typeof anExits !== 'undefined' ? anExits : [], climb: typeof AN_CORRENTE !== 'undefined' ? AN_CORRENTE : CHAIN, boss: typeof anBoss !== 'undefined' ? anBoss : null, thin: STONE };
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, host: null, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const NV_TOP = (typeof CM_TOP !== 'undefined' ? CM_TOP : 1488) + 186;   // metros abaixo do chão do vilarejo (1674)
+const NV_TOP = (typeof CM_TOP !== 'undefined' ? CM_TOP : 1488) + LAYER_D;   // metros abaixo do chão do vilarejo (1674)
 // topo de cada faixa em metros abaixo do NV_TOP: A Cratera de Impacto, O Casco, Os Laboratórios, O Núcleo, (rocha-mãe)
-const NV_BANDS = [0, 46, 98, 150, 186];
+const NV_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const NV_BAND_NAMES = ['cratera', 'casco', 'laboratorios', 'nucleo'];
 const NV_ZONE0 = 49;                                // zonas 49..52 (o 248 põe os nomes depois das da Escuridão)
 let NV_S0 = (() => { const a = nvAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (nvBuild acerta)

@@ -95,3 +95,12 @@ Desde 2026-10-09 o mundo tem 900 blocos de largura (`WW`), três vezes os 300 de
 - Laços que comparam todos com todos (O(n²) ou pior) ficam três vezes mais caros ou piores: evite.
 - No fim da geração, o `js/87-mundo-largo.js` liga ao vilarejo qualquer bolsão aberto de 30 blocos ou mais que ficou isolado (passagem e poço com corrente ou escada).
 
+
+## Altura das camadas
+
+Desde 2026-10-12 cada camada tem 558 m (`LAYER_D`), três vezes os 186 m do desenho. `LAYER_K` (em `js/01-base.js`) diz quantas vezes ela é mais alta que o desenho; os geradores continuam desenhando em 186 m (`LAYER_DESIGN`) e esticam.
+
+- Faixas (`X_BANDS`), veios de minério e lugares fixos (sala do chefe, descidas) saem do desenho vezes `LAYER_K`.
+- Uma faixa mais alta não ganha salas maiores: ganha `LAYER_K` andares iguais aos de antes, com as mesmas ligações entre eles. Tudo que existe "por camada" multiplica por `LAYER_K`, como o que é "por mundo" multiplica por `WSC`.
+- Nenhuma queda aberta de mais de uns 12 a 15 blocos no caminho normal. No fim da geração, o `js/313-quedas-minerios.js` põe pisos com degrau nos poços estreitos que caem mais que isso (só onde quem anda cai dentro e sem tirar nenhuma subida) e leva 80% do carvão e do metal de cada camada para a rocha a 2 blocos ou menos de um vão.
+- O gerador entrega o trabalho a `genStage(id, fn)` e o que roda depois de todas as camadas se registra em `genPos`: a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`), e os passes rodam só nas camadas novas.

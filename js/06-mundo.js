@@ -6,7 +6,7 @@ const diffs = new Map();
 const Z1 = 106, Z2 = 166;
 // the world wraps around horizontally: walk far enough one way and you come back from the other side
 const wrapX = x => (x < 0 || x >= WW) ? ((x % WW) + WW) % WW : x;
-const wdx = d => d - Math.round(d / WW) * WW;   // shortest horizontal tile distance around the ring
+const WW_H = WW / 2, wdx = d => d > -WW_H && d < WW_H ? d : d - Math.round(d / WW) * WW;   // shortest horizontal tile distance around the ring (the near case first: it is most calls)
 function tileAt(x, y) { if (y < 0) return AIR; if (y >= WH) return BEDROCK; return tiles[y * WW + wrapX(x)]; }
 function wallAt(x, y) { return y < 0 || y >= WH ? 0 : walls[y * WW + wrapX(x)]; }
 function solidAt(x, y) { return SOLID[tileAt(x, y)] === 1; }
@@ -26,9 +26,13 @@ function generate(sd) {
   for (let x = SPX - VIL_HALF; x <= SPX + VIL_HALF; x++) surf[x] = s0;
   for (let k = 1; k <= 10; k++) { const a = k / 11; surf[SPX - VIL_HALF - k] = Math.round(lerp(s0, surf[SPX - VIL_HALF - k], a)); surf[SPX + VIL_HALF + k] = Math.round(lerp(s0, surf[SPX + VIL_HALF + k], a)); }
   // strata: dirt with cobble patches up top, cobble lower down, dark slate in the deep
+  // with the caves and the cathedral on, 45 rewrites every row from the cathedral's top down (CB_S0 = surf[SPX] + CAVE_D),
+  // so from 16 rows under it the rock is plain slate with no noise (only solid / slate matters to the passes below)
+  const CUT = typeof CATEDRAL !== 'undefined' && CATEDRAL && typeof CAVE_D !== 'undefined' && CAVE_D ? surf[SPX] + CAVE_D + 16 : WH;
   for (let x = 0; x < WW; x++) {
     const sx = surf[x], dirtD = 5 + ring1(x, 0.09, 90, 1.7, 2) * 6, deepL = Z1 + 8 + (ring1(x, 0.03, 110, 5.5, 3) - 0.5) * 18;
     for (let y = Math.max(0, sx); y < WH; y++) {
+      if (y >= CUT && y >= deepL + 1 && y - sx >= dirtD) { const i = y * WW + x; tiles[i] = DEEP; walls[i] = 3; continue; }
       const d = y - sx, i = y * WW + x, n = seam((a, b) => N.fbm(a * 0.06, b * 0.06 + 40, 3), x, y);
       let t;
       if (d < dirtD) t = DIRT;
@@ -109,8 +113,8 @@ function generate(sd) {
     const dir = R() < 0.5 ? 1 : -1, x1 = clamp(x + dir * (20 + R() * 20), 6, WW - 6);
     tunnel(x, surf[Math.floor(x)] - 1, x1, surf[Math.floor(x)] + 26 + R() * 14, 1.55, null);
   }
-  // remove floating specks of rock
-  for (let y = 1; y < WH - 4; y++) for (let x = 0; x < WW; x++) {
+  // remove floating specks of rock (under CUT it is all solid slate: nothing to remove, and R is not used here)
+  for (let y = 1, ye = Math.min(WH - 4, CUT); y < ye; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!SOLID[tiles[i]] || y < surf[x] + 3) continue;
     const n = (SOLID[tiles[y * WW + W1(x - 1)]] ? 1 : 0) + (SOLID[tiles[y * WW + W1(x + 1)]] ? 1 : 0) + (SOLID[tiles[i - WW]] ? 1 : 0) + (SOLID[tiles[i + WW]] ? 1 : 0);
     if (n === 0) tiles[i] = AIR;
@@ -144,7 +148,8 @@ function generate(sd) {
     }
   }
   // coal seams: placed by hash, not by R(), so everything else in a seeded world stays where it was
-  for (let y = SURF_BASE + 8; y < WH - 16; y++) for (let x = 0; x < WW; x++) {
+  // (a seam starting 7 rows below CUT can't climb back above it: the rows it would touch are the cathedral's)
+  for (let y = SURF_BASE + 8, ye = Math.min(WH - 16, CUT + 7); y < ye; y++) for (let x = 0; x < WW; x++) {
     if (hash2(x, y, seed ^ 0x2c0a1) > 0.0042) continue;
     let cx = x, cy = y; const n = 3 + Math.floor(hash2(x, y, seed ^ 0x2c0a2) * 5);
     for (let k = 0; k < n; k++) {
@@ -195,7 +200,7 @@ function generate(sd) {
   for (let x = 0; x < WW; x++) { const y = surf[x]; if (y < 1) continue; if (tiles[y * WW + x] === GRASS && tiles[(y - 1) * WW + x] === AIR) { const r = R(); if (r < 0.3) tiles[(y - 1) * WW + x] = TUFT; else if (r < 0.37) tiles[(y - 1) * WW + x] = FLOWER; } }
   // cave floor dressing: glowing mushrooms deeper down, bones everywhere
   const floorOk = (x, y) => { const i = y * WW + x; return tiles[i] === AIR && walls[i] && SOLID[tiles[i + WW]] && tiles[i + WW] !== BEDROCK && tiles[i - WW] === AIR; };
-  for (let y = 2; y < WH - 16; y++) for (let x = 3; x < WW - 3; x++) {
+  for (let y = 2, ye = Math.min(WH - 16, CUT); y < ye; y++) for (let x = 3; x < WW - 3; x++) {   // (no air under CUT: no floor, no R())
     if (y < surf[x] + 12 || !floorOk(x, y)) continue;
     const r = R();
     if (y > Z1 - 10 && r < 0.035) tiles[y * WW + x] = SHROOM;
@@ -203,7 +208,8 @@ function generate(sd) {
   }
   // torches: the entrance path, then scattered through the caves (more of them near the top)
   for (let k = 1; k < entrance.length; k += 2) { const [x, y] = entrance[k]; for (let yy = y; yy < y + 4; yy++) if (floorOk(x, yy)) { tiles[yy * WW + x] = TORCH; break; } }
-  for (let cy = surf[SPX] + 14; cy < WH - 16; cy += 10) for (let cx = 4; cx < WW - 4; cx += 15) {
+  // (the last use of R: under CUT there is no air for a torch, so those rolls changed nothing)
+  for (let cy = surf[SPX] + 14, ce = Math.min(WH - 16, CUT); cy < ce; cy += 10) for (let cx = 4; cx < WW - 4; cx += 15) {
     const p = cy < Z1 ? 0.62 : cy < Z2 ? 0.45 : 0.3; if (R() > p) continue;
     for (let a = 0; a < 30; a++) {
       const x = cx + Math.floor(R() * 15), y = cy + Math.floor(R() * 10); if (x >= WW - 3 || y >= WH - 16) continue;
@@ -216,7 +222,7 @@ function generate(sd) {
   // the abandoned cathedral replaces the caves under the village (js/45-catedral-mundo.js); the cave code above stays for later
   if (CATEDRAL) buildCathedral();
   // the far layer behind the back wall: where it opens onto the deep caverns (js/36-profundeza.js)
-  buildDepth();
+  buildDepth(0, Math.min(WH, genFundo + 8));   // only the rows generated so far (js/312 builds the rest with each layer)
   if (CATEDRAL) cathedralDeep();
 
 }

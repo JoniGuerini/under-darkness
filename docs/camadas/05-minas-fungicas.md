@@ -1,6 +1,8 @@
 # As Minas Fúngicas: ficha de implementação
 
-A quinta camada, logo abaixo da Mina Abandonada, de 744 a 930 m. Antes dos mineiros do cobalto, uma colônia mais antiga cavou aqui atrás de um metal verde-azulado e acordou um fungo que tomou as galerias, os bichos e as pessoas. Esta ficha aproveita e atualiza a ideia antiga da Parte 6 de [../biomas.md](../biomas.md).
+> **2026-10-12:** a camada tem 558 m, de 2232 a 2790 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A quinta camada, logo abaixo da Mina Abandonada, de 2232 a 2790 m. Antes dos mineiros do cobalto, uma colônia mais antiga cavou aqui atrás de um metal verde-azulado e acordou um fungo que tomou as galerias, os bichos e as pessoas. Esta ficha aproveita e atualiza a ideia antiga da Parte 6 de [../biomas.md](../biomas.md).
 
 **O que a diferencia:** é a única camada viva por inteiro. A rocha, o chão, a água e até a parede do chefe crescem, respiram e soltam esporos; a luz é fria e vem dos próprios cogumelos. A Mina, logo acima, é seca, quente e laranja; a Cidade Afundada, logo abaixo, é de pedra lavrada, gente viva e luz de vela; o Abismo é fogo e carne. Aqui é tudo úmido, silencioso, verde-azulado e lento.
 
@@ -24,7 +26,7 @@ A quinta camada, logo abaixo da Mina Abandonada, de 744 a 930 m. Antes dos minei
 | 27 | Grutas Alagadas | 842 a 894 | lodo, xisto úmido | grutas largas e baixas com bacias de água parada, passarelas da colônia sobre a água, juncos de micélio |
 | 28 | Coração do Micélio | 894 a 930 | carne de micélio, rocha tomada | câmaras redondas de carne, túneis em forma de veia, a Gruta da Mãe (o chefe) |
 
-- **Nível dos monstros:** 11 na metade de cima da camada e 12 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 12, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Nível dos monstros:** 11 na metade de cima da camada e 12 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 12, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada (de cima):** hoje as duas fendas do Abismo saem do chão das Fornalhas Esquecidas. Quando o Abismo descer para baixo desta camada, essas fendas viram as duas descidas das Minas Fúngicas, nas mesmas posições (`mnExits`). Cada uma é um **poço lacrado**: um anel de tijolo de fornalha no chão, com a grade de ferro que os mineiros puseram arrombada de baixo para cima e fios brancos de micélio escapando pela borda. Embaixo, o poço é de rocha natural forrada de micélio, uns 20 blocos de queda, com uma escada da colônia (tomada) e um cordão de micélio ao lado, até a câmara de pouso. Volta-se pela mesma escada.
 - **Saída (para baixo):** duas descidas no chão do Coração do Micélio, longe uma da outra. Cada uma é uma **raiz-mestra**: um cordão de micélio grosso como um tronco que fura o chão e desce uns 25 blocos de rocha até o teto de uma cisterna da Cidade Afundada. Desce-se e sobe-se pelo próprio cordão (escalável como a corrente). Enquanto a camada 6 não existir, as fendas do Abismo saem dessas mesmas posições (`fgExits`).
 - **Câmara de pouso:** uma em cada pé de descida: 12 x 6, chão plano de tábua, iluminada por cogumelos-lanterna, sem monstro nascendo, reservada para os pontos de volta.
@@ -240,7 +242,7 @@ Os Tomados guardam um pedaço da cor de antes (pele, roupa, pelo da mula) que va
 
 | Arquivo | O que tem |
 |---|---|
-| `js/120-fungo-api.js` | ids, faixas `FG_BANDS`, `FG_D = 186`, topo pelo registro `LAYERS`, `FG_ZONE0` (25), `fungoBand`, `fgExits`, `fgBoss`. `FUNGO = false` desliga a camada |
+| `js/120-fungo-api.js` | ids, faixas `FG_BANDS`, `FG_D = LAYER_D` (558), topo pelo registro `LAYERS`, `FG_ZONE0` (25), `fungoBand`, `fgExits`, `fgBoss`. `FUNGO = false` desliga a camada |
 | `js/121-fungo-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, itens de bloco, cordão e escada escaláveis |
 | `js/122-fungo-objetos.js` | os 28 objetos e `FG_PROP_PLAN` |
 | `js/123-fungo-tomados.js` | colono, marionete, semeador, mariposa, tapete |

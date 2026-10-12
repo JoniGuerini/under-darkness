@@ -1,6 +1,8 @@
 # A Floresta Petrificada: ficha de implementação
 
-A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m. É uma floresta inteira que a terra engoliu há milênios e que virou pedra sem cair: troncos de granito em pé do chão ao teto, raízes que viraram túneis e copas com folhas de cristal. É o único lugar do jogo onde o cristal é abundante.
+> **2026-10-12:** a camada tem 558 m, de 3348 a 3906 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A sétima camada, debaixo da Cidade Afundada, de 3348 a 3906 m. É uma floresta inteira que a terra engoliu há milênios e que virou pedra sem cair: troncos de granito em pé do chão ao teto, raízes que viraram túneis e copas com folhas de cristal. É o único lugar do jogo onde o cristal é abundante.
 
 **O que a diferencia:** é a única camada que foi viva e nunca foi construída. A Cidade de cima é rua e casa, a Fortaleza de baixo é cantaria e bronze, o Abismo é carne e fogo; aqui tudo é tronco, raiz e folha, só que de pedra, frio, silencioso e iluminado por dentro pelo cristal.
 
@@ -17,8 +19,8 @@ A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m. É uma floresta 
 
 ## 2. Lugar no mundo
 
-- **Profundidade:** 1116 a 1302 m. Zonas 33 a 36. Nome no código `FLORESTA`, prefixo `FP_`.
-- **Nível dos monstros:** 15 na metade de cima da camada e 16 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 16, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 17.
+- **Profundidade:** 3348 a 3906 m. Zonas 33 a 36. Nome no código `FLORESTA`, prefixo `FP_`.
+- **Nível dos monstros:** 15 na metade de cima da camada e 16 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 16, então nenhum monstro daqui fica abaixo ou no nível da camada de cima. Chefe nível 17.
 
 | Zona | Faixa | Metros | Massa | Caráter |
 |---|---|---|---|---|
@@ -35,7 +37,7 @@ A sétima camada, debaixo da Cidade Afundada, de 1116 a 1302 m. É uma floresta 
 
 ## 3. Estrutura e geração (`js/145-floresta-mundo.js`)
 
-`FP_D = 186`, topo dado pelo registro `LAYERS`. Gerado em pedaços (um passo por chamada), na ordem de `regras-de-bioma.md`.
+`FP_D = LAYER_D` (558), topo dado pelo registro `LAYERS`. Gerado em pedaços (um passo por chamada), na ordem de `regras-de-bioma.md`.
 
 1. **Rocha por faixa.** Solo petrificado em cima, granito verde no meio, raiz de pedra nas Raízes, granito e cerne no fundo. As bordas se misturam por ruído. Nas primeiras 8 linhas a pedra da Cidade (o bloco de massa da ficha 06) vai rareando por ruído e o solo petrificado aparece.
 2. **A floresta enterrada** (antes de cavar): o gerador planta a floresta como ela era. Em cada coluna sorteada nasce um tronco (casca por fora, cerne por dentro) com raízes que se abrem embaixo e uma copa de folhagem de cristal em cima. Troncos de 2 a 3 blocos de largura nas faixas 33 a 35 e de 4 a 6 na 36. Um a cada cinco nasce deitado, em diagonal de 20 a 35 graus: vira rampa natural.
@@ -259,7 +261,7 @@ O cristal é a única cor viva da camada; o resto é verde-acinzentado e marrom 
 
 | Arquivo | O que tem |
 |---|---|
-| `js/140-floresta-api.js` | ids, `FP_BANDS`, `FP_D = 186`, `FP_ZONE0`, `forestBand`, `fpExits`, `fpBoss`, entrada no `LAYERS`. `FLORESTA = false` desliga a camada. |
+| `js/140-floresta-api.js` | ids, `FP_BANDS`, `FP_D = LAYER_D` (558), `FP_ZONE0`, `forestBand`, `fpExits`, `fpBoss`, entrada no `LAYERS`. `FLORESTA = false` desliga a camada. |
 | `js/141-floresta-blocos.js` | texturas, paredes, terceira camada, minérios, geodos, decoração, itens de bloco, cipó e degraus de raiz escaláveis, folhagem translúcida na luz |
 | `js/142-floresta-objetos.js` | 28 objetos e `FP_PROP_PLAN` |
 | `js/143-floresta-bichos.js` | lagarto, raiz estranguladora, tatu, mariposa, dríade |

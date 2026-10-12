@@ -22,10 +22,10 @@
    própria (0.9.7), então a luz da camada é toda de tochas, braseiros e piras. Carrega logo depois do 109-principe-caos e antes do 87 (o worldLink roda depois). */
 
 const ESCURO = true;
-const ES_D = 186;                                   // metros de camada
-const ES_TOP = AB_TOP + 186;                        // onde a camada começa, em metros abaixo do chão do vilarejo
+const ES_D = LAYER_D;                                   // metros de camada
+const ES_TOP = AB_TOP + LAYER_D;                        // onde a camada começa, em metros abaixo do chão do vilarejo
 // topo de cada faixa em metros abaixo do ES_TOP: A Borda Apagada, O Breu, As Raízes da Noite, O Fundo do Mundo, (rocha-mãe)
-const ES_BANDS = [0, 46, 98, 150, 186];
+const ES_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const ES_BAND_NAMES = ['borda', 'breu', 'raizes', 'fundo'];
 const ES_ZONE0 = 45;                                // zonas 45..48 (o 229 põe os nomes depois das da Colmeia)
 let ES_S0 = AB_S0 + AB_D;                           // a primeira linha da camada no mundo atual (esBuild acerta)

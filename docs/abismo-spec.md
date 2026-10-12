@@ -1,5 +1,7 @@
 # O Abismo: especificação
 
+> **2026-10-12:** a camada tem 558 m, de 8928 a 9486 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
 A última camada do jogo. Foi feita como a quinta, debaixo da Mina Abandonada; desde a Colmeia (2026-10-10) é a décima, de 1674 a 1860 m, e desce uma camada a cada camada nova, sempre por último (`LAYERS`, `js/129`). Os metros abaixo são os de quando era a quinta: some 186 m por camada a mais. É o inferno de Under Darkness: o lugar de onde vieram os demônios. Substitui de vez a ideia antiga da Cripta Abandonada (a sala quadrada nas cavernas com diabretes, cães, demônios e o Carrasco), que foi removida do jogo. Do tema antigo ficam só o clima (fogo, carne, correntes, caos) e alguns itens (chifre, presa, Lâmina Infernal, Elmo de Chifres, Grevas Demoníacas, Machado de Chifre), que agora caem dos demônios novos.
 
 ## 1. Identidade
@@ -126,7 +128,7 @@ Luz quente em tudo (lava, braseiros, crosta), roxa nas runas e cristais. Cinza c
 
 | Arquivo | O que tem |
 |---|---|
-| `js/103-abismo-api.js` | ids, faixas `AB_BANDS`, `AB_D = 186`, `AB_ZONE0`, `abyssBand`, `abExits`, `abBoss`. `ABISMO = false` desliga a camada. |
+| `js/103-abismo-api.js` | ids, faixas `AB_BANDS`, `AB_D = LAYER_D` (558), `AB_ZONE0`, `abyssBand`, `abExits`, `abBoss`. `ABISMO = false` desliga a camada. |
 | `js/104-abismo-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, itens de bloco, escada e corrente escaláveis |
 | `js/105-abismo-objetos.js` | 28 objetos, o Trono do Caos e `AB_PROP_PLAN` |
 | `js/106-abismo-demonios.js` | diabrete, cão infernal, brutamontes, verme de magma, alma penada |

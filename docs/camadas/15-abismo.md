@@ -1,5 +1,7 @@
 # O Abismo: o que muda quando ele descer para a 15ª camada
 
+> **2026-10-12:** a camada tem 558 m, de 8928 a 9486 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
 O Abismo já existe: hoje é a 5ª camada, de 744 a 930 m, logo abaixo da Mina, e a ficha dele continua sendo a [../abismo-spec.md](../abismo-spec.md). Este documento não refaz a ficha: ele lista só o que muda quando o Abismo virar a 15ª camada, de 2604 a 2790 m, entre Os Salões do Pesadelo (14) e A Escuridão (16). Blocos, objetos, os 10 demônios e o jeito de lutar de cada um ficam iguais.
 
 **O que diferencia o Abismo das vizinhas:** os Salões do Pesadelo são o sonho que vira real e a Escuridão é a falta de tudo; o Abismo é o único lugar barulhento, quente e cheio de luz do fundo do mundo. É o último lugar onde ainda tem fogo.

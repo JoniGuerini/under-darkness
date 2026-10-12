@@ -24,13 +24,13 @@
    depois de todas as camadas do meio, logo antes do Abismo, que desce das Portas Quentes (psExits). */
 
 const PESADELO = true;
-const PS_D = 186;                                   // metros de camada
+const PS_D = LAYER_D;                                   // metros de camada
 // a camada logo acima, da mais funda para a mais rasa: quem não existe ainda é pulado. Devolve a primeira linha, a
 // altura, o chão natural, a rocha em que as últimas linhas afinam e os poços de onde as descidas saem
 function psAbove() {
   const tries = [['ANTIGOS', 'AT'], ['TITAS', 'TT'], ['DRAGAO', 'DG'], ['MAR', 'MS'], ['ELFOS', 'EL'], ['NAVE', 'NV'], ['COLMEIA', 'CM']];
   for (const [flag, p] of tries) {
-    let on = false, S0, D; try { on = eval(`typeof ${flag} !== 'undefined' && ${flag}`); S0 = eval(`typeof ${p}_S0 !== 'undefined' ? ${p}_S0 : undefined`); D = eval(`typeof ${p}_D !== 'undefined' ? ${p}_D : 186`); } catch (e) { on = false; }
+    let on = false, S0, D; try { on = eval(`typeof ${flag} !== 'undefined' && ${flag}`); S0 = eval(`typeof ${p}_S0 !== 'undefined' ? ${p}_S0 : undefined`); D = eval(`typeof ${p}_D !== 'undefined' ? ${p}_D : LAYER_D`); } catch (e) { on = false; }
     if (!on || S0 === undefined) continue;
     const lo = p.toLowerCase(), get = n => { try { return eval(`typeof ${n} !== 'undefined' ? ${n} : undefined`); } catch (e) { return undefined; } };
     return { id: lo, S0, D, soils: get(`${p}_SOILS`) || null, halls: get(`${lo}Exits`) || [], boss: get(`${lo}Boss`) || null,
@@ -39,10 +39,10 @@ function psAbove() {
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
 // metros abaixo do chão do vilarejo onde a camada começa (a posição no registro 129)
-const PS_TOP = (layerPos('pesadelo') - 1) * 186;
+const PS_TOP = (layerPos('pesadelo') - 1) * LAYER_D;
 // topo de cada faixa em metros abaixo do PS_TOP: A Casa que Não Era, Os Corredores Sem Fim, Os Quartos Esquecidos, A
 // Galeria dos Espelhos, (rocha-mãe)
-const PS_BANDS = [0, 46, 98, 150, 186];
+const PS_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const PS_BAND_NAMES = ['casa', 'corredores', 'quartos', 'galeria'];
 const PS_ZONE0 = 73;                                // zonas 73..76 (o 309 põe os nomes pelo índice)
 let PS_S0 = (() => { try { const a = psAbove(); return a.S0 + a.D; } catch (e) { return 2046; } })();   // psBuild acerta
@@ -87,7 +87,19 @@ const psKeep = new Set();   // descidas, pousos, Portas Quentes, o Salão, os la
 // dentro do Salão dos Espelhos, com margem m
 function inPsHall(tx, ty, m = 0) { const B = psBoss; if (!B) return false; return Math.abs(wdx(tx - B.cx)) <= B.w / 2 + m && ty >= B.top - m && ty <= B.fy + m; }
 const inPsLand = (tx, ty, m = 0) => psLand.some(L => wdx(tx - L.x0) >= -m && wdx(tx - L.x0) < L.w + m && ty >= L.fy - L.h - m && ty <= L.fy + m);
-const inPsNowhere = (tx, ty, m = 0) => psNowhere.some(N => wdx(tx - N.x0) >= -1 - m && wdx(tx - N.x0) <= N.w + m && ty >= N.top - 1 - m && ty <= N.fy + m);
+// as listas crescem com a camada e estas perguntas são feitas bloco a bloco: um índice por linhas (de 16 em 16, com
+// folga de PS_IDX_M) para só olhar o que está perto; refeito quando a lista muda de tamanho
+const PS_IDX_M = 8;
+function psIdx(list, key, top, bot) {
+  let G = list[key]; if (G && G.n === list.length) return G;
+  G = []; G.n = list.length;
+  for (const it of list) for (let r = Math.max(0, (top(it) - PS_IDX_M) >> 4); r <= (bot(it) + PS_IDX_M) >> 4; r++) (G[r] || (G[r] = [])).push(it);
+  Object.defineProperty(list, key, { value: G, configurable: true, writable: true });
+  return G;
+}
+const psNear = (list, key, top, bot, ty, m) => m > PS_IDX_M ? list : psIdx(list, key, top, bot)[ty >> 4];
+const psNwTop = N => N.top - 1, psNwBot = N => N.fy;
+const inPsNowhere = (tx, ty, m = 0) => { const L = psNear(psNowhere, 'psIdxN', psNwTop, psNwBot, ty, m); return !!L && L.some(N => wdx(tx - N.x0) >= -1 - m && wdx(tx - N.x0) <= N.w + m && ty >= N.top - 1 - m && ty <= N.fy + m); };
 
 /* ---------- estados que o pesadelo põe no herói (o 306 conta o tempo, desenha e solta) ----------
    cochilo (mariposa do sono): as pálpebras fecham na tela e o herói fica parado `sec` segundos.

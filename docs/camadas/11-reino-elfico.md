@@ -1,6 +1,8 @@
 # O Reino Élfico: ficha de implementação
 
-A décima primeira camada, debaixo da Nave Caída e em cima do Abismo, de 1860 a 2046 m. Pedido do Jonathan (2026-10-11): "um novo bioma de elfos, inspiração Senhor dos Anéis e Warcraft". Monstros de nível 23 a 24, metal novo Lunarita, chefe A Dama do Espelho (nível 25).
+> **2026-10-12:** a camada tem 558 m, de 5580 a 6138 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A décima primeira camada, debaixo da Nave Caída e em cima do Abismo, de 5580 a 6138 m. Pedido do Jonathan (2026-10-11): "um novo bioma de elfos, inspiração Senhor dos Anéis e Warcraft". Monstros de nível 23 a 24, metal novo Lunarita, chefe A Dama do Espelho (nível 25).
 
 **O que a diferencia:** é a camada mais **bonita e mais calma de olhar** do jogo, e a mais perigosa de se distrair. Todas as outras são feitas de coisas mortas, quebradas ou monstruosas; aqui o que há é um reino que ainda funciona, com árvores de prata vivas, salões lavrados, lanternas acesas e água que brilha, guardado por quem não quer ninguém lá. A Nave de cima é neon, metal e barulho; o Abismo de baixo é fogo; o Reino Élfico é prata, azul-lua, folha e silêncio. Descendo, a beleza apodrece: a corte que bebeu do poço proibido virou carmesim e ouro, e no fundo a Dama ainda olha o espelho.
 
@@ -20,7 +22,7 @@ A décima primeira camada, debaixo da Nave Caída e em cima do Abismo, de 1860 a
 | 55 | A Corte Desterrada | 1958 a 2010 | Mármore Profanado, Madeira Morta, Cristal de Mana Sangrenta | os mesmos salões em ruína, teto caído, árvores mortas e retorcidas, espinheiros, flâmulas carmesim e ouro, cristais vermelhos acesos |
 | 56 | O Poço da Lua | 2010 a 2046 | Pedra-do-Poço, Raiz-Mãe, Cristal Lunar | grutas redondas com poços de água que brilha, as raízes da Árvore-Mãe atravessando tudo, o Espelho da Lua e as duas Raízes Fundas para o Abismo |
 
-- **Monstros:** nível 23 na metade de cima e 24 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, nunca passando de 24 (`layerLvl(layerLo('elfos'), d)`).
+- **Monstros:** nível 23 na metade de cima e 24 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, nunca passando de 24 (`layerLvl(layerLo('elfos'), d)`).
 - **Entrada:** as duas descidas continuam os dois Rasgos no Casco da Nave (`nvExits`). O casco acaba onde a terra fica escura e cheirosa: o poço de 3 vira um **poço de raízes**, com a **Escada de Corda** élfica (`EL_ESCADA`) inteira, até o **Posto de Guarda**.
 - **Câmara de pouso:** ao pé de cada escada, um **Posto de Guarda** de 12 x 6: piso de tábua, paredes de madeira prateada, duas lanternas élficas acesas, sem monstro. Reservado para os pontos de volta.
 - **Saída:** duas **Raízes Fundas** no chão do Poço da Lua, a pelo menos `WW / 3` uma da outra e longe do Espelho: poços onde uma raiz da Árvore-Mãe desce para beber do fogo de baixo, a casca queimada nas bordas, com a Escada de Corda até a última fileira. As posições ficam em `elExits` ({ x0, x1, cx, w: 3, fy, top }); o Abismo continua de lá (o 103 lê como `halls`).

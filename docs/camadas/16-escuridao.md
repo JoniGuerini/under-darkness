@@ -1,6 +1,8 @@
 # A Escuridão: ficha de implementação
 
-A Escuridão é a 16ª e última camada, de 2790 a 2976 m, debaixo do Abismo. É o fundo do mundo e o lugar de onde sobe a escuridão que fica mais grossa a cada camada que o herói desce. Aqui quase não há luz, o mapa esquece o que o herói viu e o próprio terreno muda no escuro; no fundo espera Nox, Aquele Que Apaga.
+> **2026-10-12:** a camada tem 558 m, de 9486 a 10044 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A Escuridão é a 16ª e última camada, de 9486 a 10044 m, debaixo do Abismo. É o fundo do mundo e o lugar de onde sobe a escuridão que fica mais grossa a cada camada que o herói desce. Aqui quase não há luz, o mapa esquece o que o herói viu e o próprio terreno muda no escuro; no fundo espera Nox, Aquele Que Apaga.
 
 **O que diferencia a Escuridão das outras:** o Abismo, logo acima, é a camada mais quente, barulhenta e acesa do jogo; a Escuridão é a falta de tudo isso. Em toda outra camada a luz é enfeite; aqui ela é o recurso, a arma e o escudo.
 
@@ -125,7 +127,7 @@ Arquivos: `js/224-escuro-crias.js` (os 5 primeiros) e `js/225-escuro-crias2.js` 
 | `acendedor` | Acendedor Oco | distância em arco | um Acendedor esvaziado pela Escuridão; anda devagar com a lanterna de chama azul fria e guarda os braseiros acesos | ergue a lanterna para trás (rastro de luz) e a arremessa em arco; onde cai, fica uma poça de fogo frio por 4 s, que machuca e ilumina | 100 | 20 | Borda, Raízes |
 | `maofundo` | Mão do Fundo (sombra) | emboscada | mora dentro dos poços sem fundo e das bordas dos vãos | dedos pálidos aparecem na borda e arranham a pedra (0,8 s); a mão agarra quem está na borda ou na corrente e puxa para baixo | 140 | 24 | Breu, Fundo |
 
-- **Nível:** 33 na metade de cima da camada e 34 da metade para baixo (a partir de 93 m); 30% vêm 1 acima, mas nunca passam de 34.
+- **Nível:** 33 na metade de cima da camada e 34 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 acima, mas nunca passam de 34.
 - **Drops:** pó de breu (apagaluz, rastro, mortalha), asa de mariposa (traca), núcleo de breu (colosso, semolhos), lume frio (acendedor), `min_noctirio` (colosso, semolhos, maofundo, bocabreu), poções, carvão, tochas (de 1 a 2, 20%) e raramente as bases temáticas (seção 8).
 - **Spawn:** só em tile com luz abaixo de 0,15, nunca a menos de 12 blocos de um braseiro aceso, nunca na sala do Nox.
 

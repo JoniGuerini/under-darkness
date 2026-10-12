@@ -24,7 +24,7 @@
    Carrega depois do mundo da camada de cima e antes do 103 (o Abismo começa onde esta camada termina). */
 
 const COLMEIA = true;
-const CM_D = 186;                                   // metros de camada
+const CM_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam e as
 // salas de onde as duas brechas descem ({ cx, fy } ou { x0, fy }); quem não existe ainda é pulado
 function cmAbove() {
@@ -35,9 +35,9 @@ function cmAbove() {
   return { id: 'cidade', S0: CD_S0, D: CD_D, soils: CD_SOILS, host: CD_HOST, halls: cdDown, climb: CD_ESCADA };
 }
 const CM_TOP_ABOVE = (() => { const a = cmAbove(); return a.id === 'anoes' ? (typeof AN_TOP !== 'undefined' ? AN_TOP : null) : a.id === 'floresta' ? (typeof FP_TOP !== 'undefined' ? FP_TOP : null) : CD_TOP; })();
-const CM_TOP = (CM_TOP_ABOVE !== null ? CM_TOP_ABOVE : CD_TOP + 186 * (layerPos('colmeia') - layerPos('cidade') - 1)) + 186;   // metros abaixo do chão do vilarejo
+const CM_TOP = (CM_TOP_ABOVE !== null ? CM_TOP_ABOVE : CD_TOP + LAYER_D * (layerPos('colmeia') - layerPos('cidade') - 1)) + LAYER_D;   // metros abaixo do chão do vilarejo
 // topo de cada faixa em metros abaixo do CM_TOP: Brecha Tomada, Galerias de Cera, Câmaras de Âmbar, O Berçário, (rocha-mãe)
-const CM_BANDS = [0, 42, 92, 138, 186];
+const CM_BANDS = [0, 42, 92, 138, 186].map(v => v * LAYER_K);
 const CM_BAND_NAMES = ['brecha', 'galerias', 'camaras', 'bercario'];
 const CM_ZONE0 = 41;                                // zonas 41..44 (o 198 põe os nomes depois das da Fortaleza)
 let CM_S0 = (() => { const a = cmAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (cmBuild acerta)

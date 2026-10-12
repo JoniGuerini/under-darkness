@@ -1,6 +1,8 @@
 # A Cidade Afundada: ficha de implementação
 
-A sexta camada, debaixo das Minas Fúngicas, de 930 a 1116 m. Uma cidade inteira que a terra engoliu de uma vez, torta e meio alagada, com as cisternas no alto, as ruas e casas no meio e o palácio e a torre do sino no fundo. É o único lugar do jogo com gente viva: saqueadores que vieram atrás da prata e o culto do Poço, que adora o que está mais embaixo.
+> **2026-10-12:** a camada tem 558 m, de 2790 a 3348 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A sexta camada, debaixo das Minas Fúngicas, de 2790 a 3348 m. Uma cidade inteira que a terra engoliu de uma vez, torta e meio alagada, com as cisternas no alto, as ruas e casas no meio e o palácio e a torre do sino no fundo. É o único lugar do jogo com gente viva: saqueadores que vieram atrás da prata e o culto do Poço, que adora o que está mais embaixo.
 
 **O que a diferencia:** é a única camada construída por gente e habitada por gente. Os inimigos pensam: sobem escadas, fogem, bebem poção, armam armadilhas, fecham passagens com tijolo e pegam o que está no chão. As Minas Fúngicas, logo acima, são vivas e orgânicas, com luz fria de cogumelo; a Mina é trabalho bruto em rocha; o Abismo é outro mundo. Aqui é pedra lavrada, ruas tortas, água negra e luz de vela, e alguém do outro lado da porta.
 
@@ -24,7 +26,7 @@ A sexta camada, debaixo das Minas Fúngicas, de 930 a 1116 m. Uma cidade inteira
 | 31 | Bairro do Poço | 1028 a 1080 | cantaria, pedra do Poço | o bairro do culto: o templo, as casas com velas, o Grande Poço no centro; procissões |
 | 32 | Palácio do Sino | 1080 a 1116 | mármore rachado, aterro | o palácio afundado, a praça, as adegas furadas por raízes de pedra e a base da Torre do Sino (o chefe) |
 
-- **Nível dos monstros:** 13 na metade de cima da camada e 14 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 14, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Nível dos monstros:** 13 na metade de cima da camada e 14 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 14, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada (de cima):** as duas raízes-mestras do Coração do Micélio. Cada uma fura o teto abobadado de um salão de cisterna: o cordão de micélio grosso pende do buraco no teto até uma borda de pedra seca na lateral do salão, uns 25 blocos abaixo. Desce-se e sobe-se pelo cordão (escalável como a corrente). Os saqueadores pregaram escadas de corda ao lado: é por onde eles também entram.
 - **Saída (para baixo):** duas descidas nas adegas do Palácio do Sino, longe uma da outra. Raízes de pedra da Floresta Petrificada subiram e furaram o piso; entre elas abre-se uma fenda com degraus que os saqueadores talharam e uma escada de corda presa a uma viga, uns 20 blocos de descida. Enquanto a camada 7 não existir, as fendas do Abismo saem dessas mesmas posições (`cdExits`).
 - **Câmara de pouso:** uma no pé de cada descida, dentro da cisterna: a casa do guarda da cisterna, 12 x 6, de pedra seca, com uma lanterna acesa e a porta trancada por dentro. Monstro não nasce e humano não entra.
@@ -259,7 +261,7 @@ Os afogados são inchados e cinza-esverdeados, com a roupa da cidade colada no c
 
 | Arquivo | O que tem |
 |---|---|
-| `js/130-cidade-api.js` | ids, faixas `CD_BANDS`, `CD_D = 186`, topo pelo registro `LAYERS`, `CD_ZONE0` (29), `cidadeBand`, `cdExits`, `cdBoss`, o Grande Poço (`cdPoco`). `CIDADE = false` desliga a camada |
+| `js/130-cidade-api.js` | ids, faixas `CD_BANDS`, `CD_D = LAYER_D` (558), topo pelo registro `LAYERS`, `CD_ZONE0` (29), `cidadeBand`, `cdExits`, `cdBoss`, o Grande Poço (`cdPoco`). `CIDADE = false` desliga a camada |
 | `js/131-cidade-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, itens de bloco, escada de corda e corrente escaláveis |
 | `js/132-cidade-objetos.js` | os 28 objetos e `CD_PROP_PLAN` |
 | `js/133-cidade-vivos.js` | comportamento humano; saqueador, besteiro, armadilheiro (estrepes, fios, rede), telhadeiro |

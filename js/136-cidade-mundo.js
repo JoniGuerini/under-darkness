@@ -37,8 +37,11 @@ function cdBuild() {
   CD_S0 = Math.min(WH - 12, FG_S0 + Math.min(FG_D, WH - 8 - FG_S0));
   const S0 = CD_S0, YB = Math.min(WH - 8, S0 + CD_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x6c1d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / CD_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < CD_BANDS[1] ? 0 : d < CD_BANDS[2] ? 1 : d < CD_BANDS[3] ? 2 : 3;
+  // uma linha ao acaso para o que se repete numa faixa: o intervalo [a, b] do desenho de 186 guarda a mesma distância
+  // das beiras da faixa e o meio se estica (a faixa é LAYER_K vezes mais alta e leva LAYER_K vezes mais coisas)
+  const sp = (a, b, band) => { const B0 = CD_BANDS[band] / LAYER_K, B1 = CD_BANDS[band + 1] / LAYER_K, lo = mb(B0) + (a - B0), hi = mb(B1) - (B1 - b); return S0 + lo + R() * Math.max(0, hi - lo); };
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   cdChambers = []; cdStreets = []; cdHouses = []; cdCamps = []; cdTemples = []; cdBasins = []; cdLand = []; cdPalace = [];
   cdEntries = []; cdDown = []; cdBoss = null; cdPoco = null; cdKeep.clear();
@@ -52,9 +55,12 @@ function cdBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3 || !CD_HOST[tiles[i]]) continue;
+      // 8 linhas abaixo da camada: o aterro sem ruído; a Floresta escreve pedra e parede por cima de tudo ali (é tudo
+      // FP_HOST), então a parede de mármore ou cantaria que o ruído escolhia não chega ao mundo
+      if (y >= YB + 8) { tiles[i] = CD_ATERRO; walls[i] = WCD_CANTARIA; continue; }
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x6b3);
       if (k < 1 && h > 0.4 + k * 0.6) { tiles[i] = h > 0.75 ? FG_XISTO : FG_CARNE; walls[i] = WFG_CARNE; continue; }
-      const b = bandOf(y - S0), n1 = nz(x, y, 30, 0x6a1), n2 = nz(x, y, 16, 0x6a2);
+      const b = bandOf(y - S0), n1 = nz(x, y, 30, 0x6a1), n2 = y < YB ? nz(x, y, 16, 0x6a2) : 0;   // n2 só dentro da camada
       let t = CD_ATERRO, w = b === 0 ? WCD_LIMO : b === 3 ? (n1 > 0.5 ? WCD_MARMORE : WCD_CANTARIA) : n1 > 0.55 ? WCD_CANTARIA : WCD_TIJOLO;
       if (y >= YB) t = CD_ATERRO;
       else if (b === 3 && n2 > 0.7) t = CD_MARMORE;
@@ -103,7 +109,7 @@ function cdBuild() {
     cdChambers.push(C); return C;
   };
   const fd = (typeof fungDown !== 'undefined' ? fungDown : []).filter(c => c.fy);
-  const landFy = S0 + mb(26);
+  const landFy = S0 + 26;   // a cisterna de chegada logo abaixo do Coração: o furo da raiz fica curto
   for (const F of fd.slice(0, 2)) {
     const side = R() < 0.5 ? -1 : 1, w = 40, h = 14, xs = W1(Math.round(F.cx) - 2);   // xs..xs+3: o furo da raiz
     const x0 = side < 0 ? xs - 3 : xs + 4 - w + 3;
@@ -147,7 +153,7 @@ function cdBuild() {
   // ---------- 2c. o Grande Poço: 9 de largura, paredes de pedra do Poço, do Bairro até perto do fundo ----------
   {
     let cx = 0; for (let tries = 0; tries < 100; tries++) { cx = (R() * WW) | 0; if (awayFromEntries(cx, 100) && Math.abs(wdx(cx - cdBoss.cx)) > 70) break; }
-    const top = S0 + mb(108), bot = S0 + mb(176), x0 = cx - 4;
+    const top = S0 + mb(108), bot = top + 68, x0 = cx - 4;   // fundo como no desenho (68): esticado, viraria uma queda de 200
     cdPoco = { x0: W1(x0), x1: W1(x0 + 8), cx: W1(cx), top, bot };
     for (let y = top; y <= bot + 3; y++) for (let x = x0 - 2; x <= x0 + 10; x++) seal[I(x, y)] = 1;
     for (let y = top; y < bot; y++) for (let x = x0; x <= x0 + 8; x++) { const i = I(x, y); cv[i] = 1; keep[i] = 1; }
@@ -155,20 +161,20 @@ function cdBuild() {
   }
 
   // ---------- 2d. as Cisternas Altas: salões de colunas, esgotos de canal, o aqueduto ----------
-  for (let k = 0, tries = 0; k < WSC && tries < 200; tries++) {
-    const w = 60 + ((R() * 21) | 0), h = 22, cx = (R() * WW) | 0, cy = S0 + mb(24) + R() * mb(10);
+  for (let k = 0, tries = 0; k < WSC * LAYER_K && tries < 200 * LAYER_K; tries++) {
+    const w = 60 + ((R() * 21) | 0), h = 22, cx = (R() * WW) | 0, cy = sp(24, 34, 0);
     if (busy(cx, cy, w, h, 5)) continue;
     blob(cx, cy, w, h, 0x6e00 + k, 1.2);
     cdChambers.push({ cx, cy, w, h, band: 0, kind: 'aqueduto' }); k++;
   }
 
-  for (let k = 0, tries = 0; k < 4 * WSC && tries < 400; tries++) {
-    const w = 30 + ((R() * 21) | 0), h = 12 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(16 + R() * 26);
+  for (let k = 0, tries = 0; k < 4 * WSC * LAYER_K && tries < 400 * LAYER_K; tries++) {
+    const w = 30 + ((R() * 21) | 0), h = 12 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = Math.round(sp(16, 42, 0));
     if (fy - h < S0 + 3 || busy(x0 + w / 2, fy - h / 2, w, h, 5)) continue;
     cistern(x0, fy, w, h, 0); k++;
   }
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 300; tries++) {
-    const w = 40 + ((R() * 41) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(10 + R() * 34);
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 300 * LAYER_K; tries++) {
+    const w = 40 + ((R() * 41) | 0), x0 = (R() * WW) | 0, fy = Math.round(sp(10, 44, 0));
     if (busy(x0 + w / 2, fy - 2, w, 5, 3)) continue;
     const a = Math.round(w * 0.15), b = w - a;
     for (let kk = 0; kk < w; kk++) { const ch = kk >= a && kk < b, f = fy + (ch ? 1 : 0); for (let y = fy - 4; y < f; y++) dig(x0 + kk, y); hard(x0 + kk, f); }
@@ -176,8 +182,7 @@ function cdBuild() {
     cdChambers.push(C); k++;
   }
   // ---------- 2e. as ruas: quarteirões de 60 a 90, cada um com a sua inclinação ----------
-  const streetRow = (m, band) => {
-    const base = S0 + mb(m);
+  const streetRow = (base, band) => {
     let x = (R() * WW) | 0, done = 0, f = base;
     while (done < WW - 50) {
       const qw = 60 + ((R() * 31) | 0), len = Math.min(qw, WW - done - 20), sl = 5 + ((R() * 4) | 0), hh = 6 + ((R() * 3) | 0);
@@ -199,8 +204,13 @@ function cdBuild() {
       x += len; done += len;
     }
   };
-  for (const m of [58, 74, 90]) streetRow(m, 1);
-  for (const m of [104, 120, 138]) streetRow(m, 2);
+  // as fileiras de rua: eram 3 por faixa, a 16 uma da outra (58, 74, 90 | 104, 120, 138); com a faixa LAYER_K vezes
+  // mais alta são LAYER_K vezes mais fileiras, à mesma distância
+  for (const [band, a, b] of [[1, 58, 90], [2, 104, 138]]) {
+    const top = S0 + mb(CD_BANDS[band] / LAYER_K) + (a - CD_BANDS[band] / LAYER_K), bot = S0 + mb(CD_BANDS[band + 1] / LAYER_K) - (CD_BANDS[band + 1] / LAYER_K - b);
+    const n = Math.max(2, Math.round((bot - top) / 16));
+    for (let j = 0; j <= n; j++) streetRow(Math.round(top + (bot - top) * j / n), band);
+  }
   const onStreet = (S, k0, w) => k0 >= 2 && k0 + w <= S.len - 2 && !(S.crack.length && k0 < S.crack[0] + S.crack[1] + 1 && k0 + w > S.crack[0] - 1);
   const used = new Set();
   const pickStreet = (band, w, margin) => {
@@ -222,7 +232,7 @@ function cdBuild() {
     cdChambers.push({ cx: P.cx, cy: top - 3, w: 33, h: 7, band: 2, kind: 'praca', fy: top, x0: W1(P.x0 - 12) });
   }
   // o templo: 30 x 14, no chão de uma rua do Bairro; o primeiro ao lado do Poço, voltado para ele
-  for (let k = 0; k < WSC; k++) {
+  for (let k = 0; k < WSC * LAYER_K; k++) {
     let S = null, k0 = 0, x0, fy;
     if (k === 0) { const sd = R() < 0.5 ? -1 : 1; x0 = sd < 0 ? cdPoco.x0 - 12 - 30 : cdPoco.x0 + 21; fy = cdPoco.top; }
     else { const p = pickStreet(2, 30, 4); if (!p) continue; [S, k0] = p; x0 = S.x0 + k0; fy = S.floor[k0]; }
@@ -231,7 +241,7 @@ function cdBuild() {
     cdTemples.push(C); cdChambers.push(C);
   }
   // os acampamentos dos saqueadores: 20 x 10, uma rua alargada para cima
-  for (let k = 0, tries = 0; k < 2 * WSC && tries < 30 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 2 * WSC * LAYER_K && tries < 30 * WSC * LAYER_K; tries++) {
     const p = pickStreet(1, 20, 6); if (!p) continue;
     const [S, k0] = p, fy = S.floor[k0], x0 = S.x0 + k0;
     for (let x = x0; x < x0 + 20; x++) { for (let y = fy - 10; y < fy; y++) dig(x, y); }
@@ -239,7 +249,7 @@ function cdBuild() {
     k++;
   }
   // as casas tortas das Ruas: 2 a 3 andares de 6 sobre a rua, telhado de ardósia que vira caminho
-  for (let k = 0, tries = 0; k < 10 * WSC && tries < 60 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 10 * WSC * LAYER_K && tries < 60 * WSC * LAYER_K; tries++) {
     const hw = 10 + ((R() * 7) | 0), p = pickStreet(1, hw, 2); if (!p) continue;
     const [S, k0] = p, nf = 2 + ((R() * 2) | 0), fy = S.floor[k0], top = fy - nf * 6, x0 = S.x0 + k0;
     if (top - 6 < S0 + mb(48)) continue;
@@ -249,7 +259,7 @@ function cdBuild() {
     k++;
   }
   // as casas do culto: 10 x 6 no Bairro, 1 andar, telhado baixo
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 40 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 40 * WSC * LAYER_K; tries++) {
     const p = pickStreet(2, 10, 2); if (!p) continue;
     const [S, k0] = p, fy = S.floor[k0], x0 = S.x0 + k0;
     for (let x = x0; x < x0 + 10; x++) for (let y = fy - 6; y < fy; y++) dig(x, y);
@@ -258,7 +268,7 @@ function cdBuild() {
   }
   // os becos verticais: 3 a 5 de largura, ligam uma rua à de baixo, com escada de corda
   const becos = [];
-  for (const band of [1, 2]) for (let k = 0, tries = 0; k < 5 * WSC && tries < 80 * WSC; tries++) {
+  for (const band of [1, 2]) for (let k = 0, tries = 0; k < 5 * WSC * LAYER_K && tries < 80 * WSC * LAYER_K; tries++) {
     const L = cdStreets.filter(s => s.band === band); if (!L.length) break;
     const A = L[(R() * L.length) | 0], ka = 3 + ((R() * Math.max(1, A.len - 8)) | 0), ax = A.x0 + ka, w = 3 + ((R() * 3) | 0);
     if (!onStreet(A, ka, w)) continue;
@@ -266,7 +276,7 @@ function cdBuild() {
     const B = cdStreets.filter(s => s !== A && s.floor[0] > fa + 6 && Math.abs(s.floor[0] - fa) < 34 && wdx(ax - s.x0) >= 2 && wdx(ax - s.x0) < s.len - w - 2).sort((a, b) => a.floor[0] - b.floor[0])[0];
     if (!B) continue;
     const fb = B.floor[wdx(ax - B.x0)];
-    if (fb - fa < 10 || fb - fa > 32) continue;
+    if (fb - fa < 10 || fb - fa > 24) continue;   // a rua logo de baixo, não duas abaixo
     let clash = false; for (let x = ax - 3; x < ax + w + 3; x++) if (used.has(I(x, A.floor[0]))) clash = true;
     if (clash || inCdPoco(W1(ax), fa + 4, 3) || Math.abs(wdx(ax - cdBoss.cx)) < 16) continue;
     for (let x = ax; x < ax + w; x++) { used.add(I(x, A.floor[0])); for (let y = fa; y < fb; y++) dig(x, y); }
@@ -281,14 +291,14 @@ function cdBuild() {
     const C = { cx, cy: fy - 3, w, h: 6, band: 3, kind: 'adega', fy, x0: W1(x0), x1: W1(x0 + w - 1), down: true };
     cdDown.push(C); cdChambers.push(C); k++;
   }
-  for (let k = 0, tries = 0; k < 2 * WSC && tries < 300; tries++) {
-    const w = 16 + ((R() * 9) | 0), cx = (R() * WW) | 0, fy = S0 + mb(160) + ((R() * mb(18)) | 0);
+  for (let k = 0, tries = 0; k < 2 * WSC * LAYER_K && tries < 300 * LAYER_K; tries++) {
+    const w = 16 + ((R() * 9) | 0), cx = (R() * WW) | 0, fy = Math.round(sp(160, 178, 3));
     if (busy(cx, fy - 3, w, 6, 4) || inCdPoco(cx, fy - 3, w / 2 + 4)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, 6, 1);
     cdChambers.push({ cx, cy: fy - 3, w, h: 6, band: 3, kind: 'adega', fy, x0: W1(x0) }); k++;
   }
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 400; tries++) {
-    const w = 30 + ((R() * 11) | 0), h = 10 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = S0 + mb(156) + ((R() * mb(22)) | 0);
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 400 * LAYER_K; tries++) {
+    const w = 30 + ((R() * 11) | 0), h = 10 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = Math.round(sp(156, 178, 3));
     if (fy - h < S0 + CD_BANDS[3] - 2 || busy(cx, fy - h / 2, w, h, 5) || inCdPoco(cx, fy - h / 2, w / 2 + 4)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h, 2);
     const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'palacio', fy, x0: W1(x0), top: fy - h, stair: R() < 0.5 ? -1 : 1 };
@@ -307,20 +317,30 @@ function cdBuild() {
   };
   const mouth = C => C.fy ? C.fy - 2 : C.s ? C.s.floor[0] - 2 : C.cy + C.h * 0.2;
   const ends = (C, right) => right ? C.cx + C.w / 2 - 1 : C.cx - C.w / 2 + 1;
-  const RAD = [1.6, 1.6, 1.6, 1.8];
-  for (let b = 0; b < 4; b++) {
-    const L = cdChambers.filter(c => c.band === b && !c.nolink).sort((a, c) => a.cx - c.cx);
+  // um túnel que desce muito vai em pernas de no máximo ~12 linhas, de um lado para o outro: nenhum trecho vira queda reta
+  const zz = (xa, ya, xb, yb, r, s) => {
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) { const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n; worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny; }
+  };
+  // cada faixa são LAYER_K andares (cada um da altura de uma faixa antiga): uma volta ao mundo por andar e alguns
+  // túneis de um andar para o de baixo
+  const RAD = [1.6, 1.6, 1.6, 1.8], NTR = 4 * LAYER_K;
+  for (const c of cdChambers) { const b = c.band, t0 = CD_BANDS[b], h = (CD_BANDS[b + 1] - t0) / LAYER_K; c.tier = b * LAYER_K + clamp(Math.floor((mouth(c) - S0 - t0) / h), 0, LAYER_K - 1); }
+  for (let t = 0; t < NTR; t++) {
+    const b = (t / LAYER_K) | 0, L = cdChambers.filter(c => c.tier === t && !c.nolink).sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue;
       if (A.kind === 'rua' && B.kind === 'rua' && Math.abs(wdx(B.s.x0 - (A.s.x0 + A.s.len))) < 2 && Math.abs(B.s.floor[0] - A.s.floor[A.s.len - 1]) < 2) continue;   // a rua já continua
-      worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x6700 + b * 50 + k);
+      zz(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x6700 + t * 50 + k);
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = cdChambers.filter(c => c.band === b && !c.nolink), D = cdChambers.filter(c => c.band === b + 1 && !c.nolink);
+  for (let t = 0; t < NTR - 1; t++) {
+    const b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
+    const U = cdChambers.filter(c => c.tier === t && !c.nolink), D = cdChambers.filter(c => c.tier === t + 1 && !c.nolink);
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
       const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x67f0 + b * 9 + k);
+      zz(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b2]) + 0.2, 0x67f0 + t * 9 + k);
     }
   }
   // bolsinhas fechadas; ilhas soltas no ar
@@ -414,6 +434,8 @@ function cdBuild() {
     for (const x of [x0 - 2, x0 - 1, x0 + 9, x0 + 10]) set(x, P.top - 1, CD_PEDRA_POCO);   // o parapeito baixo
     for (let y = P.top + 1; y < P.bot; y++) set(x0, y, CD_CORRENTE);
     for (let y = P.top + 1; y < P.top + 7; y++) set(x0 + 8, y, CD_CORRENTE);
+    // anéis de pedra quebrados a cada 10, um de cada lado (nunca na coluna da corrente): quem cai no Poço cai aos poucos
+    for (let y = P.top + 12, k = 0; y < P.bot - 4; y += 10, k++) for (let x = k % 2 ? x0 + 4 : x0 + 1; x <= (k % 2 ? x0 + 8 : x0 + 4); x++) set(x, y, CD_PEDRA_POCO);
     for (let x = x0 - 10; x <= x0 + 18; x++) { if (x >= x0 - 2 && x <= x0 + 10) continue; if (at(x, P.top - 1) === AIR && SOLID[at(x, P.top)] && hash2(W1(x), P.top, seed) < 0.3) set(x, P.top - 1, CD_OFERENDA); }
     for (let y = P.top - 8; y <= P.top; y++) for (let x = x0 - 12; x <= x0 + 20; x++) cdKeep.add(I(x, y));
   }
@@ -485,6 +507,7 @@ function cdBuild() {
     for (let y = E.fy - 2; y < L; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = FG_CORDAO; cdKeep.add(i); } }
     for (let y = E.fy + 1; y < L; y++) { const i = I(x0 + 2, y); if (!SOLID[tiles[i]]) { tiles[i] = CD_ESCADA; cdKeep.add(i); } }
     for (let y = E.fy - 3; y < E.C.top + 1; y++) for (let x = x0; x < x0 + 4; x++) cdKeep.add(I(x, y));
+    for (let y = E.fy + 9; y < E.C.top - 3; y += 10) for (const x of [x0, x0 + 3]) set(x, y, y < S0 ? FG_CARNE : CD_LIMO);   // um degrau a cada dez: só o cordão e a escada passam
     // o pouso: cantaria seca, parede de cantaria, uma lanterna acesa no teto
     const Ld = E.land;
     for (let y = Ld.fy - Ld.h - 1; y <= Ld.fy; y++) for (let x = Ld.x0 - 1; x <= Ld.x0 + Ld.w; x++) {
@@ -500,7 +523,9 @@ function cdBuild() {
   }
   function inCdHallRow(C, y) { return y >= C.top && y < C.fy; }
   // os becos: a escada de corda numa das beiras
-  for (const Bc of becos) { const lx = Bc.x0 + (hash2(Bc.x0, Bc.ya, seed) < 0.5 ? 0 : Bc.w - 1); for (let y = Bc.ya - 2; y < Bc.yb; y++) { const t = at(lx, y); if (t === AIR || t === CD_CALCAMENTO) set(lx, y, CD_ESCADA); } for (let x = Bc.x0; x < Bc.x0 + Bc.w; x++) for (let y = Bc.ya; y < Bc.yb; y++) if (at(x, y) === AIR) walls[I(x, y)] = WCD_TIJOLO; }
+  for (const Bc of becos) { const lx = Bc.x0 + (hash2(Bc.x0, Bc.ya, seed) < 0.5 ? 0 : Bc.w - 1); for (let y = Bc.ya - 2; y < Bc.yb; y++) { const t = at(lx, y); if (t === AIR || t === CD_CALCAMENTO) set(lx, y, CD_ESCADA); } for (let x = Bc.x0; x < Bc.x0 + Bc.w; x++) for (let y = Bc.ya; y < Bc.yb; y++) if (at(x, y) === AIR) walls[I(x, y)] = WCD_TIJOLO;
+    for (let y = Bc.ya + 8; y < Bc.yb - 4; y += 8) for (let x = Bc.x0; x < Bc.x0 + Bc.w; x++) if (W1(x) !== W1(lx) && at(x, y) === AIR) { set(x, y, CD_MADEIRAME); cdKeep.add(I(x, y)); }   // um patamar de madeira a cada 8: só a escada passa
+  }
 
   // ---------- 4. os veios ----------
   const R4 = mulberry32(seed ^ 0x0de6);
@@ -514,9 +539,9 @@ function cdBuild() {
       }
     }
   };
-  vein(CD_O_CARVAO, 80 * WSC, 0, 180, 3, 8, t => t === CD_ATERRO);
-  vein(CD_O_PRATA, 70 * WSC, 0, 150, 2, 5, t => t === CD_ATERRO || t === CD_LIMO);
-  vein(CD_O_PRATA, 40 * WSC, 150, 186, 4, 8, t => t === CD_ATERRO || t === CD_MARMORE);
+  vein(CD_O_CARVAO, 80 * WSC * LAYER_K, 0, 180, 3, 8, t => t === CD_ATERRO);
+  vein(CD_O_PRATA, 70 * WSC * LAYER_K, 0, 150, 2, 5, t => t === CD_ATERRO || t === CD_LIMO);
+  vein(CD_O_PRATA, 40 * WSC * LAYER_K, 150, 186, 4, 8, t => t === CD_ATERRO || t === CD_MARMORE);
 }
 
 function cdAfter() {
@@ -532,6 +557,11 @@ function cdAfter() {
       x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.6;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
+  };
+  const zz = (xa, ya, xb, yb, r, s) => {   // em pernas de ~12 linhas, de um lado para o outro (como no cdBuild)
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) { const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n; worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny; }
   };
   const cdSolid = t => SOLID[t] && CD_SOILS[t];
   const at = (x, y) => tiles[I(x, y)], put = (x, y, t) => { tiles[I(x, y)] = t; };
@@ -561,15 +591,20 @@ function cdAfter() {
   for (const E of cdEntries) for (let y = E.fy - 1; y <= (E.ledge || E.fy); y++) for (let x = E.x0; x < E.x0 + 4; x++) flood(I(x, y));
   if (!cdEntries.length) flood(I(cdChambers[0].cx, mouthOf(cdChambers[0])));
   if (cdBoss) for (let y = cdBoss.top; y < cdBoss.fy; y++) for (let k = 0; k < cdBoss.w; k++) reach[I(cdBoss.x0 + k, y)] = 1;   // a torre: o 137 cuida
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // as bolsas isoladas, rotuladas uma vez só (a camada é três vezes mais alta), da maior para a menor
+  const comps = []; let orgB = null;
+  {
+    const o = S0 * WW, lab = new Uint8Array((YB - S0) * WW);
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - o] || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - o] = 1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= o && nb < YB * WW && !lab[nb - o] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - o] = 1; stack.push(nb); } }
+      if (comp.length >= 20) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, b) => b.length - a.length);
+  }
+  for (let pass = 0; pass < comps.length; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;   // um túnel de antes já chegou
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -579,9 +614,9 @@ function cdAfter() {
         const d = Math.abs(dx) + Math.abs(dy) * 1.4; if (d < bd) { bd = d; best = [cx, cy, cx + dx, y]; }
       }
     }
-    if (best) { worm(best[0], best[1], best[2], best[3], 1.6, 0x66a0 + pass); flood(I(best[2], best[3]), true); }
+    if (best) { zz(best[0], best[1], best[2], best[3], 1.6, 0x66a0 + pass); flood(I(best[2], best[3]), true); }
     if (!reach[bestC[0]]) {   // longe demais, ou a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
+      const org = orgB || (orgB = new Int32Array(NN).fill(-1)), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
       for (let h = 0; h < q.length && hit < 0; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -590,12 +625,17 @@ function cdAfter() {
           q.push(nb);
         }
       }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      // o corredor; onde ele sobe ou desce reto, uma escada de corda na coluna (um poço de 1 sem nada seria uma queda)
+      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0, p = org[c], vert = p >= 0 && p % WW === x; dig(x, y); dig(x, y - 1); if (vert) for (const yy of [y, y - 1]) { const i = I(x, yy); if (tiles[i] === AIR && cdRow(yy)) tiles[i] = CD_ESCADA; } }
+      for (const c of q) org[c] = -1; if (hit >= 0) org[hit] = -1;
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
   }
   function mouthOf(C) { return Math.round(C.fy ? C.fy - 2 : C.cy); }
+
+  // ---------- 1b. vigas de madeirame caídas atravessadas onde um vão ainda cai 22 ou mais (84: layerShelves) ----------
+  layerShelves(S0 + 2, YB - 2, CD_MADEIRAME, (x, y, i) => cdKeep.has(i) || inCdHall(x, y, 3) || inCdPoco(x, y, 2));
 
   // ---------- 2. uma escada de corda (corrente nas Cisternas) em todo desnível de 5 ou mais ----------
   {
@@ -698,10 +738,12 @@ function cdClimbFix() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x), S0 = CD_S0, YB = Math.min(WH - 8, S0 + CD_D), Y0 = S0 - 6;
   const S = (x, y) => SOLID[tiles[I(x, y)]] === 1, L = (x, y) => CD_CLIMB(tiles[I(x, y)]);
   const ok = (x, y) => !S(x, y) && !S(x, y - 1), H = YB - Y0;
+  // a torre (inCdHall) em colunas, uma vez: chamar o inCdHall a cada passo da busca pesava
+  const hallX = new Uint8Array(WW), hT = cdBoss ? cdBoss.top : 1e9, hB = cdBoss ? cdBoss.fy : -1; for (let x = 0; x < WW; x++) hallX[x] = inCdHall(x, hT) ? 1 : 0;
   const seen = new Uint8Array(WW * H * 5), any = new Uint8Array(WW * H), from = new Int32Array(WW * H * 5), good = new Uint8Array(WW * H * 5);
   const search = (sx, sy) => {
     seen.fill(0); any.fill(0); const q = []; let cur = -1, hit = -1;
-    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || inCdHall(x, y)) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1) || aguaAt(x, y)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
+    const push = (x, y, r) => { x = W1(x); if (y <= Y0 || y >= YB || !ok(x, y) || (y >= hT && y <= hB && hallX[x])) return; if (S(x, y + 1) || L(x, y) || L(x, y - 1) || aguaAt(x, y)) r = 4; const k = ((y - Y0) * WW + x) * 5 + r; if (seen[k]) return; seen[k] = 1; from[k] = cur; any[(y - Y0) * WW + x] = 1; q.push(x, y, r); if (good[k] && hit < 0) hit = k; };
     const win = k => { for (; k >= 0 && !good[k]; k = from[k]) good[k] = 1; return true; };
     let y = sy; while (y < YB - 1 && !S(sx, y + 1)) y++; push(sx, y, 4);
     while (q.length) {
@@ -741,7 +783,14 @@ function cdClimbFix() {
   for (const c of cdCamps) starts.push([c.x0 + 10, c.fy - 1]);
   if (cdPoco) starts.push([cdPoco.x0 + 4, cdPoco.bot - 1]);
   let fixes = 0;
-  for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }
+  // um começo dentro do que uma busca que falhou já percorreu falha igual (tudo o que ele alcança, ela alcançou):
+  // pula, até uma escada mudar alguma coisa (os começos são LAYER_K vezes mais agora)
+  const dead = new Uint8Array(WW * H);
+  for (const [x0, y0] of starts) {
+    const x = W1(x0); let y = y0; while (y < YB - 1 && !S(x, y + 1)) y++;
+    if (y > Y0 && y < YB && dead[(y - Y0) * WW + x]) continue;
+    for (let k = 0; k < 12 && !search(x, y0); k++) { if (!repair()) { for (let i = 0; i < any.length; i++) if (any[i]) dead[i] = 1; break; } fixes++; dead.fill(0); }
+  }
   return fixes;
 }
 
@@ -831,9 +880,10 @@ function cdPlaceProps() {
 
 // a ordem: a camada, a torre do chefe (137: cdDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('cidade', () => {
   if (!CIDADE) return;
   try { cdBuild(); cdAfter(); if (typeof cdDress === 'function') cdDress(); cdExitClear(); cdClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da cidade ---------- */
@@ -841,10 +891,10 @@ function cdPlaceProps() {
   _cd();
   if (!CIDADE) return;
   const Y1 = Math.min(WH, CD_S0 + CD_D + 4);
-  for (let y = CD_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(CD_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - CD_S0) + (depthNz(x, y, 25, seed ^ 0x6e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x6e12);
-    DEEPT[i] = d < 46 ? (n > 0.5 ? DP_CD_ARCOS : DP_CD_ATERRO) : d < 150 ? (n > 0.42 ? DP_CD_CASAS : DP_CD_ATERRO) : (n > 0.55 ? DP_CD_ARCOS : n > 0.35 ? DP_CD_CASAS : DP_CD_ATERRO);
+    DEEPT[i] = d < CD_BANDS[1] ? (n > 0.5 ? DP_CD_ARCOS : DP_CD_ATERRO) : d < CD_BANDS[3] ? (n > 0.42 ? DP_CD_CASAS : DP_CD_ATERRO) : (n > 0.55 ? DP_CD_ARCOS : n > 0.35 ? DP_CD_CASAS : DP_CD_ATERRO);
   }
 }; }
 

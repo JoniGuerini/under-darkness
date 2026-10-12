@@ -12,7 +12,7 @@ ZONE_NAMES.push('Galerias Tomadas', 'Bosque de Chapéus', 'Grutas Alagadas', 'Co
 ZONE_SUB.push('a colônia ainda parece só abandonada', 'bonito demais para estar certo', 'a água não corre há séculos', 'as paredes respiram');
 if (ZONE_NAMES.length !== FG_ZONE0 + 4) console.error('zonas das Minas Fúngicas fora do lugar', ZONE_NAMES.length);
 
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (FUNGO) try { fungWater(); } catch (err) { console.error(err); } }; }
+genPos(() => { if (FUNGO) try { fungWater(); } catch (err) { console.error(err); } }, 'fungo');   // depois das ligações da leva que gerou os fungos (129)
 
 aguaTom(ty => FUNGO && ty >= FG_S0 - 4 && ty < FG_S0 + FG_D, ['#061214', '#0a1e22', '#102c30', '#1a3e40', '#2a5654', '#467472']);
 

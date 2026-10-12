@@ -29,8 +29,9 @@ let psChambers = [], psGal = [], psCorr = [], psCaves = [], psDoors = [], psUpCl
 const PS_CLIMB = t => t === PS_ESCADA || t === PS_CORDA || t === CHAIN || t === psUpClimb;
 const psYB = () => Math.min(WH - 8, PS_S0 + PS_D);
 // o corredor em laço (os 3 trechos) e o quarto-prêmio no fim
-const inPsLoop = (tx, ty, m = 0) => psLoops.some(L => wdx(tx - L.x0) >= -m && wdx(tx - L.x0) < L.n * L.L + m && ty >= L.top - 1 - m && ty <= L.fy + m);
-const inPsPrize = (tx, ty, m = 0) => psLoops.some(L => L.prize && wdx(tx - L.prize.x0) >= -1 - m && wdx(tx - L.prize.x0) <= L.prize.w + m && ty >= L.prize.top - 1 - m && ty <= L.prize.fy + m);
+const psLpTop = L => L.top - 1, psLpBot = L => L.fy, psPzTop = L => L.prize ? L.prize.top - 1 : L.top - 1, psPzBot = L => L.prize ? L.prize.fy : L.fy;
+const inPsLoop = (tx, ty, m = 0) => { const Q = psNear(psLoops, 'psIdxL', psLpTop, psLpBot, ty, m); return !!Q && Q.some(L => wdx(tx - L.x0) >= -m && wdx(tx - L.x0) < L.n * L.L + m && ty >= L.top - 1 - m && ty <= L.fy + m); };
+const inPsPrize = (tx, ty, m = 0) => { const Q = psNear(psLoops, 'psIdxP', psPzTop, psPzBot, ty, m); return !!Q && Q.some(L => L.prize && wdx(tx - L.prize.x0) >= -1 - m && wdx(tx - L.prize.x0) <= L.prize.w + m && ty >= L.prize.top - 1 - m && ty <= L.prize.fy + m); };
 
 function psBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
@@ -38,8 +39,10 @@ function psBuild() {
   PS_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = PS_S0, YB = Math.min(WH - 8, S0 + PS_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7a51), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / PS_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const bandOf = d => d < PS_BANDS[1] ? 0 : d < PS_BANDS[2] ? 1 : d < PS_BANDS[3] ? 2 : 3;
+  // cada faixa tem LAYER_K andares da altura de uma faixa antiga: as ligações correm por andar, e de um andar ao de baixo
+  const tierOf = y => { const d = clamp(y - S0, 0, DB - 1), b = bandOf(d), hb = (PS_BANDS[b + 1] - PS_BANDS[b]) / LAYER_K; return b * LAYER_K + Math.min(LAYER_K - 1, Math.floor((d - PS_BANDS[b]) / hb)); };
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
   psChambers = []; psGal = []; psCorr = []; psCaves = []; psDoors = [];
   psEntries = []; psLand = []; psExits = []; psBoss = null; psRooms = []; psHalls = []; psBeds = []; psLoops = []; psNowhere = []; psKeep.clear();
@@ -54,14 +57,14 @@ function psBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x, t = tiles[i];
       if (t === BEDROCK || y >= WH - 3) continue;
-      const d = y - S0 + (nz(x, y, 22, 0x7b3) - 0.5) * 12, b = bandOf(Math.max(0, d)), n1 = nz(x, y, 30, 0x7a1), n2 = nz(x, y, 16, 0x7a2);
+      if (y >= YB) { tiles[i] = PS_SONO; walls[i] = WPS_SONO; continue; }   // abaixo da camada: sem ruído (a de baixo escreve por cima)
+      const d = y - S0 + (nz(x, y, 22, 0x7b3) - 0.5) * 12, b = bandOf(Math.max(0, d)), n1 = () => nz(x, y, 30, 0x7a1), n2 = () => nz(x, y, 16, 0x7a2);   // cada ruído só onde a faixa lê
       let tt = PS_SONO, w = WPS_SONO;
-      if (y >= YB) tt = PS_SONO;
-      else if (b === 1) { if (n2 > 0.8) tt = PS_TIJOLO; }
-      else if (b === 2) { if (n1 > 0.7) tt = PS_PENAS; else if (n2 > 0.74) tt = PS_ACOLCHOADO; }
-      else if (b === 3) { if (n2 > 0.74) { tt = PS_ESPELHO; w = WPS_ESPELHO; } if (y >= YB - 8 && n1 > 0.45) tt = PS_QUEIMADO; }
+      if (b === 1) { if (n2() > 0.8) tt = PS_TIJOLO; }
+      else if (b === 2) { if (n1() > 0.7) tt = PS_PENAS; else if (n2() > 0.74) tt = PS_ACOLCHOADO; }
+      else if (b === 3) { if (n2() > 0.74) { tt = PS_ESPELHO; w = WPS_ESPELHO; } if (y >= YB - 8 && n1() > 0.45) tt = PS_QUEIMADO; }
       tiles[i] = tt; walls[i] = w;
-      if (y < YB && agua.length) agua[i] = 0;
+      if (agua.length) agua[i] = 0;
     }
   }
 
@@ -159,7 +162,7 @@ function psBuild() {
 
   // ---------- 2c. as Portas Quentes: dois salões da Galeria com o poço de 4 até a última linha ----------
   for (let tries = 0; psExits.length < 2 && tries < 600; tries++) {
-    const w = 28 + ((R() * 8) | 0), h = 10, cx = (R() * WW) | 0, fy = S0 + mb(164) + ((R() * mb(8)) | 0);
+    const w = 28 + ((R() * 8) | 0), h = 10, cx = (R() * WW) | 0, fy = YB - 15 - ((R() * 8) | 0);   // o poço tem o mesmo tamanho de antes
     if (!awayFromBoss(cx, fy, 60) || psExits.some(e => Math.abs(wdx(e.cx - cx)) < (tries < 400 ? WW / 3 : WW / 5)) || busy(cx, fy - h / 2, w, h, 5)) continue;
     const x0 = cx - (w >> 1); room(x0, fy, w, h);
     const C = { cx, cy: fy - h / 2, w, h, band: 3, kind: 'galeria', x0: W1(x0), fy, top: fy - h, exit: true };
@@ -171,10 +174,11 @@ function psBuild() {
   }
 
   // ---------- 2d. os corredores em laço: 3 trechos iguais e, no fim, o quarto-prêmio (1 na Casa e 1 nos Corredores, vezes WSC) ----------
-  for (const [band, n] of [[0, WSC], [1, WSC]]) {
-    for (let k = 0, tries = 0; k < n && tries < 300; tries++) {
+  for (const [band, n] of [[0, WSC * LAYER_K], [1, WSC * LAYER_K]]) {
+    const lo = PS_BANDS[band] + (band ? 12 : 20), hi = PS_BANDS[band + 1] - 8;
+    for (let k = 0, tries = 0; k < n && tries < 300 * LAYER_K; tries++) {
       const L = 24 + ((R() * 4) | 0), len = 3 * L, pw = 14, ph = 8, ent = 8;   // um trecho maior que meia tela: a emenda nunca aparece
-      const x0 = (R() * WW) | 0, fy = band === 0 ? S0 + mb(20 + R() * 20) : S0 + mb(58 + R() * 32), cx = x0 + (len + pw - ent) / 2;
+      const x0 = (R() * WW) | 0, fy = S0 + lo + ((R() * (hi - lo)) | 0), cx = x0 + (len + pw - ent) / 2;
       if (fy - 16 < S0 + 2 || busy(cx, fy - 2, len + pw + ent + 4, 30, 8) || !awayFromBoss(cx, fy, len)) continue;
       // a antessala (liga com o resto), o corredor selado com a rocha em volta, o quarto-prêmio selado
       sealBox(x0 - 1, fy - 15, x0 + len + pw, fy + 13);
@@ -192,41 +196,41 @@ function psBuild() {
   }
 
   // ---------- 2e. a Casa que Não Era: cômodos retos, 1 em 4 do tamanho errado ----------
-  for (let k = 0, tries = 0; k < 10 * WSC && tries < 600; tries++) {
+  for (let k = 0, tries = 0; k < 10 * WSC * LAYER_K && tries < 600 * LAYER_K; tries++) {
     const big = k % 4 === 3, w = big ? 26 + ((R() * 10) | 0) : 12 + ((R() * 13) | 0), h = big ? 12 + ((R() * 4) | 0) : 6 + ((R() * 5) | 0);
-    const x0 = (R() * WW) | 0, fy = S0 + mb(8 + h + R() * (36 - h));
+    const x0 = (R() * WW) | 0, fy = S0 + 8 + h + ((R() * (PS_BANDS[1] - 10 - h)) | 0);
     if (fy - h < S0 + 3 || busy(x0 + w / 2, fy - h / 2, w, h, 6)) continue;
     room(x0, fy, w, h);
     const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 0, kind: 'comodo', x0: W1(x0), fy, top: fy - h, big };
     psRooms.push(H); psChambers.push(H); k++;
   }
   // ---------- 2f. os Corredores Sem Fim: retos e compridos, de azulejo ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 600; tries++) {
-    const len = 40 + ((R() * 41) | 0), h = 4 + ((R() * 2) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(54 + R() * 40);
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 600 * LAYER_K; tries++) {
+    const len = 40 + ((R() * 41) | 0), h = 4 + ((R() * 2) | 0), x0 = (R() * WW) | 0, fy = S0 + PS_BANDS[1] + 8 + ((R() * (PS_BANDS[2] - PS_BANDS[1] - 12)) | 0);
     if (busy(x0 + len / 2, fy - 3, len, h, 4)) continue;
     room(x0, fy, len, h);
     const C = { cx: x0 + len / 2, cy: fy - h / 2, w: len, h, band: 1, kind: 'corredor', x0: W1(x0), fy, top: fy - h, len };
     psHalls.push(C); psChambers.push(C); k++;
   }
   // ---------- 2g. os Quartos Esquecidos: grutas macias com a cama no meio ----------
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 600; tries++) {
-    const w = 16 + ((R() * 15) | 0), h = 10 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(106 + h + R() * (42 - h));
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 600 * LAYER_K; tries++) {
+    const w = 16 + ((R() * 15) | 0), h = 10 + ((R() * 7) | 0), x0 = (R() * WW) | 0, fy = S0 + PS_BANDS[2] + 8 + h + ((R() * (PS_BANDS[3] - PS_BANDS[2] - 10 - h)) | 0);
     if (busy(x0 + w / 2, fy - h / 2, w, h, 7) || !awayFromBoss(x0 + w / 2, fy, w)) continue;
     room(x0, fy, w, h, 4);
     const H = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 2, kind: 'quarto', x0: W1(x0), fy, top: fy - h };
     psRooms.push(H); psChambers.push(H); k++;
   }
   // ---------- 2h. a Galeria dos Espelhos: salões largos ----------
-  for (let k = 0, tries = 0; k < 4 * WSC && tries < 600; tries++) {
-    const w = 30 + ((R() * 21) | 0), h = 10 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + mb(160 + R() * 12);
-    if (fy - h < S0 + mb(151) || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 4)) continue;
+  for (let k = 0, tries = 0; k < 4 * WSC * LAYER_K && tries < 600 * LAYER_K; tries++) {
+    const w = 30 + ((R() * 21) | 0), h = 10 + ((R() * 5) | 0), x0 = (R() * WW) | 0, fy = S0 + PS_BANDS[3] + 4 + h + ((R() * (DB - 14 - PS_BANDS[3] - 4 - h)) | 0);
+    if (fy - h < S0 + PS_BANDS[3] + 1 || busy(x0 + w / 2, fy - h / 2, w, h, 6) || !awayFromBoss(x0 + w / 2, fy - h / 2, w / 2 + 4)) continue;
     room(x0, fy, w, h);
     const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 3, kind: 'galeria', x0: W1(x0), fy, top: fy - h };
     psGal.push(C); psHalls.push(C); psChambers.push(C); k++;
   }
   // ---------- 2i. grutas moles (a rocha que cedeu): 4 por faixa, vezes WSC ----------
-  for (let b = 0; b < 4; b++) for (let k = 0, tries = 0; k < 4 * WSC && tries < 300; tries++) {
-    const w = 12 + ((R() * 14) | 0), h = 7 + ((R() * 6) | 0), cx = (R() * WW) | 0, cy = S0 + mb(PS_BANDS[b] + 4) + h / 2 + R() * Math.max(0, mb(PS_BANDS[b + 1] - PS_BANDS[b] - 8) - h);
+  for (let b = 0; b < 4; b++) for (let k = 0, tries = 0; k < 4 * WSC * LAYER_K && tries < 300 * LAYER_K; tries++) {
+    const w = 12 + ((R() * 14) | 0), h = 7 + ((R() * 6) | 0), cx = (R() * WW) | 0, cy = S0 + PS_BANDS[b] + 4 + h / 2 + R() * Math.max(0, PS_BANDS[b + 1] - PS_BANDS[b] - 8 - h);
     if (busy(cx, cy, w, h, 5) || !awayFromBoss(cx, cy, w / 2 + 6) || cy + h / 2 > YB - 4) continue;
     blob(cx, cy, w, h, 0x7d00 + b * 50 + k, 1.6);
     const C = { cx, cy, w, h, band: b, kind: 'gruta', fy: Math.round(cy + h / 2) };
@@ -234,8 +238,8 @@ function psBuild() {
   }
   // ---------- 2j. os quartos que não existem: 12 x 8 dentro da rocha, sem ligação, casca de O Nada ----------
   const NKIND = ['dormente', 'monstro', 'casa'];
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 800; tries++) {
-    const w = 12, h = 8, b = tries % 4, x0 = (R() * WW) | 0, fy = S0 + mb(PS_BANDS[b] + 4) + h + ((R() * Math.max(1, mb(PS_BANDS[b + 1] - PS_BANDS[b] - 10) - h)) | 0);
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 800 * LAYER_K; tries++) {
+    const w = 12, h = 8, b = tries % 4, x0 = (R() * WW) | 0, fy = S0 + PS_BANDS[b] + 4 + h + ((R() * Math.max(1, PS_BANDS[b + 1] - PS_BANDS[b] - 10 - h)) | 0);
     if (fy >= YB - 12 || busy(x0 + w / 2, fy - h / 2, w + 4, h + 4, 6) || !awayFromBoss(x0 + w / 2, fy, 20)) continue;
     sealBox(x0 - 2, fy - h - 2, x0 + w + 1, fy + 2);
     const N = { x0: W1(x0), w, h, top: fy - h, fy, cx: x0 + w / 2, cy: fy - h / 2, band: b, kind: NKIND[k % 3], id: psNowhere.length };
@@ -246,20 +250,26 @@ function psBuild() {
   // ---------- 3. as ligações ----------
   const mouth = C => C.fy ? C.fy : Math.round(C.cy + C.h * 0.3);
   const ends = (C, right) => [Math.round(right ? C.cx + C.w / 2 - 2 : C.cx - C.w / 2 + 2), mouth(C)];
-  for (let b = 0; b < 4; b++) {
-    const L = psChambers.filter(c => c.band === b && !c.nolink && !c.boss).sort((a, c) => a.cx - c.cx);
+  const NT_ = 4 * LAYER_K, tierL = [];
+  for (let t = 0; t < NT_; t++) tierL.push([]);
+  for (const c of psChambers) if (!c.nolink && !c.boss) tierL[tierOf(mouth(c))].push(c);
+  for (let t = 0; t < NT_; t++) {
+    const b = (t / LAYER_K) | 0, L = tierL[t].sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const P = L[k], Q = L[(k + 1) % L.length]; if (P === Q) continue;
       const [ax, ay] = ends(P, true), [bx, by] = ends(Q, false);
       if (b === 1 || b === 3) gallery(ax, ay, bx, by, psCorr);
-      else worm(ax, ay - 2, bx, by - 2, 1.6, 0x7700 + b * 90 + k);   // túneis redondos e largos
+      else worm(ax, ay - 2, bx, by - 2, 1.6, 0x7700 + t * 90 + k);   // túneis redondos e largos
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = psChambers.filter(c => c.band === b && !c.nolink && !c.boss), D = psChambers.filter(c => c.band === b + 1 && !c.nolink && !c.boss);
+  // de um andar ao de baixo: o túnel desce em diagonal (o destino fica de lado, nunca bem embaixo: nada de poço) e a
+  // escadaria anda um degrau a cada 2 colunas
+  const slant = (P, D) => { const ay = mouth(P); let Q = null, qd = 1e9; for (const c of D) { const dy = Math.max(6, mouth(c) - ay), dx = Math.abs(wdx(c.cx - P.cx)), e = dx < dy * 1.2 ? 400 + dy * 1.2 - dx : Math.abs(dx - dy * 1.6); if (e < qd) { qd = e; Q = c; } } return Q; };
+  for (let t = 0; t < NT_ - 1; t++) {
+    const U = tierL[t], D = tierL[t + 1];
     for (let k = 0; k < 2 * WSC && U.length && D.length; k++) {
-      const P = U[(R() * U.length) | 0], Q = D.reduce((m, c) => Math.abs(wdx(c.cx - P.cx)) < Math.abs(wdx(m.cx - P.cx)) ? c : m);
-      const [ax, ay] = ends(P, R() < 0.5); worm(ax, ay - 2, Q.cx, mouth(Q) - 2, 1.5, 0x77f0 + b * 9 + k);
+      const P = U[(R() * U.length) | 0], Q = slant(P, D);
+      const [ax, ay] = ends(P, wdx(Q.cx - P.cx) > 0); worm(ax, ay - 2, Q.cx, mouth(Q) - 2, 1.5, 0x77f0 + t * 9 + k);
     }
     for (let k = 0, tries = 0; k < 2 * WSC && tries < 80; tries++) {
       const P = U[(R() * U.length) | 0]; if (!P) continue;
@@ -412,7 +422,7 @@ function psBuild() {
     psBeds.push({ id: psBeds.length, tx: W1(tx), fy, band: C.band, kind, room: C });
   };
   for (const H of psRooms) if (H.kind === 'quarto') bedIn(H, 'quarto');
-  { let n = 0; for (const H of psRooms) if (H.kind === 'comodo' && !H.big && H.w >= 12 && n < 3 * WSC && hash2(H.x0, H.fy, seed ^ 0x73) < 0.45) { bedIn(H, 'comodo'); n++; } }
+  { let n = 0; for (const H of psRooms) if (H.kind === 'comodo' && !H.big && H.w >= 12 && n < 3 * WSC * LAYER_K && hash2(H.x0, H.fy, seed ^ 0x73) < 0.45) { bedIn(H, 'comodo'); n++; } }
   for (const Lp of psLoops) bedIn(Lp.prize, 'premio');
   for (const N of psNowhere) if (N.kind === 'dormente') bedIn(N, 'nada');
 
@@ -428,7 +438,7 @@ function psBuild() {
       }
     }
   };
-  vein(PS_O_CARVAO, 26 * WSC, 0, 178, 3, 8, t => t === PS_SONO);
+  vein(PS_O_CARVAO, 26 * WSC * LAYER_K, 0, 178, 3, 8, t => t === PS_SONO);
   // a onirita: só em volta das camas, num raio de 10 (mais grossa no prêmio dos laços)
   const oniHost = t => t === PS_SONO || t === PS_ACOLCHOADO || t === PS_PENAS || t === PS_FORRADA || t === PS_TIJOLO;
   for (const Bd of psBeds) {
@@ -483,15 +493,18 @@ function psAfter() {
   if (!psEntries.length && psChambers.length) flood(I(psChambers[0].cx, Math.round(psChambers[0].cy)));
   if (B) for (let y = B.top - 4; y <= B.fy + 4; y++) for (let x = B.cx - 28; x <= B.cx + 27; x++) reach[I(x, y)] = 1;
   for (const N of psNowhere) for (let y = N.top - 3; y <= N.fy + 2; y++) for (let x = N.x0 - 3; x <= N.x0 + N.w + 2; x++) reach[I(x, y)] = 1;
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // os pedaços soltos, contados uma vez só e ligados do maior para o menor (contar de novo a cada passada custava caro)
+  const comps = [];
+  { const lab = new Uint8Array(NN);
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
       const comp = []; lab[i] = 1; stack.push(i);
       while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 16 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      if (comp.length >= 16) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, c) => c.length - a.length); }
+  for (let pass = 0; pass < comps.length && pass < 60 * WSC * LAYER_K; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -685,14 +698,14 @@ function psPlaceProps() {
   const putDoor = (s, kind, v = 0) => { const p = floorProp('ps_porta', v, s.x, s.fy); mark(s.x, s.fy - 4, 2, 4, 1); const d = { id: psDoors.length, x: s.x, fy: s.fy, kind, to: -1, band: pesadeloBand(s.fy - 1), p }; psDoors.push(d); return d; };
   for (let b = 0; b < 4; b++) {
     // os pares (atalho de ida e volta), de 30 a 200 blocos um do outro
-    for (let k = 0, n = b < 2 ? 2 * WSC : WSC; k < n; k++) {
+    for (let k = 0, n = (b < 2 ? 2 * WSC : WSC) * LAYER_K; k < n; k++) {
       const S = doorSpots(b); if (S.length < 2) break;
       const a = S[(R() * S.length) | 0], far = S.filter(s => { const d = Math.abs(wdx(s.x - a.x)); return d >= 30 && d <= 200 && s.C !== a.C; });
       if (!far.length) continue;
       const c = far[(R() * far.length) | 0], da = putDoor(a, 'par'), dc = putDoor(c, 'par'); da.to = dc.id; dc.to = da.id;
     }
     // a porta para lugar nenhum (azul): abre e mostra uma parede de tijolo
-    if (b < 3) for (let k = 0; k < WSC; k++) { const S = doorSpots(b); if (S.length) putDoor(S[(R() * S.length) | 0], 'parede', 1); }
+    if (b < 3) for (let k = 0; k < WSC * LAYER_K; k++) { const S = doorSpots(b); if (S.length) putDoor(S[(R() * S.length) | 0], 'parede', 1); }
   }
   // os quartos que não existem: a porta de dentro e a de fora (numa sala da mesma faixa)
   for (const N of psNowhere) {
@@ -776,10 +789,10 @@ function psPlaceProps() {
   _cd();
   if (!PESADELO) return;
   const Y1 = Math.min(WH, PS_S0 + PS_D + 4);
-  for (let y = PS_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(PS_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - PS_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 46 ? DP_PS_CASAS : d < 98 ? (n > 0.72 ? DP_PS_CASAS : DP_PS_CORREDOR) : d < 150 ? (n > 0.55 ? DP_PS_CORREDOR : DP_PS_CASAS) : d > 166 && n > 0.35 ? DP_PS_BRILHO : DP_PS_CORREDOR;
+    DEEPT[i] = d < PS_BANDS[1] ? DP_PS_CASAS : d < PS_BANDS[2] ? (n > 0.72 ? DP_PS_CASAS : DP_PS_CORREDOR) : d < PS_BANDS[3] ? (n > 0.55 ? DP_PS_CORREDOR : DP_PS_CASAS) : d > PS_D - 20 * LAYER_K && n > 0.35 ? DP_PS_BRILHO : DP_PS_CORREDOR;
   }
 }; }
 

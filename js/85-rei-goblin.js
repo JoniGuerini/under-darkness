@@ -77,17 +77,17 @@ function rgWallLadders() {
     }
   }
 }
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (MINA) { try { rgDress(); rgWallLadders(); mnExitClear(); mnClimbFix();
+{ const _bc = buildCathedral; buildCathedral = function () { _bc(); genStage('mina', () => { if (MINA) { try { rgDress(); rgWallLadders(); mnExitClear(); mnClimbFix();
   // last pass: props whose footing a ladder or a cut took away, and posts left hanging
   let drop = false; for (let k = PROPS.length - 1; k >= 0; k--) { const p = PROPS[k]; if (p.def.mina && p.sup.length && p.sup.some(i => !SOLID[tiles[i]])) { PROPS.splice(k, 1); drop = true; } }
   if (drop) { propBuckets.clear(); propBySup.clear(); const keep = PROPS.slice(); PROPS.length = 0; for (const p of keep) addProp(p.def, p.v, p.X, p.Y, p.sup); }
   for (let sweep = 0, ch = true; ch && sweep < 12; sweep++) { ch = false;
-    for (let y = MN_S0 - 40; y < WH - 1; y++) for (let x = 0; x < WW; x++) {
+    for (let y = MN_S0 - 40, y1 = Math.min(WH - 1, MN_S0 + MN_D); y < y1; y++) for (let x = 0; x < WW; x++) {   // the mine rows only (the world below is not built yet)
       const i = y * WW + x, t = tiles[i], u = tiles[i - WW], d = tiles[i + WW];
       if (t === MN_ESCORA) { if (!(SOLID[u] || u === MN_ESCORA) || !(SOLID[d] || d === MN_ESCORA)) { tiles[i] = AIR; ch = true; } continue; }
       if ((CV_STANDS[t] && !SOLID[d] && d !== t) || (CV_HANGS[t] && !SOLID[u] && u !== t)) { tiles[i] = AIR; ch = true; }
     } }
-} catch (err) { console.error(err); } } }; }
+} catch (err) { console.error(err); } } }); }; }
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone);
   if (e && type !== 'reigoblin' && mnBoss && inRgHall(Math.floor((px + e.w / 2) / T), Math.floor((py + e.h / 2) / T), -2) && !(bossFight && bossFight.rg)) rgDrop(e);

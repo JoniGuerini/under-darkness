@@ -23,37 +23,51 @@ Passo 2 do planejamento das 16 camadas (o mapa do passo 1 está em [../camadas.m
 
 ## 1. A tabela das 16 camadas
 
-Cada camada tem 186 m de altura e 4 faixas. Os números de nível seguem a curva que o jogo já usa: a vida dos monstros cresce 30% por nível e o dano das armas cresce 30% por nível de item, então uma camada nova sobe 2 níveis de monstro e 2 níveis de item.
+Cada camada tem 558 m de altura e 4 faixas (desde 2026-10-12; veja a seção 1b). Os números de metros abaixo são os do jogo de hoje, contados do chão do vilarejo. Os números de nível seguem a curva que o jogo já usa: a vida dos monstros cresce 30% por nível e o dano das armas cresce 30% por nível de item, então uma camada nova sobe 2 níveis de monstro e 2 níveis de item.
 
 | # | Camada | Metros | Monstros | Chefe (nível) | Metal | Nível da forja |
 |---|---|---|---|---|---|---|
-| 1 | As Cavernas | 6 a 186 | 1 a 4 | A Mãe-Teia (4) | Cobre | 2 |
-| 2 | A Catedral | 186 a 372 | 5 a 6 | O Rei Esqueleto (6) | Ferro | 3 |
-| 3 | As Cavernas de Gelo | 372 a 558 | 7 a 8 | O Yeti Ancestral (9) | Ouro | 5 |
-| 4 | A Mina Abandonada | 558 a 744 | 9 a 10 | O Rei Goblin (10) | Cobalto | 6 |
-| 5 | As Minas Fúngicas | 744 a 930 | 11 a 12 | A Mãe-Esporo (13) | Esporita | 9 |
-| 6 | A Cidade Afundada | 930 a 1116 | 13 a 14 | O Sineiro Afogado (15) | Prata | 11 |
-| 7 | A Floresta Petrificada | 1116 a 1302 | 15 a 16 | O Cervo de Pedra (17) | Platina | 13 |
-| 8 | A Fortaleza dos Anões | 1302 a 1488 | 17 a 18 | O Autômato-Forja (19) | Mithril | 15 |
-| 9 | A Colmeia | 1488 a 1674 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
-| 10 | A Nave Caída (extra) | 1674 a 1860 | 21 a 22 | O Olho-Cometa (23) | Xenita | 19 |
-| 11 | O Reino Élfico (extra) | 1860 a 2046 | 23 a 24 | A Dama do Espelho (25) | Lunarita | 21 |
-| 12 | O Mar Sem Sol (feito) | 2046 a 2232 | 25 a 26 | O Leviatã (27) | Oricalco | 23 |
-| 11 | O Covil do Dragão | 1860 a 2046 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
-| 12 | O Ossário dos Titãs | 2046 a 2232 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
-| 13 | A Cidade dos Antigos | 2232 a 2418 | 27 a 28 | O Arquiteto (29) | Ferro Estelar | 25 |
-| 14 | Os Salões do Pesadelo | 2418 a 2604 | 29 a 30 | O Sem-Rosto (31) | Onirita | 27 |
-| 15 | O Abismo | 2604 a 2790 | 31 a 32 | O Príncipe do Caos (33) | Infernita | 29 |
-| 16 | A Escuridão | 2790 a 2976 | 33 a 34 | Nox, Aquele Que Apaga (37) | Noctírio | 31 |
+| 1 | As Cavernas | 18 a 558 | 1 a 4 | A Mãe-Teia (4) | Cobre | 2 |
+| 2 | A Catedral | 558 a 1116 | 5 a 6 | O Rei Esqueleto (6) | Ferro | 3 |
+| 3 | As Cavernas de Gelo | 1116 a 1674 | 7 a 8 | O Yeti Ancestral (9) | Ouro | 5 |
+| 4 | A Mina Abandonada | 1674 a 2232 | 9 a 10 | O Rei Goblin (10) | Cobalto | 6 |
+| 5 | As Minas Fúngicas | 2232 a 2790 | 11 a 12 | A Mãe-Esporo (13) | Esporita | 9 |
+| 6 | A Cidade Afundada | 2790 a 3348 | 13 a 14 | O Sineiro Afogado (15) | Prata | 11 |
+| 7 | A Floresta Petrificada | 3348 a 3906 | 15 a 16 | O Cervo de Pedra (17) | Platina | 13 |
+| 8 | A Fortaleza dos Anões | 3906 a 4464 | 17 a 18 | O Autômato-Forja (19) | Mithril | 15 |
+| 9 | A Colmeia | 4464 a 5022 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
+| 10 | A Nave Caída (extra) | 5022 a 5580 | 21 a 22 | O Olho-Cometa (23) | Xenita | 19 |
+| 11 | O Reino Élfico (extra) | 5580 a 6138 | 23 a 24 | A Dama do Espelho (25) | Lunarita | 21 |
+| 12 | O Mar Sem Sol (feito) | 6138 a 6696 | 25 a 26 | O Leviatã (27) | Oricalco | 23 |
+| 11 | O Covil do Dragão | 6696 a 7254 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
+| 12 | O Ossário dos Titãs | 7254 a 7812 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
+| 13 | A Cidade dos Antigos | 7812 a 8370 | 27 a 28 | O Arquiteto (29) | Ferro Estelar | 25 |
+| 14 | Os Salões do Pesadelo | 8370 a 8928 | 29 a 30 | O Sem-Rosto (31) | Onirita | 27 |
+| 15 | O Abismo | 8928 a 9486 | 31 a 32 | O Príncipe do Caos (33) | Infernita | 29 |
+| 16 | A Escuridão | 9486 a 10044 | 33 a 34 | Nox, Aquele Que Apaga (37) | Noctírio | 31 |
 
-- **Monstros:** a coluna é o nível dos monstros, do topo ao fundo da camada. Regra do Jonathan (2026-10-10): **cada camada começa 1 nível acima do último da camada de cima**, nunca repete nem volta. Da catedral para baixo são 2 níveis por camada: o primeiro na metade de cima, o segundo da metade para baixo (a partir de 93 m). 30% dos monstros nascem 1 nível acima, mas nunca passam do topo da própria camada. As cavernas, por serem a primeira, vão de 1 a 4 (1 nível a cada 50 m). No código: `layerLvl(primeiro, d)` em `js/52-caverna-api.js`.
+- **Monstros:** a coluna é o nível dos monstros, do topo ao fundo da camada. Regra do Jonathan (2026-10-10): **cada camada começa 1 nível acima do último da camada de cima**, nunca repete nem volta. Da catedral para baixo são 2 níveis por camada: o primeiro na metade de cima, o segundo da metade para baixo (a partir de 279 m da camada, `LAYER_D / 2`). 30% dos monstros nascem 1 nível acima, mas nunca passam do topo da própria camada. As cavernas, por serem a primeira, vão de 1 a 4 (1 nível a cada 150 m, os 50 m do desenho vezes 3). No código: `layerLvl(primeiro, d)` em `js/52-caverna-api.js`.
 - **Nível da forja:** o nível de item das 9 peças forjadas daquele metal. Na camada 5 em diante ele é o nível do primeiro monstro da camada menos 2 (2n − 1, com n a posição da camada): o equipamento forjado é bom para entrar na camada e fica para trás quando o drop dela começa a superar.
 - **Barras por metal:** de 5 minérios por barra no cobalto e 6 na infernita, sobe 1 a cada 3 camadas: 6 da esporita à platina, 7 do mithril ao oricalco, 8 do dracônio ao ferro estelar, 9 na onirita e na infernita, 10 no noctírio.
 - **Bases e lendários de drop:** as bases temáticas de cada camada (armas e armaduras que só caem lá) nascem no nível do primeiro monstro da camada; o lendário do chefe, no nível do chefe.
 
 ---
 
+## 1b. Camadas 3 vezes mais altas (2026-10-12)
+
+Pedido do Jonathan (2026-10-12): as camadas acabavam rápido demais ("3, 4 vezes mais longa").
+
+- **A altura:** cada gerador continua desenhando em 186 m (`LAYER_DESIGN`, `js/01-base.js`) e estica `LAYER_K = 3` vezes. Cada camada tem `LAYER_D = 186 x 3 = 558` linhas, ou 558 m (`js/129-camadas.js`), e o mundo tem `WH = 10130` linhas. As faixas também são 3 vezes mais altas: cada arquivo api faz `X_D = LAYER_D` e `X_BANDS = [valores do desenho].map(v => v * LAYER_K)`, e o topo de cada camada (`X_TOP`) é o da de cima mais `LAYER_D`. A camada na posição N começa a (N − 1) x 558 m do chão do vilarejo.
+- **Mais andares, não salas maiores:** cada faixa guarda 3 andares do tamanho da faixa antiga, com as mesmas salas, os mesmos túneis e as mesmas subidas entre andares. Os veios de minério e as salas de chefe ficam no mesmo lugar relativo (um metro do desenho vira 3).
+- **Menos penhasco:** nenhuma queda aberta de mais de uns 12 a 15 blocos no caminho normal. O `js/313-quedas-minerios.js` corre depois das ligações (embrulha o `worldLink`) e, em todo poço estreito (até 8 de largura) que cai mais de 12 blocos, põe um piso de lado a lado a cada 12 mais ou menos, com um degrau ao lado (2 de largura) por onde se continua descendo; nos salões largos põe uma laje saindo da parede. Só onde quem anda pode cair dentro, só na rocha natural da camada (nunca em salão, sala de chefe, água ou poço com escada, corrente ou cipó), e um piso que tiraria uma subida que existia é desfeito.
+- **Minério na borda:** o mesmo arquivo muda os veios de carvão e do metal de cada camada que ficaram enterrados longe de qualquer vão para a rocha de 0 a 2 blocos da borda, até 80% deles estarem lá. O número de blocos não muda e o minério só vai para as rochas onde ele já nasce.
+- **O save:** o número de mundo sobe para 19. Mundos de antes (camadas de 186 m) são refeitos; nível, itens, ouro e o baú da vila continuam.
+
+---
+
 ## 2. Geração aos poucos
+
+**Como ficou no jogo (2026-10-12, `js/312-gera-aos-poucos.js` e o fim do `js/129-camadas.js`):** um mundo novo sai só com a superfície, as Cavernas e a Catedral. Cada camada seguinte é gerada quando o herói entra na de cima dela, com a tela de carregando ("Gerando o mundo") por um instante, então a de baixo está sempre pronta antes de ele chegar. O Teleporte gera o que falta antes de levar o herói. Os geradores entregam o trabalho a `genStage(id, fn)` e os passes de depois (ligações do 87, quedas e minério do 313, pedras do 117, ervas do 94, bacias do 128 e do 139) se registram em `genPos` e rodam depois de cada leva, só nas camadas novas. O save guarda até onde o mundo foi gerado (`gerado`) e o carregar refaz as mesmas levas, uma a uma, do mesmo jeito; a geração com o jogo rodando vê o mundo como a semente deixou e põe por cima o que o jogo mudou. As camadas ainda não geradas já têm o topo previsto, então o mapa, as zonas e o Teleporte sabem onde cada uma vai ficar. O plano abaixo é o de 2026-10-10; o que mudou dele: a primeira leva é de 2 camadas, a folga é de 1 camada e a geração é feita de uma vez, com a tela de carregando, não em pedaços durante o jogo.
 
 Decisão do Jonathan (2026-10-10): um personagem novo nasce com as 4 primeiras camadas geradas. As outras são geradas conforme o herói desce, nunca todas de uma vez.
 
@@ -115,6 +129,8 @@ A Nave Caída entrou fora do mapa das 16 e usa números que ninguém tinha reser
 - Monstros usam linha de visão e busca de caminho. XP baixo, como já é.
 - **Um metal por camada, mais carvão.** O metal só cai dos monstros daquela camada ou das de baixo. As pedras preciosas não são metal e seguem a tabela da seção 4b.
 - **Duas descidas** por camada, saindo da última faixa da camada de cima. Todo desnível de 5 blocos ou mais tem escada, corrente ou cipó: dá para voltar sem cavar.
+- **Sem penhasco no caminho normal** (2026-10-12): nenhuma queda aberta desenhada de mais de uns 12 a 15 blocos onde quem anda pode cair. O `js/313-quedas-minerios.js` põe pisos e lajes nos poços que passam disso (seção 1b).
+- **Minério perto da borda** (2026-10-12): 80% do carvão e do metal de cada camada fica a 2 blocos ou menos de um vão (`js/313-quedas-minerios.js`).
 - **Uma câmara de pouso** por camada, perto de cada descida: uma sala pequena, plana e iluminada onde não nasce monstro. Ela fica reservada para os pontos de volta que o Jonathan ainda vai desenhar.
 - **Sem baús de loot.** Os baús que apareciam nas camadas saíram do jogo (Jonathan, 2026-10-10); só fica o baú do vilarejo. As bases temáticas de cada camada caem como drop raro dos monstros dela, e o chefe solta uma delas na primeira vitória, além do lendário.
 - **Arte:** o padrão do vilarejo. Pixel art granulada, rampas de 6 tons, luz de cima à esquerda, contorno escuro só onde toca o ar. Blocos de 12x12; humanoides de 12x22 com os encaixes do herói.

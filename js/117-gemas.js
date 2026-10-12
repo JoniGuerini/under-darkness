@@ -159,9 +159,14 @@ Object.assign(MAT_VAL, { gema_topazio: 12, gema_esmeralda: 20, gema_safira: 30, 
 
 /* ---- espalhar as pedras: aglomerados de 1 ou 2 blocos dentro da rocha de cada camada; a pedra sai da tabela da camada ---- */
 function placeGems() {
-  const R = mulberry32(seed ^ 0x6e3a5), W1 = x => (x + WW) % WW, want = 36 * WSC, got = GEM_LAYERS.map(() => 0);
-  for (let k = 0; k < 900000 && got.some(n => n < want); k++) {
-    const x = (R() * WW) | 0, y = surf[x] + 10 + ((R() * (WH - surf[x] - 16)) | 0), i = y * WW + x, t = tiles[i];
+  // só nas linhas das camadas que acabaram de ser geradas (129, 312), com um sorteio por leva
+  const [ya, yb] = genFaixaNova(), Y0 = Math.max(ya, 0), Y1 = Math.min(yb, WH - 6);
+  if (Y1 <= Y0) return;
+  const R = mulberry32(seed ^ 0x6e3a5 ^ Math.imul(Y0 + 1, 0x9e3779b1)), W1 = x => (x + WW) % WW, want = 36 * WSC * LAYER_K, got = GEM_LAYERS.map(() => 0);
+  const tries = Math.ceil(900000 * LAYER_K * Math.min(1, 1.5 * (Y1 - Y0) / WH));
+  for (let k = 0; k < tries; k++) {
+    const x = (R() * WW) | 0, ys = Math.max(Y0, surf[x] + 10); if (ys >= Y1) continue;
+    const y = ys + ((R() * (Y1 - ys)) | 0), i = y * WW + x, t = tiles[i];
     const h = GEM_LAYERS.findIndex(L => L.ok(t)); if (h < 0 || got[h] >= want) continue;
     const L = GEM_LAYERS[h]; if (L.zone && !L.zone(zoneAt(x, y))) continue;
     const sh = GEM_SHARE[L.pos], tot = sh.reduce((a, b) => a + b, 0); let r = R() * tot, g = 0;
@@ -170,4 +175,4 @@ function placeGems() {
     if (R() < 0.45) { const d = (R() * 4) | 0, nx = W1(x + (d === 0 ? 1 : d === 1 ? -1 : 0)), ny = y + (d === 2 ? 1 : d === 3 ? -1 : 0), j = ny * WW + nx; if (L.ok(tiles[j])) tiles[j] = gt; }
   }
 }
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); try { placeGems(); } catch (err) { console.error(err); } }; }
+genPos(() => { try { placeGems(); } catch (err) { console.error(err); } });   // depois de cada leva de camadas (129), nas camadas novas

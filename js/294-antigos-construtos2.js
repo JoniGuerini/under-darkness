@@ -471,7 +471,7 @@ function at2EmLonge(S) {
 // outro êmbolo já está (ou vai) ali do lado?
 const at2EmOcupado = (e, x, y) => enemies.some(o => o !== e && !o.dead && o.type === 'embolo' && [o.spot, o.dest].some(S => S && Math.abs(wdx(S.x - x)) <= 1 && Math.abs(S.y - y) <= 1));
 function at2EmBusca(sx, sy, porHeroi, e = null) {
-  const R = 12, seen = new Set([sx * 4096 + sy]), q = [[sx, sy, 0, -1]];
+  const R = 12, seen = new Set([sx * 16384 + sy]), q = [[sx, sy, 0, -1]];
   let best = null, bs = 1e9;
   for (let i = 0; i < q.length && i < 500; i++) {
     const [x, y, n] = q[i];
@@ -481,7 +481,7 @@ function at2EmBusca(sx, sy, porHeroi, e = null) {
       if (sc < bs) { bs = sc; best = { x, y, d, L, i, sc }; }
     }
     for (const [ux, uy] of AT2_D4) {
-      const nx = x + ux, ny = y + uy, k = nx * 4096 + ny;
+      const nx = x + ux, ny = y + uy, k = nx * 16384 + ny;
       if (Math.abs(nx - sx) > R || Math.abs(ny - sy) > R || seen.has(k)) continue;
       seen.add(k);
       if (!at2Laje(tileAt(nx, ny)) || at2Proibido(nx, ny)) continue;

@@ -11,19 +11,38 @@
    old width are remade (wg 6); level, items, gold and the chest stay.
    Loads after 86 (wraps buildCathedral after everyone else) and before 47. */
 
+// what generation must never cut or fill: the boss halls and set pieces of every layer, the barriers, and the kept tiles (also used by 313)
+// (2026-10-12: only the layers already generated, js/312: a layer still to come keeps last world's halls and sets)
+const WL_HALLS = [
+  ['pesadelo', (x, y) => typeof inPsHall === 'function' && (inPsHall(x, y, 3) || inPsNowhere(x, y, 1) || inPsLoop(x, y, 1) || inPsPrize(x, y, 1))],
+  ['cavernas', (x, y) => typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)], ['gelo', (x, y) => typeof inYetiHall === 'function' && inYetiHall(x, y, -3)],
+  ['catedral', (x, y) => typeof inThroneHall === 'function' && inThroneHall(x, y, -3)], ['mina', (x, y) => typeof inRgHall === 'function' && inRgHall(x, y, -3)],
+  ['abismo', (x, y) => typeof inAbHall === 'function' && inAbHall(x, y, -3)], ['fungo', (x, y) => typeof inMaeHall === 'function' && inMaeHall(x, y, -3)],
+  ['cidade', (x, y) => typeof inCdHall === 'function' && inCdHall(x, y, -3)], ['colmeia', (x, y) => typeof inCmHall === 'function' && inCmHall(x, y, 1)],
+  ['floresta', (x, y) => typeof inFpHall === 'function' && inFpHall(x, y, -3)], ['anoes', (x, y) => typeof inAnHall === 'function' && inAnHall(x, y, -3)],
+  ['escuro', (x, y) => typeof inEsHall === 'function' && inEsHall(x, y, -3)], ['nave', (x, y) => typeof inNvHall === 'function' && inNvHall(x, y, 1)],
+  ['dragao', (x, y) => typeof inDgHall === 'function' && inDgHall(x, y, 1)], ['antigos', (x, y) => typeof inAtHall === 'function' && (inAtHall(x, y, 1) || inAtPrumo(x, y, 1))],
+  ['titas', (x, y) => typeof inTtHall === 'function' && inTtHall(x, y, -3)], ['mar', (x, y) => typeof inMsHall === 'function' && inMsHall(x, y, 1)]
+];
+function wlSacred(x, y) { for (const [id, f] of WL_HALLS) if (genFeita(id) && f(x, y)) return true; return inVillage(x, y); }
+function wlKeepT(t) { return t === BEDROCK || (typeof PS_BARREIRA !== 'undefined' && (t === PS_BARREIRA || t === PS_NADA)) || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA) ||
+    (typeof AB_BARREIRA !== 'undefined' && t === AB_BARREIRA) || (typeof FG_BARREIRA !== 'undefined' && t === FG_BARREIRA) || (typeof CD_BARREIRA !== 'undefined' && t === CD_BARREIRA) || (typeof CD_PEDRA_POCO !== 'undefined' && t === CD_PEDRA_POCO) || (typeof CM_LACRE !== 'undefined' && t === CM_LACRE) || (typeof FP_BARREIRA !== 'undefined' && (t === FP_BARREIRA || t === FP_TRONCO_G)) || (typeof AN_BARREIRA !== 'undefined' && (t === AN_BARREIRA || t === AN_COMPORTA)) ||
+    (typeof ES_BARREIRA !== 'undefined' && (t === ES_BARREIRA || t === ES_PENUMBRA || t === ES_PENUMBRA_FIRME)) || (typeof NV_BARREIRA !== 'undefined' && t === NV_BARREIRA) || (typeof AT_BARREIRA !== 'undefined' && (t === AT_BARREIRA || t === AT_TRANSITO)) || (typeof EL_BARREIRA !== 'undefined' && (t === EL_BARREIRA || t === EL_ESPELHO || t === EL_LUA)) || (typeof DG_CORTINA !== 'undefined' && (t === DG_CORTINA || t === DG_OURO_QUENTE)) || (typeof TT_BARREIRA !== 'undefined' && t === TT_BARREIRA) || (typeof MS_BARREIRA !== 'undefined' && t === MS_BARREIRA) || t === LAVA; }
+const WL_KEEPS = [['pesadelo', () => typeof psKeep !== 'undefined' && psKeep], ['gelo', () => typeof icLedge !== 'undefined' && icLedge], ['mina', () => typeof mnKeep !== 'undefined' && mnKeep],
+  ['abismo', () => typeof abKeep !== 'undefined' && abKeep], ['fungo', () => typeof fungKeep !== 'undefined' && fungKeep], ['cidade', () => typeof cdKeep !== 'undefined' && cdKeep],
+  ['colmeia', () => typeof cmKeep !== 'undefined' && cmKeep], ['floresta', () => typeof fpKeep !== 'undefined' && fpKeep], ['anoes', () => typeof anKeep !== 'undefined' && anKeep],
+  ['escuro', () => typeof esKeep !== 'undefined' && esKeep], ['nave', () => typeof nvKeep !== 'undefined' && nvKeep], ['elfos', () => typeof elKeep !== 'undefined' && elKeep],
+  ['dragao', () => typeof dgKeep !== 'undefined' && dgKeep], ['antigos', () => typeof atKeep !== 'undefined' && atKeep], ['titas', () => typeof ttKeep !== 'undefined' && ttKeep],
+  ['mar', () => typeof msKeep !== 'undefined' && msKeep]];   // the fissure steps, the shafts' timbers, the rifts and bridges
+function wlKept(i) { for (const [id, g] of WL_KEEPS) if (genFeita(id)) { const s = g(); if (s && s.has(i)) return true; } return false; }
+
 function worldLink() {
-  const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
+  const NN = WW * Math.min(WH, genFundo), W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const open = i => !SOLID[tiles[i]] || tiles[i] === CV_TEIA;
   const reach = new Uint8Array(NN), st = [];
   const flood = s0 => { if (reach[s0] || !open(s0)) return; reach[s0] = 1; st.push(s0); while (st.length) { const c = st.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !reach[nb] && open(nb)) { reach[nb] = 1; st.push(nb); } } };
   flood(I(SPX, surf[SPX] - 2));
-  const sacred = (x, y) => (typeof inPsHall === 'function' && (inPsHall(x, y, 3) || inPsNowhere(x, y, 1) || inPsLoop(x, y, 1) || inPsPrize(x, y, 1))) || (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) ||
-    (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || (typeof inAbHall === 'function' && inAbHall(x, y, -3)) ||
-    (typeof inMaeHall === 'function' && inMaeHall(x, y, -3)) || (typeof inCdHall === 'function' && inCdHall(x, y, -3)) || (typeof inCmHall === 'function' && inCmHall(x, y, 1)) || (typeof inFpHall === 'function' && inFpHall(x, y, -3)) || (typeof inAnHall === 'function' && inAnHall(x, y, -3)) || (typeof inEsHall === 'function' && inEsHall(x, y, -3)) || (typeof inNvHall === 'function' && inNvHall(x, y, 1)) || (typeof inDgHall === 'function' && inDgHall(x, y, 1)) || (typeof inAtHall === 'function' && (inAtHall(x, y, 1) || inAtPrumo(x, y, 1))) || (typeof inTtHall === 'function' && inTtHall(x, y, -3)) || (typeof inMsHall === 'function' && inMsHall(x, y, 1)) || inVillage(x, y);
-  const keepT = t => t === BEDROCK || (typeof PS_BARREIRA !== 'undefined' && (t === PS_BARREIRA || t === PS_NADA)) || (typeof IC_BARREIRA !== 'undefined' && t === IC_BARREIRA) || (typeof MN_BARREIRA !== 'undefined' && t === MN_BARREIRA) ||
-    (typeof AB_BARREIRA !== 'undefined' && t === AB_BARREIRA) || (typeof FG_BARREIRA !== 'undefined' && t === FG_BARREIRA) || (typeof CD_BARREIRA !== 'undefined' && t === CD_BARREIRA) || (typeof CD_PEDRA_POCO !== 'undefined' && t === CD_PEDRA_POCO) || (typeof CM_LACRE !== 'undefined' && t === CM_LACRE) || (typeof FP_BARREIRA !== 'undefined' && (t === FP_BARREIRA || t === FP_TRONCO_G)) || (typeof AN_BARREIRA !== 'undefined' && (t === AN_BARREIRA || t === AN_COMPORTA)) ||
-    (typeof ES_BARREIRA !== 'undefined' && (t === ES_BARREIRA || t === ES_PENUMBRA || t === ES_PENUMBRA_FIRME)) || (typeof NV_BARREIRA !== 'undefined' && t === NV_BARREIRA) || (typeof AT_BARREIRA !== 'undefined' && (t === AT_BARREIRA || t === AT_TRANSITO)) || (typeof EL_BARREIRA !== 'undefined' && (t === EL_BARREIRA || t === EL_ESPELHO || t === EL_LUA)) || (typeof DG_CORTINA !== 'undefined' && (t === DG_CORTINA || t === DG_OURO_QUENTE)) || (typeof TT_BARREIRA !== 'undefined' && t === TT_BARREIRA) || (typeof MS_BARREIRA !== 'undefined' && t === MS_BARREIRA) || t === LAVA;
-  const kept = i => (typeof psKeep !== 'undefined' && psKeep.has(i)) || (typeof icLedge !== 'undefined' && icLedge.has(i)) || (typeof mnKeep !== 'undefined' && mnKeep.has(i)) || (typeof abKeep !== 'undefined' && abKeep.has(i)) || (typeof fungKeep !== 'undefined' && fungKeep.has(i)) || (typeof cdKeep !== 'undefined' && cdKeep.has(i)) || (typeof cmKeep !== 'undefined' && cmKeep.has(i)) || (typeof fpKeep !== 'undefined' && fpKeep.has(i)) || (typeof anKeep !== 'undefined' && anKeep.has(i)) || (typeof esKeep !== 'undefined' && esKeep.has(i)) || (typeof nvKeep !== 'undefined' && nvKeep.has(i)) || (typeof elKeep !== 'undefined' && elKeep.has(i)) || (typeof dgKeep !== 'undefined' && dgKeep.has(i)) || (typeof atKeep !== 'undefined' && atKeep.has(i)) || (typeof ttKeep !== 'undefined' && ttKeep.has(i)) || (typeof msKeep !== 'undefined' && msKeep.has(i));   // the fissure steps, the shafts' timbers, the rifts and bridges
+  const sacred = wlSacred, keepT = wlKeepT, kept = wlKept;   // 2026-10-12: top-level (313 uses them too)
   const dig = (x, y) => { const i = I(x, y); if (y < 2 || y >= WH - 4 || keepT(tiles[i]) || kept(i) || sacred(W1(x), y)) return; if (SOLID[tiles[i]]) tiles[i] = AIR; };
   const climb = y => typeof MS_CORDAME !== 'undefined' && typeof MS_S0 !== 'undefined' && y >= MS_S0 - 2 && y < MS_S0 + MS_D ? MS_CORDAME : typeof TT_ESCADA !== 'undefined' && typeof TT_S0 !== 'undefined' && y >= TT_S0 - 2 && y < TT_S0 + TT_D ? TT_ESCADA : typeof DG_ESCADA !== 'undefined' && typeof DG_S0 !== 'undefined' && DG_S0 && y >= DG_S0 - 2 && y < DG_S0 + DG_D ? DG_ESCADA : typeof AT_ESCADA !== 'undefined' && typeof AT_S0 !== 'undefined' && y >= AT_S0 - 2 && y < AT_S0 + AT_D ? (antigosBand(y) === 3 ? AT_CORRENTE : AT_ESCADA) : typeof PS_ESCADA !== 'undefined' && typeof PS_S0 !== 'undefined' && PESADELO && y >= PS_S0 - 2 && y < PS_S0 + PS_D ? PS_ESCADA : typeof ES_CORRENTE !== 'undefined' && typeof ES_S0 !== 'undefined' && y >= ES_S0 - 2 ? (escuroBand(y) === 2 ? ES_RAIZ_PEND : ES_CORRENTE) : typeof NV_ESCADA !== 'undefined' && typeof NV_S0 !== 'undefined' && y >= NV_S0 - 2 && y < NV_S0 + NV_D ? NV_ESCADA : typeof EL_ESCADA !== 'undefined' && typeof EL_S0 !== 'undefined' && y >= EL_S0 - 2 && y < EL_S0 + EL_D ? EL_ESCADA : typeof CM_ESCADA_FAVO !== 'undefined' && typeof CM_S0 !== 'undefined' && y >= CM_S0 - 2 && y < CM_S0 + CM_D ? CM_ESCADA_FAVO : typeof AB_ESCADA !== 'undefined' && typeof AB_S0 !== 'undefined' && AB_S0 && y >= AB_S0 - 2 ? AB_ESCADA : typeof AN_ESCADA !== 'undefined' && typeof AN_S0 !== 'undefined' && y >= AN_S0 - 2 ? AN_ESCADA : typeof FP_RAIZ_ESCADA !== 'undefined' && typeof FP_S0 !== 'undefined' && y >= FP_S0 - 2 ? FP_RAIZ_ESCADA : typeof CD_ESCADA !== 'undefined' && typeof CD_S0 !== 'undefined' && y >= CD_S0 - 2 ? CD_ESCADA : typeof FG_ESCADA !== 'undefined' && typeof FG_S0 !== 'undefined' && y >= FG_S0 - 2 ? FG_ESCADA : typeof MN_ESCADA !== 'undefined' && typeof MN_S0 !== 'undefined' && y >= MN_S0 - 2 ? MN_ESCADA : CHAIN;
   // the cut-off pockets, biggest first
@@ -36,11 +55,12 @@ function worldLink() {
     comps.push(cells);
   }
   comps.sort((a, b) => b.length - a.length);
+  const org = new Int32Array(NN).fill(-1);   // um só para todos os bolsões (limpo depois de cada um)
   let links = 0;
   for (const cells of comps) {
     if (cells.length < 30 || reach[cells[0]] || links >= 80) continue;
     // breadth-first out through the rock from the whole pocket to the nearest joined open tile
-    const org = new Int32Array(NN).fill(-1), q = cells.slice(); for (const c of cells) org[c] = c;
+    const q = cells.slice(); for (const c of cells) org[c] = c;
     let hit = null;
     for (let h = 0; h < q.length && !hit; h++) {
       const c = q[h], x = c % WW, row = c - x;
@@ -51,6 +71,7 @@ function worldLink() {
         org[nb] = org[c]; q.push(nb);
       }
     }
+    for (const c of q) org[c] = -1;
     if (!hit) continue;
     // across at the pocket's height (3 tall), then a shaft with something to climb
     const ax = hit[0] % WW, ay = (hit[0] / WW) | 0, bx = ax + wdx(hit[1] % WW - ax), by = (hit[1] / WW) | 0;
@@ -73,7 +94,8 @@ function worldLink() {
   if (drop) { propBuckets.clear(); propBySup.clear(); const keep = PROPS.slice(); PROPS.length = 0; for (const p of keep) addProp(p.def, p.v, p.X, p.Y, p.sup); }
   return links;
 }
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); try { worldLink(); } catch (err) { console.error(err); } }; }
+// depois de cada leva de camadas (129, 312): as ligações
+genPos(() => { try { worldLink(); } catch (err) { console.error(err); } });
 
 /* ---------- the save: worlds of the old width are remade; level, items, gold and the chest stay ---------- */
 let wideNews = false;

@@ -12,7 +12,7 @@
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW;
   const LAYERS = () => [
     { nome: 'Cavernas', ok: typeof CAVERNA !== 'undefined' && CAVERNA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[CV_ZONE0 + b], y0: CV_S0 + CV_BANDS[b], y1: CV_S0 + CV_BANDS[b + 1] })), entrada: () => cavePortalEnd },
-    { nome: 'Catedral', ok: true, faixas: [[0, 26], [26, 82], [82, 132], [132, 186]].map(([a, b], k) => ({ nome: ZONE_NAMES[5 + k], y0: cbY(a), y1: cbY(b) })), entrada: () => caveExits && caveExits[0] },
+    { nome: 'Catedral', ok: true, faixas: [0, 1, 2, 3].map(k => ({ nome: ZONE_NAMES[5 + k], y0: cbY(CB_BANDS[k]), y1: cbY(CB_BANDS[k + 1]) })), entrada: () => caveExits && caveExits[0] },
     { nome: 'Cavernas de Gelo', ok: typeof GELO !== 'undefined' && GELO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[IC_ZONE0 + b], y0: IC_S0 + IC_BANDS[b], y1: IC_S0 + IC_BANDS[b + 1] })), entrada: () => icExits && icExits[0] && [icExits[0].x0 + 3, IC_S0 + 13] },
     { nome: 'Mina Abandonada', ok: typeof MINA !== 'undefined' && MINA, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[MN_ZONE0 + b], y0: MN_S0 + MN_BANDS[b], y1: Math.min(WH - 8, MN_S0 + MN_BANDS[b + 1]) })), entrada: () => mnExits && mnExits[0] && [mnExits[0].x0 + 1, mnExits[0].fy - 2] },
     { nome: 'Minas Fúngicas', ok: typeof FUNGO !== 'undefined' && FUNGO, faixas: [0, 1, 2, 3].map(b => ({ nome: ZONE_NAMES[FG_ZONE0 + b], y0: FG_S0 + FG_BANDS[b], y1: Math.min(WH - 8, FG_S0 + FG_BANDS[b + 1]) })), entrada: () => fungExits && fungExits[0] && [fungExits[0].x0 + 1, fungExits[0].fy - 2] },

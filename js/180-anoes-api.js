@@ -23,12 +23,12 @@
    Carrega depois dos arquivos da Floresta Petrificada (140 a 149) e antes do 103 (o Abismo começa onde esta termina). */
 
 const ANOES = true;
-const AN_D = 186;                                   // metros de camada
+const AN_D = LAYER_D;                                   // metros de camada
 // a camada de cima: a Floresta Petrificada (camada 7) quando existe; sem ela, a Cidade Afundada
 const AN_FLORESTA = typeof FP_S0 !== 'undefined';
-const AN_TOP = (AN_FLORESTA ? (typeof FP_TOP !== 'undefined' ? FP_TOP : CD_TOP + 186) : CD_TOP) + 186;   // metros abaixo do chão do vilarejo (1302)
+const AN_TOP = (AN_FLORESTA ? (typeof FP_TOP !== 'undefined' ? FP_TOP : CD_TOP + LAYER_D) : CD_TOP) + LAYER_D;   // metros abaixo do chão do vilarejo (1302)
 // topo de cada faixa em metros abaixo do AN_TOP: Portões de Bronze, Salões do Clã, Canais de Lava, Forjas de Runas, (rocha-mãe)
-const AN_BANDS = [0, 46, 98, 150, 186];
+const AN_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AN_BAND_NAMES = ['portoes', 'saloes', 'canais', 'forjas'];
 const AN_ZONE0 = 37;                                // zonas 37..40 (o 188 põe os nomes depois das da Floresta, 33 a 36)
 let AN_S0 = AN_FLORESTA ? FP_S0 + FP_D : CD_S0 + CD_D;   // a primeira linha da camada no mundo atual (anBuild acerta)

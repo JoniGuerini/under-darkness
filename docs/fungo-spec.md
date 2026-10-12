@@ -1,6 +1,8 @@
 # As Minas Fúngicas: o que foi feito
 
-A quinta camada, debaixo da Mina Abandonada, de 744 a 930 m (2026-10-10). A ficha de desenho, com as faixas, os monstros, a chefe e o loot, é [camadas/05-minas-fungicas.md](camadas/05-minas-fungicas.md); este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha.
+> **2026-10-12:** a camada tem 558 m, de 2232 a 2790 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A quinta camada, debaixo da Mina Abandonada, de 2232 a 2790 m (2026-10-10). A ficha de desenho, com as faixas, os monstros, a chefe e o loot, é [camadas/05-minas-fungicas.md](camadas/05-minas-fungicas.md); este arquivo diz onde cada parte ficou no código e o que mudou em relação à ficha.
 
 ## 1. Arquivos
 

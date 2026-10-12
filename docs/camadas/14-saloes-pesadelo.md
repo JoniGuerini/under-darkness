@@ -1,6 +1,8 @@
 # Os Salões do Pesadelo: ficha de implementação
 
-Camada 14, de 2418 a 2604 m, debaixo da Cidade dos Antigos e em cima do Abismo. É o lugar onde o sonho vira real: uma casa que não existe, corredores que se repetem, quartos de infância esquecidos e uma galeria de espelhos onde mora O Sem-Rosto.
+> **2026-10-12:** a camada tem 558 m, de 8370 a 8928 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+Camada 14, de 8370 a 8928 m, debaixo da Cidade dos Antigos e em cima do Abismo. É o lugar onde o sonho vira real: uma casa que não existe, corredores que se repetem, quartos de infância esquecidos e uma galeria de espelhos onde mora O Sem-Rosto.
 
 **O que a diferencia:** tudo aqui é mole, doméstico e errado. A Cidade de cima é fria e exata; aqui as paredes cedem, os móveis têm o tamanho errado, a luz é amarela de abajur e os lugares se repetem ou levam para onde não deviam. O Abismo de baixo é horror de fogo e carne; o Pesadelo é horror de casa, de criança e de reflexo, sem sangue.
 
@@ -31,7 +33,7 @@ A ficha abaixo é o plano original, com os números antigos (camada 14, `js/210`
 | 63 | Os Quartos Esquecidos | 2516 a 2568 | acolchoado, massa de penas, pedra-sono | quartos de criança em grutas macias, lençóis pendurados, brinquedos gigantes, os Adormecidos |
 | 64 | A Galeria dos Espelhos | 2568 a 2604 | vidro de espelho, azulejo; assoalho queimado no fundo | salões de espelho, o Salão dos Espelhos do chefe, e no fundo o calor do Abismo começando |
 
-- **Monstros:** nível 29 na metade de cima da camada e 30 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 30, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Monstros:** nível 29 na metade de cima da camada e 30 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 30, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 - **Entrada:** as duas **Escadas que Afundam** saem da Cratera da Estrela (camada 13, posições em `atExits`). Do lado de cima é um vão quadrado de laje com escada embutida. Descendo, as juntas entortam, os degraus ficam de tamanhos diferentes, a laje vira pedra-sono e a escada embutida vira **escada de mão torta** (`PS_ESCADA`). Cerca de 22 blocos abaixo, o vão abre no teto da câmara de pouso, na Casa que Não Era. Volta-se pela mesma escada.
 - **Saída:** duas **Portas Quentes** na Galeria dos Espelhos, longe uma da outra e do lado oposto ao Salão dos Espelhos. Cada uma é uma porta de casa solta no meio de um salão, entreaberta, com luz vermelha saindo por baixo. Atrás dela, um poço de 4 blocos desce pela pedra-sono, que vai escurecendo e rachando em vermelho; a escada de mão torta vira, nas últimas linhas, a corrente de ferro negro do Abismo. A ficha 15 decide a chegada lá embaixo. As posições ficam em `psExits`.
 - **Câmara de pouso:** uma em cada chegada, 10 x 6, piso de assoalho, um abajur aceso, um tapete; não nasce monstro e nenhuma porta de teletransporte fica nela. Reservada para os pontos de volta.

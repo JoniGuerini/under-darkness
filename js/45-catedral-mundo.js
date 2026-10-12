@@ -3,19 +3,21 @@
 /* ================= the abandoned cathedral: the world under the village =================
    Built at the end of generate() (06-mundo) when CATEDRAL is on, from the seed alone:
    the old caves are generated first and then everything under the village is replaced:
-   a mass of pale limestone (dirt near the top), and inside it the cathedral in four bands,
-     Átrio Soterrado  6-26 m   a broken stairway down from the village sign, a vestibule
-     Nave             26-82 m  two floors of tall vaulted halls with columns
-     Claustro         82-132 m three floors of chapels and arcaded walks
-     Criptas          132-186m low vaults and ossuaries
-   joined by doorways on each floor, stairways and shafts with chains between floors.
+   a mass of pale limestone (dirt near the top), and inside it the cathedral in four bands (metres of the
+   186 m design; the layer is LAYER_K times longer since 2026-10-12, so each band holds LAYER_K times the floors):
+     Átrio Soterrado  0-26 m   the ruined stairways down from the caves, four floors of vestibules
+     Nave             26-82 m  six floors of tall vaulted halls with columns
+     Claustro         82-132 m nine floors of chapels and arcaded walks
+     Criptas          132-186m ten floors of low vaults and ossuaries
+   joined by doorways on each floor, stairways and shafts with chains between floors (as short as before).
    Then it is dressed: tile decorations (candles, bones, webs...) and the big props
    (43-catedral-objetos), which are baked into the chunk images and cost nothing per frame. */
 
-let CB_S0 = 46, CB_F = 1;                         // the village floor row and how much the bands are squeezed
-const cbY = d => CB_S0 + Math.round(d * CB_F);     // metres below the village -> tile row
+let CB_S0 = 46, CB_F = 1;                         // the cathedral's top row and how much it is squeezed (1 unless the world is short)
+const cbY = d => CB_S0 + Math.round(d * CB_F);     // rows below the cathedral's top (0..LAYER_D) -> tile row
+const CB_BANDS = [0, 26, 82, 132, 186].map(v => v * LAYER_K);   // band tops in rows below CB_S0: átrio, nave, claustro, criptas, (ice)
 let cathRooms = [], cathEntry = null;
-function cathBand(ty) { const d = (ty - CB_S0) / CB_F; return d < 26 ? 0 : d < 82 ? 1 : d < 132 ? 2 : 3; }
+function cathBand(ty) { const d = (ty - CB_S0) / CB_F; return d < CB_BANDS[1] ? 0 : d < CB_BANDS[2] ? 1 : d < CB_BANDS[3] ? 2 : 3; }
 function cathZone(tx, ty) { return 5 + cathBand(ty); }
 const CATH_SPAWN = {
   5: [[['zombie', 0.6], ['skeleton', 0.4]], 5],
@@ -28,7 +30,7 @@ const BAND_NAMES = ['atrio', 'nave', 'claustro', 'criptas'];
 function buildCathedral() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
   const R = mulberry32(seed ^ 0x7ca7ed2a);
-  CB_S0 = surf[SPX] + CAVE_D; CB_F = Math.min(1, (WH - 7 - CB_S0) / 188);   // the caves (js/56-caverna-mundo.js) fill the CAVE_D metres above
+  CB_S0 = surf[SPX] + CAVE_D; CB_F = Math.min(1, (WH - 7 - CB_S0) / (LAYER_D + 2));   // the caves (js/56-caverna-mundo.js) fill the CAVE_D metres above
   const occ = new Uint8Array(NN);   // 1 masonry, 2 inside a room or passage
   cathRooms = [];
   const X42 = n => { try { const v = eval(n); return (v < 30 ? WMAT[v] : MAT[v] || DECO[v]) ? v : 0; } catch (e) { return 0; } };
@@ -37,11 +39,14 @@ function buildCathedral() {
 
   // ---------- 2. the rock: dirt up top, then limestone with dirt pockets, then limestone ----------
   for (let x = 0; x < WW; x++) {
-    const sx = surf[x];
+    const sx = surf[x], yBed = WH - 3 - ((hash2(x, 0, seed) * 2) | 0);   // the bedrock row only depends on the column
     for (let y = CAVE_D ? Math.max(sx, CB_S0) : sx; y < WH; y++) {
       const i = y * WW + x, d = CAVE_D ? y - CB_S0 + 12 : y - sx;   // under the caves: no dirt, limestone with dirt pockets first
-      if (y >= WH - 3 - ((hash2(x, 0, seed) * 2) | 0)) { tiles[i] = BEDROCK; walls[i] = 3; continue; }
+      if (y >= yBed) { tiles[i] = BEDROCK; walls[i] = 3; continue; }
       if (d < 4) { if (!SOLID[tiles[i]]) tiles[i] = DIRT; continue; }
+      // the wobble is under ±4.5, so from d 29 on it is always plain limestone (dd >= 24): the same tile without the noise
+      // (most of the layer, and every row under it down to the bottom until the next layer writes over them)
+      if (d >= 29) { tiles[i] = CT_CALCARIO; walls[i] = WCT_CALCARIO; continue; }
       const dd = d + (depthNz(x, y, 40, seed ^ 0x51c1) - 0.5) * 9;
       tiles[i] = dd < 9 ? DIRT : dd < 24 && depthNz(x, y, 50, seed ^ 0x51c2) > 0.42 ? CT_CALC_TERRA : CT_CALCARIO;
       walls[i] = dd < 11 ? 1 : WCT_CALCARIO;
@@ -50,7 +55,7 @@ function buildCathedral() {
     const i0 = sx * WW + x; if (tiles[i0] === DIRT && tileAt(x, sx - 1) === AIR && walls[i0] === 0) tiles[i0] = GRASS;
   }
   // a few natural fissures in the limestone (dead ends, bones and ore show up there)
-  for (let y = cbY(10); y < cbY(184); y++) for (let x = 0; x < WW; x++) {
+  for (let y = cbY(10); y < cbY(LAYER_D - 2); y++) for (let x = 0; x < WW; x++) {
     const n = depthNz(x, y, 38, seed ^ 0x51c3), m = depthNz(x, y, 90, seed ^ 0x51c4);
     if (Math.abs(n - 0.5) < 0.018 && m > 0.55) tiles[y * WW + x] = AIR;
   }
@@ -147,19 +152,25 @@ function buildCathedral() {
     return list;
   }
 
-  // the bands
-  const F = {
-    atrio: floor(0, cbY(21), 9, 18, 6, 8, 10, 30, ['vestibulo', 'sala']),
-    naveA: floor(1, cbY(50), 24, 50, 15, 19, 4, 14, ['nave', 'principal', 'nave']),
-    naveB: floor(1, cbY(78), 22, 46, 15, 21, 4, 14, ['nave', 'nave', 'capela']),
-    cl1: floor(2, cbY(98), 10, 28, 8, 11, 4, 10, ['capela', 'claustro', 'sala']),
-    cl2: floor(2, cbY(114), 10, 28, 8, 11, 4, 10, ['capela', 'claustro', 'biblioteca']),
-    cl3: floor(2, cbY(130), 10, 30, 8, 11, 4, 10, ['claustro', 'capela', 'sala']),
-    cr1: floor(3, cbY(147), 8, 22, 5, 7, 4, 12, ['cripta', 'ossario', 'cripta']),
-    cr2: floor(3, cbY(162), 8, 22, 5, 7, 4, 12, ['cripta', 'ossario', 'tumulos']),
-    cr3: floor(3, cbY(177), 8, 20, 5, 6, 4, 12, ['cripta', 'tumulos', 'ossario'])
-  };
-  const ORDER = ['atrio', 'naveA', 'naveB', 'cl1', 'cl2', 'cl3', 'cr1', 'cr2', 'cr3'];
+  // the bands: the floors of the 186 m design (one átrio, two naves, three claustros, three criptas) repeated down
+  // the LAYER_K times longer layer at the same spacing, so rooms and the climbs between floors keep their size.
+  // [band, first floor below the band's top, spacing, rows kept under the last floor, then the design floors' rooms
+  // in turn: [wMin, wMax, hMin, hMax, gMin, gMax, kinds]]; with LAYER_K 3 that is 4 átrio, 6 nave, 9 claustro, 10 cripta floors
+  const FLOORS = [
+    [0, 21, 18, 3, [[9, 18, 6, 8, 10, 30, ['vestibulo', 'sala']]]],
+    [1, 26, 28, 2, [[24, 50, 15, 19, 4, 14, ['nave', 'principal', 'nave']], [22, 46, 15, 21, 4, 14, ['nave', 'nave', 'capela']]]],
+    [2, 18, 16, 4, [[10, 28, 8, 11, 4, 10, ['capela', 'claustro', 'sala']], [10, 28, 8, 11, 4, 10, ['capela', 'claustro', 'biblioteca']], [10, 30, 8, 11, 4, 10, ['claustro', 'capela', 'sala']]]],
+    [3, 13, 15, 14, [[8, 22, 5, 7, 4, 12, ['cripta', 'ossario', 'cripta']], [8, 22, 5, 7, 4, 12, ['cripta', 'ossario', 'tumulos']], [8, 20, 5, 6, 4, 12, ['cripta', 'tumulos', 'ossario']]]]
+  ];
+  const F = {}, ORDER = [];
+  for (const [band, off, step, tail, kinds] of FLOORS) {
+    const f0 = CB_BANDS[band] + off, n = Math.floor((CB_BANDS[band + 1] - tail - f0) / step) + 1;
+    for (let j = 0; j < n; j++) {
+      const [wa, wb, ha, hb, ga, gb, ks] = kinds[j % kinds.length], id = BAND_NAMES[band] + j;
+      F[id] = floor(band, cbY(f0 + j * step), wa, wb, ha, hb, ga, gb, ks); F[id].band = band; ORDER.push(id);
+    }
+  }
+  F.atrio = F.atrio0;
 
   // columns: arcades in the naves and cloisters, short piers in the crypts
   for (const Rm of cathRooms) {
@@ -173,10 +184,10 @@ function buildCathedral() {
     const U = F[ORDER[k]], L = F[ORDER[k + 1]], pairs = [];
     for (const A of U) for (const B of L) { const [o0, o1] = overlapX(A, B); if (o1 - o0 >= 2) pairs.push([A, B, o0, o1]); }
     for (let j = pairs.length - 1; j > 0; j--) { const q = (R() * (j + 1)) | 0; [pairs[j], pairs[q]] = [pairs[q], pairs[j]]; }
-    const want = Math.min(pairs.length, (k === 0 ? 2 : 3 + (R() < 0.5 ? 1 : 0)) * WSC);
+    const want = Math.min(pairs.length, (U.band === 0 ? 2 : 3 + (R() < 0.5 ? 1 : 0)) * WSC);
     for (let j = 0; j < want; j++) {
       const [A, B, o0, o1] = pairs[j], st = STY[B.band];
-      if (j === 0 && k >= 1 && k <= 4 && R() < 0.75) {
+      if (j === 0 && (U.band === 1 || U.band === 2) && L.band <= 2 && R() < 0.75) {   // the grand stairways: in the naves and claustros
         // a stairway: out of A's floor along one side, down through the rock into B
         const dir = R() < 0.5 ? 1 : -1, sx = dir > 0 ? o0 : o1;
         stairs(sx, A.fy, dir, B.fy, 4, st);
@@ -257,12 +268,13 @@ function buildCathedral() {
       }
     }
   };
-  vein(COAL, 150 * WSC, 6, 184, 3, 7); vein(IRON, 140 * WSC, 6, 184, 2, 6);   // coal and iron in the cathedral (102: one metal per layer)
+  vein(COAL, 150 * WSC * LAYER_K, 6, LAYER_D - 2, 3, 7); vein(IRON, 140 * WSC * LAYER_K, 6, LAYER_D - 2, 2, 6);   // coal and iron in the cathedral (102: one metal per layer)
 
   // ---------- 9. everything reachable from the village ----------
   const reach = new Uint8Array(NN), stack = [];
-  const flood = () => {
-    reach.fill(0); const s0 = I(cathEntry[0], cathEntry[1] - 1); reach[s0] = 1; stack.push(s0);
+  // grows the reached set from s0 (digging only opens rock, so what was reached stays reached; no need to start over)
+  const flood = (s0 = I(cathEntry[0], cathEntry[1] - 1)) => {
+    if (SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0);
     while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } }
   };
   flood();
@@ -279,7 +291,7 @@ function buildCathedral() {
     const st = STY[band], [bx, by] = best;
     if (by < gy - 2) { const fy = by + 1; passage(Math.min(bx, gx), Math.max(bx, gx), fy, 3, st); shaft(gx, fy - 2, gy, st); }
     else passage(Math.min(bx, gx), Math.max(bx, gx), gy + 1, 3, st);
-    flood();
+    flood(I(bx, by));
   }
 
   // ---------- 10. tile dressing: candles, bones, webs, roots (no loot chests since 2026-10-10) ----------
@@ -432,7 +444,9 @@ function propsLoseSupport(x, y) {
   for (const p of a) if (!p.gone) { p.gone = true; propGone.add(p.key); propDirty(p); burst(p.X + p.w / 2, p.Y + p.h / 2, 14, '#8a8378', 70, 300, 0.6); }
 }
 function propDirty(p) { for (let Y = p.Y; Y < p.Y + p.h + T; Y += T) for (let X = p.X; X < p.X + p.w + T; X += T) markDirty(Math.floor(Math.min(X, p.X + p.w - 1) / T), Math.floor(Math.min(Y, p.Y + p.h - 1) / T)); }
-function applyPropGone(keys) { propGone.clear(); if (!Array.isArray(keys)) return; const s = new Set(keys); for (const p of PROPS) if (s.has(p.key)) { p.gone = true; propGone.add(p.key); } }
+// all the saved keys stay (a layer generated later, js/312, finds its broken props here when it is built)
+function applyPropGone(keys) { propGone.clear(); if (Array.isArray(keys)) for (const k of keys) propGone.add(k); propGoneMark(); }
+function propGoneMark() { for (const p of PROPS) if (propGone.has(p.key)) p.gone = true; }
 
 /* ---------- props: drawing into the chunk images ---------- */
 function paintProps(ccx, ccy, buf, SZ) {
@@ -509,7 +523,7 @@ function cathedralDeep() {
   const has = t => !!DMAT[t];
   const near = new Uint8Array(WW * WH);
   for (const Rm of cathRooms) for (let y = Rm.top - 6; y <= Rm.fy + 3; y++) for (let x = Rm.x0 - 6; x <= Rm.x1 + 6; x++) { if (y < 0 || y >= WH) continue; near[y * WW + ((x % WW) + WW) % WW] = y < Rm.top + 4 ? 2 : 1; }
-  for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
+  for (let y = genDeepA; y < WH; y++) for (let x = 0; x < WW; x++) {   // genDeepA: a later layer (312) redoes only the rows from there down
     const i = y * WW + x, t = DEEPT[i]; if (!t || y < surf[x] + 3) continue;
     const b = cathBand(y);
     let n = b === 3 ? DP_CT_CRIPTA : near[i] === 2 ? DP_CT_ABOBADA : near[i] ? DP_CT_ALVENARIA : DP_CT_CALCARIO;

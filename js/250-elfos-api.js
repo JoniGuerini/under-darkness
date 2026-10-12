@@ -23,7 +23,7 @@
    Carrega depois do mundo da Nave (245) e antes do 103 (o Abismo começa onde esta camada termina). */
 
 const ELFOS = true;
-const EL_D = 186;                                   // metros de camada
+const EL_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam e os
 // poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
 function elAbove() {
@@ -33,9 +33,9 @@ function elAbove() {
     return { id: 'colmeia', S0: CM_S0, D: CM_D, soils: typeof CM_SOILS !== 'undefined' ? CM_SOILS : null, halls: typeof cmExits !== 'undefined' ? cmExits : [], climb: typeof CM_ESCADA_FAVO !== 'undefined' ? CM_ESCADA_FAVO : CHAIN, boss: typeof cmBoss !== 'undefined' ? cmBoss : null, thin: typeof CM_CERA_REAL !== 'undefined' ? CM_CERA_REAL : STONE };
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const EL_TOP = (typeof NV_TOP !== 'undefined' ? NV_TOP : 1674) + 186;   // metros abaixo do chão do vilarejo (1860)
+const EL_TOP = (typeof NV_TOP !== 'undefined' ? NV_TOP : 1674) + LAYER_D;   // metros abaixo do chão do vilarejo (1860)
 // topo de cada faixa em metros abaixo do EL_TOP: A Mata de Prata, Os Salões do Rei, A Corte Desterrada, O Poço da Lua, (rocha-mãe)
-const EL_BANDS = [0, 46, 98, 150, 186];
+const EL_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const EL_BAND_NAMES = ['mata', 'saloes', 'corte', 'poco'];
 const EL_ZONE0 = 53;                                // zonas 53..56 (o 258 põe os nomes depois das da Nave)
 let EL_S0 = (() => { const a = elAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (elBuild acerta)

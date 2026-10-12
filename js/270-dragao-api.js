@@ -25,7 +25,7 @@
    Carrega depois do mundo do Reino Élfico (255) e do Mar Sem Sol, se houver, e antes do 103. */
 
 const DRAGAO = true;
-const DG_D = 186;                                   // metros de camada
+const DG_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: o Mar Sem Sol se existir, senão o Reino Élfico; { id, S0, D, soils, halls, climb, boss, thin }
 // halls são os poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
 function dgAbove() {
@@ -38,9 +38,9 @@ function dgAbove() {
     return { id: 'nave', S0: NV_S0, D: NV_D, soils: typeof NV_SOILS !== 'undefined' ? NV_SOILS : null, halls: typeof nvExits !== 'undefined' ? nvExits : [], climb: CHAIN, boss: typeof nvBoss !== 'undefined' ? nvBoss : null, thin: STONE };
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const DG_TOP = (typeof MS_TOP !== 'undefined' ? MS_TOP : typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + 186;   // metros abaixo do chão do vilarejo
+const DG_TOP = (typeof MS_TOP !== 'undefined' ? MS_TOP : typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + LAYER_D;   // metros abaixo do chão do vilarejo
 // topo de cada faixa em metros abaixo do DG_TOP: Chaminés de Vapor, Túneis Kobold, Tubos de Lava, Leito de Ouro, (rocha-mãe)
-const DG_BANDS = [0, 46, 98, 150, 186];
+const DG_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const DG_BAND_NAMES = ['chamines', 'tuneis', 'tubos', 'leito'];
 const DG_ZONE0 = 61;                                // zonas 61..64 (o 279 põe os nomes no índice)
 let DG_S0 = (() => { const a = dgAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (dgBuild acerta)

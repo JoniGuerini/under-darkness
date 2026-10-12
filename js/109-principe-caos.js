@@ -116,7 +116,7 @@ function abWallLadders() {
 }
 const abDressAll = () => { abDress(); abWallLadders(); };
 // 108 calls abDress at the end of the build; if it didn't, dress the hall here
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); if (typeof ABISMO !== 'undefined' && ABISMO && abBoss && !prDressed) { try { abDressAll(); } catch (err) { console.error(err); } } }; }
+{ const _bc = buildCathedral; buildCathedral = function () { _bc(); genStage('pesadelo', () => { if (typeof ABISMO !== 'undefined' && ABISMO && abBoss && !prDressed) { try { abDressAll(); } catch (err) { console.error(err); } } }); }; }
 { const _ad = abDress; abDress = function () { _ad(); try { abWallLadders(); } catch (err) { console.error(err); } }; }
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone);

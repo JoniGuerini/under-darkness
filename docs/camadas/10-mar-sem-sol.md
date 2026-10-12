@@ -1,6 +1,8 @@
 # O Mar Sem Sol: ficha de implementação
 
-A décima segunda camada (feita em 2026-10-11), debaixo do Reino Élfico e em cima do Abismo, de 2046 a 2232 m. Esta ficha foi escrita quando o Mar seria a décima; os números de verdade (arquivos 260 a 269, zonas 57 a 60, níveis) estão na seção "Como ficou no jogo", no fim. É um mar subterrâneo do tamanho do mundo inteiro, com praias de areia negra, ilhas de rocha, navios que ninguém sabe como chegaram e um fundo onde só a luz dos bichos alcança. Monstros de nível 25 a 26, metal novo Oricalco, chefe O Leviatã (nível 27).
+> **2026-10-12:** a camada tem 558 m, de 6138 a 6696 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A décima segunda camada (feita em 2026-10-11), debaixo do Reino Élfico e em cima do Abismo, de 6138 a 6696 m. Esta ficha foi escrita quando o Mar seria a décima; os números de verdade (arquivos 260 a 269, zonas 57 a 60, níveis) estão na seção "Como ficou no jogo", no fim. É um mar subterrâneo do tamanho do mundo inteiro, com praias de areia negra, ilhas de rocha, navios que ninguém sabe como chegaram e um fundo onde só a luz dos bichos alcança. Monstros de nível 25 a 26, metal novo Oricalco, chefe O Leviatã (nível 27).
 
 **O que a diferencia:** é a única camada **aberta e molhada**: um vão de 30 fileiras de ar sobre uma superfície de água que dá a volta no mundo, logo depois do aperto quente da Colmeia em cima e antes do fogo do Covil do Dragão embaixo. Ela traz o sistema de água e de nado, que nenhuma outra camada tem; do Abismo difere em tudo: frio, silêncio, escuro azul e espaço demais.
 
@@ -23,7 +25,7 @@ A décima segunda camada (feita em 2026-10-11), debaixo do Reino Élfico e em ci
 - **Entrada:** os dois Escorredouros de Mel da Colmeia (`cmExits`) furam o teto do vão. De cada um pende uma **Raiz de Cera**: uma coluna de cera escorrida de 3 de largura, do teto até a praia, com a Escada de Favos (`CM_ESCADA_FAVO`) por dentro em toda a altura (uns 26 fileiras), afinando em cera e cracas perto do chão. A geração sempre põe uma praia ou um cabo de rocha debaixo de cada raiz. Volta-se pela mesma escada.
 - **Câmara de pouso:** ao pé de cada raiz, uma gruta rasa no penhasco, 12 x 6, chão de areia plano, um anel de conchas luminosas acesas, sem monstro.
 - **Saída:** dois **Poços de Vapor** nas Chaminés Negras, a pelo menos `WW / 3` um do outro: chaminés mortas de 3 de largura que descem até a última fileira, paredes de sulfeto que esquentam, vapor subindo devagar e a **Escada de Cordame** (`MS_CORDAME`) que a gente-peixe amarrou. A camada guarda as posições em `msExits` para o Covil do Dragão.
-- **Nível dos monstros:** 21 na metade de cima da camada e 22 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 22, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Nível dos monstros:** 21 na metade de cima da camada e 22 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 22, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 
 ## 3. Estrutura e geração (`js/177-mar-mundo.js`)
 
@@ -200,7 +202,7 @@ Gente-peixe: humanoides de 12x22 com os encaixes do herói, curvados, escamas em
 
 | Arquivo | O que tem |
 |---|---|
-| `js/170-mar-api.js` | ids, `MS_BANDS`, `MS_D = 186`, `MS_ZONE0 = 45`, `MS_NIVEL`, `marBand`, `msExits`, `msBoss`. `MAR = false` desliga a camada |
+| `js/170-mar-api.js` | ids, `MS_BANDS`, `MS_D = LAYER_D` (558), `MS_ZONE0 = 45`, `MS_NIVEL`, `marBand`, `msExits`, `msBoss`. `MAR = false` desliga a camada |
 | `js/171-agua.js` | a camada de água, encher por bacia, enchimento ao cavar, luz, desenho, `aguaIn`, IA de nado |
 | `js/172-nadar.js` | o herói na água: nado, fôlego, peso, barra de fôlego, sons |
 | `js/173-mar-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, cordame e corrente |

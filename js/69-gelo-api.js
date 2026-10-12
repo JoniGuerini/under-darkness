@@ -11,10 +11,10 @@
    Loads right after 57-mae-teia (and before 49, so the monsters get the same BAL scaling). */
 
 const GELO = true;
-const IC_D = 186;                                 // metres of ice
-const IC_TOP = (typeof CAVE_D !== 'undefined' ? CAVE_D : 0) + 186;   // where the ice starts, metres below the village floor (under the crypts)
+const IC_D = LAYER_D;                                 // metres of ice
+const IC_TOP = (typeof CAVE_D !== 'undefined' ? CAVE_D : 0) + LAYER_D;   // where the ice starts, metres below the village floor (under the crypts)
 // band tops in metres below IC_TOP: Fendas Geladas, Salões de Gelo Azul, Covis dos Yetis, Coração do Inverno, (bedrock)
-const IC_BANDS = [0, 46, 104, 156, 186];
+const IC_BANDS = [0, 46, 104, 156, 186].map(v => v * LAYER_K);
 const IC_BAND_NAMES = ['fendas', 'saloes', 'covis', 'coracao'];
 const IC_ZONE0 = ZONE_NAMES.length;               // zone ids 13..16 (73 pushes the names)
 let IC_S0 = 46 + IC_TOP;                          // the first ice row of the current world (set by icBuild)

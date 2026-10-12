@@ -567,12 +567,12 @@ function ms2Rastro(e) {
 }
 // a água ligada à enguia num raio de 5 blocos (em largura, só por água)
 function ms2Ligada(tx, ty) {
-  const out = [], seen = new Set([tx * 4096 + ty]), q = [[tx, ty]];
+  const out = [], seen = new Set([tx * 16384 + ty]), q = [[tx, ty]];
   if (!ms2Molhado(tx, ty)) return out;
   for (let i = 0; i < q.length && i < 200; i++) {
     const [x, y] = q[i]; out.push(q[i]);
     for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const nx = x + ax, ny = y + ay, k = nx * 4096 + ny;
+      const nx = x + ax, ny = y + ay, k = nx * 16384 + ny;
       if (seen.has(k)) continue; seen.add(k);
       if ((nx - tx) ** 2 + (ny - ty) ** 2 > MS2_RAIO * MS2_RAIO || !ms2Molhado(nx, ny)) continue;
       q.push([nx, ny]);
@@ -593,12 +593,12 @@ AI.enguia = function (e, dt, dx, dy, dist, aggro) {
     if (Math.random() < dt * 25) { const S = e.segs[(Math.random() * Math.max(1, e.lit || 1)) | 0]; ms2Sparks(S[0], S[1], 1, MS2_RAIO_C, 20, 0, 0.2); }
     if (e.stateT <= 0) {
       // a descarga: toda a água ligada num raio de 5 blocos; quem está fora da água não leva
-      const cells = ms2Ligada(Math.floor(ecx / T), Math.floor(ecy / T)), set = new Set(cells.map(c => c[0] * 4096 + c[1]));
+      const cells = ms2Ligada(Math.floor(ecx / T), Math.floor(ecy / T)), set = new Set(cells.map(c => c[0] * 16384 + c[1]));
       ms2Descargas.push({ x: ecx, y: ecy, cells, t: 0 });
       let pega = false;
       if (ms2HeroiMolhado()) {
         const x0 = Math.floor(pl.x / T), x1 = Math.floor((pl.x + pl.w - 0.01) / T), y0 = Math.floor(pl.y / T), y1 = Math.floor((pl.y + pl.h - 0.01) / T);
-        for (let y = y0; y <= y1 && !pega; y++) for (let x = x0; x <= x1; x++) if (set.has(x * 4096 + y)) { pega = true; break; }
+        for (let y = y0; y <= y1 && !pega; y++) for (let x = x0; x <= x1; x++) if (set.has(x * 16384 + y)) { pega = true; break; }
       }
       if (pega) { const r = hurtPlayer(e.dmg, pcx - pl.facing * 12, null, true); if (r === 'hit') ms2Sparks(pcx, pcy, 10, MS2_RAIO_C, 70, 0, 0.4); }   // vem da água em volta: o escudo não segura
       e.state = 'zap'; e.stateT = 0.35; e.atkCD = 3.2 + Math.random() * 1.2; e.lit = 0;

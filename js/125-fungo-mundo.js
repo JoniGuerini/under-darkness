@@ -35,7 +35,7 @@ function fungBuild() {
   FG_S0 = Math.min(WH - 12, MN_S0 + Math.min(MN_D, WH - 8 - MN_S0));
   const S0 = FG_S0, YB = Math.min(WH - 8, S0 + FG_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x5f1a), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / FG_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const db = (x, y) => (y - S0) * FG_D / DB + (nz(x, y, 30, 0x5b1) - 0.5) * 10;
   const bandOf = d => d < FG_BANDS[1] ? 0 : d < FG_BANDS[2] ? 1 : d < FG_BANDS[3] ? 2 : 3;
   const canCarve = (x, y) => y >= S0 + 1 && y <= YB - 3;
@@ -52,15 +52,16 @@ function fungBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3 || !FG_HOST[tiles[i]]) continue;
+      if (y >= YB) { tiles[i] = FG_XISTO; walls[i] = WFG_XISTO; continue; }   // abaixo da camada: a mesma rocha, sem ruído (a de baixo escreve por cima)
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x5b3);
       if (k < 1 && h > 0.35 + k * 0.6) { tiles[i] = h > 0.7 ? MN_ESCORIA : MN_FERROSA; walls[i] = WMN_FERROSA; continue; }   // a mina rareia
-      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x5a1), n2 = nz(x, y, 18, 0x5a2), n3 = nz(x, y, 50, 0x5a3);
+      // cada ruído só na faixa que lê
+      const d = db(x, y), b = bandOf(d), n1 = () => nz(x, y, 34, 0x5a1), n2 = () => nz(x, y, 18, 0x5a2), n3 = () => nz(x, y, 50, 0x5a3);
       let t, w;
-      if (y >= YB) { t = FG_XISTO; w = WFG_XISTO; }
-      else if (b === 0) { t = n1 > 0.74 ? FG_TOMADA : FG_XISTO; w = t === FG_TOMADA ? WFG_MICELIO : WFG_XISTO; }
-      else if (b === 1) { t = n2 > 0.62 ? FG_TOMADA : n3 > 0.82 ? FG_XISTO : FG_HUMUS; w = t === FG_HUMUS ? WFG_HUMUS : WFG_MICELIO; }
-      else if (b === 2) { t = n1 > 0.62 ? FG_LODO : n2 > 0.76 ? FG_TOMADA : FG_XISTO; w = WFG_XISTO; }
-      else { t = n2 > 0.66 ? FG_TOMADA : n3 > 0.84 ? FG_XISTO : FG_CARNE; w = t === FG_CARNE ? WFG_CARNE : WFG_MICELIO; }
+      if (b === 0) { t = n1() > 0.74 ? FG_TOMADA : FG_XISTO; w = t === FG_TOMADA ? WFG_MICELIO : WFG_XISTO; }
+      else if (b === 1) { t = n2() > 0.62 ? FG_TOMADA : n3() > 0.82 ? FG_XISTO : FG_HUMUS; w = t === FG_HUMUS ? WFG_HUMUS : WFG_MICELIO; }
+      else if (b === 2) { t = n1() > 0.62 ? FG_LODO : n2() > 0.76 ? FG_TOMADA : FG_XISTO; w = WFG_XISTO; }
+      else { t = n2() > 0.66 ? FG_TOMADA : n3() > 0.84 ? FG_XISTO : FG_CARNE; w = t === FG_CARNE ? WFG_CARNE : WFG_MICELIO; }
       tiles[i] = t; walls[i] = w;
     }
   }
@@ -99,7 +100,18 @@ function fungBuild() {
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
   };
-  const busy = (cx, cy, w, h, m = 4) => fungChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + m && Math.abs(c.cy - cy) < (c.h + h) / 2 + m);
+  // um túnel que desce muito: em pernas de no máximo ~12 linhas, indo de um lado para o outro, para nenhum trecho
+  // virar uma queda reta (a camada ficou três vezes mais alta e as minhocas retas viravam penhascos)
+  const zz = (xa, ya, xb, yb, r, s) => {
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) {
+      const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n;
+      worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny;
+    }
+  };
+  // mv: a rocha que fica em cima e embaixo; as salas empilham LAYER_K vezes mais fundo, e salas que se tocam viram um poço alto
+  const busy = (cx, cy, w, h, m = 4, mv = m) => fungChambers.some(c => Math.abs(wdx(c.cx - cx)) < (c.w + w) / 2 + m && Math.abs(c.cy - cy) < (c.h + h) / 2 + mv);
   // uma sala reta de chão plano: `fy` é a fileira do chão, o ar fica de fy - h a fy - 1, teto em arco baixo
   const room = (x0, fy, w, h, vault = 1.5) => { for (let y = fy - h; y < fy; y++) for (let x = x0; x < x0 + w; x++) { const k = x - x0, arch = Math.round(vault * Math.pow(Math.abs((k + 0.5) / w * 2 - 1), 3)); if (y >= fy - h + arch) dig(x, y); } for (let x = x0; x < x0 + w; x++) fill(x, fy); };
   // uma galeria da colônia: 4 de ar sobre o chão, que sobe e desce 1 bloco a cada 8 colunas (o fungo empurrou as escoras)
@@ -115,11 +127,13 @@ function fungBuild() {
   };
 
   // as duas descidas primeiro: do chão de duas fornalhas da mina, longe uma da outra e longe da Oficina da Escavadeira
-  const mb0 = mnBoss, furn = mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy && (!mb0 || Math.abs(wdx(c.cx - mb0.cx)) > mb0.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
+  const mb0 = mnBoss, furn0 = mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy && (!mb0 || Math.abs(wdx(c.cx - mb0.cx)) > mb0.w / 2 + 24)).sort((a, b) => a.cx - b.cx);
+  // das fornalhas mais fundas (as Fornalhas ficaram três vezes mais altas: de uma lá de cima o poço seria um penhasco)
+  const deep = furn0.filter(c => c.fy > S0 - 40), furn = deep.length >= 4 ? deep : furn0.filter(c => c.fy > S0 - 80).length >= 4 ? furn0.filter(c => c.fy > S0 - 80) : furn0;
   const picks = [];
   for (let n = 0; n < furn.length && picks.length < 2; n++) { const c = furn[(n * 5 + ((R() * furn.length) | 0)) % furn.length]; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 80)) picks.push(c); }
   for (const c of furn) { if (picks.length >= 2) break; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 40)) picks.push(c); }
-  const landY = S0 + mb(12);
+  const landY = S0 + 12;   // logo abaixo da mina: o poço da descida fica curto
   for (const c of picks) {
     const x0 = W1(Math.round(c.cx) - 2);
     fungExits.push({ x0, fy: c.fy, top: c.fy - 2 });
@@ -147,10 +161,11 @@ function fungBuild() {
     const C = { cx, cy: fy - 3, w, h, band: 3, kind: 'raiz', fy, x0: W1(cx - (w >> 1)) };
     fungDown.push(C); fungChambers.push(C); k++;
   }
-  // as galerias da colônia: níveis em metros, quantas por nível
-  const LEV = [[10, 3, 30, 60], [20, 3, 30, 60], [30, 3, 30, 60], [40, 2, 30, 50]];
+  // as galerias da colônia: níveis em linhas, quantas por nível. Eram 4 níveis (10, 20, 30, 40) nas Galerias de 46;
+  // com a faixa LAYER_K vezes mais alta são LAYER_K vezes mais níveis, à mesma distância de 10 um do outro
+  const LEV = []; for (let j = 0, top = mb(FG_BANDS[1] / LAYER_K) - 8; 10 + j * 10 < top; j++) LEV.push([10 + j * 10, j % 4 === 3 ? 2 : 3, 30, j % 4 === 3 ? 50 : 60]);
   for (const [m, n, la, lb] of LEV) for (let k = 0, tries = 0; k < n * WSC && tries < 40 * WSC; tries++) {
-    const len = la + ((R() * (lb - la)) | 0), xa = (R() * WW) | 0, fy = S0 + mb(m) + (((R() * 3) | 0) - 1);
+    const len = la + ((R() * (lb - la)) | 0), xa = (R() * WW) | 0, fy = S0 + m + (((R() * 3) | 0) - 1);
     if (busy(xa + len / 2, fy - 2, len, 5, 3)) continue;
     gallery(xa, len, fy, 0); k++;
   }
@@ -166,7 +181,7 @@ function fungBuild() {
     gallery(dir < 0 ? x0 - 1 - 26 : x0 + w + 1, 26, fy, 0);
   }
   // as casas da colônia: na ponta de uma galeria, o chão emendando no dela
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 60 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 60 * WSC * LAYER_K; tries++) {
     const G = fungGalleries[(R() * fungGalleries.length) | 0]; if (!G || G.house) continue;
     const w = 12 + ((R() * 7) | 0), h = 6 + ((R() * 3) | 0), right = R() < 0.5, fy = right ? G.floor[G.len - 1] : G.floor[0];
     const x0 = right ? G.x0 + G.len : G.x0 - w;
@@ -179,11 +194,11 @@ function fungBuild() {
   // os salões dos chapéus, as grutas alagadas, os túneis meio alagados e as câmaras de carne
   const PLAN = [[3, 40, 70, 18, 30, 50, 96, 'salao', 1], [5, 24, 40, 10, 14, 102, 146, 'gruta', 2], [4, 20, 40, 4, 4, 104, 146, 'tunel', 2], [6, 14, 22, 14, 22, 152, 180, 'carne', 3]];
   for (const [n0, wa, wb, ha, hb, d0, d1, kind, band] of PLAN) {
-    const n = n0 * WSC;
+    const n = n0 * WSC * LAYER_K;   // por área: a faixa é LAYER_K vezes mais alta
     for (let k = 0, tries = 0; k < n && tries < n * 40; tries++) {
       const w = wa + ((R() * (wb - wa + 1)) | 0), h = kind === 'carne' ? Math.min(w, mb(hb)) : Math.min(mb(hb), ha + ((R() * (hb - ha + 1)) | 0));
       const cx = (R() * WW) | 0, cy = S0 + mb(d0) + h / 2 + R() * Math.max(0, mb(d1 - d0) - h);
-      if (busy(cx, cy, w, h)) continue;
+      if (busy(cx, cy, w, h, 4, 9)) continue;
       if (kind === 'tunel') {   // o chão afunda 2 no meio: ali fica a água, sempre com 2 de ar em cima
         const x0 = Math.round(cx - w / 2), fy = Math.round(cy + h / 2), a = Math.round(w * 0.2), b = w - a;
         for (let kk = 0; kk < w; kk++) { const deep = kk >= a && kk < b, f = fy + (deep ? 2 : 0); for (let y = fy - 4; y < f; y++) dig(x0 + kk, y); fill(x0 + kk, f); }
@@ -200,18 +215,23 @@ function fungBuild() {
   const RAD = [1.5, 2.0, 1.8, 2.3];
   const mouth = C => C.boss ? fungBoss.fy - 2 : C.g ? C.g.fy - 2 : C.fy ? C.fy - 2 : C.cy + C.h * 0.2;
   const ends = (C, right) => C.boss ? (right ? C.cx + C.w / 2 : C.cx - C.w / 2) : C.g ? (right ? C.cx + C.w / 2 - 1 : C.cx - C.w / 2 + 1) : C.cx;
-  for (let b = 0; b < 4; b++) {
-    const L = fungChambers.filter(c => c.band === b && c.kind !== 'enfermaria').sort((a, c) => a.cx - c.cx);
+  // cada faixa são LAYER_K andares (cada um da altura de uma faixa antiga): uma volta ao mundo por andar, e alguns
+  // túneis descendo de andar em andar, todos em zigue-zague
+  const NTR = 4 * LAYER_K;
+  for (const c of fungChambers) { const b = c.band, t0 = FG_BANDS[b], h = (FG_BANDS[b + 1] - t0) / LAYER_K; c.tier = b * LAYER_K + clamp(Math.floor((mouth(c) - S0 - t0) / h), 0, LAYER_K - 1); }
+  for (let t = 0; t < NTR; t++) {
+    const b = (t / LAYER_K) | 0, L = fungChambers.filter(c => c.tier === t && c.kind !== 'enfermaria').sort((a, c) => a.cx - c.cx);
     for (let k = 0; k < L.length; k++) {
       const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue;
-      worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x5700 + b * 50 + k);
+      zz(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x5700 + t * 50 + k);
     }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = fungChambers.filter(c => c.band === b && !c.boss && c.kind !== 'enfermaria'), D = fungChambers.filter(c => c.band === b + 1 && !c.boss);
+  for (let t = 0; t < NTR - 1; t++) {
+    const b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
+    const U = fungChambers.filter(c => c.tier === t && !c.boss && c.kind !== 'enfermaria'), D = fungChambers.filter(c => c.tier === t + 1 && !c.boss);
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
       const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x57f0 + b * 9 + k);
+      zz(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b2]) + 0.2, 0x57f0 + t * 9 + k);
     }
   }
   // bolsinhas fechadas; ilhas soltas no ar
@@ -246,6 +266,7 @@ function fungBuild() {
     for (const x of [x0 - 2, x0 + 5]) { const i = I(x, y0); if (SOLID[tiles[i]]) tiles[i] = MN_TIJOLO; }   // o anel em volta da boca
     for (let y = y0 - 2; y <= landY - 1; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]]) { tiles[i] = FG_ESCADA; fungKeep.add(i); } }
     for (let y = y0 + 1; y <= landY - 1; y++) { const i = I(x0 + 3, y); if (!SOLID[tiles[i]]) { tiles[i] = FG_CORDAO; fungKeep.add(i); } }
+    for (let y = y0 + 9; y < y1 - 4; y += 10) for (const x of [x0, x0 + 2]) { const i = I(x, y); tiles[i] = FG_TABUA; fungKeep.add(i); }   // um patamar a cada dez: só a escada e o cordão passam
     for (let y = y0 - 3; y < landY; y++) for (let x = x0; x < x0 + 4; x++) fungKeep.add(I(x, y));
     // o que a mina pôs em cima da boca (um objeto apoiado no chão da fornalha) sai
     for (let n = PROPS.length - 1; n >= 0; n--) { const p = PROPS[n]; if (p.Y + p.h > (y0 - 6) * T && p.Y < (y0 + 1) * T && p.X < (x0 + 6) * T && p.X + p.w > (x0 - 2) * T) fungDropProp(p); }
@@ -264,9 +285,9 @@ function fungBuild() {
       }
     }
   };
-  vein(FG_O_CARVAO, 80 * WSC, 0, 150, 3, 8, t => t === FG_XISTO);   // carvão em toda camada (102)
-  vein(FG_O_ESPORITA, 80 * WSC, 0, 150, 2, 5, (t, x, y) => t === FG_TOMADA || (t === FG_XISTO && nearMyc(x, y)));   // a esporita segue o fungo
-  vein(FG_O_ESPORITA, 40 * WSC, 150, 186, 4, 8, (t, x, y) => t === FG_TOMADA || (t === FG_CARNE && nearMyc(x, y)) || t === FG_XISTO);   // mais grossa no Coração
+  vein(FG_O_CARVAO, 80 * WSC * LAYER_K, 0, 150, 3, 8, t => t === FG_XISTO);   // carvão em toda camada (102)
+  vein(FG_O_ESPORITA, 80 * WSC * LAYER_K, 0, 150, 2, 5, (t, x, y) => t === FG_TOMADA || (t === FG_XISTO && nearMyc(x, y)));   // a esporita segue o fungo
+  vein(FG_O_ESPORITA, 40 * WSC * LAYER_K, 150, 186, 4, 8, (t, x, y) => t === FG_TOMADA || (t === FG_CARNE && nearMyc(x, y)) || t === FG_XISTO);   // mais grossa no Coração
 }
 // tira um objeto já posto (a boca de uma descida abriu debaixo dele)
 function fungDropProp(p) {
@@ -288,6 +309,11 @@ function fungAfter() {
       x += Math.cos(a) * 0.8; y += Math.sin(a) * 0.6;
       for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r) - 1; dx <= Math.ceil(r) + 1; dx++) if ((dx * dx) / 1.6 + dy * dy <= r * r) dig(Math.round(x) + dx, Math.round(y) + dy);
     }
+  };
+  const zz = (xa, ya, xb, yb, r, s) => {   // em pernas de ~12 linhas, de um lado para o outro (como no fungBuild)
+    const dx = wdx(xb - xa), dy = yb - ya, n = Math.max(1, Math.ceil(Math.abs(dy) / 12)), sw = Math.abs(dx) / n < Math.abs(dy) / n + 4;
+    let px = xa, py = ya;
+    for (let k = 1; k <= n; k++) { const nx = xa + dx * k / n + (sw && k < n ? (k % 2 ? 1 : -1) * (Math.abs(dy) / n + 6) : 0), ny = ya + dy * k / n; worm(px, py, nx, ny, r, s + k * 31); px = nx; py = ny; }
   };
   const fgSolid = t => SOLID[t] && FG_SOILS[t];
   const at = (x, y) => tiles[I(x, y)], put = (x, y, t) => { tiles[I(x, y)] = t; };
@@ -326,7 +352,7 @@ function fungAfter() {
     let sx = cx, sy = -1;
     for (let k = 0; sy < 0 && k < H.w / 2; k++) for (const x of [cx - k, cx + k]) { if (sy >= 0 || SOLID[at(x, nivel)]) continue; let y = nivel; while (y < lim + 1 && !SOLID[at(x, y + 1)]) y++; if (SOLID[at(x, y + 1)]) { sx = x; sy = y; } }
     if (sy < 0) continue;
-    H.basin = { box: [Math.round(H.cx - H.w / 2) - 3, Math.round(H.cx + H.w / 2) + 3, nivel, lim + 2], x: sx, y: sy, nivel, tipo: H.cy > S0 + FG_BANDS[2] + 30 || R3() < 0.3 ? AGUA_PLANCTON : AGUA_LIMPA, max: H.w * (depth + 2) * 2 };
+    H.basin = { box: [Math.round(H.cx - H.w / 2) - 3, Math.round(H.cx + H.w / 2) + 3, nivel, lim + 2], x: sx, y: sy, nivel, tipo: H.cy > S0 + FG_BANDS[2] + 30 * LAYER_K || R3() < 0.3 ? AGUA_PLANCTON : AGUA_LIMPA, max: H.w * (depth + 2) * 2 };
     fungBasins.push(H.basin);
     fungPlug(H.basin);
     // a passarela: uma fileira de tábua logo acima da água, de parede a parede, com uma falha a cada tanto
@@ -344,15 +370,20 @@ function fungAfter() {
   const flood = (s0, again) => { if ((reach[s0] && !again) || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   if (fungInfirmary) { const F = fungInfirmary; for (let y = F.top; y < F.fy; y++) for (let k = 0; k < F.w; k++) reach[I(F.x0 + k, y)] = 1; }   // lacrada de propósito
   for (const E of fungExits) flood(I(E.x0 + 2, E.fy - 1));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // as bolsas isoladas, rotuladas uma vez só (a camada é três vezes mais alta: nada de rotular tudo a cada passada), da maior para a menor
+  const comps = []; let orgB = null;
+  {
+    const o = S0 * WW, lab = new Uint8Array((YB - S0) * WW);
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
-      const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
-      const comp = []; lab[i] = 1; stack.push(i);
-      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      const i = y * WW + x; if (reach[i] || lab[i - o] || SOLID[tiles[i]] || !walls[i]) continue;
+      const comp = []; lab[i - o] = 1; stack.push(i);
+      while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= o && nb < YB * WW && !lab[nb - o] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb - o] = 1; stack.push(nb); } }
+      if (comp.length >= 20) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, b) => b.length - a.length);
+  }
+  for (let pass = 0; pass < comps.length; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;   // um túnel de antes já chegou
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -363,7 +394,7 @@ function fungAfter() {
       }
     }
     if (!best) {
-      const org = new Int32Array(NN).fill(-1), q = []; for (const c of bestC) { org[c] = c; q.push(c); }
+      const org = orgB || (orgB = new Int32Array(NN).fill(-1)), q = []; for (const c of bestC) { org[c] = c; q.push(c); }   // um buffer só, limpo depois (alocar 9M por bolsa pesava)
       for (let h = 0; h < q.length && !best; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -372,12 +403,13 @@ function fungAfter() {
           org[nb] = org[c]; q.push(nb);
         }
       }
+      for (const c of q) org[c] = -1;
       if (!best) { for (const c of bestC) reach[c] = 1; continue; }
     }
-    worm(best[0], best[1], best[2], best[3], 1.6, 0x56a0 + pass);
+    zz(best[0], best[1], best[2], best[3], 1.6, 0x56a0 + pass);
     flood(I(best[2], best[3]), true);
     if (!reach[bestC[0]]) {   // a minhoca bateu numa borda guardada: um corredor pela rocha, contornando o que fica
-      const org = new Int32Array(NN).fill(-1), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
+      const org = orgB || (orgB = new Int32Array(NN).fill(-1)), q = []; let hit = -1; for (const c of bestC) { org[c] = c; q.push(c); }
       for (let h = 0; h < q.length && hit < 0; h++) {
         const c = q[h], x = c % WW, row = c - x;
         for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) {
@@ -386,7 +418,9 @@ function fungAfter() {
           q.push(nb);
         }
       }
-      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0; dig(x, y); dig(x, y - 1); }
+      // o corredor; onde ele sobe ou desce reto, um cordão na coluna (um poço de 1 sem nada seria uma queda)
+      for (let c = hit; c >= 0 && org[c] !== c; c = org[c]) { const x = c % WW, y = (c / WW) | 0, p = org[c], vert = p >= 0 && p % WW === x; dig(x, y); dig(x, y - 1); if (vert) for (const yy of [y, y - 1]) { const i = I(x, yy); if (tiles[i] === AIR && fgRow(yy)) tiles[i] = FG_CORDAO; } }
+      for (const c of q) org[c] = -1; if (hit >= 0) org[hit] = -1;
       if (hit >= 0) flood(hit, true);
       if (!reach[bestC[0]]) for (const c of bestC) reach[c] = 1;
     }
@@ -432,14 +466,18 @@ function fungAfter() {
   // ---------- 4. os salões dos chapéus: cogumelos gigantes em escada, no máximo 3 de altura um do outro ----------
   for (const H of fungChambers) {
     if (H.kind !== 'salao') continue;
-    const n = 3 + ((R3() * 4) | 0), span = H.w * 0.8, step = span / n;
+    // um chapéu a cada ~9 colunas (eram 3 a 6 por salão): os salões altos ficaram muitos, e o vão entre um chapéu e
+    // outro era uma queda do teto ao chão
+    const span = H.w * 0.85, n = Math.max(3 + ((R3() * 4) | 0), Math.ceil(span / 9)), step = span / n;
     let prev = 3 + ((R3() * 2) | 0), up = 1;
     for (let k = 0; k < n; k++) {
       const tx = Math.round(H.cx - span / 2 + step * (k + 0.5) + (R3() - 0.5) * step * 0.3);
       let fy = Math.round(H.cy - H.h * 0.2); if (SOLID[at(tx, fy)]) continue;
       while (fy < YB - 2 && !SOLID[at(tx, fy)]) fy++;   // o chão debaixo do tronco (só o chão do salão: num poço, nada)
       if (fy > H.cy + H.h / 2 + 2) continue;
-      let flat = true; for (let dx = -2; dx <= 2; dx++) if (!SOLID[at(tx + dx, fy)] || SOLID[at(tx + dx, fy - 1)]) flat = false;
+      // o pé do tronco: o chão debaixo dele pode ter um degrau de 1 (o chão da caverna é irregular; exigir 5 colunas
+      // planas deixava os salões quase sem cogumelo)
+      let flat = true; for (let dx = -1; dx <= 1 && flat; dx++) { let f = fy - 2; while (f < fy + 2 && !SOLID[at(tx + dx, f)]) f++; if (!SOLID[at(tx + dx, f)] || SOLID[at(tx + dx, fy - 2)]) flat = false; }
       if (!flat) continue;
       let ceil = fy - 1; while (ceil > S0 + 1 && !SOLID[at(tx, ceil)]) ceil--;
       const room = fy - ceil - 1; if (room < 8) continue;
@@ -453,7 +491,7 @@ function fungAfter() {
         if (!edge && at(x, cy) === AIR) put(x, cy, FG_CHAPEU);
         if (at(x, cy + 1) === AIR) put(x, cy + 1, FG_CHAPEU);
       }
-      for (let y = cy + 2; y < fy; y++) for (let dx = 0; dx < tw; dx++) { const x = tx - (tw >> 1) + dx; if (at(x, y) === AIR || DECO[at(x, y)]) put(x, y, FG_TRONCO); }
+      for (let dx = 0; dx < tw; dx++) { const x = tx - (tw >> 1) + dx; for (let y = cy + 2; y < fy + 2 && (y < fy || !SOLID[at(x, y)]); y++) if (at(x, y) === AIR || DECO[at(x, y)]) put(x, y, FG_TRONCO); }
     }
   }
 
@@ -470,6 +508,9 @@ function fungAfter() {
   for (const C of fungDown) for (let x = C.x0 - 1; x <= C.x0 + C.w; x++) { const i = I(x, C.fy); if (!fungKeep.has(i)) tiles[i] = Math.abs(wdx(x - C.cx)) < 4 ? FG_TOMADA : FG_CARNE; }
   // a água agora (a decoração da beira precisa dela); o 128 enche de novo no fim, depois do 87
   fungWater();
+
+  // ---------- 5b. chapéus de prateleira (o fungo que cresce de lado na parede) onde um vão ainda cai 22 ou mais (84: layerShelves) ----------
+  layerShelves(S0 + 2, YB - 2, FG_CHAPEU, (x, y, i) => fungKeep.has(i) || inBoss(x, y, 3) || inInf(x, y, 1));
 
   // ---------- 6. uma escada (Galerias) ou um cordão (o resto) em todo desnível de 5 ou mais ----------
   {
@@ -617,7 +658,14 @@ function fungClimbFix() {
   if (fungBoss) starts.push([fungBoss.cx - 20, fungBoss.fy - 3]);
   for (const c of fungChambers) if (c.kind === 'salao' || c.kind === 'raiz') starts.push([Math.round(c.cx), Math.round(c.cy)]);
   let fixes = 0;
-  for (const [x, y] of starts) { for (let k = 0; k < 12 && !search(W1(x), y); k++) { if (!repair()) break; fixes++; } }
+  // um começo dentro do que uma busca que falhou já percorreu falha igual (tudo o que ele alcança, ela alcançou):
+  // pula, até uma escada mudar alguma coisa (os começos são LAYER_K vezes mais agora)
+  const dead = new Uint8Array(WW * H);
+  for (const [x0, y0] of starts) {
+    const x = W1(x0); let y = y0; while (y < YB - 1 && !S(x, y + 1)) y++;
+    if (y > Y0 && y < YB && dead[(y - Y0) * WW + x]) continue;
+    for (let k = 0; k < 12 && !search(x, y0); k++) { if (!repair()) { for (let i = 0; i < any.length; i++) if (any[i]) dead[i] = 1; break; } fixes++; dead.fill(0); }
+  }
   return fixes;
 }
 
@@ -693,9 +741,10 @@ function fungPlaceProps() {
 
 // a ordem: a camada, a chefe (126: fungDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('fungo', () => {
   if (!FUNGO) return;
   try { fungBuild(); fungAfter(); if (typeof fungDress === 'function') fungDress(); fungExitClear(); fungClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás das Minas Fúngicas ---------- */
@@ -703,10 +752,10 @@ function fungPlaceProps() {
   _cd();
   if (!FUNGO) return;
   const Y1 = Math.min(WH, FG_S0 + FG_D + 4);
-  for (let y = FG_S0 - 4; y < Y1; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(FG_S0 - 4, genDeepA); y < Y1; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - FG_S0) + (depthNz(x, y, 25, seed ^ 0x5e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x5e12);
-    DEEPT[i] = d < 46 ? (n > 0.6 ? DP_FG_COLONIA : DP_FG_ROCHA) : d < 98 ? (n > 0.4 ? DP_FG_CHAPEUS : DP_FG_ROCHA) : d < 150 ? (n > 0.72 ? DP_FG_CHAPEUS : DP_FG_ROCHA) : (n > 0.66 ? DP_FG_COLONIA : DP_FG_ROCHA);
+    DEEPT[i] = d < FG_BANDS[1] ? (n > 0.6 ? DP_FG_COLONIA : DP_FG_ROCHA) : d < FG_BANDS[2] ? (n > 0.4 ? DP_FG_CHAPEUS : DP_FG_ROCHA) : d < FG_BANDS[3] ? (n > 0.72 ? DP_FG_CHAPEUS : DP_FG_ROCHA) : (n > 0.66 ? DP_FG_COLONIA : DP_FG_ROCHA);
   }
 }; }
 

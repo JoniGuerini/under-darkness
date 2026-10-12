@@ -23,7 +23,7 @@
    Carrega depois do mundo do Reino (255) e antes do 103 (quem vem embaixo começa onde esta camada termina). */
 
 const MAR = true;
-const MS_D = 186;                                   // metros de camada
+const MS_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam e os
 // poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
 function msAbove() {
@@ -35,9 +35,9 @@ function msAbove() {
     return { id: 'colmeia', S0: CM_S0, D: CM_D, soils: typeof CM_SOILS !== 'undefined' ? CM_SOILS : null, halls: typeof cmExits !== 'undefined' ? cmExits : [], climb: typeof CM_ESCADA_FAVO !== 'undefined' ? CM_ESCADA_FAVO : CHAIN, boss: typeof cmBoss !== 'undefined' ? cmBoss : null, thin: typeof CM_CERA_REAL !== 'undefined' ? CM_CERA_REAL : STONE, root: null };
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE, root: null };
 }
-const MS_TOP = (typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + 186;   // metros abaixo do chão do vilarejo (2046)
+const MS_TOP = (typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + LAYER_D;   // metros abaixo do chão do vilarejo (2046)
 // topo de cada faixa em metros abaixo do MS_TOP: Praias Negras, Floresta de Algas, A Fossa, Chaminés Negras, (rocha-mãe)
-const MS_BANDS = [0, 46, 98, 150, 186];
+const MS_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const MS_BAND_NAMES = ['praias', 'floresta', 'fossa', 'chamines'];
 const MS_ZONE0 = 57;                                // zonas 57..60 (o 268 põe os nomes por índice)
 const MS_TETO = 6, MS_NIVEL_D = 32;                 // o teto do vão e o nível do mar, em metros abaixo do topo da camada

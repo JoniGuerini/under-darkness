@@ -35,7 +35,7 @@ function esBuild() {
   ES_S0 = Math.min(WH - 12, AB_S0 + Math.min(AB_D, WH - 8 - AB_S0));
   const S0 = ES_S0, YB = Math.min(WH - 8, S0 + ES_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7e5d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
-  const mb = m => Math.round(m * DB / ES_D);
+  const mb = m => Math.round(m * DB / LAYER_DESIGN);
   const db = (x, y) => (y - S0) * ES_D / DB + (nz(x, y, 30, 0x7b2) - 0.5) * 10;
   const bandOf = d => d < ES_BANDS[1] ? 0 : d < ES_BANDS[2] ? 1 : d < ES_BANDS[3] ? 2 : 3;
   // the roots: tall stripes, stretched up and down (the noise read every 6 rows, eased between)
@@ -53,15 +53,16 @@ function esBuild() {
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
       if (tiles[i] === BEDROCK || y >= WH - 3 || !ES_HOST[tiles[i]]) continue;
+      // abaixo da camada a faixa é sempre a última (d >= ES_D - 5): a mesma pedra e parede, sem ruído
+      if (y >= YB) { tiles[i] = ES_PRIMEVA; walls[i] = ES_WALL_OF(3); continue; }
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x7b4);
       if (k < 1 && h > 0.5 + k * 0.5) { tiles[i] = AB_CAOS; walls[i] = WAB_CAOS; continue; }   // lascas do caos nas primeiras linhas
-      const d = db(x, y), b = bandOf(d), n1 = nz(x, y, 34, 0x7a1), n2 = nz(x, y, 18, 0x7a2);
+      const d = db(x, y), b = bandOf(d);   // cada faixa lê um ruído só (as Raízes, o delas)
       let t;
-      if (y >= YB) t = ES_PRIMEVA;
-      else if (b === 0) t = n1 > 0.72 ? ES_BREU : ES_APAGADA;
-      else if (b === 1) t = n2 > 0.76 ? ES_VIDRO : ES_BREU;
+      if (b === 0) t = nz(x, y, 34, 0x7a1) > 0.72 ? ES_BREU : ES_APAGADA;
+      else if (b === 1) t = nz(x, y, 18, 0x7a2) > 0.76 ? ES_VIDRO : ES_BREU;
       else if (b === 2) { const r = rootN(x, y); t = r > 0.6 ? ES_RAIZ : r > 0.54 ? ES_CASCA : ES_BREU; }
-      else t = n2 > 0.8 ? ES_BREU : ES_PRIMEVA;
+      else t = nz(x, y, 18, 0x7a2) > 0.8 ? ES_BREU : ES_PRIMEVA;
       tiles[i] = t; walls[i] = ES_WALL_OF(b);
     }
   }
@@ -103,9 +104,11 @@ function esBuild() {
   };
 
   // ---------- 2a. as duas descidas: do chão de dois templos do Abismo, longe um do outro e do Trono ----------
-  const landY = S0 + mb(18);
+  const landY = S0 + 18;   // o poço tem o mesmo tamanho de antes: o Posto fica logo no topo
   {
-    const ab = abBoss, temples = abChambers.filter(c => c.kind === 'templo' && c.fy && (!ab || Math.abs(wdx(c.cx - ab.cx)) > ab.w / 2 + 30)).sort((a, b) => a.cx - b.cx);
+    const ab = abBoss, all = abChambers.filter(c => c.kind === 'templo' && c.fy && (!ab || Math.abs(wdx(c.cx - ab.cx)) > ab.w / 2 + 30)).sort((a, b) => a.cx - b.cx);
+    // só os templos do último andar do Trono: o poço até o Posto fica curto como antes
+    const low = all.filter(c => c.fy > S0 - 40), temples = low.length >= 2 && low.some(a => low.some(b => Math.abs(wdx(a.cx - b.cx)) > 120)) ? low : all;
     const picks = [];
     for (let n = 0; n < temples.length && picks.length < 2; n++) { const c = temples[(n * 5 + ((R() * temples.length) | 0)) % temples.length]; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 120)) picks.push(c); }
     for (const c of temples) { if (picks.length >= 2) break; if (!picks.includes(c) && picks.every(p => Math.abs(wdx(p.cx - c.cx)) > 50)) picks.push(c); }
@@ -155,28 +158,36 @@ function esBuild() {
 
   // ---------- 2d. as salas por faixa ----------
   // a Borda: os Postos dos Acendedores em ruína
-  for (let k = 0, tries = 0; k < 6 * WSC && tries < 300 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 6 * WSC * LAYER_K && tries < 300 * WSC * LAYER_K; tries++) {
     const w = 16 + ((R() * 9) | 0), h = 7 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = S0 + mb(12) + ((R() * mb(30)) | 0);
     if (fy - h < S0 + 3 || busy(cx, fy - h / 2, w, h, 5)) continue;
     hall(cx, fy, w, h, 0, 'ruina'); k++;
   }
   // o Breu: os Grandes Vãos, com o chão em ilhas e poços sem fundo
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 200 * WSC; tries++) {
-    const w = 60 + ((R() * 41) | 0), h = 20 + ((R() * 17) | 0), cx = (R() * WW) | 0, cy = S0 + mb(52) + h / 2 + R() * Math.max(0, mb(40) - h);
-    if (busy(cx, cy, w, h, 6) || !awayFromArrivals(cx, w / 2 + 10)) continue;
+  // (mais baixos que no começo, 14 a 21, com saliências de rocha no meio e poços de 10 a 14; um vão nunca fica em cima
+  // de outro, poço incluído: a queda não atravessa dois vãos)
+  const vBox = [];
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 200 * WSC * LAYER_K; tries++) {
+    const w = 60 + ((R() * 41) | 0), h = 14 + ((R() * 8) | 0), cx = (R() * WW) | 0, cy = S0 + mb(52) + h / 2 + R() * Math.max(0, mb(40) - h);
+    if (busy(cx, cy, w, h, 6) || !awayFromArrivals(cx, w / 2 + 10) || vBox.some(v => Math.abs(wdx(v.cx - cx)) < (v.w + w) / 2 + 6 && Math.abs(v.cy - cy - 7) < (v.h + h + 15) / 2 + 4)) continue;
+    vBox.push({ cx, cy: cy + 7, w, h: h + 15 });
     blob(cx, cy, w, h, 0x7d00 + k, 1.5);
+    // as saliências: lajes de 2 soltas no meio do vão (os túneis não as comem)
+    const shelf = (lx, lw, ly) => { for (let x = lx; x < lx + lw; x++) for (let y = ly; y < ly + 2; y++) { const i = I(x, y); if (canCarve(x, y)) { cv[i] = 0; keep[i] = 1; seal[i] = 1; } } };
+    shelf(Math.round(cx + (R() - 0.5) * w * 0.6), 5 + ((R() * 5) | 0), Math.round(cy - h * 0.15 + (R() - 0.5) * h * 0.25));
     const C = { cx, cy, w, h, band: 1, kind: 'vao', pits: [] }; esChambers.push(C);
     const bot = Math.round(cy + h / 2) + 1, n = 2 + ((R() * 3) | 0);
     for (let p = 0; p < n; p++) {
-      const pw = 3 + ((R() * 4) | 0), px = Math.round(cx + (p - (n - 1) / 2) * (w * 0.7 / n) + (R() - 0.5) * 6), deep = 20 + ((R() * 11) | 0), pbot = Math.min(YB - 5, bot + deep);
+      const pw = 3 + ((R() * 4) | 0), px = Math.round(cx + (p - (n - 1) / 2) * (w * 0.7 / n) + (R() - 0.5) * 6), deep = 10 + ((R() * 5) | 0), pbot = Math.min(YB - 5, bot + deep);
       for (let y = Math.round(cy); y <= pbot; y++) for (let x = px; x < px + pw; x++) dig(x, y);
       const P = { x0: W1(px), w: pw, top: bot, bot: pbot, vao: C, slab: R() < 0.55 };
       esPits.push(P); C.pits.push(P);
+      const sh = 1 + ((R() * 3) | 0); shelf(px - sh, pw + 2 + ((R() * 3) | 0), Math.round(cy - h * 0.12));   // uma laje no alto, em cima de cada poço: do teto ao fundo não é uma queda só
     }
     k++;
   }
   // as Raízes: os Nós, salas redondas dentro de um nó de raiz
-  for (let k = 0, tries = 0; k < 5 * WSC && tries < 250 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 5 * WSC * LAYER_K && tries < 250 * WSC * LAYER_K; tries++) {
     const w = 14 + ((R() * 7) | 0), h = 10 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = S0 + mb(104) + h / 2 + R() * Math.max(0, mb(42) - h);
     if (busy(cx, cy, w, h, 6)) continue;
     blob(cx, cy, w, h, 0x7e00 + k, 1.25);
@@ -185,7 +196,7 @@ function esBuild() {
     esChambers.push({ cx, cy, w, h, band: 2, kind: 'no', fy }); k++;
   }
   // o Fundo: os Altares Frios
-  for (let k = 0, tries = 0; k < 3 * WSC && tries < 200 * WSC; tries++) {
+  for (let k = 0, tries = 0; k < 3 * WSC * LAYER_K && tries < 200 * WSC * LAYER_K; tries++) {
     const w = 20 + ((R() * 11) | 0), h = 8 + ((R() * 3) | 0), cx = (R() * WW) | 0, fy = S0 + mb(156) + ((R() * mb(20)) | 0);
     if (fy - h < S0 + ES_BANDS[3] - 2 || busy(cx, fy - h / 2, w, h, 6)) continue;
     hall(cx, fy, w, h, 3, 'altar'); k++;
@@ -204,15 +215,21 @@ function esBuild() {
   const mouth = C => C.fy ? C.fy - 2 : C.kind === 'vao' ? C.cy : C.cy + C.h * 0.2;
   const ends = (C, right) => right ? C.cx + C.w / 2 - 1 : C.cx - C.w / 2 + 1;
   const RAD = [1.6, 2.0, 1.7, 1.6];
-  for (let b = 0; b < 4; b++) {
-    const L = esChambers.filter(c => c.band === b && !c.nolink).sort((a, c) => a.cx - c.cx);
-    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x7700 + b * 50 + k); }
+  // cada faixa tem LAYER_K andares da altura de uma faixa antiga: os túneis dão a volta em cada andar e descem de um
+  // andar ao de baixo em diagonal (o destino de lado, nunca bem embaixo: nada de poço)
+  const tierOf = y => { const d = clamp(Math.round(y) - S0, 0, DB - 1), b = bandOf(d), hb = (ES_BANDS[b + 1] - ES_BANDS[b]) / LAYER_K; return b * LAYER_K + Math.min(LAYER_K - 1, Math.floor((d - ES_BANDS[b]) / hb)); };
+  const NTi = 4 * LAYER_K, tierL = []; for (let t = 0; t < NTi; t++) tierL.push([]);
+  for (const c of esChambers) if (!c.nolink) tierL[tierOf(mouth(c))].push(c);
+  for (let t = 0; t < NTi; t++) {
+    const b = (t / LAYER_K) | 0, L = tierL[t].sort((a, c) => a.cx - c.cx);
+    for (let k = 0; k < L.length; k++) { const A = L[k], B = L[(k + 1) % L.length]; if (A === B) continue; worm(ends(A, true), mouth(A), ends(B, false), mouth(B), RAD[b], 0x7700 + t * 50 + k); }
   }
-  for (let b = 0; b < 3; b++) {
-    const U = esChambers.filter(c => c.band === b && !c.nolink), D = esChambers.filter(c => c.band === b + 1 && !c.nolink);
+  const slant = (A, D) => { const ay = mouth(A); let Q = null, qd = 1e9; for (const c of D) { const dy = Math.max(6, mouth(c) - ay), dx = Math.abs(wdx(c.cx - A.cx)), e = dx < dy * 1.2 ? 400 + dy * 1.2 - dx : Math.abs(dx - dy * 1.6); if (e < qd) { qd = e; Q = c; } } return Q; };
+  for (let t = 0; t < NTi - 1; t++) {
+    const U = tierL[t], D = tierL[t + 1], b = (t / LAYER_K) | 0, b2 = ((t + 1) / LAYER_K) | 0;
     for (let k = 0; k < 4 * WSC && U.length && D.length; k++) {
-      const A = U[(R() * U.length) | 0], B = D.reduce((m, c) => Math.abs(wdx(c.cx - A.cx)) < Math.abs(wdx(m.cx - A.cx)) ? c : m);
-      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b + 1]) + 0.2, 0x77f0 + b * 9 + k);
+      const A = U[(R() * U.length) | 0], B = slant(A, D);
+      worm(A.cx, mouth(A), B.cx, mouth(B), Math.max(RAD[b], RAD[b2]) + 0.2, 0x77f0 + t * 9 + k);
     }
   }
   // bolsinhas fechadas; ilhas soltas no ar
@@ -345,9 +362,9 @@ function esBuild() {
       }
     }
   };
-  vein(ES_O_CARVAO, 90 * WSC, 0, 186, 3, 8, t => t === ES_APAGADA || t === ES_RAIZ);
-  vein(ES_O_NOCTIRIO, 60 * WSC, 46, 186, 2, 5, t => t === ES_BREU || t === ES_PRIMEVA);
-  vein(ES_O_NOCTIRIO, 30 * WSC, 150, 186, 4, 8, t => t === ES_PRIMEVA || t === ES_BREU);
+  vein(ES_O_CARVAO, 90 * WSC * LAYER_K, 0, 186, 3, 8, t => t === ES_APAGADA || t === ES_RAIZ);
+  vein(ES_O_NOCTIRIO, 60 * WSC * LAYER_K, 46, 186, 2, 5, t => t === ES_BREU || t === ES_PRIMEVA);
+  vein(ES_O_NOCTIRIO, 30 * WSC * LAYER_K, 150, 186, 4, 8, t => t === ES_PRIMEVA || t === ES_BREU);
 }
 
 function esAfter() {
@@ -371,15 +388,18 @@ function esAfter() {
   const reach = new Uint8Array(NN), stack = [];
   const flood = (s0, again) => { if ((reach[s0] && !again) || SOLID[tiles[s0]]) return; reach[s0] = 1; stack.push(s0); while (stack.length) { const c = stack.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= (S0 - 40) * WW && nb < NN && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; stack.push(nb); } } };
   for (const L of esLand) flood(I(L.x0 + 4, L.fy - 1));
-  for (let pass = 0; pass < 60 * WSC; pass++) {
-    const lab = new Uint8Array(NN); let bestC = null;
+  // os pedaços soltos, contados uma vez só e ligados do maior para o menor (contar de novo a cada passada custava caro)
+  const comps = [];
+  { const lab = new Uint8Array(NN);
     for (let y = S0; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
       const i = y * WW + x; if (reach[i] || lab[i] || SOLID[tiles[i]] || !walls[i]) continue;
       const comp = []; lab[i] = 1; stack.push(i);
       while (stack.length) { const c = stack.pop(), cx = c % WW, row = c - cx; comp.push(c); for (const nb of [row + W1(cx - 1), row + W1(cx + 1), c - WW, c + WW]) if (nb >= S0 * WW && nb < YB * WW && !lab[nb] && !reach[nb] && !SOLID[tiles[nb]]) { lab[nb] = 1; stack.push(nb); } }
-      if (comp.length >= 20 && (!bestC || comp.length > bestC.length)) bestC = comp;
+      if (comp.length >= 20) comps.push(comp);
     }
-    if (!bestC) break;
+    comps.sort((a, c) => c.length - a.length); }
+  for (let pass = 0; pass < comps.length && pass < 60 * WSC * LAYER_K; pass++) {
+    const bestC = comps[pass]; if (bestC.some(c => reach[c])) continue;
     let best = null, bd = 1e9;
     for (let k = 0; k < bestC.length; k += Math.max(1, (bestC.length / 40) | 0)) {
       const c = bestC[k], cx = c % WW, cy = (c / WW) | 0;
@@ -487,8 +507,8 @@ function esAfter() {
   }
 
   // ---------- 5. as sementes do breu vivo: no escuro, longe da rota, dos Postos e da sala ----------
-  for (let k = 0, tries = 0; k < 40 * WSC && tries < 4000 * WSC; tries++) {
-    const x = (R3() * WW) | 0, y = S0 + 50 + ((R3() * (YB - S0 - 54)) | 0), i = I(x, y);
+  for (let k = 0, tries = 0; k < 40 * WSC * LAYER_K && tries < 4000 * WSC * LAYER_K; tries++) {
+    const x = (R3() * WW) | 0, y = S0 + ES_BANDS[1] + 12 + ((R3() * (YB - S0 - ES_BANDS[1] - 16)) | 0), i = I(x, y);
     if (at(x, y) !== AIR || !esSolid(at(x, y + 1)) || esKeep.has(i) || inEsHall(x, y, 6) || esRoute.some(([rx, ry]) => Math.abs(wdx(rx - x)) < 14 && Math.abs(ry - y) < 10)) continue;
     put(x, y, ES_BREU_VIVO); k++;
   }
@@ -629,19 +649,20 @@ function esPlaceProps() {
 
 // a ordem: a camada, a sala do chefe (227: esDress), as bocas e a subida; o 87 liga o resto depois
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc();
+  _bc(); genStage('escuro', () => {
   if (!ESCURO) return;
   try { esBuild(); esAfter(); if (typeof esDress === 'function') esDress(); esExitClear(); esClimbFix(); } catch (err) { console.error(err); }
+});
 }; }
 
 /* ---------- a terceira camada atrás da Escuridão: torres na Borda e no Fundo, o Nada no Breu, as raízes subindo ---------- */
 { const _cd = cathedralDeep; cathedralDeep = function () {
   _cd();
   if (!ESCURO) return;
-  for (let y = ES_S0 - 4; y < WH; y++) for (let x = 0; x < WW; x++) {
+  for (let y = Math.max(ES_S0 - 4, genDeepA); y < WH; y++) for (let x = 0; x < WW; x++) {
     const i = y * WW + x; if (!DEEPT[i]) continue;
     const d = (y - ES_S0) + (depthNz(x, y, 25, seed ^ 0x7e11) - 0.5) * 10, n = depthNz(x, y, 20, seed ^ 0x7e12);
-    DEEPT[i] = d < 46 ? (n > 0.55 ? DP_ES_TORRES : DP_ES_NADA) : d < 98 ? (n > 0.7 ? DP_ES_RAIZES : DP_ES_NADA) : d < 150 ? (n > 0.3 ? DP_ES_RAIZES : DP_ES_NADA) : (n > 0.6 ? DP_ES_TORRES : DP_ES_NADA);
+    DEEPT[i] = d < ES_BANDS[1] ? (n > 0.55 ? DP_ES_TORRES : DP_ES_NADA) : d < ES_BANDS[2] ? (n > 0.7 ? DP_ES_RAIZES : DP_ES_NADA) : d < ES_BANDS[3] ? (n > 0.3 ? DP_ES_RAIZES : DP_ES_NADA) : (n > 0.6 ? DP_ES_TORRES : DP_ES_NADA);
   }
 }; }
 

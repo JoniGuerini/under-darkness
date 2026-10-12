@@ -20,10 +20,10 @@
    Abismo começa onde esta camada termina). */
 
 const FUNGO = true;
-const FG_D = 186;                                   // metros de camada
-const FG_TOP = (typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + 186;   // onde a camada começa, em metros abaixo do chão do vilarejo (744)
+const FG_D = LAYER_D;                                   // metros de camada
+const FG_TOP = (typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + LAYER_D;   // onde a camada começa, em metros abaixo do chão do vilarejo (744)
 // topo de cada faixa em metros abaixo do FG_TOP: Galerias Tomadas, Bosque de Chapéus, Grutas Alagadas, Coração do Micélio, (rocha-mãe)
-const FG_BANDS = [0, 46, 98, 150, 186];
+const FG_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const FG_BAND_NAMES = ['galerias', 'bosque', 'grutas', 'coracao'];
 const FG_ZONE0 = 25;                                // zonas 25..28 (reservadas no 00-geral; o 128 põe os nomes depois das do Abismo)
 let FG_S0 = MN_S0 + MN_D;                           // a primeira linha da camada no mundo atual (fungBuild acerta)

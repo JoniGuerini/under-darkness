@@ -1,12 +1,14 @@
 # As Cavernas de Gelo: especificação
 
-A terceira camada, debaixo das Criptas da catedral, de 372 a 558 m (o mundo passou de 440 para 640 blocos de altura). A ficha do bioma está em `docs/biomas.md` (parte 4); as regras gerais em `docs/regras-de-bioma.md`.
+> **2026-10-12:** a camada tem 558 m, de 1116 a 1674 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([camadas/00-geral.md](camadas/00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A terceira camada, debaixo das Criptas da catedral, de 1116 a 1674 m (o mundo passou de 440 para 640 blocos de altura). A ficha do bioma está em `docs/biomas.md` (parte 4); as regras gerais em `docs/regras-de-bioma.md`.
 
 ## 1. Arquivos
 
 | Arquivo | O que tem |
 |---|---|
-| `js/69-gelo-api.js` | ids de blocos (74 a 93), paredes (18 a 22), camada distante (14 a 17), faixas `IC_BANDS`, `IC_D = 186`, zonas 13 a 16 (`IC_ZONE0`), `iceBand`, `IC_SLIP`, `icExits`, `icBoss`. `GELO = false` desliga a camada inteira. |
+| `js/69-gelo-api.js` | ids de blocos (74 a 93), paredes (18 a 22), camada distante (14 a 17), faixas `IC_BANDS`, `IC_D = LAYER_D` (558), zonas 13 a 16 (`IC_ZONE0`), `iceBand`, `IC_SLIP`, `icExits`, `icBoss`. `GELO = false` desliga a camada inteira. |
 | `js/70-gelo-blocos.js` | texturas (neve, neve batida, gelo, gelo azul, permafrost, rocha gelada, gelo negro, calcário congelado, veio de gelo, barreira), paredes, camada distante, minérios no gelo (ferro, ouro, cristal), decoração de 1 bloco (sincelo, estalagmite, cristal, cristal de teto, montinho de neve, ossos, coluna de gelo), itens de bloco, quais blocos escorregam. Exporta `ICART`. |
 | `js/71-gelo-objetos.js` | 20 objetos de cena (`gelo: true`), o Trono de Gelo e o plano por faixa `IC_PROP_PLAN`. |
 | `js/72-gelo-bichos.js` | yeti, lobo da geada, espírito da nevasca, verme da geada, sentinela de gelo, gosma gelada: arte, IA, projéteis (`icThrow`, `icWave`), lentidão do frio (`icSlowT`), sons, drops, materiais. Exporta `ICB` (o yeti em qualquer escala, para o chefe). |

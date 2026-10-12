@@ -25,7 +25,7 @@
    do 103 (o Abismo começa onde esta camada termina). */
 
 const TITAS = true;
-const TT_D = 186;                                   // metros de camada
+const TT_D = LAYER_D;                                   // metros de camada
 // lê um nome global que pode não existir ainda (as camadas vizinhas são feitas ao mesmo tempo, os nomes delas podem
 // faltar): o eval indireto enxerga as constantes de nível de topo dos outros arquivos
 const ttG = n => { try { return (0, eval)(n); } catch (err) { return undefined; } };
@@ -41,9 +41,9 @@ function ttAbove() {
     return { id: 'elfos', S0: EL_S0, D: EL_D, soils: EL_SOILS, halls: elExits, climb: EL_ESCADA, boss: elBoss, thin: EL_PEDRA_POCO };
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const TT_TOP = (ttG('DG_TOP') ?? ttG('MS_TOP') ?? (typeof EL_TOP !== 'undefined' ? EL_TOP : 2046)) + 186;   // metros abaixo do chão do vilarejo (2418 com as cinco)
+const TT_TOP = (ttG('DG_TOP') ?? ttG('MS_TOP') ?? (typeof EL_TOP !== 'undefined' ? EL_TOP : 2046)) + LAYER_D;   // metros abaixo do chão do vilarejo (2418 com as cinco)
 // topo de cada faixa em metros abaixo do TT_TOP: Campo das Costelas, A Espinha, Vale dos Crânios, Leito do Último, (rocha-mãe)
-const TT_BANDS = [0, 46, 98, 150, 186];
+const TT_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const TT_BAND_NAMES = ['costelas', 'espinha', 'cranios', 'leito'];
 const TT_ZONE0 = 65;                                // zonas 65..68 (o 289 põe os nomes no índice)
 let TT_S0 = (() => { const a = ttAbove(); return a.S0 + a.D; })();   // a primeira linha da camada no mundo atual (ttBuild acerta)

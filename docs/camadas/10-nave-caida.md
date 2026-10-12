@@ -1,6 +1,8 @@
 # A Nave Caída: ficha de implementação
 
-A décima camada, debaixo da Colmeia e em cima do Abismo, de 1674 a 1860 m. Pedido do Jonathan (2026-10-11), a partir das figurinhas de ET dele: homenzinhos verdes, discos voadores com feixe arco-íris, um astronauta, um foguete, o olho com rastro arco-íris, o planeta com anel e a gosma verde. Monstros de nível 21 a 22, metal novo Xenita, chefe O Olho-Cometa (nível 23).
+> **2026-10-12:** a camada tem 558 m, de 5022 a 5580 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A décima camada, debaixo da Colmeia e em cima do Abismo, de 5022 a 5580 m. Pedido do Jonathan (2026-10-11), a partir das figurinhas de ET dele: homenzinhos verdes, discos voadores com feixe arco-íris, um astronauta, um foguete, o olho com rastro arco-íris, o planeta com anel e a gosma verde. Monstros de nível 21 a 22, metal novo Xenita, chefe O Olho-Cometa (nível 23).
 
 **O que a diferencia:** é a única camada que **não é deste mundo** e a única **cheia de luz**. Todas as outras ficam mais escuras ao descer; aqui o neon da nave acende tudo em verde, rosa, ciano e violeta, como um fliperama enterrado. A Colmeia de cima é morna, curva e orgânica; o Abismo de baixo é fogo e carne; a Nave é metal liso, linhas retas, vidro e luz fria. É a camada mais colorida do jogo e a mais estranha.
 
@@ -20,7 +22,7 @@ A décima camada, debaixo da Colmeia e em cima do Abismo, de 1674 a 1860 m. Pedi
 | 51 | Os Laboratórios | 1772 a 1824 | Liga Alienígena, Vidro de Laboratório, Gosma | as salas brancas e violeta das abduções: cápsulas de espécime, mesas de exame, tanques de gosma, a Galeria dos Espécimes |
 | 52 | O Núcleo | 1824 a 1860 | Metal do Reator, Cristal de Plasma | o reator arco-íris, os condutos de plasma, o Planetário do Olho-Cometa, os dois Rasgos no Casco para o Abismo |
 
-- **Monstros:** nível 21 na metade de cima e 22 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 22 (`layerLvl(layerLo('nave'), d)`).
+- **Monstros:** nível 21 na metade de cima e 22 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 22 (`layerLvl(layerLo('nave'), d)`).
 - **Entrada:** as duas descidas saem dos dois Escorredouros de Mel da Colmeia (`cmExits`). O mel acaba onde a pedra virou vidro: o poço continua como um **tubo de chapa rasgada** de 3 de largura, com a **Escada de Serviço** (`NV_ESCADA`, neon) inteira por 20 a 26 fileiras, até a Cápsula de Pouso.
 - **Câmara de pouso:** ao pé de cada escada, uma **Cápsula de Pouso** de 12 x 6: piso de grade, paredes de casco, a luz de emergência da nave acesa (dois tubos de neon), sem monstro. Reservada para os pontos de volta.
 - **Saída:** dois **Rasgos no Casco** no chão do Núcleo, a pelo menos `WW / 3` um do outro e longe do Planetário: buracos onde o casco abriu na queda, a chapa dobrada para fora e o plasma vazando nas bordas, com a Escada de Serviço até a última fileira. As posições ficam em `nvExits`; o Abismo continua de lá (o 103 lê como `halls`).
@@ -208,7 +210,7 @@ Os Visitantes: pele verde-limão do adesivo (`#2e7a0c` a `#c8ff7a`), olhos preto
 
 | Arquivo | O que tem |
 |---|---|
-| `js/240-nave-api.js` | ids, `NV_BANDS`, `NV_D = 186`, `NV_ZONE0 = 49`, `naveBand`, `nvAbove`, `nvEntries`, `nvLand`, `nvExits`, `nvBoss`, os estados do herói. `NAVE = false` desliga a camada |
+| `js/240-nave-api.js` | ids, `NV_BANDS`, `NV_D = LAYER_D` (558), `NV_ZONE0 = 49`, `naveBand`, `nvAbove`, `nvEntries`, `nvLand`, `nvExits`, `nvBoss`, os estados do herói. `NAVE = false` desliga a camada |
 | `js/241-nave-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, o neon ao vivo, a escada e o cabo escaláveis |
 | `js/242-nave-objetos.js` | os objetos e `NV_PROP_PLAN` |
 | `js/243-nave-visitantes.js` | visitante, atirador, disco, olho, gosma |

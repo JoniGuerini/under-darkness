@@ -349,25 +349,29 @@ function alqLayer(y) {
   return typeof MN_S0 !== 'undefined' && typeof MINA !== 'undefined' && MINA ? 4 : 3;
 }
 function plantHerbs() {
-  HERB_SPOTS = [];
+  // por leva de camadas (129, 312): só as linhas das camadas novas; a superfície vai junto com a primeira leva
+  const [ya, yb] = genFaixaNova(), primeira = genNova('cavernas');
+  if (primeira) HERB_SPOTS = [];
+  const fundas = Math.max(1, LAYERS.length - Math.max(0, layerPos('mina') - 1));   // o grupo 4 (da mina para baixo) se divide entre estas camadas
   const s0 = (seed % 99991) + 4100, cover = new Set();
   // nada de erva atrás de objeto de cena, em sala de chefe ou no vilarejo
   if (typeof PROPS !== 'undefined') for (const p of PROPS) { const x0 = Math.floor(p.X / T), y0 = Math.floor(p.Y / T), x1 = Math.floor((p.X + p.w - 1) / T), y1 = Math.floor((p.Y + p.h - 1) / T); for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) cover.add(y * WW + wrapX(x)); }
   const hall = (x, y) => (typeof inTeiaHall === 'function' && inTeiaHall(x, y, -3)) || (typeof inYetiHall === 'function' && inYetiHall(x, y, -3)) ||
     (typeof inThroneHall === 'function' && inThroneHall(x, y, -3)) || (typeof inRgHall === 'function' && inRgHall(x, y, -3)) || inVillage(x, y);
   const cand = [[], [], [], [], []];
-  for (let x = 0; x < WW; x++) {   // a superfície: capim, com ar em cima (tufos e flores podem dar lugar)
+  if (primeira) for (let x = 0; x < WW; x++) {   // a superfície: capim, com ar em cima (tufos e flores podem dar lugar)
     const y = surf[x] - 1; if (y < 2 || tiles[(y + 1) * WW + x] !== GRASS) continue;
     const t = tiles[y * WW + x]; if ((t === AIR || t === TUFT || t === FLOWER) && tiles[(y - 1) * WW + x] === AIR && !hall(x, y)) cand[0].push(y * WW + x);
   }
-  for (let y = surf[SPX] + 8; y < WH - 4; y++) for (let x = 0; x < WW; x++) {   // embaixo: chão firme de bloco cheio com dois de ar em cima
+  for (let y = Math.max(surf[SPX] + 8, ya), y1 = Math.min(WH - 4, yb); y < y1; y++) for (let x = 0; x < WW; x++) {   // embaixo: chão firme de bloco cheio com dois de ar em cima
     const i = y * WW + x; if (tiles[i] !== AIR || tiles[i - WW] !== AIR) continue;
     const dn = tiles[i + WW]; if (!SOLID[dn] || !BLOCKY[dn] || cover.has(i) || cover.has(i - WW)) continue;
     if (y < surf[x] + 8 || hall(x, y)) continue;
     const L = alqLayer(y); if (L > 0) cand[L].push(i);
   }
   for (let L = 0; L < 5; L++) {
-    const C = cand[L], want = Math.round(HERB_N[L] * (typeof WSC !== 'undefined' ? WSC : 1)); if (!C.length) continue;
+    const n4 = L === 4 ? genNovas.filter(id => layerPos(id) >= layerPos('mina')).length / fundas : 1;
+    const C = cand[L], want = Math.round(HERB_N[L] * (typeof WSC !== 'undefined' ? WSC : 1) * n4); if (!C.length || !want) continue;
     // sorteio pela semente (o mesmo mundo sempre tem as mesmas ervas), espalhadas pela camada inteira
     const key = i => hash2(i % WW, (i / WW) | 0, s0 + L), taken = [];
     C.sort((a, b) => key(a) - key(b));
@@ -379,4 +383,4 @@ function plantHerbs() {
     for (const i of taken) { tiles[i] = HERBS[L].t; HERB_SPOTS.push([i, HERBS[L].t]); }
   }
 }
-{ const _bc = buildCathedral; buildCathedral = function () { _bc(); try { plantHerbs(); } catch (err) { console.error(err); } }; }
+genPos(() => { try { plantHerbs(); } catch (err) { console.error(err); } });   // depois de cada leva de camadas (129), nas camadas novas

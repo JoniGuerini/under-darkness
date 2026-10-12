@@ -1,6 +1,8 @@
 # A Colmeia: ficha de implementação
 
-A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m. É o que expulsou os anões: uma colmeia de insetos gigantes que cavou de baixo para cima, engoliu os salões de pedra em cera e resina e guarda, nas câmaras de âmbar, tudo o que prendeu no caminho. Monstros de nível 19 a 20, metal novo Ambrita, chefe A Rainha da Colmeia (nível 21).
+> **2026-10-12:** a camada tem 558 m, de 4464 a 5022 m abaixo do chão do vilarejo: o desenho de 186 m esticado `LAYER_K = 3` vezes, com as faixas também 3 vezes mais altas e 3 andares de salas por faixa ([00-geral.md](00-geral.md), seção 1b). Os outros metros desta ficha são os do desenho de 186 m, da época em que ela foi escrita; dentro da camada, cada um vale 3. Quedas longas ganham pisos e o minério fica perto da borda (`js/313-quedas-minerios.js`), e a camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`).
+
+A nona camada, debaixo da Fortaleza dos Anões, de 4464 a 5022 m. É o que expulsou os anões: uma colmeia de insetos gigantes que cavou de baixo para cima, engoliu os salões de pedra em cera e resina e guarda, nas câmaras de âmbar, tudo o que prendeu no caminho. Monstros de nível 19 a 20, metal novo Ambrita, chefe A Rainha da Colmeia (nível 21).
 
 **O que a diferencia:** é a única camada **construída por bichos**: tudo é estreito, morno, curvo e hexagonal, sem um único vão grande fora das câmaras de âmbar, o contrário da pedra reta da Fortaleza em cima e do mar aberto e frio embaixo. Do Ninho das Cavernas ela difere pela ordem (favos, cera, mel, luz âmbar) em vez de teia solta no escuro; do Abismo, pelo calor de corpo em vez de fogo.
 
@@ -23,7 +25,7 @@ A nona camada, debaixo da Fortaleza dos Anões, de 1488 a 1674 m. É o que expul
 - **Entrada:** as duas descidas saem do chão da última faixa da Fortaleza, nas posições que ela anota (como `mnExits`). Cada uma é uma **brecha**: um buraco torto no piso de pedra, com a borda coberta de crosta de cera escorrida, como uma ferida que inchou. Da brecha desce um tubo de cera de 3 de largura com a **Escada de Favos** inteira (`CM_ESCADA_FAVO`) por 20 a 28 fileiras, até um salão anão da Brecha Tomada. Volta-se pela mesma escada.
 - **Câmara de pouso:** ao pé de cada escada, um salão anão de 12 x 6 que a cera ainda não alcançou: piso de pedra plano, uma lanterna anã acesa, sem monstro. É o último lugar com cara de gente.
 - **Saída:** dois **Escorredouros de Mel** no chão de câmaras de ovos do Berçário, a pelo menos `WW / 3` um do outro e longe da esfera. São poços onde o mel da colmeia escorre para baixo: paredes de cera brilhando de mel, Escada de Favos inteira até a última fileira, gotas caindo. A camada guarda as posições em `cmExits`; o Mar Sem Sol continua o poço como uma raiz de cera pendurada no teto dele.
-- **Nível dos monstros:** 19 na metade de cima da camada e 20 da metade para baixo (a partir de 93 m); 30% vêm 1 nível acima, mas nunca passam de 20, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
+- **Nível dos monstros:** 19 na metade de cima da camada e 20 da metade para baixo (a partir de 279 m, a metade da camada); 30% vêm 1 nível acima, mas nunca passam de 20, então nenhum monstro daqui fica abaixo ou no nível da camada de cima.
 
 ## 3. Estrutura e geração (`js/165-colmeia-mundo.js`)
 
@@ -214,7 +216,7 @@ Insetos: carapaças escuras com bordas de luz âmbar vinda das paredes, asas com
 
 | Arquivo | O que tem |
 |---|---|
-| `js/160-colmeia-api.js` | ids, `CM_BANDS`, `CM_D = 186`, `CM_ZONE0 = 41`, `colmeiaBand`, `cmExits`, `cmBoss`. `COLMEIA = false` desliga a camada |
+| `js/160-colmeia-api.js` | ids, `CM_BANDS`, `CM_D = LAYER_D` (558), `CM_ZONE0 = 41`, `colmeiaBand`, `cmExits`, `cmBoss`. `COLMEIA = false` desliga a camada |
 | `js/161-colmeia-blocos.js` | texturas, paredes, terceira camada, minérios, decoração, Escada de Favos e Fio de Cera escaláveis, Poça de Mel |
 | `js/162-colmeia-objetos.js` | 28 objetos e `CM_PROP_PLAN` |
 | `js/163-colmeia-insetos.js` | operária, soldada, formiga-leão, correição, larva |

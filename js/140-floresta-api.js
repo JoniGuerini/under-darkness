@@ -21,11 +21,11 @@
    Carrega logo depois do 136-cidade-mundo e antes do 103 (o Abismo começa onde esta camada termina). */
 
 const FLORESTA = true;
-const FP_D = 186;                                   // metros de camada
-const FP_TOP = CD_TOP + 186;                        // onde a camada começa, em metros abaixo do chão do vilarejo (1116)
+const FP_D = LAYER_D;                                   // metros de camada
+const FP_TOP = CD_TOP + LAYER_D;                        // onde a camada começa, em metros abaixo do chão do vilarejo (1116)
 // topo de cada faixa em metros abaixo do FP_TOP: Bosque Soterrado, Mata de Cristal, Raízes Profundas, Clareira dos
 // Gigantes, (rocha-mãe)
-const FP_BANDS = [0, 46, 98, 150, 186];
+const FP_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const FP_BAND_NAMES = ['bosque', 'mata', 'raizes', 'clareira'];
 const FP_ZONE0 = 33;                                // zonas 33..36 (o 148 põe os nomes depois das da Cidade Afundada)
 let FP_S0 = CD_S0 + CD_D;                           // a primeira linha da camada no mundo atual (fpBuild acerta)
