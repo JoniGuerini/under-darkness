@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.37.5';
+const VERSAO = '0.38.0';
 const NOVIDADES = [
+  { v: '0.38.0', data: '12/10/2026', titulo: 'Arco e flecha', itens: [
+    'Arcos (Curto, de Caça, Longo e de Osso), aljavas e flechas. A aljava vai no lugar do escudo, e as flechas ficam na mochila.',
+    'Com o arco na mão a flecha já fica encaixada. Clique para puxar e soltar, e o herói pega a próxima flecha da aljava nas costas.',
+    'O Grimaldo vende flechas, arco e aljava. Flechas, Arco Curto e Aljava de Couro também saem no Criar.',
+  ] },
   { v: '0.37.5', data: '12/10/2026', titulo: 'Ímã dos drops', itens: [
     'O ímã dos drops ficou mais forte e alcança mais longe, então o que cai alcança o herói andando.',
     'Drop que encosta no herói é pego na hora: minério quebrado em cima não atravessa mais o boneco.',

@@ -80,9 +80,10 @@ function gripBothHands(P) {
     // same layers as compose(), with the far arm moved in front of the chest, then the same outline pass
     const c = crctx; c.clearRect(0, 0, CW, CHT);
     const bx = OX, by = OY;
+    if (P.shield && !P.shield.top) c.drawImage(P.shield.img, Math.round(P.shield.cx - P.shield.img.width / 2), Math.round(P.shield.cy - P.shield.img.height / 2));   // a aljava nas costas (js/350)
     c.drawImage(P.legs, bx, by + 18); c.drawImage(P.body, bx, by);
     if (P.head) c.drawImage(P.head.img, bx, by + P.head.oy);
-    heroArmDraw(c, bx + 4.5, by + 10.5, back);
+    { const h = heroArmDraw(c, bx + 4.5, by + 10.5, back); if (back.item) rotDraw(c, back.item.img, h[0], h[1], back.item.px || 2.5, back.item.py || 11, back.item.ang); }   // a flecha na mão de trás (js/350)
     if (front) { const h = heroArmDraw(c, bx + 7.5, by + 10.5, front); if (item) rotDraw(c, item.img, h[0], h[1], item.px || 2.5, item.py || 11, item.ang); }
     // far hand closes over the grip: repaint just the hand on top of the blade
     const r = heroArm(back.hero, back.dark, back.ang, back.len), hx = bx + 4.5 + r.hx, hy = by + 10.5 + r.hy, sr = heroRamp(HERO_COL.s);
@@ -101,7 +102,7 @@ function gripBothHands(P) {
   const _refreshInv = refreshInv;
   refreshInv = function (force) {
     _refreshInv(force);
-    const w = equip.weapon, on = !!(w && isTwoHand(w.id) && !equip.shield);
+    const w = equip.weapon, on = !!(w && isTwoHand(w.id) && !equip.shield && ITEMS[w.id].kind !== 'bow');   // o arco deixa o espaço livre para a aljava
     document.querySelectorAll('.invcard .slot.eq[data-eq="shield"]').forEach(d => {
       d.classList.toggle('duas-maos', on);
       const img = d.querySelector('img'); if (!img) return;
