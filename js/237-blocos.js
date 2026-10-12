@@ -4,13 +4,13 @@
    Pedido do Jonathan (2026-10-10), no espírito das abas de afinidade do baú do Path of Exile: ao lado do "Criar",
    o botão "Blocos" troca a grade da mochila pela grade da bolsa, com uma casa fixa para cada bloco que o jogo tem
    (todo item com `block`: terra, pedra, madeira, os tijolos e pedras de cada camada...).
-   - Bloco coletado vai direto para a bolsa (`pouch`, id -> quantidade, sem limite) e nunca ocupa a mochila.
-     Antes, completa uma pilha dele que já esteja na barra de ação.
+   - Bloco coletado vai para a bolsa (`pouch`, id -> quantidade, sem limite). Antes, completa as pilhas dele que já
+     estejam na barra ou na mochila (pedido de 2026-10-12): só o que sobra vai para a bolsa.
    - Da bolsa, arrastar (ou clicar e largar) numa casa da barra leva uma pilha (até 99) para lá. Botão direito leva
      para a primeira casa livre da barra. Colocar blocos no mundo gasta a pilha da barra, e ela se completa
      sozinha com o que houver na bolsa, então a barra funciona como uma janela da bolsa.
-   - Bloco largado na mochila, na bolsa ou que apareça na mochila de outro jeito (baú, ordenar, save antigo) volta
-     para a bolsa. Barra e baú do vilarejo continuam aceitando blocos.
+   - A mochila aceita pilhas de bloco que o herói puser lá (arrastando da bolsa ou da barra); bloco nunca entra
+     sozinho numa casa vazia da mochila. Botão direito numa pilha de bloco a devolve para a bolsa.
    - countItem/removeItem contam e gastam da bolsa, então a madeira da tocha (235-criar), lojas e receitas seguem
      funcionando sem mudar nada.
    - Itens de colocar que não são blocos (candelabro e outros `deco`) continuam na mochila.
@@ -30,11 +30,11 @@ function blkTopUp(id) {
   const mx = stackMax(id);
   for (let i = 0; i < HB_BAG && pouchN(id); i++) { const s = inv[i]; if (s && s.id === id && s.n < mx) s.n += pouchTake(id, mx - s.n); }
 }
-// o que for bloco na mochila (fora da barra) vai para a bolsa
-function blkSweep() {
-  let moved = false;
-  for (let i = HB_BAG; i < INV_N; i++) { const s = inv[i]; if (s && isBlk(s.id)) { pouchPut(s.id, s.n); inv[i] = null; moved = true; } }
-  return moved;
+// bloco coletado: completa primeiro as pilhas dele na barra e depois na mochila; devolve o que sobrou
+function blkFillStacks(id, n) {
+  const mx = stackMax(id);
+  for (let i = 0; i < INV_N && n > 0; i++) { const s = inv[i]; if (s && s.id === id && s.n < mx) { const t = Math.min(n, mx - s.n); s.n += t; n -= t; invDirty = true; } }
+  return n;
 }
 
 /* ---- contar, guardar e gastar passam pela bolsa ---- */
@@ -43,7 +43,7 @@ function blkSweep() {
   canFit = id => isBlk(id) || _cf(id);
   addItem = function (id, n = 1) {
     if (!isBlk(id) || n <= 0) return _ai(id, n);
-    pouchPut(id, n); blkTopUp(id); return 0;
+    pouchPut(id, blkFillStacks(id, n)); blkTopUp(id); return 0;
   };
   removeItem = function (id, n = 1) {
     if (isBlk(id)) n -= pouchTake(id, n);
@@ -143,7 +143,6 @@ function moveBlk(a, b, el) {
     if (b.k === 'trash') { pouchTake(id, Math.min(have, stackMax(id))); changed(false); sfx.trash(); return; }
     if (b.k === 'blk') return;
     if (b.k !== 'inv' && b.k !== 'chest') return bad(el);
-    if (b.k === 'inv' && b.i >= HB_BAG) return bad(el);   // a mochila não guarda blocos
     const B = invGet(b), mx = stackMax(id);
     if (B && B.id === id) { const t = pouchTake(id, mx - B.n); if (!t) return bad(el); }
     else if (B && !isBlk(B.id)) return bad(el);
@@ -160,8 +159,6 @@ function moveBlk(a, b, el) {
   itemAt = r => r && r.k === 'blk' ? (pouchN(r.id) ? { id: r.id, n: pouchN(r.id) } : null) : _ia(r);
   moveItem = function (a, b, el) {
     if (a.k === 'blk' || b.k === 'blk') return moveBlk(a, b, el);
-    const A = (a.k === 'inv' || a.k === 'chest') && invGet(a);
-    if (A && isBlk(A.id) && b.k === 'inv' && b.i >= HB_BAG) return moveBlk(a, b, el);   // bloco solto na mochila: vai para a bolsa
     return _mv(a, b, el);
   };
   quickAction = function (r) {
@@ -182,7 +179,7 @@ function moveBlk(a, b, el) {
     craft.after(b);
     b.addEventListener('click', () => { sfx.select(); setBlkView(!blkView); });
   };
-  refreshInv = function (force) { if (blkSweep()) force = true; _ri(force); if (invVisible()) paintBlk(force); };
+  refreshInv = function (force) { _ri(force); if (invVisible()) paintBlk(force); };
   closeInv = function () { _ci(); if (blkView) setBlkView(false); };
 }
 
@@ -193,5 +190,5 @@ function moveBlk(a, b, el) {
   _nw(sd, sv);
   const p = sv && sv.blocos;
   if (Array.isArray(p)) for (const q of p) if (Array.isArray(q) && isBlk(q[0]) && q[1] > 0) pouchPut(q[0], Math.floor(q[1]));
-  blkSweep(); invDirty = true;
+  invDirty = true;
 }; }

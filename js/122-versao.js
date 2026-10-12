@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.37.0';
+const VERSAO = '0.37.1';
 const NOVIDADES = [
+  { v: '0.37.1', data: '12/10/2026', titulo: 'Bolsa de blocos', itens: [
+    'Bloco coletado completa primeiro as pilhas dele na barra e na mochila; só o que sobra vai para a bolsa de blocos.',
+    'A mochila agora aceita pilhas de bloco que você puser nela.'
+  ] },
   { v: '0.37.0', data: '12/10/2026', titulo: 'Armas pesadas e golpes', itens: [
     'Machado de Guerra e Marreta, armas novas de duas mãos que o Grimaldo forja em todo metal. A Marreta bate no chão e acerta quem está perto.',
     'A maça de uma mão agora tem um bloco do material na ponta, no lugar da bola.',
