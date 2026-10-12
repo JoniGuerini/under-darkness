@@ -11,7 +11,7 @@
      lança    - estocada na direção do mouse · varrida com a haste · recuo e estocada longa
      montante - golpe por cima · corte subindo pela frente · estocada com as duas mãos
      machado de duas mãos - golpe de lenhador · giro completo no ar · golpe subindo com salto
-     maça de duas mãos    - pancada no chão (onda que acerta quem está no chão perto) · golpe lateral · cutucada rápida
+     maça de duas mãos    - pancada no chão (onda que acerta quem está no chão perto) · golpe lateral · salto esmagador (pula e cai com a marreta, com onda)
      cajado   - pancada por cima · cutucada
    Cada golpe é uma lista de poses-chave no tempo: [t, ângulo da arma, ângulo do braço, curva, extras].
    Ângulos como no resto do jogo: 0 = para cima, +pi/2 = para frente, pi = para baixo; passar de pi dá a volta por baixo.
@@ -114,9 +114,9 @@ const GOLPES = {
     { n: 'golpe lateral', hit: [0.22, 0.34], total: 0.58,
       keys: [[0.21, -2.1, 1.1, 's', { lean: -1 }], [0.34, 2.15, 1.9, 'l', { lean: 1 }], [0.42, 2.25, 1.95, 'o', { lean: 1 }], [0.58, 0.35, 2.0, 's']],
       ev: [[0.21, 'step', 50], [0.21, 'whoosh', 1], [0.34, 'shake', 1.4]] },
-    { n: 'cutucada', hit: [0.13, 0.22], total: 0.42, dmg: 0.85, noTrail: true,
-      keys: [[0.11, 1.5, 2.7, 's', { lean: -1 }], [0.18, 1.48, 1.45, 'o', { lean: 1 }], [0.25, 1.48, 1.45, 'l', { lean: 1 }], [0.42, 0.35, 2.0, 's']],
-      ev: [[0.13, 'step', 75], [0.13, 'whoosh']] }
+    { n: 'salto esmagador', hit: [0.3, 0.37], total: 0.62, dmg: 1.3,
+      keys: [[0.2, -1.3, 0.9, 's', { lean: -1 }], [0.3, -1.55, 0.84, 's', { lean: -1 }], [0.37, 2.35, 1.95, 'i', { lean: 1 }], [0.49, 2.37, 1.97, 'l', { lean: 1, sink: 1 }], [0.62, 0.35, 2.0, 's']],
+      ev: [[0.22, 'hop', 210], [0.22, 'step', 45], [0.3, 'whoosh', 1], [0.37, 'slam']] }
   ],
   staff: [
     { n: 'pancada', hit: [0.22, 0.3], total: 0.52,

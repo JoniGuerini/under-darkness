@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.37.1';
+const VERSAO = '0.37.2';
 const NOVIDADES = [
+  { v: '0.37.2', data: '12/10/2026', titulo: 'Salto esmagador', itens: [
+    'A Marreta não dá mais estocada: o terceiro golpe agora é um salto esmagador, que pula e cai com a marreta no chão.',
+  ] },
   { v: '0.37.1', data: '12/10/2026', titulo: 'Bolsa de blocos', itens: [
     'Bloco coletado completa primeiro as pilhas dele na barra e na mochila; só o que sobra vai para a bolsa de blocos.',
     'A mochila agora aceita pilhas de bloco que você puser nela.'
