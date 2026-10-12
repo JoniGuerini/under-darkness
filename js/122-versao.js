@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.33.4';
+const VERSAO = '0.33.5';
 const NOVIDADES = [
+  { v: '0.33.5', data: '12/10/2026', titulo: 'Compras de graça', itens: [
+    'Modo deus (F4, para testes): nova opção Compras de graça em Menu > Testes > Modo deus, que compra na loja e abas do baú sem gastar ouro.'
+  ] },
   { v: '0.33.4', data: '12/10/2026', titulo: 'Modo lixo', itens: [
     'O Lixo do inventário virou um botão: ligado, cada clique num item da mochila ou da bolsa de blocos joga ele fora.'
   ] },

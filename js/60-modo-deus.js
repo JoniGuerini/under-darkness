@@ -1,11 +1,11 @@
 'use strict';
 /* modo deus, só para testes: F4 liga e desliga. Em Menu > Testes > Modo deus dá para ligar e desligar o modo
    e cada um dos efeitos dele: sem dano (o herói não perde vida), mana infinita, um golpe mata (qualquer alvo,
-   chefes inclusive) luz total (o subterrâneo fica bem menos escuro, ainda com sombra) e tochas infinitas (põe tocha sem ter nenhuma). Os efeitos começam todos ligados. Nada disso vai para
+   chefes inclusive) luz total (o subterrâneo fica bem menos escuro, ainda com sombra) tochas infinitas (põe tocha sem ter nenhuma) e compras de graça (loja e abas do baú sem gastar ouro). Os efeitos começam todos ligados. Nada disso vai para
    o save: todo jogo começa com o modo desligado. Enquanto ligado, aparece uma linha "Deus" no painel do canto superior direito.
    `modoDeus` (lido por outros arquivos para pular dano) quer dizer "o herói não toma dano agora": modo ligado e "Sem dano" ligado. */
 let deusOn = false;
-const DEUS = { vida: true, mana: true, golpe: true, luz: true, tocha: true };
+const DEUS = { vida: true, mana: true, golpe: true, luz: true, tocha: true, ouro: true };
 const deusFx = k => deusOn && DEUS[k];
 Object.defineProperty(window, 'modoDeus', { configurable: true, get: () => deusFx('vida') });
 (function () {
@@ -27,7 +27,7 @@ let deusMenu = () => { };
 (function () {
   const list = $('tpList'); if (!list || !window.__tp) return;
   const h2 = $('pause').querySelector('.card h2');
-  const OPC = [['vida', 'Sem dano'], ['mana', 'Mana infinita'], ['golpe', 'Um golpe mata'], ['luz', 'Luz total'], ['tocha', 'Tochas infinitas']];
+  const OPC = [['vida', 'Sem dano'], ['mana', 'Mana infinita'], ['golpe', 'Um golpe mata'], ['luz', 'Luz total'], ['tocha', 'Tochas infinitas'], ['ouro', 'Compras de graça']];
   const lbl = (t, on) => t + ': ' + (on ? 'ligado' : 'desligado');
   let aberto = false;
   const btn = (txt, fn, id) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = txt; if (id) b.id = id; b.addEventListener('click', fn); b.addEventListener('pointerenter', () => b.focus({ preventScroll: true })); list.appendChild(b); return b; };
@@ -74,6 +74,21 @@ let deusMenu = () => { };
   removeItem = (id, n = 1) => id === 'tocha' ? true : ri(id, n);
   try { return _pt(tx, ty); } finally { countItem = ci; removeItem = ri; }
 }; }
+// compras de graça: só enquanto a loja (19) e as abas do baú (333) conferem e cobram o preço, pl.gold parece não ter fim
+// e não desce; fora disso (HUD, save, roubo dos goblins) é o ouro de verdade. O save nunca vê o ouro de mentira.
+{ let ouro = pl.gold, dentro = 0, fora = 0;
+  const finge = () => dentro > 0 && !fora && deusFx('ouro');
+  Object.defineProperty(pl, 'gold', { enumerable: true, configurable: true,
+    get() { return finge() ? Math.max(ouro, 1e9) : ouro; },
+    set(v) { if (!finge()) { ouro = v; return; } const d = v - Math.max(ouro, 1e9); if (d > 0) ouro += d; } });
+  const mostra = () => { const g = $('shopGold'); if (g) g.innerHTML = coinTag(ouro); const b = $('bagGold'); if (b) b.textContent = goldTxt(ouro); };
+  const escopo = fn => function () { dentro++; try { return fn.apply(this, arguments); } finally { if (--dentro === 0 && deusFx('ouro')) mostra(); } };
+  const semFingir = fn => function () { fora++; try { return fn.apply(this, arguments); } finally { fora--; } };
+  for (const k of ['refreshShop', 'renderFeat', 'buyEntry', 'openBuyPop', 'buyStashTab']) if (typeof window[k] === 'function') window[k] = escopo(window[k]);
+  makeSave = semFingir(makeSave); saveGame = semFingir(saveGame);
+  // o Comprar do baú foi ligado ao buyStashTab original (333): com o efeito ligado, o clique passa pelo embrulhado
+  document.addEventListener('click', e => { if (!deusFx('ouro') || !e.target.closest || !e.target.closest('#stashBuyOk')) return; e.stopPropagation(); e.preventDefault(); buyStashTab(); }, true);
+}
 // um golpe, uma morte. Fica por fora de todos os outros embrulhos de hitEnemy, por isso vem no fim.
 // Respeita só os momentos em que o chefe não pode ser tocado (entrada, queda e volta do Rei Esqueleto);
 // o Rei ainda se levanta uma vez, e o segundo golpe acaba com ele.
