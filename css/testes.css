@@ -63,3 +63,14 @@
 #testes .tfoot{display:flex;justify-content:center}
 #testes .tfoot button{min-width:200px;min-height:40px;font-size:15px;font-weight:600}
 @media (max-width:640px){#testes .tarmy{grid-template-columns:repeat(3,1fr)}#testes .tmundo,#testes .tinfo{grid-template-columns:1fr}}
+
+/* senha: enquanto travada, o cartão só mostra o campo e os botões */
+#testes .testcard.travado{width:min(420px,100%)}
+#testes .testcard.travado>:not(h2):not(.tlock){display:none}
+#testes .testcard:not(.travado) .tlock{display:none}
+#testes .tlock{display:grid;gap:10px;padding:16px 18px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px #2a2230}
+#testes .tlock input{font:600 18px var(--font-ui);letter-spacing:.12em;color:var(--parch);background:#120e16;border:3px solid #000;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #3b3245;padding:9px 12px;outline:none;border-radius:0}
+#testes .tlock input:focus{box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #c8682c}
+#testes .tlock input.bad{animation:bad .3s;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #d23b3b}
+#testes .tlbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#testes .tlbtns button{min-height:40px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center}
