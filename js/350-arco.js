@@ -49,6 +49,23 @@ function bowCanvas(id, pull, arrow) {
     return c;
   });
 }
+// o arco com a flecha encaixada já no ângulo da mira: o arco gira como antes e a flecha é desenhada pixel a pixel por cima,
+// para a ponta (um triângulo de 3 px) e as penas aparecerem em qualquer ângulo, até apontando para baixo
+const NOCK_C = 22;   // a mão fica no meio de uma tela de 44x44
+let nockCv = null;
+function nockedBow(id, pull, arrow, A) {
+  if (!nockCv) { nockCv = mk(NOCK_C * 2, NOCK_C * 2); nockCv.getContext('2d').imageSmoothingEnabled = false; }
+  const x = nockCv.getContext('2d'), pv = bowPivot(id), P = ARROW_PAL[arrow], wr = heroRamp(P.w), ar = heroRamp(P.a), fr = heroRamp(P.f);
+  x.clearRect(0, 0, NOCK_C * 2, NOCK_C * 2);
+  rotDraw(x, bowCanvas(id, pull, null), NOCK_C, NOCK_C, pv.px, pv.py, A - Math.PI / 2);
+  const dx = Math.sin(A), dy = -Math.cos(A), qx = -dy, qy = dx;
+  const px = (u, v, col) => { x.fillStyle = col; x.fillRect(Math.floor(NOCK_C + dx * u + qx * v), Math.floor(NOCK_C + dy * u + qy * v), 1, 1); };
+  const tail = -3.5 - pull, tip = 10.5 - pull * 0.8;   // puxada, a ponta ainda passa uns 5 px da mão
+  for (let u = tail + 1; u <= tip - 1.5; u += 0.5) px(u, 0, wr[Math.floor(u - tail) % 3 ? 3 : 2]);   // a haste
+  px(tail + 0.5, 1.1, fr[3]); px(tail + 0.5, -1.1, fr[3]); px(tail + 1.5, 1.1, fr[3]); px(tail + 1.5, -1.1, fr[3]); px(tail, 0, fr[4]);   // as penas
+  px(tip - 1.5, 1.2, ar[3]); px(tip - 1.5, -1.2, ar[3]); px(tip - 1, 0, ar[4]); px(tip - 0.5, 0, ar[4]); px(tip, 0, ar[5]);           // a ponta
+  return nockCv;
+}
 const bowPivot = id => ({ px: BOW_PL + 5, py: Math.floor(bowArt(id).height / 2) + 0.5 });
 // a flecha na mão de trás: em pé, a ponta para cima, a mão perto das penas (pivô 2.5, 11 como os itens da mão de trás)
 function heldArrow(arrow) {
@@ -193,7 +210,8 @@ function bowPose(P) {
   const hx = OX + 7.5 + dx * 6, hy = OY + 10.5 + dy * 6;
   const nocked = bow.st === 'ready' || bow.st === 'draw', arrow = arrowNow() || 'flecha';
   const pv = bowPivot(id);
-  P.front = Object.assign({}, P.front, { ang: A, len: 6, sl: 5, item: { img: bowCanvas(id, bow.pull, nocked ? arrow : null), ang: A - Math.PI / 2, px: pv.px, py: pv.py } });
+  const item = nocked ? { img: nockedBow(id, bow.pull, arrow, A), ang: 0, px: NOCK_C, py: NOCK_C } : { img: bowCanvas(id, bow.pull, null), ang: A - Math.PI / 2, px: pv.px, py: pv.py };
+  P.front = Object.assign({}, P.front, { ang: A, len: 6, sl: 5, item });
   const at = d => [hx - dx * d, hy - dy * d];   // um ponto na linha da flecha, d px atrás da mão do arco
   const smooth = smooth01, r = bow.t / BOW_T.reload;
   if (bow.st === 'ready' || bow.st === 'draw') { const [x, y] = at(3.5 + bow.pull); backArmTo(P, x, y, true); }
