@@ -53,25 +53,40 @@ function talentTot(tot) {
     if (pl.parry) pl.parry *= 1 + p('parry');
     if (F.stun) pl.stunCh = (pl.stunCh || 0) + p('stun');
     if (F.regen) pl.regenB += pl.maxHp * p('regen');
+    // o dano físico entra direto no dano da arma, para a ficha (C) mostrar o mesmo número que sai no golpe
+    const w = equip.weapon, k = arvPhysMult(!(w && KIND[ITEMS[w.id].kind] && KIND[ITEMS[w.id].kind].bow));
+    if (k !== 1) {
+      const r1 = v => Math.round(v * 10) / 10;
+      pl.dmgMin = Math.max(1, r1(pl.dmgMin * k)); pl.dmgMax = Math.max(pl.dmgMin, r1(pl.dmgMax * k)); pl.dmg = (pl.dmgMin + pl.dmgMax) / 2;
+    }
+    // o dano de feitiços soma com o dos cajados, varinhas e tomos (pl.spellPct, js/92)
+    if (F.dmgSpell) pl.spellPct = (pl.spellPct || 0) + p('dmgSpell');
     pl.dps = pl.dmg * pl.aps * (1 + Math.min(1, pl.crit) * pl.critDmg);
     if (pl.hp > pl.maxHp) pl.hp = pl.maxHp;
     if (pl.mana > pl.maxMana) pl.mana = pl.maxMana;
   };
 }
-// o dano: soma as porcentagens que valem para este golpe
+// o dano: o físico já está no dano da arma (recalc acima); o de feitiço já está no pl.spellPct.
+// Aqui só entram o dano geral e o do elemento nos golpes de feitiço.
 const ARV_ELEM = { fogo: 'dmgFogo', gelo: 'dmgGelo', raio: 'dmgRaio' };
-function arvHitMult(melee) {
-  const F = arvFx;
-  const el = typeof arcRoll !== 'undefined' && arcRoll ? 'raio' : typeof nevRoll !== 'undefined' && nevRoll ? 'gelo'
+function arvPhysMult(melee) { const F = arvFx; return Math.max(0, 1 + ((F.dmgAll || 0) + (F.dmgFis || 0) + (melee ? F.dmgMelee || 0 : 0)) / 100); }
+function arvElemMult(el) { const F = arvFx; return Math.max(0, 1 + ((F.dmgAll || 0) + (F[ARV_ELEM[el]] || 0)) / 100); }
+function arvHitElem() {
+  return typeof arcRoll !== 'undefined' && arcRoll ? 'raio' : typeof nevRoll !== 'undefined' && nevRoll ? 'gelo'
     : typeof fogoRoll !== 'undefined' && fogoRoll ? 'fogo' : typeof escRoll !== 'undefined' && escRoll ? escElem || 'raio' : null;
-  let s = F.dmgAll || 0;
-  if (el) s += (F.dmgSpell || 0) + (F[ARV_ELEM[el]] || 0); else s += F.dmgFis || 0;
-  if (melee) s += F.dmgMelee || 0;
-  return Math.max(0, 1 + s / 100);
 }
 {
   const _hit = hitEnemy;
-  hitEnemy = function (e, dir, mult = 1, melee = false) { return _hit(e, dir, arvAny ? mult * arvHitMult(melee) : mult, melee); };
+  hitEnemy = function (e, dir, mult = 1, melee = false) {
+    const el = arvAny ? arvHitElem() : null;
+    return _hit(e, dir, el ? mult * arvElemMult(el) : mult, melee);
+  };
+}
+// a queimadura dos feitiços de fogo não passa pelo hitEnemy: o dano dela segue o dano de fogo da árvore
+const ARV_BURN0 = typeof FOGO !== 'undefined' && FOGO.burn ? FOGO.burn.dmg : 0;
+{
+  const _rc = recalc;
+  recalc = function () { _rc.apply(this, arguments); if (ARV_BURN0) FOGO.burn.dmg = ARV_BURN0 * (arvAny ? arvElemMult('fogo') : 1); };   // o de feitiços vem pelo pl.spellPct
 }
 // o dano recebido: resistências da árvore (por cima das dos elixires) e "recebe menos dano"; aparar que cura
 {

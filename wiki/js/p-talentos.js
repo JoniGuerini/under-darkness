@@ -12,6 +12,7 @@
         <li>Cada nível do personagem dá 1 ponto. Subir de nível não dá mais nada além disso.</li>
         <li>Clique esquerdo liga o caminho mais curto até o nó, gastando 1 ponto por nó. Clique direito devolve um nó, desde que o resto continue ligado ao início. "Recomeçar" devolve tudo.</li>
         <li>Os bônus são porcentagens da base do atributo (+10% de vida é 10% da vida máxima), nunca valores fixos.</li>
+        <li>O dano geral, físico e corpo a corpo entram direto no dano da arma, então a ficha (C) mostra o dano e o DPS já com eles. O dano de feitiços soma com o dos cajados, varinhas e tomos; o de fogo, gelo e raio vale nos feitiços daquele elemento.</li>
         <li>As resistências da árvore somam até 75%.</li>
         <li>${ARV_LIST.length} nós: ${cnt('s')} talentos, ${cnt('n')} notáveis, ${cnt('k')} keystones e o início. ${ARV_EDGES.length} ligações.</li>
         <li>Cada região tem 1 caminho central até a keystone e 2 galhos laterais com um notável na ponta. Pontes ligam as regiões vizinhas perto do centro (${E(ARV_PONTE_IN.map(arvFxLine).join(', '))}) e por fora (${E(ARV_PONTE_FORA.map(arvFxLine).join(', '))}).</li>

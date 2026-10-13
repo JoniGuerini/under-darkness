@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.38.4';
+const VERSAO = '0.39.0';
 const NOVIDADES = [
+  { v: '0.39.0', data: '13/10/2026', titulo: 'Ficha do personagem', itens: [
+    'A ficha do personagem (C) foi refeita: mostra o que os itens e a árvore de talentos dão, e cada número diz de onde vem.',
+    'Dano físico, corpo a corpo e geral da árvore agora entram no dano da arma, então a ficha e o golpe batem. O dano de feitiço da árvore soma com o dos cajados.',
+  ] },
   { v: '0.38.4', data: '12/10/2026', titulo: 'Recuperar flechas', itens: [
     'Flecha cravada sempre dá para pegar de volta: chegando perto (no teto, na parede ou no chão) ou com E com o mouse em cima, em qualquer lugar.',
     'Metade das flechas quebra ao bater, e as cravadas ficam 3 minutos. Se o bloco sumir, a flecha cai no chão.',
