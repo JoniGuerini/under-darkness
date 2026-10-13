@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.39.1';
+const VERSAO = '0.39.2';
 const NOVIDADES = [
+  { v: '0.39.2', data: '13/10/2026', titulo: 'Talentos salvos', itens: [
+    'Os pontos gastos na árvore de talentos voltam ao continuar o jogo. Antes, recarregar a página zerava a árvore.',
+  ] },
   { v: '0.39.1', data: '13/10/2026', titulo: 'Estoque da fornalha', itens: [
     'As barras fundidas não vão mais direto para a mochila: ficam no estoque da fornalha, na forja do Grimaldo, até você ir lá coletar.',
   ] },

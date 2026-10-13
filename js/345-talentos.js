@@ -179,18 +179,18 @@ function arvLoad(list) {
   const _ms = makeSave;
   makeSave = function () { const o = _ms(); o.arv = [...arv.on].filter(id => id !== 'o'); if (arv.extra) o.arvExtra = arv.extra; return o; };
   const _nw = newWorld;
-  newWorld = function (sd, sv) {
-    _nw(sd, sv);
-    const hp0 = pl.hp, max0 = pl.maxHp;
-    arv.extra = Math.max(0, Math.round(+(sv && sv.arvExtra) || 0));
-    arvLoad(sv && sv.arv); recalc();
-    const saved = sv && sv.p && +sv.p.hp;
-    pl.hp = hp0 >= max0 ? (saved ? clamp(saved, 1, pl.maxHp) : pl.maxHp) : Math.min(hp0, pl.maxHp);
-    if (pl.mana > pl.maxMana) pl.mana = pl.maxMana;
-    arvDirty = true; arvTesteTxt();
-  };
+  newWorld = function (sd, sv) { _nw(sd, sv); arvFromSave(sv); };
 }
-
+// lê a árvore de um save (depois que o mundo e o nível já foram carregados)
+function arvFromSave(sv) {
+  const hp0 = pl.hp, max0 = pl.maxHp;
+  arv.extra = Math.max(0, Math.round(+(sv && sv.arvExtra) || 0));
+  arvLoad(sv && sv.arv); recalc();
+  const saved = sv && sv.p && +sv.p.hp;
+  pl.hp = hp0 >= max0 ? (saved ? clamp(saved, 1, pl.maxHp) : pl.maxHp) : Math.min(hp0, pl.maxHp);
+  if (pl.mana > pl.maxMana) pl.mana = pl.maxMana;
+  arvDirty = true; arvTesteTxt();
+}
 /* ================= a arte ================= */
 const ARV_C = 620, ARV_W = ARV_C * 2;            // a folha: o centro da árvore fica em ARV_C, ARV_C
 const ARV_STONE = ['#07060c', '#0e0b16', '#151120', '#1d1830', '#2a2342', '#3a3058', '#4e4274'];
@@ -642,3 +642,9 @@ function arvTesteTxt() { const s = document.getElementById('tArvPts'); if (s) s.
   arvTesteTxt();
 })();
 arvRecount();
+
+// o 24-boot carrega o save assim que é lido, antes deste arquivo: aqui a árvore desse save é lida de novo
+// (sem isso, "Continuar" voltava sem talentos e o próximo save gravava a árvore vazia)
+if (typeof tiles !== 'undefined' && tiles) {
+  try { const h = window.claude?.hot?.data?.save; arvFromSave(h || loadSave()); } catch (e) { }
+}
