@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.38.1';
+const VERSAO = '0.38.2';
 const NOVIDADES = [
+  { v: '0.38.2', data: '12/10/2026', titulo: 'Tiro carregado', itens: [
+    'O arco atira quando você solta o botão. Clique rápido dá uma flecha fraca e curta, e segurar carrega o tiro: a flecha sai mais forte e mais longe.',
+  ] },
   { v: '0.38.1', data: '12/10/2026', titulo: 'Arma mira no mouse', itens: [
     'A arma na mão aponta para o mouse o tempo todo, parado, andando ou no ar, e o golpe sai na direção da mira. O arco também fica sempre mirando.',
   ] },

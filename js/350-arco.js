@@ -2,8 +2,9 @@
 
 /* ================= arco e flecha em jogo (dados: js/349-arco-dados.js) =================
    - Com o arco na mão (barra 1) e a aljava equipada, o herói já está com uma flecha encaixada. Clicar (ou segurar)
-     puxa a corda em direção ao mouse e solta sozinho quando o arco está todo puxado; logo depois a mão vai até a
-     aljava nas costas, tira outra flecha e encaixa na corda. Equipar o arco também faz essa animação.
+     puxa a corda em direção ao mouse; soltar o botão atira. Clique rápido = flecha fraca e curta; segurar
+     carrega o tiro (BOW_T.charge) e a flecha sai mais forte e mais longe; carregado, ele segura a corda até soltar.
+     Logo depois a mão vai até a aljava nas costas, tira outra flecha e encaixa na corda. Equipar o arco também faz essa animação.
    - Sem aljava ou sem flecha na mochila o arco fica vazio e não atira.
    - A flecha voa com um pouco de queda e só acerta o que ela realmente toca (como os feitiços); bate com o dano do
      arco vezes o da flecha. Na parede ou no chão ela finca e fica lá um tempo: metade delas dá para pegar de volta
@@ -16,7 +17,9 @@
    Carrega depois do 235-criar (embrulha updatePlayer, poseFor, playerPose, twoHandRule, talCondOk, restock,
    openShop, shelfOf, craftOne e paintHotbar). */
 
-const BOW_T = { draw: 0.24, loose: 0.08, reload: 0.36 };
+const BOW_T = { draw: 0.12, charge: 0.7, loose: 0.08, reload: 0.36 };   // draw: o mínimo puxado de um clique rápido
+// força do tiro (0 = clique rápido, 1 = carregado): velocidade e dano da flecha
+const BOW_POW = { spd: [0.45, 1.15], dmg: [0.5, 1.25] };
 const BOW_SPD = 360, ARROW_G = 300, ARROW_LIFE = 4, ARROW_STUCK = 10;
 const ARROW_IDS = ['flecha_ferro', 'flecha'];
 const bow = { st: 'empty', t: 0, pull: 0, A: 2.3, buf: 0, last: -9, w: null };
@@ -60,12 +63,13 @@ function heldArrow(arrow) {
 
 /* ---- disparo e voo ---- */
 function shoulderW() { const f = pl.facing; return [pl.x + pl.w / 2 + f * 1.5, pl.y + pl.h - 11.5]; }
-function fireArrow() {
+function fireArrow(pow) {
   const id = arrowNow(); if (!id) return;
+  const q = pow == null ? 1 : pow;
   removeItem(id, 1);
   const f = pl.facing, a = bow.A, dx = Math.sin(a) * f, dy = -Math.cos(a), [sx, sy] = shoulderW();
-  const sp = BOW_SPD * (ITEMS[equip.weapon.id].bowSpd || 1);
-  ARROWS.push({ x: sx + dx * 12, y: sy + dy * 12, ax: sx, ay: sy, vx: dx * sp + pl.vx * 0.3, vy: dy * sp, id, k: ITEMS[id].arrowK || 1, t: 0 });
+  const sp = BOW_SPD * (ITEMS[equip.weapon.id].bowSpd || 1) * lerp(BOW_POW.spd[0], BOW_POW.spd[1], q);
+  ARROWS.push({ x: sx + dx * 12, y: sy + dy * 12, ax: sx, ay: sy, vx: dx * sp + pl.vx * 0.3, vy: dy * sp, id, k: (ITEMS[id].arrowK || 1) * lerp(BOW_POW.dmg[0], BOW_POW.dmg[1], q), t: 0 });
   sfx.bow();
 }
 function arrowHit(o, e) {
@@ -125,11 +129,12 @@ function bowAim() {
 function bowTick(dt, hand) {
   if (!bowOn()) { bow.st = 'empty'; bow.w = null; return; }
   if (bow.w !== equip.weapon.uid) { bow.w = equip.weapon.uid; bow.st = 'empty'; }   // arco novo na mão: encaixa a flecha de novo
-  bow.buf -= dt;
+  const gate = gameTime - bow.last >= (pl.atkPeriod || 0.68) - 0.01;
+  if (bow.st === 'ready' && gate) bow.buf -= dt;   // um clique durante a recarga espera a flecha ficar pronta
   const k = clamp((pl.atkPeriod || 0.68) / 0.68, 0.45, 2.2), nk = quiverOn() ? ITEMS[equip.shield.id].nock || 1 : 1, can = bowCan();
   if (pl.dead) return;
   switch (bow.st) {
-    case 'empty': bow.pull = 0; if (can && hand) { bow.st = 'reload'; bow.t = 0; } break;
+    case 'empty': bow.pull = 0; bow.buf = 0; if (can && hand) { bow.st = 'reload'; bow.t = 0; } break;
     case 'reload':
       if (!can) { bow.st = 'empty'; break; }
       if (hand) bow.t += dt * nk / k;
@@ -137,12 +142,17 @@ function bowTick(dt, hand) {
       break;
     case 'ready':
       if (!can) { bow.st = 'empty'; break; }
-      if (hand && (mouse.l || bow.buf > 0) && pl.stunT <= 0 && !pl.climb && gameTime - bow.last >= (pl.atkPeriod || 0.68) - 0.01) { bow.st = 'draw'; bow.t = 0; bow.buf = 0; if (sfx.draw) sfx.draw(); }
+      if (hand && (mouse.l || bow.buf > 0) && pl.stunT <= 0 && !pl.climb && gate) { bow.st = 'draw'; bow.t = 0; bow.buf = 0; if (sfx.draw) sfx.draw(); }
       break;
     case 'draw':
       if (!hand || !can) { bow.st = can ? 'ready' : 'empty'; bow.pull = 0; break; }
-      bow.t += dt / k; bow.pull = Math.round(6 * smooth01(Math.min(1, bow.t / BOW_T.draw)));
-      if (bow.t >= BOW_T.draw) { bow.A = bowAim(); fireArrow(); bow.st = 'loose'; bow.t = 0; bow.pull = 0; bow.last = gameTime; }
+      {
+        const was = bow.pow || 0;
+        bow.t += dt / k; bow.pow = smooth01(Math.min(1, bow.t / BOW_T.charge)); bow.pull = Math.max(1, Math.round(6 * bow.pow));
+        if (was < 1 && bow.pow >= 1) { tone(880, 0.06, 'triangle', 0.03, 220); bow.full = gameTime; }   // carregado: um estalo baixinho
+        // atira quando solta o botão (um clique rápido puxa só um pouco antes de soltar)
+        if (!mouse.l && bow.t >= BOW_T.draw) { bow.A = bowAim(); fireArrow(bow.pow); bow.st = 'loose'; bow.t = 0; bow.pull = 0; bow.pow = 0; bow.last = gameTime; }
+      }
       break;
     case 'loose':
       bow.t += dt / k;
