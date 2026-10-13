@@ -6,7 +6,8 @@
      - drops no chão (itens, ouro, equipamentos);
      - tochas e candelabros colocados (voltam como item);
      - ervas (passa pelo harvestHerb do 95, então os talentos de colheita contam);
-     - os objetos soltos das camadas que já davam um item ao quebrar (não sólidos, com BLOCK_DROP).
+     - os objetos soltos das camadas que já davam um item ao quebrar (não sólidos, com BLOCK_DROP);
+     - as flechas cravadas do arco (js/350).
    Sem limite de distância, igual a colocar tocha: basta o mouse estar em cima. Blocos sólidos e
    plataformas continuam só com a picareta; nada do vilarejo é coletável (as lanternas dele ficam).
    Quando o mouse está sobre algo coletável, o E é dele: ganha do portal (29), dos moradores, das
@@ -34,7 +35,7 @@ function colTileOk(tx, ty) {
 function colTileSobMouse() { const [wx, wy] = mouseWorld(), tx = Math.floor(wx / T), ty = Math.floor(wy / T); return colTileOk(tx, ty) ? [tx, ty] : null; }
 function coletavelSobMouse() {
   if (typeof pl === 'undefined' || pl.dead || state !== 'play' || !surf) return false;
-  return !!(colLootSobMouse() || colTileSobMouse());
+  return !!(colLootSobMouse() || colTileSobMouse() || (typeof arrowSobMouse === 'function' && arrowSobMouse()));   // flechas cravadas: js/350
 }
 
 // põe um drop na mochila; o que não couber fica no chão, aos pés do herói
@@ -47,6 +48,7 @@ function colPegar(o) {
   return got > 0;
 }
 function coletarSobMouse() {
+  const fl = typeof arrowSobMouse === 'function' && arrowSobMouse(); if (fl) { arrowPegar(fl); return true; }
   const o = colLootSobMouse(); if (o) { colPegar(o); return true; }
   const c = colTileSobMouse(); if (!c) return false;
   const [tx, ty] = c, n0 = loot.length;

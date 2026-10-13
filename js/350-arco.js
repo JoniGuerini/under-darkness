@@ -7,8 +7,9 @@
      Logo depois a mão vai até a aljava nas costas, tira outra flecha e encaixa na corda. Equipar o arco também faz essa animação.
    - Sem aljava ou sem flecha na mochila o arco fica vazio e não atira.
    - A flecha voa com um pouco de queda e só acerta o que ela realmente toca (como os feitiços); bate com o dano do
-     arco vezes o da flecha. Na parede ou no chão ela finca e fica lá um tempo: metade delas dá para pegar de volta
-     passando por cima.
+     arco vezes o da flecha. Na parede, no teto ou no chão, metade quebra na hora (lascas) e a outra
+     metade finca e fica lá: dá para pegar de volta chegando perto (18 px de folga), com E sob o mouse (js/348,
+     qualquer distância) ou, se o bloco sumir, ela cai como drop.
    - A aljava ocupa o espaço do escudo mas não é escudo: botão direito e Shift não fazem nada com ela.
    - O Grimaldo sempre tem flechas (as duas), um arco e uma aljava; as flechas, o Arco Curto e a Aljava de Couro
      também saem no Criar do inventário.
@@ -20,7 +21,7 @@
 const BOW_T = { draw: 0.12, charge: 0.7, loose: 0.08, reload: 0.36 };   // draw: o mínimo puxado de um clique rápido
 // força do tiro (0 = clique rápido, 1 = carregado): velocidade e dano da flecha
 const BOW_POW = { spd: [0.45, 1.15], dmg: [0.5, 1.25] };
-const BOW_SPD = 360, ARROW_G = 300, ARROW_LIFE = 4, ARROW_STUCK = 10;
+const BOW_SPD = 360, ARROW_G = 300, ARROW_LIFE = 4, ARROW_STUCK = 180, ARROW_MAX_STUCK = 40, ARROW_REACH = 18;
 const ARROW_IDS = ['flecha_ferro', 'flecha'];
 const bow = { st: 'empty', t: 0, pull: 0, A: 2.3, buf: 0, last: -9, w: null };
 const ARROWS = [];
@@ -89,6 +90,26 @@ function fireArrow(pow) {
   ARROWS.push({ x: sx + dx * 12, y: sy + dy * 12, ax: sx, ay: sy, vx: dx * sp + pl.vx * 0.3, vy: dy * sp, id, k: (ITEMS[id].arrowK || 1) * lerp(BOW_POW.dmg[0], BOW_POW.dmg[1], q), t: 0 });
   sfx.bow();
 }
+// a flecha cravada: perto do herói (com folga), sob o mouse (o E do js/348) e o pegar
+function arrowNear(o) {
+  const dx = Math.max(pl.x - o.x, 0, o.x - (pl.x + pl.w)), dy = Math.max(pl.y - o.y, 0, o.y - (pl.y + pl.h));
+  return Math.hypot(dx, dy) <= ARROW_REACH;
+}
+function arrowSobMouse() {
+  const [wx, wy] = mouseWorld();
+  for (let i = ARROWS.length - 1; i >= 0; i--) {
+    const o = ARROWS[i]; if (!o.stuck) continue;
+    const sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
+    for (let k = 0; k < 9; k++) if (Math.abs(o.x - ux * k - wx) <= 3 && Math.abs(o.y - uy * k - wy) <= 3) return o;
+  }
+  return null;
+}
+function arrowPegar(o) {
+  if (!canFit(o.id)) { if (pl.fullMsg <= 0) { pl.fullMsg = 2.5; floatText(pl.x + pl.w / 2, pl.y - 10, 'Mochila cheia', '#ffb4a8', 0.8); } return false; }
+  addItem(o.id, 1); pickupMsg(o.id, 1); invDirty = true;
+  const i = ARROWS.indexOf(o); if (i >= 0) ARROWS.splice(i, 1);
+  return true;
+}
 function arrowHit(o, e) {
   hitEnemy(e, Math.sign(o.vx) || pl.facing, o.k, false);
   burst(o.x, o.y, 5, '#8a6a44', 60, 200, 0.3, 1, true);
@@ -97,10 +118,10 @@ HOOK.update.push(dt => {
   for (let i = ARROWS.length - 1; i >= 0; i--) {
     const o = ARROWS[i]; o.t += dt;
     if (o.stuck) {
-      if (o.t > ARROW_STUCK || !solidAt(o.tx, o.ty)) { ARROWS.splice(i, 1); continue; }
-      if (o.keep && o.t > 0.4 && !pl.dead && o.x > pl.x - 3 && o.x < pl.x + pl.w + 3 && o.y > pl.y - 3 && o.y < pl.y + pl.h + 3 && canFit(o.id)) {
-        addItem(o.id, 1); sfx.pickup && sfx.pickup(); invDirty = true; ARROWS.splice(i, 1);
-      }
+      if (o.t > ARROW_STUCK) { ARROWS.splice(i, 1); continue; }
+      if (!solidAt(o.tx, o.ty)) { dropLoot(o.x, o.y, o.id, 1, true); ARROWS.splice(i, 1); continue; }   // o bloco sumiu: a flecha cai como drop
+      // pega passando perto: a ponta fica dentro do bloco, então conta a distância até o herói com folga (teto, parede, chão)
+      if (o.t > 0.4 && !pl.dead && arrowNear(o)) arrowPegar(o);
       continue;
     }
     o.vy += ARROW_G * dt;
@@ -116,8 +137,11 @@ HOOK.update.push(dt => {
       const tx = Math.floor(qx / T), ty = Math.floor(qy / T);
       if (tileAt(tx, ty) === URN) { breakTile(tx, ty); end = 'hit'; break; }
       if (solidAt(tx, ty)) {
-        o.x = qx; o.y = qy; o.stuck = true; o.tx = tx; o.ty = ty; o.t = 0; o.keep = Math.random() < 0.5;
+        // metade quebra na hora (lascas e um estalo); a outra metade fica cravada e sempre dá para pegar de volta
+        if (Math.random() < 0.5) { burst(qx, qy, 6, '#8a6a44', 70, 260, 0.35, 1, true); noise(0.05, 0.08, 1800, 'highpass', 0, 0.5); end = 'hit'; break; }
+        o.x = qx; o.y = qy; o.stuck = true; o.tx = tx; o.ty = ty; o.t = 0;
         burst(qx, qy, 3, '#8a7a62', 40, 200, 0.25, 1, true); sfx.tink && sfx.tink(); end = 'wall';
+        const stuck = ARROWS.filter(a => a.stuck); if (stuck.length > ARROW_MAX_STUCK) ARROWS.splice(ARROWS.indexOf(stuck[0]), 1);
       }
     }
     if (end === 'hit' || (!end && o.t > ARROW_LIFE)) ARROWS.splice(i, 1);

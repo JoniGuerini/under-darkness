@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.38.3';
+const VERSAO = '0.38.4';
 const NOVIDADES = [
+  { v: '0.38.4', data: '12/10/2026', titulo: 'Recuperar flechas', itens: [
+    'Flecha cravada sempre dá para pegar de volta: chegando perto (no teto, na parede ou no chão) ou com E com o mouse em cima, em qualquer lugar.',
+    'Metade das flechas quebra ao bater, e as cravadas ficam 3 minutos. Se o bloco sumir, a flecha cai no chão.',
+  ] },
   { v: '0.38.3', data: '12/10/2026', titulo: 'Ponta da flecha', itens: [
     'A flecha encaixada no arco mostra a ponta e as penas em qualquer ângulo, até mirando para baixo.',
   ] },
