@@ -1,0 +1,15 @@
+/* o estoque de barras na aba Fornalha da forja (js/352-estoque-barras.js) */
+#forge .bstock{display:flex;flex-direction:column;gap:8px}
+#forge .bs-head{display:flex;align-items:center;gap:10px}
+#forge .bs-head h5{margin:2px 0 0}
+#forge .bs-head button{margin-left:auto}
+#forge .bs-tray{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(0,0,0,.35);border:2px solid #000;box-shadow:inset 0 0 0 1px #3a2e22}
+#forge .bs-slot{position:relative;width:44px;height:44px;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#2c2232,#120d16 78%);border:2px solid #000;box-shadow:inset 0 0 0 1px #4a3826;cursor:pointer}
+#forge .bs-slot img{width:34px;height:34px;image-rendering:pixelated;pointer-events:none}
+#forge .bs-slot b{position:absolute;right:2px;bottom:0;font-size:13px;font-variant-numeric:tabular-nums;color:#fff;pointer-events:none;text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
+#forge .bs-slot.vazio{cursor:default;opacity:.5}
+#forge .bs-slot[data-bs]:hover,#forge .bs-slot[data-bs]:focus-visible{outline:none;box-shadow:inset 0 0 0 1px #c8822e,inset 0 0 10px rgba(255,140,40,.25)}
+#forge .bs-slot.bad{animation:bad .3s}
+body[data-npc=ferreiro] #forge .bs-tray{background:rgba(10,5,2,.5);box-shadow:inset 0 0 0 1px #504943,inset 2px 2px 0 1px rgba(0,0,0,.6)}
+body[data-npc=ferreiro] #forge .bs-slot{background:radial-gradient(circle at 50% 70%,#3a1a0a,#0d0704 74%);box-shadow:inset 0 0 0 1px #504943,inset 2px 2px 0 1px rgba(0,0,0,.7)}
+body[data-npc=ferreiro] #forge .bs-slot[data-bs]:hover{box-shadow:inset 0 0 0 1px #d8803a,inset 0 0 12px rgba(255,120,30,.3)}

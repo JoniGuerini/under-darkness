@@ -83,7 +83,7 @@ const ofMetalTier = bar => Math.max(0, METALS.findIndex(M => M.bar === bar));
 function ofOnBar({ ore, r }) {
   ofGain('forja', 2 + ofMetalTier(r.bar));
   if (ofV('forja', 'almaForja') || ofRoll('forja', 'carvao')) reagGive('carvao', 1);
-  if (ofRoll('forja', 'barraExtra')) reagGive(r.bar, 1);
+  if (ofRoll('forja', 'barraExtra')) barStockAdd(r.bar, 1);
   if (ofRoll('forja', 'minerio')) reagGive(ore, 1);
   if (ofV('forja', 'quarta')) { ofC4 = (ofC4 + 1) % 4; if (!ofC4) reagGive(ore, r.n); }
   invDirty = true; forgeDirty = true;

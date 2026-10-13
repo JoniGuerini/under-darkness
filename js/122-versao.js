@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.39.0';
+const VERSAO = '0.39.1';
 const NOVIDADES = [
+  { v: '0.39.1', data: '13/10/2026', titulo: 'Estoque da fornalha', itens: [
+    'As barras fundidas não vão mais direto para a mochila: ficam no estoque da fornalha, na forja do Grimaldo, até você ir lá coletar.',
+  ] },
   { v: '0.39.0', data: '13/10/2026', titulo: 'Ficha do personagem', itens: [
     'A ficha do personagem (C) foi refeita: mostra o que os itens e a árvore de talentos dão, e cada número diz de onde vem.',
     'Dano físico, corpo a corpo e geral da árvore agora entram no dano da arma, então a ficha e o golpe batem. O dano de feitiço da árvore soma com o dos cajados.',

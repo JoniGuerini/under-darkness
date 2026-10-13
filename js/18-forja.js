@@ -34,17 +34,15 @@ function tickFurnace(dt) {
   if (furnace.t < r.t) return;
   furnace.t = 0; furnace.ore.n -= r.n; if (furnace.ore.n <= 0) furnace.ore = null;
   if (--furnace.fuel.n <= 0) furnace.fuel = null;
-  if (addItem(r.bar, 1)) { if (furnace.out) furnace.out.n++; else furnace.out = { id: r.bar, n: 1 }; }   // straight into the bag when there is room
+  barStockAdd(r.bar, 1);   // into the forge's stock, collected by hand (js/352-estoque-barras.js)
   furnace.made++; furnace.lastBar = r.bar; forgeDirty = true; invDirty = true;
   if (forgeOpen()) sfx.anvil(0.7);
   if (furnace.goal && furnace.made >= furnace.goal) { stopFurnace(); return; }
   if (furnaceWhy()) stopFurnace();
 }
 function stopFurnace() {
-  const made = furnace.made, bar = furnace.lastBar || 'barra_ferro';
   furnace.on = false; furnace.t = 0; furnace.goal = 0; furnace.made = 0;
   emptyFurnace();
-  if (!forgeOpen() && made > 0) toast(`A fornalha do Grimaldo terminou: ${made}× ${ITEMS[bar].name.toLowerCase()} na sua mochila.`, 'gold');
 }
 function startSmelt(id, q, el) {
   const r = FURN[id]; q = Math.min(q, smeltMax(id));
@@ -175,7 +173,7 @@ function refreshForge() {
     body = `<p class="pdesc">${bar.desc || 'Metal pronto para a bigorna.'}</p><h5>Materiais por barra</h5><ul class="preag">${reagRow(id, r.n, furHas(id))}${reagRow('carvao', 1, furHas('carvao'))}</ul>`;
     max = smeltMax(id); busy = furnace.on; verb = 'Fundir';
     const ld = furnace.ore || furnace.fuel || furnace.out;
-    $('pdNote').textContent = furnace.on ? (furnace.ore && furnace.ore.id !== id ? `A fornalha está fundindo ${ITEMS[FURN[furnace.ore.id].bar].name.toLowerCase()}. Fundir esta receita troca o minério.` : 'As barras vão direto para a sua mochila. A fornalha continua acesa se você sair.')
+    $('pdNote').textContent = furnace.on ? (furnace.ore && furnace.ore.id !== id ? `A fornalha está fundindo ${ITEMS[FURN[furnace.ore.id].bar].name.toLowerCase()}. Fundir esta receita troca o minério.` : 'A fornalha continua acesa se você sair.')
       : ld ? `Ficou na fornalha: ${[furnace.ore, furnace.fuel, furnace.out].filter(Boolean).map(q => `${q.n}× ${ITEMS[q.id].name.toLowerCase()}`).join(', ')} (mochila cheia).` : max ? '' : furHas(id) < r.n ? `Você precisa de ${r.n} ${ITEMS[id].name.toLowerCase()} por barra.` : 'Falta carvão. O Odo, na taverna, vende.';
   } else {
     const rc = RECIPES.find(q => q.id === sel), it = ITEMS[rc.id];
