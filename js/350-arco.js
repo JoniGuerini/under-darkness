@@ -120,7 +120,7 @@ function bowAim() {
   const [mx, my] = mouseWorld(), d = mx - (pl.x + pl.w / 2);
   if (Math.abs(d) > 2) pl.facing = d > 0 ? 1 : -1;
   const [sx, sy] = shoulderW();
-  return clamp(Math.atan2((mx - sx) * pl.facing, sy - my), 0.15, 3.0);
+  return clamp(Math.atan2((mx - sx) * pl.facing, sy - my), 0.15, 2.7);
 }
 function bowTick(dt, hand) {
   if (!bowOn()) { bow.st = 'empty'; bow.w = null; return; }
@@ -149,8 +149,8 @@ function bowTick(dt, hand) {
       if (bow.t >= BOW_T.loose) { bow.st = bowCan() ? 'reload' : 'empty'; bow.t = 0; }
       break;
   }
-  // a mira: para o mouse enquanto atira (e um instante depois), o arco baixo no resto do tempo
-  const aiming = hand && (bow.st === 'draw' || bow.st === 'loose' || (mouse.l && bow.st === 'ready') || gameTime - bow.last < 0.45);
+  // a mira: sempre para o mouse (js/351-mira.js faz o mesmo com as outras armas)
+  const aiming = hand && !pl.climb;   // com o arco na mão ele mira o mouse o tempo todo (na escada o arco desce)
   const tA = aiming ? bowAim() : 2.35;
   bow.A = lerp(bow.A, tA, Math.min(1, dt * (aiming ? 28 : 10)));
 }
