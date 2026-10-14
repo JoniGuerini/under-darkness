@@ -447,7 +447,7 @@ function paintTitleLogo() {
   const navNow = () => !newsBox.hidden ? newsBox.querySelector('.tmenu') : navChars.hidden ? navMain : navChars;
   function mainUI() {
     const any = charList().length > 0;
-    btnCont.hidden = !any; btnLoad.hidden = !any;
+    btnCont.hidden = !any;
     navChars.hidden = true; newsBox.hidden = true; navMain.hidden = false;
   }
   function play(fn) {
@@ -460,10 +460,9 @@ function paintTitleLogo() {
   btnCont.addEventListener('click', () => { const id = charCur != null ? charCur : chars.last; if (id != null) playChar(id); });
   btnNew.addEventListener('click', () => play(() => { charNew(); startPlaying(); }));
 
-  // carregar: a lista de personagens, cada um com Excluir (pede um segundo clique)
+  // carregar: a lista de personagens, cada um com Exportar e Excluir (pede um segundo clique); Importar cria um personagem novo (357-save-arquivo)
   function charsUI(focusId) {
     const list = charList();
-    if (!list.length) { mainUI(); navMain.querySelector('button:not([hidden])').focus(); return; }
     navMain.hidden = true; navChars.hidden = false; navChars.textContent = '';
     const h = document.createElement('h2'); h.textContent = 'Personagens'; navChars.appendChild(h);
     for (const c of list) {
@@ -479,13 +478,23 @@ function paintTitleLogo() {
         const next = list[i + 1] || list[i - 1]; charsUI(next && next.id);
       });
       d.addEventListener('blur', () => { armed = false; d.textContent = 'Excluir'; d.classList.remove('warn'); });
-      row.append(b, d); navChars.appendChild(row);
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'cexp'; x.textContent = 'Exportar';
+      x.addEventListener('click', () => charExport(c.id));
+      row.append(b, x, d); navChars.appendChild(row);
     }
+    const imp = document.createElement('button'); imp.type = 'button'; imp.className = 'cimp'; imp.textContent = 'Importar';
+    let impT = 0;
+    imp.addEventListener('click', () => charImportFile().then(id => {
+      if (id != null) { charsUI(id); return; }
+      imp.textContent = 'Arquivo inválido'; imp.classList.add('warn'); clearTimeout(impT);
+      impT = setTimeout(() => { imp.textContent = 'Importar'; imp.classList.remove('warn'); }, 1800);
+    }));
+    navChars.appendChild(imp);
     const back = document.createElement('button'); back.type = 'button'; back.className = 'back'; back.textContent = 'Voltar';
     back.addEventListener('click', () => { mainUI(); btnLoad.focus(); });
     navChars.appendChild(back);
     for (const b of navChars.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    (navChars.querySelector(`.cpick[data-id="${focusId}"]`) || navChars.querySelector('.cpick')).focus();
+    (navChars.querySelector(`.cpick[data-id="${focusId}"]`) || navChars.querySelector('.cpick') || imp).focus();
   }
   btnLoad.addEventListener('click', () => { initAudio(); charsUI(); });
 
