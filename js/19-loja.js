@@ -18,6 +18,20 @@ function setShopTab(t) {
   document.querySelectorAll('#shop .vtabs .tab').forEach(b => { b.classList.toggle('on', b.dataset.tab === t); b.setAttribute('aria-selected', b.dataset.tab === t); });
   refreshShop(); const g = $('shopGrid'); g.scrollTop = 0; g.dispatchEvent(new Event('scroll'));
 }
+// "Renovar" (2026-10-14): only the merchants whose wall is rolled (Grimaldo's gear, Aurélia's staves and tomes) get a
+// fresh one now, for a little gold that grows with the hero's level; the other villagers sell the same things every day
+const SHOP_REROLL = { ferreiro: true, maga: true };
+const rerollCost = () => 20 + 10 * pl.lvl;
+function rerollShop() {
+  if (!shopNpc || !SHOP_REROLL[shopNpc.id]) return;
+  const c = rerollCost(), b = $('btnReroll'); if (pl.gold < c) { bad(b); floatShop('Ouro insuficiente'); return; }
+  const id = shopNpc.id, keep = Object.assign({}, stock);
+  pl.gold -= c; restock();
+  for (const k in keep) if (k !== id) stock[k] = keep[k];   // only this merchant's wall changes
+  if (id === 'maga' && typeof magaScrolls === 'function') stock.maga = magaScrolls(false).concat((stock.maga || []).filter(g => !g.inf));
+  vSel = vHover = null; vQty = 1; vKey = ''; sfx.coin(); refreshShop();
+  const g = $('shopGrid'); g.scrollTop = 0; g.dispatchEvent(new Event('scroll'));
+}
 const SHELVES = [
   ['scroll', 'Pergaminhos'], ['magicw', 'Cajados e varinhas'], ['weapon', 'Armas'], ['tome', 'Tomos'],
   ['armor', 'Armaduras e escudos'], ['acc', 'Anéis e amuletos'], ['tool', 'Ferramentas'], ['potion', 'Poções'], ['food', 'Da cozinha'], ['goods', 'Mercadorias']
@@ -72,6 +86,7 @@ function backFromShop() { cancelHeld(); endDrag(); hideTip(); dockInv(false); $(
 function refreshShop() {
   if (!shopNpc) return;
   const st = shopList(), sold = vTab === 'sold';
+  const rb = $('btnReroll'); if (rb) { const c = rerollCost(), on = !sold && !!SHOP_REROLL[shopNpc.id], h = `Renovar ${coinTag(c)}`; rb.hidden = !on; if (rb._h !== h) { rb._h = h; rb.innerHTML = h; } rb.classList.toggle('cant', c > pl.gold); }
   const tb = $('shopTabSold'); if (tb) { const n = soldList(shopNpc.id).length, t = n ? `Vendidos (${n})` : 'Vendidos'; if (tb.textContent !== t) tb.textContent = t; }
   if (vSel && !st.includes(vSel)) vSel = st[Math.min(vSel._i || 0, st.length - 1)] || null;   // bought: the next piece takes its place
   if (vHover && !st.includes(vHover)) vHover = null;
@@ -147,6 +162,7 @@ function buyEntry(en, n, el) {
 }
 function onShopClick(e) {
   if (e.target === $('shop')) { backFromShop(); return; }
+  if (e.target.closest && e.target.closest('#btnReroll')) { rerollShop(); return; }
   const tab = e.target.closest && e.target.closest('#shop .vtabs .tab'); if (tab) { setShopTab(tab.dataset.tab); return; }
   const [en] = entryAt(e.target); if (en) selectEntry(en);
 }

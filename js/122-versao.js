@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.11';
+const VERSAO = '0.40.12';
 const NOVIDADES = [
+  { v: '0.40.12', data: '14/10/2026', titulo: 'Renovar estoque', itens: [
+    'Loja: botão Renovar (Grimaldo e Aurélia) troca o estoque por ouro.',
+  ] },
   { v: '0.40.11', data: '14/10/2026', titulo: 'Aba Vendidos', itens: [
     'Loja: aba Vendidos com as últimas 10 vendas e recompra; o estoque do NPC não muda mais.',
   ] },

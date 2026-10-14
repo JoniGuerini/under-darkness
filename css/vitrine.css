@@ -133,3 +133,6 @@ body #shop .vendor #btnBuy:disabled{background:linear-gradient(rgba(0,0,0,.45),r
 #shop .vtabs .tab{font-size:14px;padding:4px 14px;white-space:nowrap}
 #shop .vn .vcnt{position:absolute;right:6px;top:4px;font-size:13px;font-weight:700;color:var(--v-txt);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;pointer-events:none}
 #shop .vempty{margin:auto;color:var(--v-dim);font-size:15px;text-shadow:1px 1px 0 #000}
+#shop .vtabs .vreroll:not([hidden]){margin-left:auto;display:flex;align-items:center;gap:5px;font-size:14px;white-space:nowrap}
+#shop .vtabs .vreroll .vc{width:14px;height:14px}
+#shop .vtabs .vreroll.cant{color:#ff8a7a}
