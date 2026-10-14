@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.8';
+const VERSAO = '0.40.9';
 const NOVIDADES = [
+  { v: '0.40.9', data: '14/10/2026', titulo: 'Vida ao trocar item', itens: [
+    'Trocar ou tirar um equipamento não tira mais vida nem mana do herói quando há bônus da árvore, de comida ou de elixir.',
+  ] },
   { v: '0.40.8', data: '14/10/2026', titulo: 'Cogumelos novos', itens: [
     'Os cogumelos das Cavernas, os marrons e os azuis que brilham, foram redesenhados pixel a pixel: chapéu com luz e lamelas, pé que engrossa no chão, sardas e pintas acesas.',
   ] },
