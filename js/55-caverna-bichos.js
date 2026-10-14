@@ -43,7 +43,8 @@ Object.assign(DROPS, {
 });
 Object.assign(NAV_WALKERS, { rato: 1, aranha: 1, cuspideira: 1, besouro: 1, filhote: 1 });
 const CV_STEP = { rato: 1, aranha: 1, cuspideira: 1, besouro: 1, filhote: 1 };
-{ const _m = moveEntity; moveEntity = function (e, dt, step) { return _m(e, dt, step || !!CV_STEP[e.type]); }; }
+// rolando, o besouro não sobe degrau (bate e vira de costas); só desce (Jonathan 2026-10-14)
+{ const _m = moveEntity; moveEntity = function (e, dt, step) { return _m(e, dt, step || (!!CV_STEP[e.type] && !(e.type === 'besouro' && e.state === 'roll'))); }; }
 
 /* ================= art ================= */
 const CVB = {};   // cached sprite sets
@@ -379,6 +380,12 @@ HOOK.drawTop.push((cx, cy) => {
 });
 
 // the beetle: plods along shell first; crouches, then rolls at you; a wall knocks it onto its back
+// rolando ele cai degraus e quedas de até 10 blocos; mais fundo que isso, para na beira
+function besouroDesce(e) {
+  const fy = Math.floor((e.y + e.h + 1) / T), fx = Math.floor((e.facing > 0 ? e.x + e.w + 3 : e.x - 3) / T);
+  for (let k = 0; k <= 10; k++) if (footAt(fx, fy + k)) return true;
+  return false;
+}
 AI.besouro = function (e, dt, dx, dy, dist, aggro) {
   e.stateT -= dt;
   const ecx = e.x + e.w / 2;
@@ -388,7 +395,7 @@ AI.besouro = function (e, dt, dx, dy, dist, aggro) {
     if (Math.random() < dt * 25) burst(ecx - e.facing * 6, e.y + e.h, 1, '#6a6050', 50, 200, 0.4);
     if (!e.swingHit && !pl.dead && overlap(e, pl)) { e.swingHit = true; hurtPlayer(e.dmg, ecx, e, false); }
     if (e.hitWall) { e.state = 'flipped'; e.stateT = 1.7; e.vx = -e.facing * 60; e.vy = -140; shake(3); sfx.slam && sfx.slam(); burst(ecx + e.facing * 8, e.y + 6, 10, '#8a8070', 90, 300, 0.5); }
-    else if (e.stateT <= 0 || ledgeAhead(e, e.facing, 0, false) === 'stop') { e.state = 'recover'; e.stateT = 0.5; e.vx = 0; }
+    else if (e.stateT <= 0 || (e.onGround && !besouroDesce(e))) { e.state = 'recover'; e.stateT = 0.5; e.vx = 0; }
     return;
   }
   if (e.state === 'flipped') { e.vx = approach(e.vx, 0, 300 * dt); if (e.stateT <= 0) { e.state = 'walk'; e.atkCD = 1.4 + Math.random(); e.vy = -90; } return; }
@@ -399,7 +406,8 @@ AI.besouro = function (e, dt, dx, dy, dist, aggro) {
   if (aggro) { if (e.turnT <= 0) { e.facing = Math.sign(dx) || e.facing; e.turnT = 0.5; } dir = Math.abs(dx) < 14 ? 0 : Math.sign(dx); }
   else if (dir) e.facing = dir;
   walk(e, dt, dir, 20 + e.lvl, 300, 230, dy, aggro);
-  if (aggro && Math.abs(dx) < 130 && Math.abs(dx) > 24 && Math.abs(dy) < 14 && e.atkCD <= 0 && e.onGround && Math.sign(dx) === e.facing && clearPath(e, pl)) { e.state = 'crouch'; e.stateT = 0.6; }
+  // investe até de pertinho (antes só a mais de 2 blocos) e também em quem está uns degraus abaixo (Jonathan 2026-10-14)
+  if (aggro && Math.abs(dx) < 130 && dy > -14 && dy < 14 + 3 * T && e.atkCD <= 0 && e.onGround && (Math.abs(dx) < 4 || Math.sign(dx) === e.facing) && clearPath(e, pl)) { e.state = 'crouch'; e.stateT = 0.6; }
 };
 // on its back the beetle takes double damage
 { const _hit = hitEnemy; hitEnemy = function (e, dir, mult = 1, melee = false) {
