@@ -4,8 +4,20 @@
    The stock sits on shelves grouped by kind (one plank per group). Click a piece to put it on the counter, where it
    shows its numbers and the buy button; hovering only previews it. Right click or double click on a shelf buys one
    (Shift buys 5 of what never runs out). Selling: drag or drop an item of yours anywhere on the window, or Shift +
-   right click it in the bag. Looks: css/vitrine.css, dressed per villager by the theme vars of css/temas-npc.css. */
-let shopBuilt = false, vSel = null, vHover = null, vQty = 1, vKey = '', vFeatKey = '';
+   right click it in the bag. Looks: css/vitrine.css, dressed per villager by the theme vars of css/temas-npc.css.
+   2026-10-14: what you sell no longer goes onto the merchant's wall (selling a dozen pieces to Grimaldo used to push his
+   whole stock out). Each villager keeps your last 10 sales in the "Vendidos" tab, where they can be bought back for
+   what you got for them; the "Estoque" tab is the merchant's own wall, untouched. */
+let shopBuilt = false, vSel = null, vHover = null, vQty = 1, vKey = '', vFeatKey = '', vTab = 'stock';
+const SOLD_MAX = 10;
+// the sales history of the villager you are talking to (lives in `stock`, so a load or a new game clears it)
+const soldList = id => { const v = stock.vendidos || (stock.vendidos = {}); return v[id] || (v[id] = []); };
+const shopList = () => !shopNpc ? [] : vTab === 'sold' ? soldList(shopNpc.id) : (stock[shopNpc.id] || []);
+function setShopTab(t) {
+  if (t === vTab) return; vTab = t; vSel = vHover = null; vQty = 1; vKey = ''; sfx.select();
+  document.querySelectorAll('#shop .vtabs .tab').forEach(b => { b.classList.toggle('on', b.dataset.tab === t); b.setAttribute('aria-selected', b.dataset.tab === t); });
+  refreshShop(); const g = $('shopGrid'); g.scrollTop = 0; g.dispatchEvent(new Event('scroll'));
+}
 const SHELVES = [
   ['scroll', 'Pergaminhos'], ['magicw', 'Cajados e varinhas'], ['weapon', 'Armas'], ['tome', 'Tomos'],
   ['armor', 'Armaduras e escudos'], ['acc', 'Anéis e amuletos'], ['tool', 'Ferramentas'], ['potion', 'Poções'], ['food', 'Da cozinha'], ['goods', 'Mercadorias']
@@ -50,7 +62,7 @@ function openShop(n) {
   if (dayNow() !== shopDay || !stock.ferreiro) restock();
   buildShopUI(); buildInvUI(); shopNpc = n; sellArm = null; dockInv('shop');
   $('shopTitle').textContent = SHOPS[n.id].title;
-  vSel = null; vHover = null; vQty = 1; vKey = ''; vFeatKey = '';
+  vSel = null; vHover = null; vQty = 1; vKey = ''; vFeatKey = ''; vTab = 'sold'; setShopTab('stock');
   $('talk').hidden = true; $('shop').hidden = false; refreshShop();
   const g = $('shopGrid'); g.scrollTop = 0; g.dispatchEvent(new Event('scroll'));
 }
@@ -59,10 +71,11 @@ function backFromShop() { cancelHeld(); endDrag(); hideTip(); dockInv(false); $(
 /* the shelves: rebuilt only when the stock changes; otherwise only the classes move */
 function refreshShop() {
   if (!shopNpc) return;
-  const st = stock[shopNpc.id] || [];
+  const st = shopList(), sold = vTab === 'sold';
+  const tb = $('shopTabSold'); if (tb) { const n = soldList(shopNpc.id).length, t = n ? `Vendidos (${n})` : 'Vendidos'; if (tb.textContent !== t) tb.textContent = t; }
   if (vSel && !st.includes(vSel)) vSel = st[Math.min(vSel._i || 0, st.length - 1)] || null;   // bought: the next piece takes its place
   if (vHover && !st.includes(vHover)) vHover = null;
-  const key = shopNpc.id + '|' + st.map(e => (e.s.uid || e.s.id) + ':' + e.price).join(',');
+  const key = vTab + '|' + shopNpc.id + '|' + st.map(e => (e.s.uid || e.s.id) + ':' + e.price).join(',');
   const g = $('shopGrid');
   if (key !== vKey) {
     vKey = key;
@@ -76,12 +89,13 @@ function refreshShop() {
         h += `<div class="vshelf">${r === 0 ? `<span class="vlab">${name}</span>` : ''}<div class="vrow">`;
         for (const i of row) {
           const e = st[i], rar = itemRar(e.s);
-          h += `<div class="vn r${Math.max(0, rar)}" data-shop="${i}" style="--rc:${RAR_COL[rar]}"><i class="vglow"></i><img src="${ICON[e.s.id].url}" alt=""><span class="vtag">${coinTag(e.price)}</span></div>`;
+          h += `<div class="vn r${Math.max(0, rar)}" data-shop="${i}" style="--rc:${RAR_COL[rar]}"><i class="vglow"></i><img src="${ICON[e.s.id].url}" alt="">${e.s.n > 1 && !e.inf ? `<b class="vcnt">${e.s.n}</b>` : ''}<span class="vtag">${coinTag(e.price)}</span></div>`;
         }
         for (let j = row.length; j < per; j++) h += '<div class="vn vnone"></div>';
         h += '</div><i class="vplank"></i></div>';
       }
     }
+    if (!h && sold) h = '<p class="vempty">Nada vendido</p>';
     g.innerHTML = h; g.classList.toggle('vbig', big);
     if (!vSel) { const f = g.querySelector('.vn[data-shop]'); vSel = f ? st[+f.dataset.shop] : null; }   // the counter starts with the first piece on the wall
     g.dispatchEvent(new Event('scroll'));
@@ -108,20 +122,24 @@ function renderFeat() {
   $('vfQty').hidden = !en.inf; $('vfN').textContent = String(vQty);
   $('vfMinus').disabled = vQty <= 1; $('vfPlus').disabled = vQty >= 99;
   const p = $('vfPrice'); p.innerHTML = coinTag(tot); p.classList.toggle('cant', !can);
-  const b = $('btnBuy'); b.disabled = !can; b.textContent = can ? 'Comprar' : 'Falta ouro';
+  const b = $('btnBuy'); b.disabled = !can; b.textContent = !can ? 'Falta ouro' : en.sold ? 'Recomprar' : 'Comprar';
   $('shopFeat').classList.toggle('preview', en !== vSel);
 }
 const equipKey = () => ['weapon', 'shield', 'head', 'body', 'feet', 'tool', 'acc1', 'acc2'].map(k => equip[k] ? equip[k].uid || equip[k].id : '').join(',');
 function setHover(en) { if (vHover === en) return; vHover = en; renderFeat(); }
 function selectEntry(en) { if (!en || vSel === en) return; vSel = en; vQty = 1; sfx.select(); refreshShop(); }
 function stepQty(d) { if (!vSel || !vSel.inf) return; const q = clamp(vQty + d, 1, 99); if (q === vQty) return; vQty = q; sfx.select(); renderFeat(); }
-const entryAt = el => { const d = el && el.closest && el.closest('#shopGrid .vn[data-shop]'); return d && shopNpc ? [(stock[shopNpc.id] || [])[+d.dataset.shop], d] : [null, null]; };
+const entryAt = el => { const d = el && el.closest && el.closest('#shopGrid .vn[data-shop]'); return d && shopNpc ? [shopList()[+d.dataset.shop], d] : [null, null]; };
 
 function buyEntry(en, n, el) {
-  const st = stock[shopNpc.id], i = st.indexOf(en); if (i < 0) return false;
+  const st = shopList(), i = st.indexOf(en); if (i < 0) return false;
   if (en.inf) n = Math.min(n, Math.floor(pl.gold / en.price));
   if (n < 1) { bad(el); floatShop('Ouro insuficiente'); return false; }
-  if (en.inf) { const left = addItem(en.s.id, n), got = n - left; if (got < 1) { bad(el); floatShop('Mochila cheia'); return false; } pl.gold -= got * en.price; }
+  if (en.sold && !ITEMS[en.s.id].slot) {   // a lot sold back: all of it or nothing
+    if (en.price > pl.gold) { bad(el); floatShop('Ouro insuficiente'); return false; }
+    const left = addItem(en.s.id, en.s.n); if (left > 0) { if (left < en.s.n) removeItem(en.s.id, en.s.n - left); bad(el); floatShop('Mochila cheia'); return false; }
+    pl.gold -= en.price; st.splice(i, 1); if (vHover === en) vHover = null;
+  } else if (en.inf) { const left = addItem(en.s.id, n), got = n - left; if (got < 1) { bad(el); floatShop('Mochila cheia'); return false; } pl.gold -= got * en.price; }
   else { if (!addInst(en.s)) { bad(el); floatShop('Mochila cheia'); return false; } pl.gold -= en.price; st.splice(i, 1); if (vHover === en) vHover = null; }
   sfx.coin(); invDirty = true; refreshShop();
   const s = $('vfStage'); s.classList.remove('sold'); void s.offsetWidth; s.classList.add('sold');
@@ -129,6 +147,7 @@ function buyEntry(en, n, el) {
 }
 function onShopClick(e) {
   if (e.target === $('shop')) { backFromShop(); return; }
+  const tab = e.target.closest && e.target.closest('#shop .vtabs .tab'); if (tab) { setShopTab(tab.dataset.tab); return; }
   const [en] = entryAt(e.target); if (en) selectEntry(en);
 }
 function onShopDbl(e) { const [en, d] = entryAt(e.target); if (en && !held) buyEntry(en, 1, d); }
@@ -145,10 +164,12 @@ function sellRef(r, el, whole) {
   if (!sh.buys(s.id) || p <= 0) { bad(el); floatShop(`${shopNpc.name} não compra isso`); return; }
   if (ITEMS[s.id].slot) {
     if (itemRar(s) >= 2 && sellArm !== s.uid) { sellArm = s.uid; refreshShop(); floatShop('Item raro: repita para vender'); return; }
-    inv[i] = null; pl.gold += p; if (shopNpc.id === 'ferreiro' && s.uid) { s.uid = UID++; stock.ferreiro.push({ s, price: itemValue(s) }); if (stock.ferreiro.length > 12) stock.ferreiro.shift(); }
-  } else { const n = whole ? s.n : 1; s.n -= n; if (s.n <= 0) inv[i] = null; pl.gold += p * n; }
+    inv[i] = null; pl.gold += p; soldAdd({ s, price: p, sold: true });
+  } else { const n = whole ? s.n : 1; s.n -= n; if (s.n <= 0) inv[i] = null; pl.gold += p * n; soldAdd({ s: { id: s.id, n }, price: p * n, sold: true }); }
   sellArm = null; sfx.coin(); invDirty = true; showSell(null); refreshShop(); hideTip();
 }
+// the newest sale first; past SOLD_MAX the oldest is gone for good
+function soldAdd(en) { const L = soldList(shopNpc.id); L.unshift(en); if (L.length > SOLD_MAX) L.length = SOLD_MAX; }
 function floatShop(t) { const g = $('shopGold'); g.textContent = t; g.classList.add('warn'); clearTimeout(floatShop._t); floatShop._t = setTimeout(() => { g.classList.remove('warn'); if (shopNpc) g.innerHTML = coinTag(pl.gold); }, 1200); }
 
 /* hovering: the shelf previews on the counter; carrying one of your items over the window shows what it fetches */

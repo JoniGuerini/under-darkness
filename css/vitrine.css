@@ -127,3 +127,9 @@ body #shop .vendor #btnBuy:disabled{background:linear-gradient(rgba(0,0,0,.45),r
 /* hovering repaints only cheap layers: the shelves, the counter and the item numbers each get their own layer, so the
    house's textured wall behind them is painted once and never again while the mouse moves (see css/camadas.css) */
 #shop .vit>*,#shop .vstage,#shop #vfInfo{will-change:transform}
+
+/* the two tabs in the header: the merchant's wall and what you sold (2026-10-14) */
+#shop .vtabs{display:flex;gap:6px;flex:none;margin:-4px 0 -2px}
+#shop .vtabs .tab{font-size:14px;padding:4px 14px;white-space:nowrap}
+#shop .vn .vcnt{position:absolute;right:6px;top:4px;font-size:13px;font-weight:700;color:var(--v-txt);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;pointer-events:none}
+#shop .vempty{margin:auto;color:var(--v-dim);font-size:15px;text-shadow:1px 1px 0 #000}
