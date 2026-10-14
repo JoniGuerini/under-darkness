@@ -184,13 +184,6 @@ HOOK.drawGlow.push((cx, cy) => {
 HOOK.drawTop.push((cx, cy) => {
   for (const p of tpSparks) { lc.globalAlpha = Math.min(1, p.life / p.max * 2); lc.fillStyle = p.col; lc.fillRect(Math.round(p.x) - cx, Math.round(p.y) - cy, 1, 1); }
   lc.globalAlpha = 1;
-  if (tp.cast) {   // barrinha de conjuração sobre a cabeça
-    const k = Math.min(1, tp.cast.t / TP_CAST), w = 22, x = Math.round(pl.x + pl.w / 2 - w / 2) - cx, y = Math.round(pl.y) - cy - 8;
-    lc.globalAlpha = 1; lc.fillStyle = '#05070f'; lc.fillRect(x - 1, y - 1, w + 2, 5);
-    lc.fillStyle = '#15296e'; lc.fillRect(x, y, w, 3);
-    const f = Math.round(w * k); lc.fillStyle = '#2f6ae0'; lc.fillRect(x, y, f, 3); lc.fillStyle = '#9ccbff'; lc.fillRect(x, y, f, 1);
-    if (f > 0) { lc.fillStyle = '#ffffff'; lc.fillRect(x + f - 1, y, 1, 3); }
-  }
   if (tp.flash > 0) { lc.globalAlpha = tp.flash * 0.7; lc.fillStyle = '#9ccbff'; lc.globalCompositeOperation = 'lighter'; lc.fillRect(0, 0, VW, VH); lc.globalCompositeOperation = 'source-over'; lc.globalAlpha = 1; }
 });
 HOOK.update.push(tpUpdate);
@@ -219,15 +212,15 @@ addEventListener('keydown', e => {
 (function () {
   const b = document.createElement('button');
   b.id = 'btnTP'; b.type = 'button'; b.className = 'panel hbside'; b.setAttribute('aria-label', 'Portal para o vilarejo');
-  b.innerHTML = '<i class="tpfill"></i><canvas width="16" height="24"></canvas>';
+  b.innerHTML = '<canvas width="16" height="24"></canvas>';
   const row = $('hbrow'); if (row) row.appendChild(b);
   b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); tpStartCast(); });
 })();
 function tpPaintButton() {
   const b = $('btnTP'); if (!b || !tp.art) return;
-  const off = !tpCanCast() && state === 'play', k = tp.cast ? Math.min(1, tp.cast.t / TP_CAST) : 0;
-  const key = (off ? 1 : 0) + ':' + k.toFixed(2);
-  if (b.dataset.k !== key) { b.dataset.k = key; b.classList.toggle('off', off); b.classList.toggle('casting', !!tp.cast); b.firstChild.style.height = (k * 100).toFixed(1) + '%'; }
+  const off = !tpCanCast() && state === 'play';
+  const key = (off ? 1 : 0) + ':' + (tp.cast ? 1 : 0);
+  if (b.dataset.k !== key) { b.dataset.k = key; b.classList.toggle('off', off); b.classList.toggle('casting', !!tp.cast); }
   const f = Math.floor(gameTime * (tp.cast ? 14 : 6)) % 12;
   if (f !== tp.iconF) { tp.iconF = f; const x = b.lastChild.getContext('2d'); x.clearRect(0, 0, 16, 24); x.drawImage(tp.art.icon[f], 0, 0); }
 }

@@ -6,7 +6,7 @@
       do vilarejo (93-reagentes); cada prato fica `t` segundos no fogo; sair da janela devolve os ingredientes do
       prato que estava no fogo. O prato pronto vai para a mochila (o que não couber, para o baú).
    2. O comer: com o prato na barra, clique esquerdo; ou botão direito nele no inventário. O herói fica parado
-      levando a comida à boca por `food.eat` segundos, com a barrinha sobre a cabeça, como o portal. Andar, pular,
+      levando a comida à boca por `food.eat` segundos, como o portal. Andar, pular,
       golpear, escudo, botão direito ou levar dano interrompem, e a comida não é gasta. Comeu: a vida (e a mana)
       volta aos poucos por `food.t` segundos; uma refeição nova toma o lugar da anterior. Não vai para o save.
    Dados em 98-cozinha-dados. Visual da janela em css/cozinha.css. Embrulha talkMenu, closeTalk, tickFurnace,
@@ -301,15 +301,6 @@ heldItem = function (L, ang) {
   if (!ck.eat) return _ckHeldItem(L, ang);
   const img = handSprite(ck.eat.id); return img ? { img, ang: 0, px: img.width / 2, py: img.height / 2 + 1 } : null;
 };
-// a barrinha sobre a cabeça, em âmbar
-HOOK.drawTop.push((cx, cy) => {
-  if (!ck.eat || pl.dead) return;
-  const k = Math.min(1, ck.eat.t / ck.eat.dur), w = 22, x = Math.round(pl.x + pl.w / 2 - w / 2) - cx, y = Math.round(pl.y) - cy - 8;
-  lc.globalAlpha = 1; lc.fillStyle = '#0f0904'; lc.fillRect(x - 1, y - 1, w + 2, 5);
-  lc.fillStyle = '#5a3410'; lc.fillRect(x, y, w, 3);
-  const f = Math.round(w * k); lc.fillStyle = '#d8902e'; lc.fillRect(x, y, f, 3); lc.fillStyle = '#ffd890'; lc.fillRect(x, y, f, 1);
-  if (f > 0) { lc.fillStyle = '#fff6e0'; lc.fillRect(x + f - 1, y, 1, 3); }
-});
 // botão direito no prato, no inventário: fecha a mochila e começa a comer
 const _ckQuickAction = quickAction;
 quickAction = function (r) {
