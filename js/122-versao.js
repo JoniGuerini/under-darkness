@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.0';
+const VERSAO = '0.40.1';
 const NOVIDADES = [
+  { v: '0.40.1', data: '14/10/2026', titulo: 'Luz da tocha', itens: [
+    'A luz da tocha e da vela anda em linha reta e a rocha a bloqueia: uma saliência faz sombra embaixo dela e o penhasco ao lado fica escuro.',
+  ] },
   { v: '0.40.0', data: '13/10/2026', titulo: 'Descida pela sala do chefe', itens: [
     'Cada camada é separada da de baixo por rocha inteira. O único caminho natural para baixo sai do chão da sala do chefe e desaba quando ele cai. Quebrar a rocha com a picareta continua valendo.',
     'Enquanto o chefe da camada estiver vivo, uma poeira no ar corre na direção da sala dele e um coração bate lá longe.',

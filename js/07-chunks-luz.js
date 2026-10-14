@@ -129,31 +129,42 @@ let chunkTick = 0;
 const CHUNK_MAX = 220, CHUNK_KEEP = 150;
 
 /* ================= lighting ================= */
-let LX0 = 0, LY0 = 0, LW = 0, LH = 0, LB = null, DB = null, lightCv = null, lightCx = null, lightImg = null, lightU = null;
+let LX0 = 0, LY0 = 0, LW = 0, LH = 0, LB = null, DB = null, lightCv = null, lightCx = null, lightImg = null, lightU = null, OPQ = null;
 const emitters = [];
+/* flames light what they can see (Jonathan, 2026-10-14: "a tocha ilumina demais a parte de baixo do bloco"): a torch or
+   a candle shines straight lines out to LUZ.r tiles, and rock stops them, so a ledge throws a real shadow under itself
+   and the drop beside it stays dark. Only a weak share (LUZ.bounce) goes through the old spreading light, the light that
+   bounces round corners and into the rock. Other glowing things (crystals, lava, mushrooms) keep the old light. */
+const LUZ = { r: 14, bounce: 0.42, pow: 0.8, src: [] };
+const LUZ_PONTO = new Uint8Array(NT); LUZ_PONTO[TORCH] = 1; LUZ_PONTO[CANDLE] = 1;
 let skyLight = 1;
 const DARK = { amb: 0.02, ex: 1.15, cap: 0.992, band: 18, rate: 0.6, k: -1, t: 0 };   // the underground darkness (tune here): band = tiles of fade below the ground, rate = how fast it follows you (per s)
 function computeLight(cx, cy) {
   const M = 12;
   const x0 = Math.floor(cx / T) - M, y0 = Math.floor(cy / T) - M;
   const w = Math.ceil(VW / T) + M * 2 + 2, h = Math.ceil(VH / T) + M * 2 + 2;
-  if (w !== LW || h !== LH || !lightCv) { LW = w; LH = h; LB = new Float32Array(w * h); DB = new Float32Array(w * h); lightCv = mk(w, h); lightCx = lightCv.getContext('2d'); lightImg = lightCx.createImageData(w, h); lightU = new Uint32Array(lightImg.data.buffer); }
-  LX0 = x0; LY0 = y0; emitters.length = 0;
+  if (w !== LW || h !== LH || !lightCv) { LW = w; LH = h; LB = new Float32Array(w * h); DB = new Float32Array(w * h); OPQ = new Uint8Array(w * h); lightCv = mk(w, h); lightCx = lightCv.getContext('2d'); lightImg = lightCx.createImageData(w, h); lightU = new Uint32Array(lightImg.data.buffer); }
+  LX0 = x0; LY0 = y0; emitters.length = 0; LUZ.src.length = 0;
   const vx0 = x0 + M - 1, vx1 = x0 + M + Math.ceil(VW / T) + 1, vy0 = y0 + M - 1, vy1 = y0 + M + Math.ceil(VH / T) + 1;
   const sky = skyLight;
   for (let j = 0; j < h; j++) {
     const gy = y0 + j, row = j * w;
     for (let i = 0; i < w; i++) {
-      const gx = x0 + i, k = row + i; let L = 0, d = 0.088;
+      const gx = x0 + i, k = row + i; let L = 0, d = 0.088, op = 0;
       if (gy < 0) L = sky;
-      else if (gy >= WH) d = 0.45;
+      else if (gy >= WH) { d = 0.45; op = 2; }
       else {
         const ti = gy * WW + wrapX(gx), t = tiles[ti];
-        if (SOLID[t] && t !== GATE) d = 0.28; else { if (t === LEAVES) d = 0.15; if (walls[ti] === 0) L = sky; }
+        if (SOLID[t] && t !== GATE) { d = 0.28; op = SEETHRU[t] ? 1 : 2; } else { if (t === LEAVES) { d = 0.15; op = 1; } if (walls[ti] === 0) L = sky; }
         if (agua.length && agua[ti]) { if (d < 0.13) d = 0.13; if (agua[ti] === 2 && L < 0.3) L = 0.3; }   // water dims the light faster; plankton glows (js/171-agua.js)
-        const em = EMIT[t]; if (em > 0) { if (em > L) L = em; if (gx >= vx0 && gx <= vx1 && gy >= vy0 && gy <= vy1) emitters.push(gx, gy, t); }
+        let em = EMIT[t];
+        if (em > 0) {
+          if (gx >= vx0 && gx <= vx1 && gy >= vy0 && gy <= vy1) emitters.push(gx, gy, t);
+          if (LUZ_PONTO[t]) { LUZ.src.push(i, j, em); em *= LUZ.bounce; }
+          if (em > L) L = em;
+        }
       }
-      LB[k] = L; DB[k] = d;
+      LB[k] = L; DB[k] = d; OPQ[k] = op;
     }
   }
   const addL = (wx, wy, v) => { const i = Math.floor(wx / T) - x0, j = Math.floor(wy / T) - y0; if (i >= 0 && j >= 0 && i < w && j < h) { const k = j * w + i; if (LB[k] < v) LB[k] = v; } };
@@ -174,6 +185,7 @@ function computeLight(cx, cy) {
       for (let j = h - 2; j >= 0; j--) { const k = j * w + i, v = LB[k + w] - DB[k]; if (v > LB[k]) LB[k] = v; }
     }
   }
+  luzDireta(w, h);
   // fog of war for the map: anything lit on screen counts as seen
   let fresh = 0;
   for (let gy = Math.max(0, vy0); gy <= Math.min(WH - 1, vy1); gy++) for (let gx = vx0; gx <= vx1; gx++) { const idx = gy * WW + wrapX(gx); if (!seen[idx] && LB[(gy - y0) * w + gx - x0] > 0.1) { seen[idx] = 1; fresh++; } }
@@ -187,4 +199,44 @@ function computeLight(cx, cy) {
   const q = DARK.k, amb = lerp(0.1, DARK.amb, q), ex = lerp(1.45, DARK.ex, q), cap = lerp(0.97, DARK.cap, q);
   for (let k = 0; k < w * h; k++) { let a = 1 - Math.max(LB[k], amb); a = a <= 0 ? 0 : Math.pow(a, ex) * cap; lightU[k] = pack(4, 3, 10, (a * 255) | 0); }
   lightCx.putImageData(lightImg, 0, 0);
+}
+// the straight light of the flames (LUZ): how much of each tile within reach a flame can see. The tiles are visited ring by
+// ring outwards, and each one takes its sight from the two tiles just before it on the line back to the flame (one
+// straight, one diagonal, mixed by the slope), times what those let through: rock nothing, grates and leaves a part.
+// So rock throws a shadow that softens with distance, and a block's face turned to the flame is lit. One pass per tile
+// (Jonathan, 2026-10-14; a walk along every line cost ten times more with many torches).
+const LUZ_R = 18, LUZ_D = LUZ_R * 2 + 1, LUZ_V = new Float32Array(LUZ_D * LUZ_D);
+// the offsets ring by ring: dx, dy, the straight tile before (dx, dy), the diagonal one (dx, dy), the mix, the distance
+const LUZ_ORD = (() => {
+  const o = [];
+  for (let r = 1; r <= LUZ_R; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+    const ax = Math.abs(dx), ay = Math.abs(dy), sx = Math.sign(dx), sy = Math.sign(dy);
+    if (ax >= ay) o.push(dx, dy, dx - sx, dy, dx - sx, dy - sy, ay / ax, Math.sqrt(dx * dx + dy * dy));
+    else o.push(dx, dy, dx, dy - sy, dx - sx, dy - sy, ax / ay, Math.sqrt(dx * dx + dy * dy));
+  }
+  return Float32Array.from(o);
+})();
+const LUZ_CAI = new Float32Array(257);   // the fall with distance, (1 - d / R) ^ LUZ.pow, read by d / R in 256 steps
+let luzCaiPow = -1;
+function luzDireta(w, h) {
+  const S = LUZ.src; if (!S.length) return;
+  if (luzCaiPow !== LUZ.pow) { luzCaiPow = LUZ.pow; for (let m = 0; m <= 256; m++) LUZ_CAI[m] = Math.pow(1 - m / 256, LUZ.pow); }
+  const V = LUZ_V, O = LUZ_ORD, D = LUZ_D, C = LUZ_R * D + LUZ_R;
+  for (let n = 0; n < S.length; n += 3) {
+    const si = S[n], sj = S[n + 1], em = S[n + 2], R = Math.min(LUZ_R, LUZ.r * Math.sqrt(em)), iR = 256 / R;
+    V[C] = 1;
+    for (let q = 0; q < O.length; q += 8) {
+      const dist = O[q + 7]; if (dist > R + 1.5) { if (Math.max(Math.abs(O[q]), Math.abs(O[q + 1])) > R + 1) break; continue; }
+      const dx = O[q], dy = O[q + 1], i = si + dx, j = sj + dy, c = C + dy * D + dx;
+      if (i < 0 || j < 0 || i >= w || j >= h) { V[c] = 0; continue; }
+      // sight through the two tiles before: each one's own sight times what it lets through
+      const ax = O[q + 2], ay = O[q + 3], bx = O[q + 4], by = O[q + 5], t = O[q + 6];
+      const oa = (ax | ay) ? OPQ[(sj + ay) * w + si + ax] : 0, ob = (bx | by) ? OPQ[(sj + by) * w + si + bx] : 0;
+      const va = oa === 2 ? 0 : V[C + ay * D + ax] * (oa ? 0.6 : 1), vb = ob === 2 ? 0 : V[C + by * D + bx] * (ob ? 0.6 : 1);
+      const vis = va + (vb - va) * t; V[c] = vis;
+      if (vis <= 0.01 || dist >= R) continue;
+      const k = j * w + i, v = em * vis * LUZ_CAI[(dist * iR) | 0]; if (v > LB[k]) LB[k] = v;
+    }
+  }
 }

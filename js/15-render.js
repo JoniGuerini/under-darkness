@@ -163,6 +163,19 @@ function outlinedText(text, x, y, font, lw, stroke, fill) {
   }
   sc.drawImage(c.cv, Math.round(x) - c.L, Math.round(y) - c.A);
 }
+// a flame's halo stops at the first rock on each side (Jonathan, 2026-10-14): the ledge a torch stands on catches the
+// glow on its top face, and nothing glows under it
+function glowCut(img, gx, gy, dx, dy, cx, cy) {
+  const W = img.width, H = img.height, n = Math.ceil(Math.max(W, H) / 2 / T) + 1;
+  const op = (x, y) => { const t = tileAt(x, y); return SOLID[t] && t !== GATE && !SEETHRU[t]; };
+  let x0 = dx, x1 = dx + W, y0 = dy, y1 = dy + H;
+  for (let k = 1; k <= n; k++) if (op(gx, gy + k)) { y1 = Math.min(y1, (gy + k) * T - cy + 4); break; }
+  for (let k = 1; k <= n; k++) if (op(gx, gy - k)) { y0 = Math.max(y0, (gy - k + 1) * T - cy - 4); break; }
+  for (let k = 1; k <= n; k++) if (op(gx + k, gy)) { x1 = Math.min(x1, (gx + k) * T - cx + 4); break; }
+  for (let k = 1; k <= n; k++) if (op(gx - k, gy)) { x0 = Math.max(x0, (gx - k + 1) * T - cx - 4); break; }
+  if (x1 <= x0 || y1 <= y0) return;
+  lc.drawImage(img, x0 - dx, y0 - dy, x1 - x0, y1 - y0, x0, y0, x1 - x0, y1 - y0);
+}
 function render() {
   const cx = Math.round(cam.x + shk.x), cy = Math.round(cam.y + shk.y);
   lc.imageSmoothingEnabled = false;
@@ -185,8 +198,8 @@ function render() {
   const fl = 0.85 + Math.sin(gameTime * 13) * 0.08 + Math.sin(gameTime * 31) * 0.05;
   for (let i = 0; i < emitters.length; i += 3) {
     const gx = emitters[i], gy = emitters[i + 1], t = emitters[i + 2], x = gx * T + T / 2 - cx, y = gy * T + T / 2 - cy;
-    if (t === TORCH) { lc.globalAlpha = 0.32 * fl; lc.drawImage(SPR.glow.torch, x - 34, y - 36); }
-    else if (t === CANDLE) { lc.globalAlpha = 0.26 * fl; lc.drawImage(SPR.glow.torch, x - 34, y - 40); }
+    if (t === TORCH) { lc.globalAlpha = 0.32 * fl; glowCut(SPR.glow.torch, gx, gy, x - 34, y - 36, cx, cy); }
+    else if (t === CANDLE) { lc.globalAlpha = 0.26 * fl; glowCut(SPR.glow.torch, gx, gy, x - 34, y - 40, cx, cy); }
     else if (t === ALTAR) { lc.globalAlpha = 0.3 + Math.sin(gameTime * 2.5) * 0.08; lc.drawImage(SPR.glow.altar, x - 20, y - 22); }
     else if (t === SHROOM) { lc.globalAlpha = 0.22; lc.drawImage(SPR.glow.shroom, x - 16, y - 13); }
     else if (t === CRYSTAL) { lc.globalAlpha = 0.16 + Math.sin(gameTime * 2 + gx) * 0.05; lc.drawImage(SPR.glow.crystal, x - 16, y - 16); }
