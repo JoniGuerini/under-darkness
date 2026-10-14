@@ -3,8 +3,10 @@
 /* ================= plataforma de madeira =================
    Pedido do Jonathan (2026-10-11): uma tirinha de madeira do tamanho de um bloco para atravessar buracos e subir
    penhascos, como no Terraria. O herói passa por ela pulando de baixo e, caindo, para em cima dela.
+   - Bichos que andam (2026-10-14) pisam nela igual ao herói: pulam através por baixo e param em cima; a IA do 12
+     (footAt) conta a tábua como chão para pular, pousar e achar caminho. Os que voam ou atravessam parede, não.
    - Bloco PLAT (125, livre na faixa da mina; a bolsa de blocos mostra a plataforma na página da Superfície, logo
-     depois da madeira). Não é sólido: luz, bichos e tiros passam; só o herói pisa nela.
+     depois da madeira). Não é sólido: luz e tiros passam; o herói e os bichos que andam pisam nela.
    - Descer: S (ou seta para baixo) em cima da plataforma solta o herói por ela, e ele cai reto.
    - Coloca como bloco, e uma plataforma se apoia também na plataforma do lado, então dá para fazer uma ponte no ar.
    - Receita no Criar (235): 1 madeira = 8 plataformas. Picareta tira e devolve a plataforma.
@@ -73,8 +75,22 @@ function platUnder(e, y) {   // a fileira da tábua em que os pés tocam, ou -1
   for (let tx = x0; tx <= x1; tx++) if (tileAt(tx, ty) === PLAT) return ty;
   return -1;
 }
+// os bichos que andam: o mesmo pouso, sem o S (descem pela beirada, como de um bloco)
+function platLand(e, b0) {
+  if (e.onGround || e.vy < 0) return;
+  const b1 = e.y + e.h; if (b1 < b0) return;
+  for (let ty = Math.ceil(b0 / T - 0.001); ty * T <= b1 + 0.01; ty++) {
+    const top = ty * T, x0 = Math.floor(e.x / T), x1 = Math.floor((e.x + e.w - 0.001) / T);
+    let hit = false; for (let tx = x0; tx <= x1 && !hit; tx++) if (tileAt(tx, ty) === PLAT) hit = true;
+    if (hit && b0 <= top + 0.01) { e.y = top - e.h; e.vy = 0; e.onGround = true; return; }
+  }
+}
 { const _me = moveEntity; moveEntity = function (e, dt, step) {
-  if (e !== pl) return _me(e, dt, step);
+  if (e !== pl) {
+    const D = ET[e.type];
+    if (!D || D.fly || D.phase) return _me(e, dt, step);
+    const b0 = e.y + e.h; _me(e, dt, step); platLand(e, b0); return;
+  }
   const y0 = pl.y, b0 = y0 + pl.h;
   _me(e, dt, step);
   if (pl.platSkip != null && pl.y + pl.h > (pl.platSkip + 1) * T) pl.platSkip = null;   // já passou da tábua de que se soltou

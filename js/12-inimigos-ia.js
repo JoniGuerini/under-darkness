@@ -188,16 +188,19 @@ const AI = {
 };
 // ---- ground pathfinding: a short breadth-first search over the spots a walker can stand on ----
 const NAV_WALKERS = { zombie: 1, skeleton: 1, guard: 1 };
-function navStand(x, y, hT) { if (!solidAt(x, y)) return false; for (let k = 1; k <= hT; k++) if (solidAt(x, y - k)) return false; return true; }
+// ground a walker can stand on: solid blocks and the wooden platform (125 = PLAT, js/239), which is not solid,
+// so it never counts as a wall or a ceiling (they jump up through it from below)
+function footAt(x, y) { const t = tileAt(x, y); return SOLID[t] === 1 || t === 125; }
+function navStand(x, y, hT) { if (!footAt(x, y)) return false; for (let k = 1; k <= hT; k++) if (solidAt(x, y - k)) return false; return true; }
 function navClear(x, y0, y1) { for (let y = y0; y <= y1; y++) if (solidAt(x, y)) return false; return true; }
 function navMoves(x, y, hT, out) {
   out.length = 0;
   for (const d of [-1, 1]) {
     const nx = x + d;
-    for (let up = 2; up >= 1; up--) if (navStand(nx, y - up, hT) && navClear(x, y - hT - up, y - 1)) out.push([nx, y - up, up > 1 ? 'up' : 'walk']);
+    for (let up = 2; up >= 1; up--) if (navStand(nx, y - up, hT) && navClear(x, y - hT - up, y - 1)) out.push([nx, y - up, up > 1 || !solidAt(nx, y - up) ? 'up' : 'walk']);   // a platform step needs a hop: no auto step-up onto it
     if (!navClear(nx, y - hT, y - 1)) continue;                       // a wall that side
-    if (solidAt(nx, y)) { out.push([nx, y, 'walk']); continue; }
-    let k = 1; while (k <= 10 && !solidAt(nx, y + k)) k++;          // the drop off this edge
+    if (footAt(nx, y)) { out.push([nx, y, 'walk']); continue; }
+    let k = 1; while (k <= 10 && !footAt(nx, y + k)) k++;          // the drop off this edge
     if (k <= 10) out.push([nx, y + k, k <= 3 ? 'walk' : 'drop']);
     if (k > 3) for (let c = 2; c <= 4; c++) {                         // or leap across to the far side
       const gx = x + d * c; if (!navClear(gx - d, y - hT - 1, y - 1)) break;
@@ -212,7 +215,7 @@ function navFind(e) {
   let sx = Math.floor((e.x + e.w / 2) / T);
   if (!navStand(sx, sy, hT)) sx = navStand(Math.floor((e.x + 1) / T), sy, hT) ? Math.floor((e.x + 1) / T) : Math.floor((e.x + e.w - 1) / T);   // half over an edge
   const px = Math.floor((pl.x + pl.w / 2) / T); let py = Math.floor((pl.y + pl.h + 1) / T);
-  for (let k = 0; k < 8 && !solidAt(px, py); k++) py++;
+  for (let k = 0; k < 8 && !footAt(px, py); k++) py++;
   if (!navStand(sx, sy, hT)) return null;
   const R = 22, key = (x, y) => (x - sx + R) * 100 + (y - sy + 50);
   const seen = new Set([key(sx, sy)]), q = [[sx, sy, 0, null]], moves = [];
@@ -240,14 +243,14 @@ function ledgeAhead(e, dir, dy, chase) {
   const fy = Math.floor((e.y + e.h + 1) / T), fx = Math.floor((dir > 0 ? e.x + e.w + 3 : e.x - 3) / T);
   if (solidAt(fx, fy - 1)) return 0;                                      // a wall, not a ledge
   const drop = chase && dy > 2 * T ? 5 : 3;                                // follows you a little further down
-  for (let k = 0; k < drop; k++) if (solidAt(fx, fy + k)) return 0;
+  for (let k = 0; k < drop; k++) if (footAt(fx, fy + k)) return 0;
   if (!chase) return 'stop';
   for (let c = 1; c <= 4; c++) {
     const gx = fx + dir * c;
     if (solidAt(gx - dir, fy - 1) || solidAt(gx - dir, fy - 2)) break;   // something overhead blocks the jump
     for (let d = -2; d <= 3; d++) {
       const gy = fy + d;
-      if (!solidAt(gx, gy) || solidAt(gx, gy - 1) || solidAt(gx, gy - 2)) continue;
+      if (!footAt(gx, gy) || solidAt(gx, gy - 1) || solidAt(gx, gy - 2)) continue;
       const t = (270 + Math.sqrt(270 * 270 + 2 * GRAV * d * T)) / GRAV;
       return Math.min(150, (c * T + 6) / t);
     }
@@ -281,16 +284,16 @@ function walk(e, dt, dir, sp, acc, jv, dy, chase) {
 // how many tiles tall (1..max) the wall right in front of e is when it can be hopped onto, else 0
 function stepUp(e, dir, max) {
   const fy = Math.floor((e.y + e.h - 1) / T), fx = Math.floor((dir > 0 ? e.x + e.w + 4 : e.x - 4) / T), hT = Math.ceil(e.h / T);
-  if (!solidAt(fx, fy)) return 0;
-  let k = 1; while (k <= max && solidAt(fx, fy - k)) k++;
-  if (k > max) return 0;
+  let k = 0;
+  if (solidAt(fx, fy)) { k = 1; while (k <= max && solidAt(fx, fy - k)) k++; if (k > max) return 0; }
+  else { for (let j = 0; j < max && !k; j++) if (footAt(fx, fy - j) && !footAt(fx, fy - j - 1)) k = j + 1; if (!k || solidAt(fx, fy - k)) return 0; }   // a platform within reach
   for (let j = 1; j < hT; j++) if (solidAt(fx, fy - k - j)) return 0;     // room to stand on top
   return k;
 }
 // how far (px, up to max) a walker can travel ahead of its front edge before the floor drops away
 function floorRun(e, dir, max) {
   const fy = Math.floor((e.y + e.h + 1) / T), x0 = dir > 0 ? e.x + e.w : e.x;
-  for (let s = 0; s <= max; s += 3) { const tx = Math.floor((x0 + dir * s) / T); if (!solidAt(tx, fy) && !solidAt(tx, fy + 1) && !solidAt(tx, fy + 2)) return Math.max(0, s - 3); }
+  for (let s = 0; s <= max; s += 3) { const tx = Math.floor((x0 + dir * s) / T); if (!footAt(tx, fy) && !footAt(tx, fy + 1) && !footAt(tx, fy + 2)) return Math.max(0, s - 3); }
   return max;
 }
 function losClear(x0, y0, x1, y1) { const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d / 6); for (let i = 1; i < n; i++) { const t = i / n; if (solidAt(Math.floor((x0 + (x1 - x0) * t) / T), Math.floor((y0 + (y1 - y0) * t) / T))) return false; } return true; }
