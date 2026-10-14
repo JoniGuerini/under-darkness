@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.41.1';
+const VERSAO = '0.42.0';
 const NOVIDADES = [
+  { v: '0.42.0', data: '14/10/2026', titulo: 'Música da tela de início', itens: [
+    'Música medieval na tela de início.',
+  ] },
   { v: '0.41.1', data: '14/10/2026', titulo: 'Exportar e importar no menu', itens: [
     'Importar fica no menu da tela de início, e o menu de pausa ganhou Exportar personagem.',
   ] },
