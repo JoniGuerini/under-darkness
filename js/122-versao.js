@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.9';
+const VERSAO = '0.40.10';
 const NOVIDADES = [
+  { v: '0.40.10', data: '14/10/2026', titulo: 'Humanoides escalam', itens: [
+    'Os inimigos humanoides que perseguem andando (zumbis, esqueletos, guardas, gatunos e outros) sobem e descem escadas, cordas, correntes e cipós atrás do herói.',
+  ] },
   { v: '0.40.9', data: '14/10/2026', titulo: 'Vida ao trocar item', itens: [
     'Trocar ou tirar um equipamento não tira mais vida nem mana do herói quando há bônus da árvore, de comida ou de elixir.',
   ] },
