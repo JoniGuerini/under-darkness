@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.5';
+const VERSAO = '0.40.6';
 const NOVIDADES = [
+  { v: '0.40.6', data: '14/10/2026', titulo: 'Inimigos pulam atrás', itens: [
+    'Os inimigos que andam pulam atrás do herói de uma altura de até 10 blocos (antes eram 5), e sobem numa plataforma até 3 blocos acima.',
+  ] },
   { v: '0.40.5', data: '14/10/2026', titulo: 'Ficha arrumada', itens: [
     'Na ficha do personagem (C), os números e o botão de fechar não saem mais da caixa.',
   ] },

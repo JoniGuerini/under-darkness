@@ -15,7 +15,8 @@ const AI = {
         if (ledgeAhead(e, dir, dy, aggro) === 'stop') dir = aggro ? 0 : -dir;
         if (dir) e.facing = dir; e.vy = -(160 + Math.random() * 100); e.vx = dir * (45 + Math.random() * 45) * (aggro ? 1.15 : 0.7);
         if (dir) { const air = -2 * e.vy / GRAV, run = floorRun(e, dir, 80), L = run < 4 ? ledgeAhead(e, dir, dy, aggro) : 0;
-          if (typeof L === 'number' && L > 0) { e.vy = -270; e.vx = dir * L; } else if (Math.abs(e.vx) * air > run) e.vx = dir * run / air; }
+          if (typeof L === 'number' && L > 0) { e.vy = -270; e.vx = dir * L; }
+          else if (Math.abs(e.vx) * air > run && !(run < 4 && L === 0 && aggro && dy > 2 * T)) e.vx = dir * run / air; }   // you are below and the fall is short enough: hop off the edge after you
         const up = dir && aggro && dy < 0 ? stepUp(e, dir, 2) : 0;
         if (up) { e.vy = -Math.sqrt(2 * GRAV * (up * T + 6)); e.vx = dir * 55; e.climb = dir; }   // a step between it and you: hop up onto it
         else if (dir && aggro && e.atkCD <= 0 && Math.abs(dx) < 70 && dy < 16 && dy > -40 && clearPath(e, pl)) {   // leap onto the hero
@@ -197,14 +198,17 @@ function navMoves(x, y, hT, out) {
   out.length = 0;
   for (const d of [-1, 1]) {
     const nx = x + d;
-    for (let up = 2; up >= 1; up--) if (navStand(nx, y - up, hT) && navClear(x, y - hT - up, y - 1)) out.push([nx, y - up, up > 1 || !solidAt(nx, y - up) ? 'up' : 'walk']);   // a platform step needs a hop: no auto step-up onto it
+    for (let up = 3; up >= 1; up--) {                                 // a platform can be one higher: no edge to clear, it jumps up through it
+      if (up > 2 && solidAt(nx, y - up)) continue;
+      if (navStand(nx, y - up, hT) && navClear(x, y - hT - up, y - 1)) out.push([nx, y - up, up > 1 || !solidAt(nx, y - up) ? 'up' : 'walk']);   // a platform step needs a hop: no auto step-up onto it
+    }
     if (!navClear(nx, y - hT, y - 1)) continue;                       // a wall that side
     if (footAt(nx, y)) { out.push([nx, y, 'walk']); continue; }
     let k = 1; while (k <= 10 && !footAt(nx, y + k)) k++;          // the drop off this edge
     if (k <= 10) out.push([nx, y + k, k <= 3 ? 'walk' : 'drop']);
     if (k > 3) for (let c = 2; c <= 4; c++) {                         // or leap across to the far side
       const gx = x + d * c; if (!navClear(gx - d, y - hT - 1, y - 1)) break;
-      for (let dd = -2; dd <= 3; dd++) if (navStand(gx, y + dd, hT)) { out.push([gx, y + dd, 'leap']); break; }
+      for (let dd = -2; dd <= 10; dd++) if (navStand(gx, y + dd, hT)) { out.push([gx, y + dd, 'leap']); break; }   // down to 10 below, like the drops
     }
   }
   return out;
@@ -242,13 +246,13 @@ function clearPath(a, b) {
 function ledgeAhead(e, dir, dy, chase) {
   const fy = Math.floor((e.y + e.h + 1) / T), fx = Math.floor((dir > 0 ? e.x + e.w + 3 : e.x - 3) / T);
   if (solidAt(fx, fy - 1)) return 0;                                      // a wall, not a ledge
-  const drop = chase && dy > 2 * T ? 5 : 3;                                // follows you a little further down
+  const deep = chase && dy > 2 * T, drop = deep ? 10 : 3;                 // after you it drops up to 10 blocks (Jonathan 2026-10-14; was 5)
   for (let k = 0; k < drop; k++) if (footAt(fx, fy + k)) return 0;
   if (!chase) return 'stop';
-  for (let c = 1; c <= 4; c++) {
+  for (let c = 1; c <= (deep ? 6 : 4); c++) {                              // a longer fall gives more air time: it can cross a wider gap
     const gx = fx + dir * c;
     if (solidAt(gx - dir, fy - 1) || solidAt(gx - dir, fy - 2)) break;   // something overhead blocks the jump
-    for (let d = -2; d <= 3; d++) {
+    for (let d = -2; d <= (deep ? 10 : 3); d++) {
       const gy = fy + d;
       if (!footAt(gx, gy) || solidAt(gx, gy - 1) || solidAt(gx, gy - 2)) continue;
       const t = (270 + Math.sqrt(270 * 270 + 2 * GRAV * d * T)) / GRAV;
@@ -268,7 +272,8 @@ function walk(e, dt, dir, sp, acc, jv, dy, chase) {
   if (nav) { dir = nav.dir; e.facing = dir; }
   if (nav && nav.kind === 'up' && e.onGround) {                          // hop up onto the ledge ahead
     const edge = dir > 0 ? nav.tx * T : (nav.tx + 1) * T, front = dir > 0 ? e.x + e.w : e.x;
-    if (Math.abs(edge - front) < 8) { e.vy = -Math.max(jv, 270); e.vx = e.leapVx = dir * sp; e.leapT = 0.5; return dir; }
+    const rise = Math.floor((e.y + e.h + 1) / T) - nav.ty;               // high enough that the feet clear the top (a platform 3 up needs more than 270)
+    if (Math.abs(edge - front) < 8) { e.vy = -Math.max(jv, 270, Math.sqrt(2 * GRAV * (rise * T + 8))); e.vx = e.leapVx = dir * sp; e.leapT = 0.5; return dir; }
   }
   if (dir && e.onGround) {
     let L = ledgeAhead(e, dir, dy, chase);
