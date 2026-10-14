@@ -9,6 +9,6 @@
 /* canto de cima: só o relógio */
 #hud .world{min-width:0;padding:6px 12px}
 #hud .world .row{gap:10px}
-#hud .world #hClock{font-family:var(--font-title);font-size:24px;line-height:1;text-shadow:2px 2px 0 #000}
+#hud .world #hClock{font-family:var(--font-title);font-size:12px;line-height:1;text-shadow:2px 2px 0 #000}
 #hud .world .sun{width:11px;height:11px}
 @media (max-width:560px){.beltbox{gap:3px;padding:4px}.beltbox .slot{width:38px;height:38px}.beltbox .slot img{width:30px;height:30px}}

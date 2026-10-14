@@ -12,7 +12,7 @@
 #stash .chestp .abas-bar.cheia .aba-seta{display:block}
 #stash .chestp .aba-seta,#stash .chestp .aba-lista{
   flex:none;width:24px;height:30px;padding:0;margin:0;cursor:pointer;
-  font:800 20px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;
+  font:800 18px/1 var(--font-ui);color:#f6d27a;text-shadow:2px 2px 0 #000;
   background:var(--bau-board) 0 0/180px 42px;image-rendering:pixelated;
   border:2px solid #000;border-bottom:0;box-shadow:inset 0 2px 0 #a96a34,inset 0 -3px 0 #341c0e;filter:brightness(.8);
 }
@@ -40,7 +40,7 @@
 #stash .chestp .aba-lista.on{filter:brightness(1.15);box-shadow:inset 0 0 0 2px #d29e34}
 #stash .chestp .aba-item{
   flex:none;height:26px;padding:0 10px;text-align:left;cursor:pointer;
-  font:600 14px/1 "Rubik",system-ui,sans-serif;color:#f4ecd8;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font:600 12px/1 var(--font-ui);color:#f4ecd8;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   background:var(--bau-board) 0 0/180px 42px,var(--a1);background-blend-mode:luminosity,normal;image-rendering:pixelated;
   border:2px solid #000;box-shadow:inset 0 2px 0 var(--a2),inset 0 -2px 0 var(--a0);filter:brightness(.75) saturate(.85);
 }
@@ -49,7 +49,7 @@
 #stash .chestp .aba{
   --a0:#341c0e;--a1:#6c3e1d;--a2:#a96a34;
   position:relative;min-width:44px;height:30px;padding:0 12px 1px;margin:0;
-  font:600 14px/1 "Rubik",system-ui,sans-serif;color:#f4ecd8;text-shadow:1px 1px 0 #000,0 0 2px #000;white-space:nowrap;
+  font:600 12px/1 var(--font-ui);color:#f4ecd8;text-shadow:1px 1px 0 #000,0 0 2px #000;white-space:nowrap;
   background:var(--bau-board) 0 0/180px 42px,var(--a1);background-blend-mode:luminosity,normal;image-rendering:pixelated;
   border:2px solid #000;border-bottom:0;cursor:pointer;
   box-shadow:inset 0 2px 0 var(--a2),inset 2px 0 0 var(--a2),inset -2px 0 0 var(--a0),inset 0 -3px 0 var(--a0);
@@ -64,7 +64,7 @@
 #stash .chestp .aba.over{outline:2px solid #f6d27a;outline-offset:-4px}
 #stash .chestp .aba-mais{
   flex:none;width:32px;height:30px;padding:0;margin:0 0 0 2px;cursor:pointer;
-  font:800 22px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;
+  font:800 18px/1 var(--font-ui);color:#f6d27a;text-shadow:2px 2px 0 #000;
   background:var(--bau-board) 0 0/180px 42px;image-rendering:pixelated;
   border:2px solid #000;border-bottom:0;box-shadow:inset 0 2px 0 #a96a34,inset 0 -3px 0 #341c0e;filter:brightness(.8);
 }
@@ -79,8 +79,8 @@
   display:flex;flex-direction:column;gap:8px;align-items:stretch;
 }
 #stash .chestp .bau-pop[hidden]{display:none}
-#stash .chestp .bau-pop h4{margin:0;font:600 15px/1.1 "Rubik",system-ui,sans-serif;color:var(--oak-hi);text-align:center;text-shadow:1px 1px 0 #000}
-#stash .chestp .bau-pop .preco{margin:0;display:flex;justify-content:center;align-items:center;gap:6px;font:700 22px/1 "Rubik",system-ui,sans-serif;color:#f6d27a;text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
+#stash .chestp .bau-pop h4{margin:0;font:600 12px/1.1 var(--font-ui);color:var(--oak-hi);text-align:center;text-shadow:1px 1px 0 #000}
+#stash .chestp .bau-pop .preco{margin:0;display:flex;justify-content:center;align-items:center;gap:6px;font:700 18px/1 var(--font-ui);color:#f6d27a;text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
 #stash .chestp .bau-pop .preco .vc{width:18px;height:18px;image-rendering:pixelated}
 #stash .chestp .bau-pop .preco.cant{color:#d0604a}
 #stash .chestp .bau-pop .bts{display:flex;gap:6px;justify-content:center}
@@ -88,7 +88,7 @@
 #stash .chestp .bau-pop button:disabled{filter:grayscale(.7) brightness(.6);cursor:default}
 #stash .chestp .bau-pop input{
   box-sizing:border-box;width:100%;height:32px;padding:0 8px;
-  font:600 15px "Rubik",system-ui,sans-serif;color:#f4ecd8;caret-color:#f6d27a;
+  font:600 12px var(--font-ui);color:#f4ecd8;caret-color:#f6d27a;
   background:rgba(6,3,1,.75);border:2px solid #000;box-shadow:inset 0 0 0 1px #7e5414,inset 2px 2px 0 1px rgba(0,0,0,.6);outline:none;
 }
 #stash .chestp .bau-pop input:focus{box-shadow:inset 0 0 0 1px #d29e34,inset 2px 2px 0 1px rgba(0,0,0,.6)}

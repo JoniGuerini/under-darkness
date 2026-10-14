@@ -2,11 +2,11 @@
    Opção nova é só mais uma linha: qualquer botão que entrar em #pause .actions já fica no lugar.
    "Novo mundo" fica sozinho embaixo, separado, porque apaga o progresso. */
 #pause .card{width:min(280px,100%);gap:14px;padding:22px 26px 22px}
-#pause h2{text-align:center;font-size:clamp(48px,9vw,68px)}
+#pause h2{text-align:center;font-size:36px;font-size:round(nearest,clamp(30px,9vw,42px),6px)}
 
 #pause .actions,#pause .danger{display:flex;flex-direction:column;gap:8px;flex-wrap:nowrap;align-items:stretch}
 #pause .actions button,#pause .danger button{width:100%;display:flex;align-items:center;justify-content:center;text-align:center;margin:0}
-#pause .actions button.ghost,#pause .danger button.ghost{min-height:40px;padding:4px 12px;font-size:15px;font-weight:600}
+#pause .actions button.ghost,#pause .danger button.ghost{min-height:40px;padding:4px 12px;font-size:12px;font-weight:600}
 #btnResume{min-height:44px;padding:6px 16px;font-size:18px}
 
 /* zona de perigo: um friso de ferro e o botão com tom de sangue */

@@ -11,9 +11,9 @@
 #ttLogo,#ttByeLogo{image-rendering:pixelated;display:block}
 
 #title .tmenu{position:absolute;left:max(24px,5.5vw);bottom:max(22px,8vh);display:flex;flex-direction:column;align-items:flex-start;gap:clamp(2px,.6vh,8px)}
-#title .tmenu h2{margin:0 0 6px;font-family:var(--font-title);font-weight:400;font-size:clamp(28px,4.4vh,46px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:.02em}
+#title .tmenu h2{margin:0 0 6px;font-family:var(--font-title);font-weight:400;font-size:24px;font-size:round(nearest,clamp(18px,4.4vh,30px),6px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:0}
 #title .tmenu button,#title .tmenu button:hover,#title .tmenu button:active{all:unset;box-sizing:border-box;position:relative;display:block;padding:2px 0;
-  font-family:var(--font-title);font-size:clamp(30px,5.2vh,56px);line-height:1;letter-spacing:.02em;color:#b9a68a;text-shadow:3px 3px 0 #000,0 0 18px rgba(0,0,0,.8);
+  font-family:var(--font-title);font-size:24px;font-size:round(nearest,clamp(18px,5.2vh,36px),6px);line-height:1;letter-spacing:0;color:#b9a68a;text-shadow:3px 3px 0 #000,0 0 18px rgba(0,0,0,.8);
   translate:none;scale:none;filter:none!important;box-shadow:none!important;transition:color 90ms}
 #title .tmenu button[hidden]{display:none}
 #title .tmenu button:focus-visible,#title .tmenu button:focus,#title .tmenu button:hover{color:#ffd98a;outline:none}

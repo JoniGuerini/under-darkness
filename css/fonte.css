@@ -1,0 +1,8 @@
+/* Fontes do jogo, todas locais (funciona offline e sem Google Fonts).
+   UD Pixel: versão da Silkscreen (SIL OFL 1.1, ver fonts/OFL-UDPixel.txt) com o em de 6 pixels.
+   Um pixel da fonte = 1/6 do tamanho, então o texto fica nítido em 6px (1x), 12px (2x), 18px (3x), 24px (4x)...
+   Pesos até 750 usam o traço fino; 800/900 usam o traço grosso (números de destaque).
+   Jersey 10 fica só para o logo da tela de início (js/39-titulo.js). */
+@font-face{font-family:"UD Pixel";src:url(../fonts/UDPixel-Regular.woff2) format("woff2");font-weight:100 750;font-style:normal;font-display:block}
+@font-face{font-family:"UD Pixel";src:url(../fonts/UDPixel-Bold.woff2) format("woff2");font-weight:751 900;font-style:normal;font-display:block}
+@font-face{font-family:"Jersey 10";src:url(../fonts/Jersey10-Regular.woff2) format("woff2");font-weight:400;font-style:normal;font-display:block}

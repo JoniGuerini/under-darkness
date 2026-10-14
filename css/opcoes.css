@@ -1,19 +1,19 @@
 /* tela de opções (js/40-opcoes.js): cartão de pedra com moldura, abas, chaves e sliders em pixel art */
 #opts{z-index:60;background:radial-gradient(ellipse at center,rgba(8,6,12,.55),rgba(8,6,12,.88))}
 #opts .optcard{width:min(660px,100%);gap:14px;padding:20px 26px 20px}
-#opts h2{text-align:center;font-size:clamp(46px,8vw,64px)}
+#opts h2{text-align:center;font-size:36px;font-size:round(nearest,clamp(30px,8vw,36px),6px)}
 #opts .otabs{display:flex;justify-content:center;gap:6px}
-#opts .otabs .tab{min-width:118px;font-size:16px;font-weight:600}
+#opts .otabs .tab{min-width:118px;font-size:12px;font-weight:600}
 #opts .opane{display:grid;gap:10px;min-height:min(372px,52vh);align-content:start}
 #opts .opane[hidden]{display:none}
 #opts .sep{height:4px;background:linear-gradient(#000 0 1px,#3b3245 1px 3px,#000 3px);margin:2px 4px}
 
 #opts .orow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:8px 12px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px #2a2230}
-#opts .olbl{font-size:16px;font-weight:600;color:var(--parch)}
+#opts .olbl{font-size:12px;font-weight:600;color:var(--parch)}
 
 /* chave liga/desliga: um trilho com uma pedra que corre; acesa em brasa quando ligada */
 #opts .otog,#opts .otog:hover,#opts .otog:active{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;min-width:150px;justify-content:flex-start;translate:none;scale:none;filter:none!important;box-shadow:none!important}
-#opts .otog b{font-size:14px;font-weight:600;color:#8a7c68;min-width:74px}
+#opts .otog b{font-size:12px;font-weight:600;color:#8a7c68;min-width:74px}
 #opts .otog.on b{color:#ffd98a}
 #opts .otog .sw{position:relative;width:52px;height:24px;background:#120e16;border:3px solid #000;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #3b3245;image-rendering:pixelated}
 #opts .otog.on .sw{background:linear-gradient(#5a2210,#8e3a14);box-shadow:inset 0 3px 0 #3a140a,inset 0 0 0 1px #c8682c}
@@ -28,17 +28,17 @@
   repeating-linear-gradient(90deg,transparent 0 9px,rgba(0,0,0,.35) 9px 10px),
   linear-gradient(#ffb04a 0 3px,#d0601e 3px 7px,#8e3014 7px)}
 #opts .osl .knob{position:absolute;top:50%;left:calc(var(--v)*100%);width:14px;height:24px;translate:-50% -50%;background:linear-gradient(90deg,#fff1c4 0 3px,#e0b060 3px 9px,#9a6a2a 9px);border:3px solid #000;box-shadow:0 2px 0 rgba(0,0,0,.5)}
-#opts .osl .val{min-width:44px;text-align:right;font-size:14px;font-weight:600;color:#ffd98a;font-variant-numeric:tabular-nums}
+#opts .osl .val{min-width:44px;text-align:right;font-size:12px;font-weight:600;color:#ffd98a;font-variant-numeric:tabular-nums}
 #opts .osl:focus-visible .knob,#opts .osl:hover .knob,#opts .osl.drag .knob{outline:2px solid #ffe08a;outline-offset:1px}
 #opts .opane.mute .osl{opacity:.45}
 
 /* lista de atalhos */
 #opts .okeys{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;max-height:min(300px,40vh);overflow:auto;padding:2px 4px}
-#opts .okey{display:grid;grid-template-columns:116px 1fr;align-items:center;gap:8px;min-height:28px;font-size:13px;color:#d8c8a6}
+#opts .okey{display:grid;grid-template-columns:116px 1fr;align-items:center;gap:8px;min-height:28px;font-size:12px;color:#d8c8a6}
 #opts .okey .kk{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
 #opts .okey .kk i{font-style:normal;color:#8a7c68}
 #opts .okey kbd{font-size:12px}
 
 #opts .ofoot{display:flex;justify-content:center}
-#opts .ofoot button{min-width:200px;min-height:40px;font-size:15px;font-weight:600}
+#opts .ofoot button{min-width:200px;min-height:40px;font-size:12px;font-weight:600}
 @media (max-width:560px){#opts .okeys{grid-template-columns:1fr}}

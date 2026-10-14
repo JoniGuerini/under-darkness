@@ -1,17 +1,17 @@
 /* tela de Testes (js/339-testes.js): cartão largo de pedra com abas, como a de Opções, e o conteúdo espalhado na horizontal */
 #testes{z-index:60;background:radial-gradient(ellipse at center,rgba(8,6,12,.55),rgba(8,6,12,.88))}
 #testes .testcard{width:min(940px,100%);gap:14px;padding:20px 26px 20px}
-#testes h2{text-align:center;font-size:clamp(46px,8vw,64px)}
+#testes h2{text-align:center;font-size:36px;font-size:round(nearest,clamp(30px,8vw,36px),6px)}
 #testes .ttabs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
-#testes .ttabs .tab{min-width:132px;font-size:16px;font-weight:600}
+#testes .ttabs .tab{min-width:132px;font-size:12px;font-weight:600}
 #testes .tpane{display:grid;gap:14px;min-height:min(330px,50vh);align-content:start}
 #testes .tpane[hidden]{display:none}
-#testes em{font-style:normal;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a7c68}
+#testes em{font-style:normal;font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;color:#8a7c68}
 
 /* chave liga/desliga: o mesmo trilho com pedra das Opções */
 #testes .ttog,#testes .ttog:hover,#testes .ttog:active{all:unset;box-sizing:border-box;cursor:pointer;display:grid;align-items:center;justify-items:center;gap:10px;padding:14px 10px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px #2a2230;translate:none;scale:none;filter:none}
-#testes .ttog .tnome{font-size:15px;font-weight:600;color:var(--parch);text-align:center}
-#testes .ttog b{font-size:13px;font-weight:600;color:#8a7c68}
+#testes .ttog .tnome{font-size:12px;font-weight:600;color:var(--parch);text-align:center}
+#testes .ttog b{font-size:12px;font-weight:600;color:#8a7c68}
 #testes .ttog.on b{color:#ffd98a}
 #testes .ttog.on{background:rgba(70,36,12,.35);box-shadow:inset 0 0 0 1px #6a4520}
 #testes .ttog .sw{position:relative;width:52px;height:24px;background:#120e16;border:3px solid #000;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #3b3245;image-rendering:pixelated}
@@ -22,7 +22,7 @@
 
 /* modo deus: a chave do modo numa faixa larga em cima; os efeitos lado a lado embaixo */
 #testes .ttog.mestre{grid-template-columns:1fr auto auto;justify-items:start;gap:16px;padding:16px 22px}
-#testes .ttog.mestre .tnome{font-family:var(--font-title);font-weight:400;font-size:34px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
+#testes .ttog.mestre .tnome{font-family:var(--font-title);font-weight:400;font-size:18px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
 #testes .ttog.mestre b{min-width:74px;text-align:right}
 #testes .tfx{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
 #testes .tfx .ttog{min-height:118px;align-content:center}
@@ -30,7 +30,7 @@
 
 /* viagem: as camadas em grade; a escolhida acende, a de agora tem uma marca de brasa no canto */
 #testes .tlayers{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
-#testes .tl{position:relative;display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px;text-align:left;font-size:13px;font-weight:600;background:linear-gradient(#2c2431,#1b1520);color:var(--parch);border:3px solid #000;box-shadow:inset 0 0 0 1px #3b3245,0 3px 0 rgba(0,0,0,.45)}
+#testes .tl{position:relative;display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px;text-align:left;font-size:12px;font-weight:600;background:linear-gradient(#2c2431,#1b1520);color:var(--parch);border:3px solid #000;box-shadow:inset 0 0 0 1px #3b3245,0 3px 0 rgba(0,0,0,.45)}
 #testes .tl .tn{flex:1;line-height:1.15}
 #testes .tl.sel{background:linear-gradient(#5a3a14,#2e1d0a);color:#ffe7a8;box-shadow:inset 0 0 0 1px #e0b060,0 3px 0 rgba(0,0,0,.45)}
 #testes .tl.aqui::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;background:#ffb233;box-shadow:0 0 6px #ff8a20}
@@ -38,9 +38,9 @@
 #testes .tnum{font-style:normal;display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 4px;font-size:12px;font-weight:700;color:#1b1006;background:linear-gradient(#e0b060,#9a6a2a);border:2px solid #000}
 #testes .tbands{display:grid;gap:8px;padding:12px 14px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px #2a2230}
 #testes .tbands[hidden]{display:none}
-#testes .tbnome{font-family:var(--font-title);font-size:28px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
+#testes .tbnome{font-family:var(--font-title);font-size:18px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
 #testes .tbrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
-#testes .tbrow .tb{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font-size:14px;font-weight:600}
+#testes .tbrow .tb{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font-size:12px;font-weight:600}
 
 /* batalhão: onde e quantos, depois as quantidades lado a lado */
 #testes .tinfo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -48,20 +48,20 @@
 #testes .tinfo span{font-size:18px;font-weight:600;color:var(--parch)}
 #testes .tarmy{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 #testes .tarmy button{display:grid;place-items:center;gap:2px;min-height:96px;padding:8px}
-#testes .tarmy strong{font-family:var(--font-title);font-weight:400;font-size:44px;line-height:1}
+#testes .tarmy strong{font-family:var(--font-title);font-weight:400;font-size:24px;line-height:1}
 #testes .tarmy span{font-size:12px;font-weight:600;opacity:.8}
 #testes .tclear{display:flex;justify-content:center}
-#testes .tclear button{min-width:220px;min-height:40px;font-size:15px;font-weight:600}
+#testes .tclear button{min-width:220px;min-height:40px;font-size:12px;font-weight:600}
 
 /* outros: estação, lua e runas lado a lado */
 #testes .tmundo{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 #testes .tcell{gap:10px;padding:18px 20px;justify-items:center;text-align:center}
 #testes .tcell[hidden]{display:none}
-#testes .tcell strong{font-family:var(--font-title);font-weight:400;font-size:40px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
-#testes .tcell button{min-width:180px;min-height:40px;font-size:15px;font-weight:600}
+#testes .tcell strong{font-family:var(--font-title);font-weight:400;font-size:24px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
+#testes .tcell button{min-width:180px;min-height:40px;font-size:12px;font-weight:600}
 
 #testes .tfoot{display:flex;justify-content:center}
-#testes .tfoot button{min-width:200px;min-height:40px;font-size:15px;font-weight:600}
+#testes .tfoot button{min-width:200px;min-height:40px;font-size:12px;font-weight:600}
 @media (max-width:640px){#testes .tarmy{grid-template-columns:repeat(3,1fr)}#testes .tmundo,#testes .tinfo{grid-template-columns:1fr}}
 
 /* senha: enquanto travada, o cartão só mostra o campo e os botões */
@@ -69,8 +69,8 @@
 #testes .testcard.travado>:not(h2):not(.tlock){display:none}
 #testes .testcard:not(.travado) .tlock{display:none}
 #testes .tlock{display:grid;gap:10px;padding:16px 18px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px #2a2230}
-#testes .tlock input{font:600 18px var(--font-ui);letter-spacing:.12em;color:var(--parch);background:#120e16;border:3px solid #000;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #3b3245;padding:9px 12px;outline:none;border-radius:0}
+#testes .tlock input{font:600 18px var(--font-ui);letter-spacing:0;color:var(--parch);background:#120e16;border:3px solid #000;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #3b3245;padding:9px 12px;outline:none;border-radius:0}
 #testes .tlock input:focus{box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #c8682c}
 #testes .tlock input.bad{animation:bad .3s;box-shadow:inset 0 3px 0 #07050a,inset 0 0 0 1px #d23b3b}
 #testes .tlbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#testes .tlbtns button{min-height:40px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center}
+#testes .tlbtns button{min-height:40px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}

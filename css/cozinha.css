@@ -4,7 +4,7 @@
 #cozinha{padding-block:10px}
 #cozinha .forgep{box-sizing:border-box;width:min(940px,100%);height:min(680px,calc(100dvh - 20px));display:flex;flex-direction:column;gap:12px;padding:12px 16px 14px;border:20px solid #000;border-image:var(--tx-frame) 10 / 20px stretch;box-shadow:0 10px 0 rgba(0,0,0,.5),0 0 60px rgba(0,0,0,.6)}
 #cozinha .ch>.coin{margin-left:auto}
-#ckGold{font-size:14px;font-weight:600;color:#e0b060;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ckGold{font-size:12px;font-weight:600;color:#e0b060;white-space:nowrap;font-variant-numeric:tabular-nums}
 #ckFire{width:48px;height:32px;flex:none;image-rendering:pixelated}
 #btnCk{margin-left:auto;min-width:140px}
 #btnCk.stop{background:#b0402a;color:#fff2e0}
@@ -21,7 +21,7 @@ body[data-npc=taverneiro] #cozinha .forgep{
 }
 body[data-npc=taverneiro] #cozinha .ch{gap:10px;background:linear-gradient(90deg,transparent,var(--k-line) 20%,var(--k-acc) 50%,var(--k-line) 80%,transparent) bottom/100% 2px no-repeat}
 body[data-npc=taverneiro] #cozinha .ch::before{content:"";flex:none;width:36px;height:30px;background:var(--k-sign) center/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
-body[data-npc=taverneiro] #cozinha .ch h3{white-space:nowrap;font-size:29px;background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)}
+body[data-npc=taverneiro] #cozinha .ch h3{white-space:nowrap;font-size:18px;background:var(--k-title);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #000)}
 body[data-npc=taverneiro] #ckGold{color:var(--k-acc)}
 
 /* botões: a ação principal na cor da casa, o resto em tábuas de couro com moldura de viga */

@@ -82,8 +82,8 @@ drawNpcLabels = function (cx, cy) {
   const [wx, wy] = stashCenter(), d = Math.abs(pl.x + pl.w / 2 - wx); if (d > 60 || Math.abs(pl.y + pl.h - groundY()) > 60) return;
   const x = (wx - cx) * S, y = (wy - 16 - cy) * S, near = pl.nearNpc === STASH_SPOT;
   sc.textAlign = 'center'; sc.textBaseline = 'middle'; sc.globalAlpha = clamp((60 - d) / 24, 0, 1); sc.lineWidth = Math.max(3, S); sc.strokeStyle = '#120d12';
-  sc.font = `700 ${Math.round(S * 3.6)}px "Rubik", system-ui, sans-serif`; sc.strokeText('Baú', x, y); sc.fillStyle = '#e8c06a'; sc.fillText('Baú', x, y);
-  if (near) { sc.font = `700 ${Math.round(S * 3.2)}px "Rubik", system-ui, sans-serif`; sc.strokeText('E  abrir', x, y - S * 4.4); sc.fillStyle = '#efe2c4'; sc.fillText('E  abrir', x, y - S * 4.4); }
+  sc.font = `700 ${fpx(S * 3.6)}px "UD Pixel", monospace`; sc.strokeText('Baú', x, y); sc.fillStyle = '#e8c06a'; sc.fillText('Baú', x, y);
+  if (near) { sc.font = `700 ${fpx(S * 3.2)}px "UD Pixel", monospace`; sc.strokeText('E  abrir', x, y - (fpx(S * 3.6) + fpx(S * 3.2)) / 2 - S); sc.fillStyle = '#efe2c4'; sc.fillText('E  abrir', x, y - (fpx(S * 3.6) + fpx(S * 3.2)) / 2 - S); }
   sc.globalAlpha = 1;
 };
 

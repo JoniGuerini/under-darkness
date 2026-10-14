@@ -566,13 +566,13 @@ function drawNpcLabels(cx, cy) {
     const wx = npcWX(n), d = Math.abs(pl.x + pl.w / 2 - wx); if (d > 110 || Math.abs(pl.y + pl.h - gy) > 60) continue;
     const x = (wx - cx) * S, y = (gy - 30 - cy) * S, near = pl.nearNpc === n;
     sc.globalAlpha = clamp((110 - d) / 30, 0, 1); sc.lineWidth = Math.max(3, S); sc.strokeStyle = '#120d12';
-    sc.font = `700 ${Math.round(S * 4)}px "Rubik", system-ui, sans-serif`; sc.strokeText(n.name, x, y); sc.fillStyle = '#ffd27a'; sc.fillText(n.name, x, y);
-    sc.font = `600 ${Math.round(S * 3)}px "Rubik", system-ui, sans-serif`; sc.strokeText(n.role, x, y + S * 3.8); sc.fillStyle = '#c4b596'; sc.fillText(n.role, x, y + S * 3.8);
-    if (near) { sc.font = `700 ${Math.round(S * 3.2)}px "Rubik", system-ui, sans-serif`; sc.strokeText('E  conversar', x, y - S * 4.6); sc.fillStyle = '#efe2c4'; sc.fillText('E  conversar', x, y - S * 4.6); }
+    sc.font = `700 ${fpx(S * 4)}px "UD Pixel", monospace`; sc.strokeText(n.name, x, y); sc.fillStyle = '#ffd27a'; sc.fillText(n.name, x, y);
+    sc.font = `600 ${fpx(S * 3)}px "UD Pixel", monospace`; sc.strokeText(n.role, x, y + (fpx(S * 4) + fpx(S * 3)) / 2 + S); sc.fillStyle = '#c4b596'; sc.fillText(n.role, x, y + (fpx(S * 4) + fpx(S * 3)) / 2 + S);
+    if (near) { sc.font = `700 ${fpx(S * 3.2)}px "UD Pixel", monospace`; sc.strokeText('E  conversar', x, y - (fpx(S * 4) + fpx(S * 3.2)) / 2 - S); sc.fillStyle = '#efe2c4'; sc.fillText('E  conversar', x, y - (fpx(S * 4) + fpx(S * 3.2)) / 2 - S); }
     sc.globalAlpha = 1;
   }
   const sg = VIL_BUILD.find(v => v.k === 'sign'), [sx, sy] = bPos(sg), d = Math.abs(pl.x - sx);
-  if (d < 90) { sc.globalAlpha = clamp((90 - d) / 30, 0, 1); sc.font = `700 ${Math.round(S * 3.2)}px "Rubik", system-ui, sans-serif`; const x = (sx + 14 - cx) * S, y = (sy - 4 - cy) * S; sc.lineWidth = Math.max(3, S); sc.strokeStyle = '#120d12'; sc.strokeText(CATEDRAL && !CAVERNA ? 'Catedral  →' : 'Cavernas  →', x, y); sc.fillStyle = '#efe2c4'; sc.fillText(CATEDRAL && !CAVERNA ? 'Catedral  →' : 'Cavernas  →', x, y); sc.globalAlpha = 1; }
+  if (d < 90) { sc.globalAlpha = clamp((90 - d) / 30, 0, 1); sc.font = `700 ${fpx(S * 3.2)}px "UD Pixel", monospace`; const x = (sx + 14 - cx) * S, y = (sy - 4 - cy) * S; sc.lineWidth = Math.max(3, S); sc.strokeStyle = '#120d12'; sc.strokeText(CATEDRAL && !CAVERNA ? 'Catedral  →' : 'Cavernas  →', x, y); sc.fillStyle = '#efe2c4'; sc.fillText(CATEDRAL && !CAVERNA ? 'Catedral  →' : 'Cavernas  →', x, y); sc.globalAlpha = 1; }
 }
 
 /* ---- gold, prices and shops ---- */

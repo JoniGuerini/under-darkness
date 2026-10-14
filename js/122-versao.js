@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.42.0';
+const VERSAO = '0.43.0';
 const NOVIDADES = [
+  { v: '0.43.0', data: '14/10/2026', titulo: 'Fonte pixelada', itens: [
+    'Nova fonte pixelada em todo o jogo.',
+  ] },
   { v: '0.42.0', data: '14/10/2026', titulo: 'Música da tela de início', itens: [
     'Música medieval na tela de início.',
   ] },

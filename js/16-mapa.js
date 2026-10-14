@@ -111,7 +111,7 @@ function drawMap() {
     }
   }
   const at = (tx, ty) => [Math.round(W / 2 + (tx - px) * MS), Math.round(H / 2 + (ty - py) * MS)];
-  const label = (text, x, y, col, size, title) => { sc.font = title ? `400 ${Math.round(size * 1.35)}px "Jersey 10", "Rubik", sans-serif` : `700 ${size}px "Rubik", system-ui, sans-serif`; sc.textAlign = 'center'; sc.textBaseline = 'middle'; sc.lineJoin = 'round'; sc.lineWidth = Math.max(3, size * 0.28); sc.strokeStyle = '#0a0810'; sc.strokeText(text, x, y); sc.fillStyle = col; sc.fillText(text, x, y); };
+  const label = (text, x, y, col, size, title) => { sc.font = title ? `400 ${fpx(size * 1.35)}px "UD Pixel", monospace` : `700 ${fpx(size)}px "UD Pixel", monospace`; sc.textAlign = 'center'; sc.textBaseline = 'middle'; sc.lineJoin = 'round'; sc.lineWidth = Math.max(3, size * 0.28); sc.strokeStyle = '#0a0810'; sc.strokeText(text, x, y); sc.fillStyle = col; sc.fillText(text, x, y); };
   const fs = Math.max(Math.round(12 * dpr), Math.round(MS * 1.05));
   // the village: a little house over the spawn
   const near = tx => tx + Math.round((px - tx) / WW) * WW;   // the copy of a place closest to you on the ring

@@ -611,7 +611,7 @@ HOOK.drawGlow.push((cx, cy) => {
 HOOK.drawTop.push((cx, cy) => {
   const s = reiFx.say; if (!s || s.e.dead) return;
   const e = s.e, x = Math.round(e.x + e.w / 2) - cx, y = Math.round(e.y) - cy - 18;
-  lc.globalAlpha = clamp(s.t / 0.4, 0, 1); lc.font = '8px "Jersey 10", monospace'; lc.textAlign = 'center';
+  lc.globalAlpha = clamp(s.t / 0.4, 0, 1); lc.font = '6px "UD Pixel", monospace'; lc.textAlign = 'center';
   lc.fillStyle = '#140c10'; lc.fillText(s.text, x + 1, y + 1); lc.fillStyle = '#ffd27a'; lc.fillText(s.text, x, y);
   lc.textAlign = 'left'; lc.globalAlpha = 1;
 });

@@ -1,8 +1,8 @@
 /* lista de personagens na tela de início (js/39-titulo.js + js/120-personagens.js): o mesmo texto puro do menu */
 #title .tmenu .crow{display:flex;align-items:baseline;gap:clamp(14px,2vw,28px)}
-#title .tmenu button.cpick small{display:block;margin-top:2px;font-family:var(--font-ui);font-size:clamp(12px,1.7vh,16px);font-weight:600;letter-spacing:.02em;color:#8e7a62;text-shadow:2px 2px 0 #000}
-#title .tmenu button.cdel,#title .tmenu button.cdel:hover,#title .tmenu button.cdel:focus{padding-left:0;font-size:clamp(20px,3vh,32px);color:#7d5a52}
+#title .tmenu button.cpick small{display:block;margin-top:2px;font-family:var(--font-ui);font-size:12px;font-size:round(nearest,clamp(12px,1.7vh,12px),6px);font-weight:600;letter-spacing:0;color:#8e7a62;text-shadow:2px 2px 0 #000}
+#title .tmenu button.cdel,#title .tmenu button.cdel:hover,#title .tmenu button.cdel:focus{padding-left:0;font-size:24px;font-size:round(nearest,clamp(18px,3vh,30px),6px);color:#7d5a52}
 #title .tmenu button.cdel:focus,#title .tmenu button.cdel:hover{color:#ff8f7a}
 #title .tmenu button.cdel.warn{color:#ff8f7a}
-#title .tmenu button.cexp,#title .tmenu button.cexp:hover,#title .tmenu button.cexp:focus{padding-left:0;font-size:clamp(20px,3vh,32px);color:#8e7a62}
+#title .tmenu button.cexp,#title .tmenu button.cexp:hover,#title .tmenu button.cexp:focus{padding-left:0;font-size:24px;font-size:round(nearest,clamp(18px,3vh,30px),6px);color:#8e7a62}
 #title .tmenu button.cexp:focus,#title .tmenu button.cexp:hover{color:#ffd98a}

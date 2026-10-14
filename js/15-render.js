@@ -150,6 +150,8 @@ function drawWorldUI(cx, cy) {
 // bichos (2026-10-12). Usa o textAlign/textBaseline/lineJoin que o sc tiver na hora, como antes.
 const TXT = new Map(), txtCtx = mk(1, 1).getContext('2d');
 if (document.fonts) document.fonts.addEventListener('loadingdone', () => TXT.clear());
+/* pixel font (UD Pixel): 1 font pixel = 1/6 em, so text stays crisp only at multiples of 6px */
+function fpx(n) { return Math.max(6, Math.round(n / 6) * 6); }
 function outlinedText(text, x, y, font, lw, stroke, fill) {
   const al = sc.textAlign, bl = sc.textBaseline, lj = sc.lineJoin, k = font + '|' + lw + '|' + stroke + '|' + fill + '|' + al + bl + lj + '|' + text;
   let c = TXT.get(k);
@@ -257,13 +259,13 @@ function render() {
     for (const t of texts) {
       const a = Math.min(1, t.life / t.max * 2.5), fs = Math.round(S * 4.1 * t.size * (1 + Math.max(0, t.life - t.max + 0.12) * 3));
       sc.globalAlpha = a;
-      outlinedText(t.text, (t.x - cx) * S, (t.y - cy) * S, `800 ${fs}px "Rubik", system-ui, sans-serif`, Math.max(3, S * 1.25), '#120d12', t.col);
+      outlinedText(t.text, (t.x - cx) * S, (t.y - cy) * S, `800 ${fpx(fs)}px "UD Pixel", monospace`, Math.max(3, S * 1.25), '#120d12', t.col);
     }
     sc.globalAlpha = 1;
   }
   drawNpcLabels(cx, cy);
   // enemy level tags
-  sc.font = `600 ${Math.round(S * 3.1)}px "Rubik", system-ui, sans-serif`; sc.textAlign = 'center';
+  sc.font = `600 ${fpx(S * 3.1)}px "UD Pixel", monospace`; sc.textAlign = 'center';
   if (mapOpen && state === 'play') drawMap();
   for (const e of enemies) if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) outlinedText(`${ET[e.type].name} · Nv ${e.lvl}`, (e.x + e.w / 2 - cx) * S, (e.y - cy - 9) * S, sc.font, Math.max(2, S * 0.8), '#120d12', '#efe2c4');
 }

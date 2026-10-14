@@ -1,20 +1,20 @@
 /* novidades e versão na tela de início (js/39-titulo.js + js/121-versao.js): texto puro sobre uma sombra, como o menu */
-#title .tver{position:absolute;right:max(16px,2.4vw);bottom:max(12px,2vh);font-family:var(--font-ui);font-size:clamp(11px,1.5vh,14px);font-weight:600;letter-spacing:.06em;color:#7a6a56;text-shadow:2px 2px 0 #000;pointer-events:none}
+#title .tver{position:absolute;right:max(16px,2.4vw);bottom:max(12px,2vh);font-family:var(--font-ui);font-size:12px;font-size:round(nearest,clamp(12px,1.5vh,12px),6px);font-weight:600;letter-spacing:0;color:#7a6a56;text-shadow:2px 2px 0 #000;pointer-events:none}
 #title .tmenu button#ttNews.new::after{content:"";position:absolute;right:-16px;top:50%;width:8px;height:8px;translate:0 -50%;background:#f39a3a;box-shadow:0 0 0 2px #000,0 0 10px rgba(243,154,58,.8)}
 
 #title .tnews{position:absolute;left:max(24px,5.5vw);top:clamp(150px,30vh,300px);bottom:max(22px,8vh);width:min(600px,calc(100vw - 48px));display:flex;flex-direction:column;gap:10px;
   padding:16px 18px 12px 0;background:linear-gradient(90deg,rgba(3,2,5,.82),rgba(3,2,5,.7) 75%,rgba(3,2,5,0))}
 #title .tnews[hidden]{display:none}
-#title .tnews h2{margin:0;font-family:var(--font-title);font-weight:400;font-size:clamp(28px,4.4vh,46px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:.02em}
+#title .tnews h2{margin:0;font-family:var(--font-title);font-weight:400;font-size:24px;font-size:round(nearest,clamp(18px,4.4vh,30px),6px);line-height:1;color:#8e7a62;text-shadow:3px 3px 0 #000;letter-spacing:0}
 #title .tnews .sbwrap{flex:1;min-height:0}
 #title .tnlist{flex:1;min-height:0;height:100%;overflow:auto;padding:0 18px 0 0}
 #title .tnlist article{padding:12px 0 14px;border-top:2px solid rgba(90,58,20,.55)}
 #title .tnlist article:first-child{border-top:0;padding-top:4px}
-#title .tnlist h3{margin:0 0 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-family:var(--font-title);font-weight:400;font-size:clamp(24px,3.4vh,34px);line-height:1;color:#b9a68a;text-shadow:3px 3px 0 #000}
+#title .tnlist h3{margin:0 0 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-family:var(--font-title);font-weight:400;font-size:18px;font-size:round(nearest,clamp(12px,3.4vh,18px),6px);line-height:1;color:#b9a68a;text-shadow:3px 3px 0 #000}
 #title .tnlist article.cur h3{color:#ffd98a}
 #title .tnlist h3 span{color:inherit}
-#title .tnlist h3 small{margin-left:auto;font-family:var(--font-ui);font-size:12px;font-weight:600;letter-spacing:.04em;color:#7a6a56;text-shadow:2px 2px 0 #000}
+#title .tnlist h3 small{margin-left:auto;font-family:var(--font-ui);font-size:6px;font-weight:600;letter-spacing:0;color:#7a6a56;text-shadow:2px 2px 0 #000}
 #title .tnlist ul{margin:0;padding:0;list-style:none;display:grid;gap:5px}
-#title .tnlist li{position:relative;padding-left:16px;font-family:var(--font-ui);font-size:clamp(13px,1.8vh,15px);line-height:1.45;color:#d8c8a8;text-shadow:1px 1px 0 #000}
+#title .tnlist li{position:relative;padding-left:16px;font-family:var(--font-ui);font-size:12px;font-size:round(nearest,clamp(12px,1.8vh,12px),6px);line-height:1.45;color:#d8c8a8;text-shadow:1px 1px 0 #000}
 #title .tnlist li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;background:#c8963e;box-shadow:0 0 0 1px #000;rotate:45deg}
 #title .tnews .tmenu{position:static}

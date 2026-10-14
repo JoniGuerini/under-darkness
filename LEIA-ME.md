@@ -355,6 +355,7 @@ A versão do jogo e as notas de cada versão ficam em `js/122-versao.js` (`VERSA
 - E coleta sob o mouse (pedido do Jonathan, 2026-10-12): todo item ou objeto coletável novo deve funcionar com o E do `js/348-coletar.js` (drop em `loot`, ou bloco não sólido com `BLOCK_DROP`). Novos usos do E que dependem de estar perto não devem passar na frente do que está sob o mouse.
 - Nada de avisos/pop-ups no topo da tela (pedido do Jonathan): não recrie `#toasts` nem mostre mensagens em `toast()`; avise pelo próprio jogo (som, efeito, painel) quando precisar.
 - Descida só pela sala do chefe (pedido do Jonathan, 2026-10-13): camada nova não abre passagem para a de baixo; o selo e o caminho do `353-descida-chefe` fazem isso sozinhos. Chefe novo precisa de uma função `in<Algo>Hall(x, y, m)` e de uma linha em `SALA_FN`, e a luta deve terminar por `endBossFight(true)`.
+- Fonte pixel (pedido do Jonathan, 2026-10-14): todo texto do jogo usa a UD Pixel (`css/fonte.css`, arquivos em `fonts/`), uma Silkscreen (licença OFL, pode vender) com o em de 6 pixels. Use tamanhos múltiplos de 6px para o texto ficar nítido: 12px texto, 18px subtítulo, 24px ou mais título; 6px só para rótulo minúsculo. No canvas use `fpx(n)` (`js/15-render.js`) para arredondar o tamanho. Folga extra de painéis por causa da fonte fica em `css/fonte-ajustes.css`. Nada de Google Fonts: a Jersey 10 local fica só no logo da tela de início.
 
 ## Regra dos ofícios
 

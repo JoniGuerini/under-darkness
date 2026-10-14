@@ -1,17 +1,17 @@
 /* Criar (js/235-criar.js): lista de receitas colada no cartão do inventário, e a pilha na mão do cursor */
 #btnCraft.on{filter:brightness(1.2)}
 #craftBox{position:fixed;z-index:5;width:240px;padding:8px 10px 10px;display:grid;gap:8px}
-#craftBox .sub4{font-size:26px;text-align:center}
+#craftBox .sub4{font-size:12px;text-align:center}
 #craftBox .clist{display:grid;gap:6px}
 #craftBox .crow{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;text-align:left;padding:5px 8px 5px 5px;background:linear-gradient(#241c29,#15111a);border:2px solid #000;box-shadow:inset 0 0 0 1px #4a3826,0 2px 0 rgba(0,0,0,.45);color:var(--parch);cursor:pointer;font:inherit}
 #craftBox .crow:hover{background:linear-gradient(#30263a,#1c1622)}
 #craftBox .crow.no{opacity:.55}
 #craftBox .crow .out{grid-row:1 / 3;width:46px;height:46px;cursor:inherit}
 #craftBox .crow .out img{width:36px;height:36px}
-#craftBox .cname{font-weight:600;font-size:15px;text-shadow:1px 1px 0 #000}
+#craftBox .cname{font-weight:600;font-size:12px;text-shadow:1px 1px 0 #000}
 #craftBox .cneed{display:flex;gap:8px}
-#craftBox .ci{display:flex;align-items:center;gap:2px;font-size:13px;color:#d9c39a;text-shadow:1px 1px 0 #000;font-variant-numeric:tabular-nums}
+#craftBox .ci{display:flex;align-items:center;gap:2px;font-size:12px;color:#d9c39a;text-shadow:1px 1px 0 #000;font-variant-numeric:tabular-nums}
 #craftBox .ci img{width:20px;height:20px;image-rendering:pixelated}
 #craftBox .ci.falta{color:#ff8a7a}
 /* a pilha na mão: o número no canto, como numa casa */
-.ghost-drag.hand .n{position:absolute;right:-4px;bottom:-6px;font-size:14px;font-weight:700;color:var(--parch);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;font-variant-numeric:tabular-nums}
+.ghost-drag.hand .n{position:absolute;right:-4px;bottom:-6px;font-size:12px;font-weight:700;color:var(--parch);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;font-variant-numeric:tabular-nums}
