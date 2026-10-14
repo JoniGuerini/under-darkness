@@ -6,4 +6,3 @@
 #title .tmenu button.cdel.warn{color:#ff8f7a}
 #title .tmenu button.cexp,#title .tmenu button.cexp:hover,#title .tmenu button.cexp:focus{padding-left:0;font-size:clamp(20px,3vh,32px);color:#8e7a62}
 #title .tmenu button.cexp:focus,#title .tmenu button.cexp:hover{color:#ffd98a}
-#title .tmenu .cimp{margin-top:8px}

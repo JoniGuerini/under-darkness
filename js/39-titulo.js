@@ -366,6 +366,7 @@ function paintTitleLogo() {
     <nav class="tmenu" id="ttMain" aria-label="Menu principal">
       <button type="button" id="ttCont">Continuar</button>
       <button type="button" id="ttLoad">Carregar</button>
+      <button type="button" id="ttImp">Importar</button>
       <button type="button" id="ttNew">Novo jogo</button>
       <button type="button" id="ttNews">Novidades</button>
       <button type="button" id="ttOpt">Opções</button>
@@ -447,7 +448,7 @@ function paintTitleLogo() {
   const navNow = () => !newsBox.hidden ? newsBox.querySelector('.tmenu') : navChars.hidden ? navMain : navChars;
   function mainUI() {
     const any = charList().length > 0;
-    btnCont.hidden = !any;
+    btnCont.hidden = !any; btnLoad.hidden = !any;
     navChars.hidden = true; newsBox.hidden = true; navMain.hidden = false;
   }
   function play(fn) {
@@ -460,9 +461,10 @@ function paintTitleLogo() {
   btnCont.addEventListener('click', () => { const id = charCur != null ? charCur : chars.last; if (id != null) playChar(id); });
   btnNew.addEventListener('click', () => play(() => { charNew(); startPlaying(); }));
 
-  // carregar: a lista de personagens, cada um com Exportar e Excluir (pede um segundo clique); Importar cria um personagem novo (357-save-arquivo)
+  // carregar: a lista de personagens, cada um com Exportar (357-save-arquivo) e Excluir (pede um segundo clique)
   function charsUI(focusId) {
     const list = charList();
+    if (!list.length) { mainUI(); navMain.querySelector('button:not([hidden])').focus(); return; }
     navMain.hidden = true; navChars.hidden = false; navChars.textContent = '';
     const h = document.createElement('h2'); h.textContent = 'Personagens'; navChars.appendChild(h);
     for (const c of list) {
@@ -482,21 +484,20 @@ function paintTitleLogo() {
       x.addEventListener('click', () => charExport(c.id));
       row.append(b, x, d); navChars.appendChild(row);
     }
-    const imp = document.createElement('button'); imp.type = 'button'; imp.className = 'cimp'; imp.textContent = 'Importar';
-    let impT = 0;
-    imp.addEventListener('click', () => charImportFile().then(id => {
-      if (id != null) { charsUI(id); return; }
-      imp.textContent = 'Arquivo inválido'; imp.classList.add('warn'); clearTimeout(impT);
-      impT = setTimeout(() => { imp.textContent = 'Importar'; imp.classList.remove('warn'); }, 1800);
-    }));
-    navChars.appendChild(imp);
     const back = document.createElement('button'); back.type = 'button'; back.className = 'back'; back.textContent = 'Voltar';
     back.addEventListener('click', () => { mainUI(); btnLoad.focus(); });
     navChars.appendChild(back);
     for (const b of navChars.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
-    (navChars.querySelector(`.cpick[data-id="${focusId}"]`) || navChars.querySelector('.cpick') || imp).focus();
+    (navChars.querySelector(`.cpick[data-id="${focusId}"]`) || navChars.querySelector('.cpick')).focus();
   }
   btnLoad.addEventListener('click', () => { initAudio(); charsUI(); });
+  // importar: um save em arquivo vira um personagem novo, e a lista Carregar abre com ele (357-save-arquivo)
+  const btnImp = $('ttImp'); let impT = 0;
+  btnImp.addEventListener('click', () => { initAudio(); charImportFile().then(id => {
+    if (id != null) { charsUI(id); return; }
+    btnImp.textContent = 'Arquivo inválido'; btnImp.classList.add('warn'); clearTimeout(impT);
+    impT = setTimeout(() => { btnImp.textContent = 'Importar'; btnImp.classList.remove('warn'); }, 1800);
+  }); });
 
   // novidades: as notas de cada versão (121-versao); a opção fica marcada até a versão atual ser vista
   const btnNews = $('ttNews');
@@ -544,7 +545,7 @@ function paintTitleLogo() {
   }, true);
   for (const b of root.querySelectorAll('button')) b.addEventListener('pointerenter', () => b.focus({ preventScroll: true }));
 
-  // menu de pausa: "Tela de início" salva e volta para esta tela; "Excluir personagem" apaga o atual e volta para ela
+  // menu de pausa: "Exportar personagem" baixa o save do atual; "Tela de início" salva e volta para esta tela; "Excluir personagem" apaga o atual e volta para ela
   function toTitle() {
     $('pause').hidden = true; $('hud').hidden = true; state = 'menu';
     root.hidden = false; $('ttBye').hidden = true; root.classList.remove('bye', 'out');
@@ -553,7 +554,10 @@ function paintTitleLogo() {
   }
   const bt = document.createElement('button');
   bt.id = 'btnTitle'; bt.className = 'ghost'; bt.type = 'button'; bt.textContent = 'Tela de início';
-  $('pause').querySelector('.actions').appendChild(bt);
+  const bx = document.createElement('button');
+  bx.id = 'btnExpChar'; bx.className = 'ghost'; bx.type = 'button'; bx.textContent = 'Exportar personagem';
+  $('pause').querySelector('.actions').append(bx, bt);
+  bx.addEventListener('click', () => { if (charCur == null) return; saveGame(); charExport(charCur); });
   bt.addEventListener('click', () => { saveGame(); toTitle(); });
   const bd = document.createElement('button');
   bd.id = 'btnDelChar'; bd.className = 'ghost warn'; bd.type = 'button';
