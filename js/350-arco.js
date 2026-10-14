@@ -222,6 +222,8 @@ function bowTick(dt, hand) {
 const QUIVER_AT = { cx: OX + 3, cy: OY + 10 }, QUIVER_MOUTH = [OX + 1.5, OY + 5];
 function quiverPose(P) {
   if (!P || !quiverOn()) return P;
+  // subindo escada ou cipó a pose é de costas (js/88), que desenha o escudo como imagem: a aljava vai como imagem também
+  if (P.climb) { P.shield = quiverBack(equip.shield.id); return P; }
   P.shield = { img: quiverBack(equip.shield.id), cx: QUIVER_AT.cx, cy: QUIVER_AT.cy, top: false };
   return P;
 }

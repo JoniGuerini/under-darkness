@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.12';
+const VERSAO = '0.40.13';
 const NOVIDADES = [
+  { v: '0.40.13', data: '14/10/2026', titulo: 'Escalar com aljava', itens: [
+    'Subir escada ou cipó com a aljava equipada não faz mais o herói sumir nem estraga a iluminação.',
+  ] },
   { v: '0.40.12', data: '14/10/2026', titulo: 'Renovar estoque', itens: [
     'Loja: botão Renovar (Grimaldo e Aurélia) troca o estoque por ouro.',
   ] },
