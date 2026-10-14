@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.39.2';
+const VERSAO = '0.40.0';
 const NOVIDADES = [
+  { v: '0.40.0', data: '13/10/2026', titulo: 'Descida pela sala do chefe', itens: [
+    'Cada camada é separada da de baixo por rocha inteira. O único caminho natural para baixo sai do chão da sala do chefe e desaba quando ele cai. Quebrar a rocha com a picareta continua valendo.',
+    'Enquanto o chefe da camada estiver vivo, uma poeira no ar corre na direção da sala dele e um coração bate lá longe.',
+    'Os mundos de antes são refeitos: nível, itens, ouro e o baú da vila continuam, e os chefes voltam vivos.',
+  ] },
   { v: '0.39.2', data: '13/10/2026', titulo: 'Talentos salvos', itens: [
     'Os pontos gastos na árvore de talentos voltam ao continuar o jogo. Antes, recarregar a página zerava a árvore.',
   ] },

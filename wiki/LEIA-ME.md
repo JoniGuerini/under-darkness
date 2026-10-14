@@ -21,7 +21,7 @@ A wiki só lê: ela não deixa o código do jogo ouvir o teclado e nunca grava o
 
 ## Quando mexer na wiki
 
-- **Arquivo novo no jogo com dados** (itens, monstros, um bioma novo): acrescente o `<script src="../js/...">` no `index.html`, na mesma posição relativa do `index.html` do jogo. Arquivos de interface (HUD, menus, música, título) ficam de fora. Também ficam de fora os que só mexem no save ou na geração do jogo rodando: o `310-mundo-18`, o `313-quedas-minerios` e o `312-gera-aos-poucos` (a wiki gera o mundo inteiro de uma vez, com o `generate` do jogo, para contar blocos e objetos).
+- **Arquivo novo no jogo com dados** (itens, monstros, um bioma novo): acrescente o `<script src="../js/...">` no `index.html`, na mesma posição relativa do `index.html` do jogo. Arquivos de interface (HUD, menus, música, título) ficam de fora. Também ficam de fora os que só mexem no save ou na geração do jogo rodando: o `310-mundo-18`, o `313-quedas-minerios`, o `353-descida-chefe` e o `312-gera-aos-poucos` (a wiki gera o mundo inteiro de uma vez, com o `generate` do jogo, para contar blocos e objetos).
 - **Monstro, morador ou faixa nova**: escreva a descrição em `js/textos.js` (os números aparecem sozinhos).
 - **Documento novo ou alterado em `docs/`**: refaça o `js/docs.js` (o navegador não deixa uma página aberta com dois cliques ler outros arquivos sozinha, por isso o texto é copiado).
 - Se uma página quebrar porque o jogo mudou, ela mostra o motivo e as outras continuam funcionando.
