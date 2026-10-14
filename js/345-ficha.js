@@ -10,7 +10,7 @@
 (() => {
   const C = $('char');
   C.innerHTML = `<section class="fch" aria-label="Personagem">
-    <header class="ch"><h3>Personagem</h3><span id="chLvl"></span><button class="ghost x" id="btnCloseChar" type="button" aria-label="Fechar">×</button></header>
+    <header class="ch"><h3>Personagem</h3><span id="chLvl"></span><button class="ghost" id="btnCloseChar" type="button" aria-label="Fechar">×</button></header>
     <div class="ftop">
       <div class="fdoll"><canvas id="charCv" width="48" height="44" aria-hidden="true"></canvas></div>
       <div class="fbars">
@@ -79,7 +79,7 @@ function refreshChar() {
       R('Alcance', m(pl.reach), '', false, 'Até onde a arma chega a partir do centro do corpo.'),
       R('Roubo de vida', fP0(pl.lifeSteal), pl.lifeSteal ? 'up' : 'z', a('lifeSteal'), 'Parte do dano corpo a corpo que volta como vida.', fchFrom(I.lifeSteal, a('lifeSteal'))),
       R('Atordoar', fP0(pl.stunCh), pl.stunCh ? 'up' : 'z', a('stun'), 'Chance de um golpe corpo a corpo deixar o inimigo tonto. Não funciona nos chefes.', fchFrom(0, a('stun')))]],
-    ['Dano', 'dmgAll', fchReg('fisico'), 'Bônus por tipo', [
+    ['Dano', 'dmgAll', fchReg('fisico'), '', [
       R('Geral', fP(a('dmgAll')), a('dmgAll') ? 'up' : 'z', a('dmgAll'), 'Vale para todo golpe: corpo a corpo, flecha e feitiço.', fchFrom(0, a('dmgAll'))),
       R('Físico', fP(phys), phys ? 'up' : 'z', a('dmgFis') || a('dmgAll'), 'Golpes de arma e flechas: o % de dano dos itens, o dano físico e o geral. Já está no Dano do Ataque.', fchFrom(I.dmgPct, a('dmgFis'))),
       R('Corpo a corpo', fP(a('dmgMelee')), a('dmgMelee') ? (bow ? 'z' : 'up') : 'z', a('dmgMelee'), bow ? 'Só vale com arma de perto; o arco na mão não usa.' : 'Só os golpes com arma de perto. Já está no Dano do Ataque.', fchFrom(0, a('dmgMelee'))),
@@ -119,12 +119,12 @@ function refreshChar() {
       R('Bônus de XP', fP(pl.xpB), pl.xpB ? 'up' : 'z', false, 'Experiência a mais por inimigo derrotado.')]],
     ['Jornada', 'inicio', ARV_NEUTRO, '', [
       R('Talentos', free ? `${free} ${free === 1 ? 'livre' : 'livres'}` : 'todos usados', free ? 'up' : '', false, 'Pontos livres para a árvore de talentos. Cada nível dá 1.', `${arv.on.size - 1} nós ligados`),
-      R('Inimigos derrotados', String(pl.kills), '', false, 'Quantos inimigos você derrotou neste mundo.'),
+      R('Inimigos', String(pl.kills), '', false, 'Quantos inimigos você derrotou neste mundo.'),
       R('Ouro', goldTxt(pl.gold), '', false, 'Dinheiro para o vilarejo.'),
       R('Próximo nível', `${Math.max(0, need - Math.floor(pl.xp))} XP`, '', false, 'Quanta experiência ainda falta para subir de nível.')]]
   ];
   FCH_ROWS = {};
-  $('chStats').innerHTML = groups.map(([h, ic, col, sub, rows], gi) => `<section class="fbox"><h4><img src="${fchIcon(ic, col)}" alt="">${h}${sub ? `<small>${UDesc(sub)}</small>` : ''}</h4><dl>${rows.map((r, i) => {
+  $('chStats').innerHTML = groups.map(([h, ic, col, sub, rows], gi) => `<section class="fbox"><h4><img src="${fchIcon(ic, col)}" alt="">${h}</h4>${sub ? `<p class="fsub"${gi === 0 && w ? ` style="color:${RAR_COL[itemRar(w)]}"` : ''}>${UDesc(sub)}</p>` : ''}<dl>${rows.map((r, i) => {
     const id = gi + '.' + i; FCH_ROWS[id] = r;
     return `<dt data-r="${id}"${r.arv ? ' class="arv"' : ''}>${r.k}</dt><dd data-r="${id}" class="${r.cls}">${r.v}</dd>`;
   }).join('')}</dl></section>`).join('');
