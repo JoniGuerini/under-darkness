@@ -131,20 +131,28 @@ const CHUNK_MAX = 220, CHUNK_KEEP = 150;
 /* ================= lighting ================= */
 let LX0 = 0, LY0 = 0, LW = 0, LH = 0, LB = null, DB = null, lightCv = null, lightCx = null, lightImg = null, lightU = null, OPQ = null;
 const emitters = [];
-/* flames light what they can see (Jonathan, 2026-10-14: "a tocha ilumina demais a parte de baixo do bloco"): a torch or
-   a candle shines straight lines out to LUZ.r tiles, and rock stops them, so a ledge throws a real shadow under itself
-   and the drop beside it stays dark. Only a weak share (LUZ.bounce) goes through the old spreading light, the light that
-   bounces round corners and into the rock. Other glowing things (crystals, lava, mushrooms) keep the old light. */
-const LUZ = { r: 14, bounce: 0.42, pow: 0.8, src: [] };
-const LUZ_PONTO = new Uint8Array(NT); LUZ_PONTO[TORCH] = 1; LUZ_PONTO[CANDLE] = 1;
+/* every light shines in straight lines (Jonathan, 2026-10-14: "a tocha ilumina demais a parte de baixo do bloco"; then
+   "a iluminação como um todo no jogo deveria funcionar igual"): torches, candles, mushrooms, crystals, ores, lava,
+   braziers, and the lights added by addL (props, the hero's +Luz, spells, glowing monsters) reach out LUZ.r x their
+   strength, and rock stops them, so a ledge throws a real shadow under itself and the drop beside it stays dark. Only a
+   weak share (LUZ.bounce) goes through the old spreading light, the light that bounces round corners and into the rock.
+   The sky stays spreading light. LUZ.reta = false brings back the old light (for comparing). */
+const LUZ = { r: 14, bounce: 0.42, pow: 0.8, reta: true, src: [], n: 0, grid: null, gw: 0 };
+// a light source of this frame (window coords). Two sources in the same 2x2 tiles keep only the stronger: a lava lake
+// or a crystal vein is one light per 2x2, not one per tile.
+function luzFonte(i, j, em) {
+  const g = (j >> 1) * LUZ.gw + (i >> 1), at = LUZ.grid[g];
+  if (at) { const q = (at - 1) * 3; if (LUZ.src[q + 2] >= em) return; LUZ.src[q] = i; LUZ.src[q + 1] = j; LUZ.src[q + 2] = em; return; }
+  LUZ.grid[g] = LUZ.n + 1; LUZ.src[LUZ.n * 3] = i; LUZ.src[LUZ.n * 3 + 1] = j; LUZ.src[LUZ.n * 3 + 2] = em; LUZ.n++;
+}
 let skyLight = 1;
 const DARK = { amb: 0.02, ex: 1.15, cap: 0.992, band: 18, rate: 0.6, k: -1, t: 0 };   // the underground darkness (tune here): band = tiles of fade below the ground, rate = how fast it follows you (per s)
 function computeLight(cx, cy) {
   const M = 12;
   const x0 = Math.floor(cx / T) - M, y0 = Math.floor(cy / T) - M;
   const w = Math.ceil(VW / T) + M * 2 + 2, h = Math.ceil(VH / T) + M * 2 + 2;
-  if (w !== LW || h !== LH || !lightCv) { LW = w; LH = h; LB = new Float32Array(w * h); DB = new Float32Array(w * h); OPQ = new Uint8Array(w * h); lightCv = mk(w, h); lightCx = lightCv.getContext('2d'); lightImg = lightCx.createImageData(w, h); lightU = new Uint32Array(lightImg.data.buffer); }
-  LX0 = x0; LY0 = y0; emitters.length = 0; LUZ.src.length = 0;
+  if (w !== LW || h !== LH || !lightCv) { LUZ.gw = (w + 1) >> 1; LUZ.grid = new Int32Array(LUZ.gw * ((h + 1) >> 1)); LW = w; LH = h; LB = new Float32Array(w * h); DB = new Float32Array(w * h); OPQ = new Uint8Array(w * h); lightCv = mk(w, h); lightCx = lightCv.getContext('2d'); lightImg = lightCx.createImageData(w, h); lightU = new Uint32Array(lightImg.data.buffer); }
+  LX0 = x0; LY0 = y0; emitters.length = 0; LUZ.n = 0; LUZ.grid.fill(0); const reta = LUZ.reta, bnc = reta ? LUZ.bounce : 1;
   const vx0 = x0 + M - 1, vx1 = x0 + M + Math.ceil(VW / T) + 1, vy0 = y0 + M - 1, vy1 = y0 + M + Math.ceil(VH / T) + 1;
   const sky = skyLight;
   for (let j = 0; j < h; j++) {
@@ -160,14 +168,14 @@ function computeLight(cx, cy) {
         let em = EMIT[t];
         if (em > 0) {
           if (gx >= vx0 && gx <= vx1 && gy >= vy0 && gy <= vy1) emitters.push(gx, gy, t);
-          if (LUZ_PONTO[t]) { LUZ.src.push(i, j, em); em *= LUZ.bounce; }
+          if (reta) { luzFonte(i, j, em); em *= bnc; }
           if (em > L) L = em;
         }
       }
       LB[k] = L; DB[k] = d; OPQ[k] = op;
     }
   }
-  const addL = (wx, wy, v) => { const i = Math.floor(wx / T) - x0, j = Math.floor(wy / T) - y0; if (i >= 0 && j >= 0 && i < w && j < h) { const k = j * w + i; if (LB[k] < v) LB[k] = v; } };
+  const addL = (wx, wy, v) => { const i = Math.floor(wx / T) - x0, j = Math.floor(wy / T) - y0; if (i >= 0 && j >= 0 && i < w && j < h) { if (reta) luzFonte(i, j, v); const k = j * w + i; if (LB[k] < v * bnc) LB[k] = v * bnc; } };
   // o herói não tem luz própria (Jonathan, 2026-10-10): só itens com +Luz
   if (!pl.dead && pl.light > 0) { const pv = 0.7 + 0.08 * pl.light; addL(pl.x + pl.w / 2, pl.y + 4, pv); addL(pl.x + pl.w / 2, pl.y + pl.h - 4, pv); }
   for (const o of projs) if (o.kind !== 'arrow') addL(o.x, o.y, 0.6);
@@ -185,7 +193,7 @@ function computeLight(cx, cy) {
       for (let j = h - 2; j >= 0; j--) { const k = j * w + i, v = LB[k + w] - DB[k]; if (v > LB[k]) LB[k] = v; }
     }
   }
-  luzDireta(w, h);
+  if (reta) luzDireta(w, h);
   // fog of war for the map: anything lit on screen counts as seen
   let fresh = 0;
   for (let gy = Math.max(0, vy0); gy <= Math.min(WH - 1, vy1); gy++) for (let gx = vx0; gx <= vx1; gx++) { const idx = gy * WW + wrapX(gx); if (!seen[idx] && LB[(gy - y0) * w + gx - x0] > 0.1) { seen[idx] = 1; fresh++; } }
@@ -220,11 +228,12 @@ const LUZ_ORD = (() => {
 const LUZ_CAI = new Float32Array(257);   // the fall with distance, (1 - d / R) ^ LUZ.pow, read by d / R in 256 steps
 let luzCaiPow = -1;
 function luzDireta(w, h) {
-  const S = LUZ.src; if (!S.length) return;
+  const S = LUZ.src, NS = LUZ.n * 3; if (!NS) return;
   if (luzCaiPow !== LUZ.pow) { luzCaiPow = LUZ.pow; for (let m = 0; m <= 256; m++) LUZ_CAI[m] = Math.pow(1 - m / 256, LUZ.pow); }
   const V = LUZ_V, O = LUZ_ORD, D = LUZ_D, C = LUZ_R * D + LUZ_R;
-  for (let n = 0; n < S.length; n += 3) {
-    const si = S[n], sj = S[n + 1], em = S[n + 2], R = Math.min(LUZ_R, LUZ.r * Math.sqrt(em)), iR = 256 / R;
+  for (let n = 0; n < NS; n += 3) {
+    const si = S[n], sj = S[n + 1], em = S[n + 2], R = Math.min(LUZ_R, LUZ.r * em), iR = 256 / R, k0 = sj * w + si;
+    if (LB[k0] < em) LB[k0] = em;   // the glowing tile itself, at full strength
     V[C] = 1;
     for (let q = 0; q < O.length; q += 8) {
       const dist = O[q + 7]; if (dist > R + 1.5) { if (Math.max(Math.abs(O[q]), Math.abs(O[q + 1])) > R + 1) break; continue; }

@@ -163,7 +163,7 @@ function outlinedText(text, x, y, font, lw, stroke, fill) {
   }
   sc.drawImage(c.cv, Math.round(x) - c.L, Math.round(y) - c.A);
 }
-// a flame's halo stops at the first rock on each side (Jonathan, 2026-10-14): the ledge a torch stands on catches the
+// a light's halo stops at the first rock on each side (Jonathan, 2026-10-14): the ledge a torch stands on catches the
 // glow on its top face, and nothing glows under it
 function glowCut(img, gx, gy, dx, dy, cx, cy) {
   const W = img.width, H = img.height, n = Math.ceil(Math.max(W, H) / 2 / T) + 1;
@@ -201,8 +201,8 @@ function render() {
     if (t === TORCH) { lc.globalAlpha = 0.32 * fl; glowCut(SPR.glow.torch, gx, gy, x - 34, y - 36, cx, cy); }
     else if (t === CANDLE) { lc.globalAlpha = 0.26 * fl; glowCut(SPR.glow.torch, gx, gy, x - 34, y - 40, cx, cy); }
     else if (t === ALTAR) { lc.globalAlpha = 0.3 + Math.sin(gameTime * 2.5) * 0.08; lc.drawImage(SPR.glow.altar, x - 20, y - 22); }
-    else if (t === SHROOM) { lc.globalAlpha = 0.22; lc.drawImage(SPR.glow.shroom, x - 16, y - 13); }
-    else if (t === CRYSTAL) { lc.globalAlpha = 0.16 + Math.sin(gameTime * 2 + gx) * 0.05; lc.drawImage(SPR.glow.crystal, x - 16, y - 16); }
+    else if (t === SHROOM) { lc.globalAlpha = 0.22; glowCut(SPR.glow.shroom, gx, gy, x - 16, y - 13, cx, cy); }
+    else if (t === CRYSTAL) { lc.globalAlpha = 0.16 + Math.sin(gameTime * 2 + gx) * 0.05; glowCut(SPR.glow.crystal, gx, gy, x - 16, y - 16, cx, cy); }
     else if (t === LAVA && tileAt(gx, gy - 1) !== LAVA && (gx & 1)) { lc.globalAlpha = 0.28; lc.drawImage(SPR.glow.lava, x - 22, y - 28); }
   }
   for (const o of projs) { if (o.kind === 'arrow') continue; lc.globalAlpha = 0.85; lc.drawImage(o.kind === 'fire' && o.owner === 'enemy' ? SPR.glow.fire : o.owner === 'enemy' ? SPR.glow.orb : SPR.glow.orbP, Math.round(o.x) - cx - 11, Math.round(o.y) - cy - 11); }

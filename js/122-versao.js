@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.40.3';
+const VERSAO = '0.40.4';
 const NOVIDADES = [
+  { v: '0.40.4', data: '14/10/2026', titulo: 'Toda luz faz sombra', itens: [
+    'Toda luz do jogo (cogumelos, cristais, braseiros, magias) faz sombra na rocha, igual à tocha.',
+  ] },
   { v: '0.40.3', data: '14/10/2026', titulo: 'Sem barrinhas', itens: [
     'O portal e o comer não mostram mais a barrinha de progresso sobre a cabeça nem no botão do portal: fica só a animação.',
   ] },
