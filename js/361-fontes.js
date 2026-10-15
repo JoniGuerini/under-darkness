@@ -5,6 +5,7 @@
    Fica salva no navegador em 'ud-fonte'. Fontes que não são pixel ganham font-size-adjust para ficarem do tamanho certo. */
 const FONTES = [
   { id: 'pixel', nome: 'UD Pixel', txt: [['UDPixel-Regular', '100 750'], ['UDPixel-Bold', '751 900']] },
+  { id: 'grimorio', nome: 'Grimório Pixel', txt: [['GrimorioPixel-Regular', '100 750'], ['GrimorioPixel-Bold', '751 900']] },
   { id: 'classica', nome: 'Clássica (Rubik)', txt: [['Rubik', '300 900']], tit: [['Jersey10-Regular', '100 900']], adj: .58 },
   { id: 'pixelify', nome: 'Pixelify Sans', txt: [['PixelifySans', '400 700']], adj: .58 },
   { id: 'vt323', nome: 'VT323', txt: [['VT323-Regular', '100 900']], adj: .6 },
