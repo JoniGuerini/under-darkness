@@ -7,8 +7,10 @@
    O áudio fica em musica/titulo-musica.js e só é carregado depois que o jogo abre, para não atrasar a entrada.
    O navegador não deixa tocar som antes de um clique ou tecla: a música começa no primeiro clique ou tecla com a tela
    de início aberta, sobe devagar, dá a volta para sempre e some em ~1,5 s quando o jogo começa. Volta (do começo) se o
-   menu de pausa voltar para a tela de início. Segue o som geral (ligado/desligado) e o volume do ambiente das opções
-   (`musVol` do 09-audio). Só toca na tela de início: dentro do jogo continua só o ambiente (97-ambiente). */
+   menu de pausa voltar para a tela de início. Segue o som geral (ligado/desligado) e o volume próprio dela, "Volume da
+   música" nas opções (40-opcoes; `temaVol`, salvo em 'ud-vol-musica'; em 0% ela não toca). Só toca na tela de início: dentro do jogo continua só o ambiente (97-ambiente). */
+var temaVol = 1;
+try { const v = localStorage.getItem('ud-vol-musica'); if (v !== null) temaVol = Math.max(0, Math.min(1, +v)); } catch (e) { }
 (() => {
   const LOOP = 3136000 / 44100, LAME_DELAY = 1105 / 44100, VOL = 0.9, IN = 2.5, OUT = 1.5;
   let buf = null, loading = false, decoding = false, src = null, gain = null, vol = -1;
@@ -40,11 +42,11 @@
     if (!buf && !loading) load();
     if (typeof ac === 'undefined' || !ac || ac.state !== 'running' || !master) return;
     if (!buf) { decode(); return; }
-    const on = titleOn() && !muted && musVol > 0;
+    const on = titleOn() && !muted && temaVol > 0;
     if (on && !src) start();
     else if (!on && src) stop();
     if (src) {
-      const want = VOL * musVol;
+      const want = VOL * temaVol;
       if (want !== vol) { const now = ac.currentTime; gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.linearRampToValueAtTime(want, now + (vol < 0 ? IN : 0.08)); vol = want; }
     }
   }

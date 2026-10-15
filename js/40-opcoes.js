@@ -1,6 +1,7 @@
 'use strict';
 /* tela de opções: a mesma no título e no menu de pausa (Esc). Três abas:
-   Som: som geral ligado/desligado, som de ambiente ligado/desligado (97-ambiente), volume do ambiente e volume dos efeitos (sliders em pixel art)
+   Som: som geral ligado/desligado, volume da música da tela de início (358-titulo-musica; 0% desliga só ela), som de ambiente
+   ligado/desligado (97-ambiente), volume do ambiente e volume dos efeitos (sliders em pixel art)
    Vídeo: tela cheia e contador de FPS
    Atalhos: quadro de atalhos na tela ligado/desligado e a lista de todas as teclas
    Cada opção só chama o que já existia (toggleSound, toggleAmb, toggleFull, toggleFps, toggleHelp), então tudo continua salvo
@@ -28,7 +29,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
         <button type="button" class="tab" data-ot="video" role="tab">Vídeo</button>
         <button type="button" class="tab" data-ot="atalhos" role="tab">Atalhos</button>
       </div>
-      <div class="opane" data-op="som">${tog('oSom', 'Som')}${tog('oMus', 'Ambiente')}${sld('oVolMus', 'Volume do ambiente')}${sld('oVolSfx', 'Volume dos efeitos')}</div>
+      <div class="opane" data-op="som">${tog('oSom', 'Som')}${sld('oVolTema', 'Volume da música')}${tog('oMus', 'Ambiente')}${sld('oVolMus', 'Volume do ambiente')}${sld('oVolSfx', 'Volume dos efeitos')}</div>
       <div class="opane" data-op="video" hidden>${tog('oFull', 'Tela cheia')}${tog('oFps', 'Mostrar FPS')}</div>
       <div class="opane" data-op="atalhos" hidden>${tog('oHelp', 'Atalhos na tela')}<div class="sep" role="separator"></div><div class="okeys" id="oKeys">${keyList}</div></div>
       <div class="ofoot"><button type="button" class="ghost" id="oBack">Voltar</button></div>
@@ -58,7 +59,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
     b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
     b.querySelector('b').textContent = id === 'oFull' ? (on ? 'Ligada' : 'Desligada') : (on ? 'Ligado' : 'Desligado');
   }
-  function paintAll() { for (const id in TOG) paintTog(id); paintSl('oVolMus', musVol); paintSl('oVolSfx', sfxVol); el.querySelector('[data-op="som"]').classList.toggle('mute', muted); }
+  function paintAll() { for (const id in TOG) paintTog(id); paintSl('oVolMus', musVol); paintSl('oVolTema', volNow('oVolTema')); paintSl('oVolSfx', sfxVol); el.querySelector('[data-op="som"]').classList.toggle('mute', muted); }
   for (const id in TOG) $(id).addEventListener('click', () => { TOG[id][1](); paintAll(); setTimeout(paintAll, 150); sfxTick(); });
   document.addEventListener('fullscreenchange', () => { if (optsOpen()) paintAll(); });
 
@@ -72,20 +73,23 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
   let tickT = 0;
   function sfxTick() { const now = performance.now(); if (now - tickT < 70) return; tickT = now; initAudio(); sfx.select(); }
   function saveVol() { try { localStorage.setItem('sob-a-terra-vol-musica', String(musVol)); localStorage.setItem('sob-a-terra-vol-efeitos', String(sfxVol)); } catch (e) { } }
+  // a música da tela de início tem o volume dela (temaVol, do 358-titulo-musica), salvo em 'ud-vol-musica'
+  const volNow = id => id === 'oVolMus' ? musVol : id === 'oVolTema' ? (typeof temaVol !== 'undefined' ? temaVol : 1) : sfxVol;
   function setVol(id, v) {
     v = Math.round(Math.max(0, Math.min(1, v)) * 20) / 20;
+    if (id === 'oVolTema') { if (v === volNow(id) || typeof temaVol === 'undefined') return; temaVol = v; initAudio(); try { localStorage.setItem('ud-vol-musica', String(v)); } catch (e) { } paintSl(id, v); return; }
     if (id === 'oVolMus') { if (v === musVol) return; musVol = v; initAudio(); if (window.setMusicVol) setMusicVol(v); }
     else { if (v === sfxVol) return; sfxVol = v; initAudio(); if (sfxOut) sfxOut.gain.setTargetAtTime(v, ac.currentTime, 0.02); sfxTick(); }
     paintSl(id, v); saveVol();
   }
-  for (const id of ['oVolMus', 'oVolSfx']) {
+  for (const id of ['oVolTema', 'oVolMus', 'oVolSfx']) {
     const s = $(id), trk = s.querySelector('.trk');
     const at = e => { const r = trk.getBoundingClientRect(); setVol(id, (e.clientX - r.left) / r.width); };
     s.addEventListener('pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); s.focus(); s.setPointerCapture(e.pointerId); s.classList.add('drag'); at(e); });
     s.addEventListener('pointermove', e => { if (s.hasPointerCapture(e.pointerId)) at(e); });
     const end = e => { s.classList.remove('drag'); try { s.releasePointerCapture(e.pointerId); } catch (x) { } };
     s.addEventListener('pointerup', end); s.addEventListener('pointercancel', end);
-    s.addEventListener('wheel', e => { e.preventDefault(); e.stopPropagation(); setVol(id, (id === 'oVolMus' ? musVol : sfxVol) + (e.deltaY < 0 ? 0.05 : -0.05)); }, { passive: false });
+    s.addEventListener('wheel', e => { e.preventDefault(); e.stopPropagation(); setVol(id, volNow(id) + (e.deltaY < 0 ? 0.05 : -0.05)); }, { passive: false });
   }
 
   /* abrir e fechar */
@@ -111,7 +115,7 @@ const optsOpen = () => !!$('opts') && !$('opts').hidden;
     if (!optsOpen()) return;
     const a = document.activeElement;
     if (e.code === 'Escape') { e.preventDefault(); close(); }
-    else if (a && a.classList.contains('osl') && /^Arrow(Left|Right|Up|Down)$/.test(e.code)) { e.preventDefault(); setVol(a.id, (a.id === 'oVolMus' ? musVol : sfxVol) + (/Right|Up/.test(e.code) ? 0.05 : -0.05)); }
+    else if (a && a.classList.contains('osl') && /^Arrow(Left|Right|Up|Down)$/.test(e.code)) { e.preventDefault(); setVol(a.id, volNow(a.id) + (/Right|Up/.test(e.code) ? 0.05 : -0.05)); }
     else if (/^Arrow(Left|Right)$/.test(e.code) && a && a.classList.contains('tab')) { e.preventDefault(); const t = ['som', 'video', 'atalhos'], i = (t.indexOf(tab) + (e.code === 'ArrowRight' ? 1 : 2)) % 3; showTab(t[i]); el.querySelector('.otabs .tab.on').focus(); }
     else if (/^Arrow(Up|Down)$/.test(e.code)) {
       e.preventDefault();
