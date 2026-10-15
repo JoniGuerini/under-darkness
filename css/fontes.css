@@ -1,0 +1,4 @@
+/* seletor de fonte em Opções > Vídeo (js/361-fontes.js): seta, nome da fonte, seta */
+#opts .ofonte{display:flex;align-items:center;gap:8px}
+#opts .ofonte button{min-width:36px;min-height:32px;padding:0 8px;font-size:12px;font-weight:700}
+#opts .ofonte b{min-width:190px;text-align:center;font-size:12px;font-weight:600;color:#ffd98a;white-space:nowrap}

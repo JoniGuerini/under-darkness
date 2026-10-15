@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.43.2';
+const VERSAO = '0.44.0';
 const NOVIDADES = [
+  { v: '0.44.0', data: '14/10/2026', titulo: 'Escolha de fonte', itens: [
+    'Escolha de fonte nas Opções.',
+  ] },
   { v: '0.43.2', data: '14/10/2026', titulo: 'Letras minúsculas', itens: [
     'Letras minúsculas na fonte pixelada.',
   ] },
