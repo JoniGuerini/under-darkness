@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.44.3';
+const VERSAO = '0.44.4';
 const NOVIDADES = [
+  { v: '0.44.4', data: '15/10/2026', titulo: 'Rostos novos', itens: [
+    'Rostos novos do Odo e do Teodoro.',
+  ] },
   { v: '0.44.3', data: '15/10/2026', titulo: 'Grimório com minúsculas', itens: [
     'Grimório Pixel com minúsculas.',
   ] },
