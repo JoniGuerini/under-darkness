@@ -455,7 +455,7 @@ function abExitClear() {
 }
 
 { const _bc = buildCathedral; buildCathedral = function () {
-  _bc(); genStage('pesadelo', () => {
+  _bc(); genStage('abismo', () => {
   if (!ABISMO) return;
   abBuild(); abAfter();
   if (typeof abDress === 'function') try { abDress(); } catch (err) { console.error(err); }

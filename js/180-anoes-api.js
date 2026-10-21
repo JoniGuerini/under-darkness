@@ -26,7 +26,7 @@ const ANOES = true;
 const AN_D = LAYER_D;                                   // metros de camada
 // a camada de cima: a Floresta Petrificada (camada 7) quando existe; sem ela, a Cidade Afundada
 const AN_FLORESTA = typeof FP_S0 !== 'undefined';
-const AN_TOP = (AN_FLORESTA ? (typeof FP_TOP !== 'undefined' ? FP_TOP : CD_TOP + LAYER_D) : CD_TOP) + LAYER_D;   // metros abaixo do chão do vilarejo (1302)
+const AN_TOP = layerTop('anoes');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do AN_TOP: Portões de Bronze, Salões do Clã, Canais de Lava, Forjas de Runas, (rocha-mãe)
 const AN_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AN_BAND_NAMES = ['portoes', 'saloes', 'canais', 'forjas'];

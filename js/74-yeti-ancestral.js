@@ -154,7 +154,7 @@ function yetiMinions() { let n = 0; for (const m of enemies) if (m.yetiMinion &&
 function yetiStart() {
   const B = icBoss; yetiGates(true);
   const D = ET.yetiancestral, e = spawnEnemy('yetiancestral', B.cx * T - D.w / 2, B.fy * T - D.h - 1, IC_ZONE0 + 3);
-  Object.assign(e, { boss: true, lvl: 9, hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: pl.x < B.cx * T ? -1 : 1, cd: 1.2, roared: false, callT: 0, rainT: 0 });
+  Object.assign(e, { boss: true, lvl: layerBossLvl('gelo'), hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: pl.x < B.cx * T ? -1 : 1, cd: 1.2, roared: false, callT: 0, rainT: 0 });
   yetiSet(e, 'intro', 2.4);
   yetiBoss = e; bossFight = { e, yeti: true };
   const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'O Yeti Ancestral'; bn.lastChild.textContent = 'senhor do inverno'; }

@@ -156,7 +156,7 @@ function teiaMinions() { let n = 0; for (const m of enemies) if (m.teiaMinion &&
 function teiaStart() {
   const B = cvBoss; teiaGates(true);
   const e = spawnEnemy('maeteia', B.cx * T - 15, (B.top + 1) * T, CV_ZONE0 + 2);
-  const D = ET.maeteia; Object.assign(e, { boss: true, lvl: 4, hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: 1, anchorY: (B.top) * T, cd: 1.2, hatched: false, hatchT: 0 });
+  const D = ET.maeteia; Object.assign(e, { boss: true, lvl: layerBossLvl('cavernas'), hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: 1, anchorY: (B.top) * T, cd: 1.2, hatched: false, hatchT: 0 });
   teiaSet(e, 'intro', 2.2);
   teiaBoss = e; bossFight = { e, teia: true };
   const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'A Mãe-Teia'; bn.lastChild.textContent = 'senhora do ninho'; }

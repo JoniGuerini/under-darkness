@@ -1,7 +1,7 @@
 'use strict';
 
 /* ================= A Dama do Espelho: a chefe do Reino Élfico =================
-   O Espelho da Lua (docs/camadas/11-reino-elfico.md, seção 7). O 255 reserva no Poço uma caixa maciça de Pedra-do-Poço
+   O Espelho da Lua (docs/camadas/11-reino-elfico.md, seção 7). O 255 reserva nas Grutas da Lua uma caixa maciça de Pedra-do-Poço
    de x0 - 3 a x1 + 3 e de top - 3 a fy + 3 em volta da gruta de 64 x 26 (elBoss), cava os dois corredores de serviço
    por fora da caixa e chama elDress; este arquivo escreve a gruta dentro dela: o oco com o teto de Raiz-Mãe emaranhada
    (os cantos de cima arredondados, fios de raiz pendurados), o Espelho d'Água no chão de ponta a ponta (2 de fundo),
@@ -10,7 +10,7 @@
    túneis das portas (4 de altura, de door.x, na borda da caixa, até o ar de dentro; o véu é a parte que cruza a casca).
    Pisar dentro da gruta acorda a Dama; o Véu de Luar fecha as duas portas. Fora da luta nada da gruta quebra.
    Sair (portal, teleporte) ou morrer refaz a gruta pelo plano (as raízes que caíram somem, a Lua volta branca, as
-   Sentinelas Sombrias e o reflexo somem) e a Dama volta com a vida cheia.
+   Guardas Sombrias e o reflexo somem) e a Dama volta com a vida cheia.
    As raízes que caem e o véu vão direto em tiles (sem setTile): nunca entram nos diffs nem no save.
    A Lua é desenhada por cima dos blocos dela (o disco liso, as raízes que a seguram): branca, vermelha da fase 2 em
    diante, apagada no eclipse (EMIT dela vai a zero enquanto dura). O espelho reflete a sala: a faixa logo acima do
@@ -21,7 +21,7 @@
         luz cai ali, 70%), Lâminas de Luz (abre os braços 0,6 s; 3 crescentes em leque, 50% cada), Deslize (some num
         brilho e aparece sobre outra plataforma).
      2. a Tentação (60%): cresce, a pele cinza-azulada, os olhos brancos, o vestido escuro; a Lua fica vermelha. Duas
-        Sentinelas Sombrias entram pelas portas (uma vez). Encantamento (a mão estendida 0,5 s; anéis prateados vão
+        Guardas Sombrias entram pelas portas (uma vez). Encantamento (a mão estendida 0,5 s; anéis prateados vão
         até o herói em 1 s: enfeitiçado 2,5 s, puxado para ela), Espinhos de Raiz (sombras no chão 0,7 s; raízes
         pontudas descem do teto ali, 60%, e ficam fincadas 5 s).
      3. o Reflexo (30%): o espelho acorda e o reflexo dela (a Dama da Luz que ela foi) sobe da água do outro lado da
@@ -38,8 +38,8 @@ const DMQ_L = layerBossLvl('elfos');
 const DMQ = { hp: Math.round(360 * (1 + 0.3 * (DMQ_L - 1))), dmg: Math.round(9 * (1 + 0.2 * (DMQ_L - 1))), xp: 520, p2: 0.6, p3: 0.3, eclEvery: 12, eclDark: 3, stake: 5 };
 const dmState = { dead: false };
 ET.dama = { name: 'A Dama do Espelho', w: 16, h: 52, hp: DMQ.hp, dmg: DMQ.dmg, xp: DMQ.xp, kb: 0, fly: true, phase: true, blood: '#e6eef8', boss: true };
-const DMQ_DROPS = [['lagrima_lua', 1], ['min_lunarita', 1, 6, 10], ['cristal_sangrento', 1, 2, 4], ['folha_prata', 1, 2, 5], ['pocao', 1, 2, 4]];
-const DMQ_BASES = ['glaive_lunar', 'escudo_folha', 'elmo_alado'];
+const DMQ_DROPS = [['lagrima_lua', 1], ['min_lunarita', 1, 6, 10], ['rosa_negra', 1, 2, 4], ['folha_prata', 1, 2, 5], ['pocao', 1, 2, 4]];
+const DMQ_BASES = ['lamina_folha', 'escudo_folha', 'elmo_alado'];
 const dmDrops = () => { DROPS.dama = DMQ_DROPS.filter(([id]) => ITEMS[id]); };
 dmDrops();
 let dmBoss = null, dmPlan = null, dmChecked = false, dmAllow = false;
@@ -251,7 +251,8 @@ function dmEnd(won) {
   showBanner('Vitória', 'o espelho volta a ser só água');
   saveGame();
 }
-{ const _eb = endBossFight; endBossFight = function (won) { if (bossFight && bossFight.dm) return dmEnd(won); return _eb(won); }; }
+// este arquivo carrega depois do 353 e corta a corrente do endBossFight: o caminho para a camada de baixo abre daqui
+{ const _eb = endBossFight; endBossFight = function (won) { if (bossFight && bossFight.dm) return dmEnd(won); return _eb(won); }; }   // o caminho abre no 363
 // cada fase é vivida: o golpe só a leva até o piso da fase
 const dmFloorHp = e => e.ph === 0 ? Math.floor(e.maxHp * DMQ.p2) : e.ph === 1 ? Math.floor(e.maxHp * DMQ.p3) : 0;
 const dmInvuln = e => e.state === 'intro' || e.state === 'fase2' || e.state === 'fase3' || e.hidden;
@@ -469,20 +470,20 @@ function dmCeilAt(x, g) {
   for (let m = 0; m < 40; m++, ty--) { const t = tileAt(tx, ty); if (SOLID[t] && t !== EL_LUA) return (ty + 1) * T - cy; }
   return dmPlan.JT * T;
 }
-// as Sentinelas Sombrias: entram pelas portas, uma de cada lado (as do 253, translúcidas)
+// as Guardas Sombrias: entram pelas portas, uma de cada lado (as Guardas-Fronteira do 253, escuras e translúcidas)
 function dmSombras() {
-  if (!ET.sentinela || !AI.sentinela) return;
+  if (!ET.fronteira || !AI.fronteira) return;
   for (const D of dmPlan.doors) dmFx.sombras.push({ D, t: 0.35 * dmFx.sombras.length });
 }
 function dmSombraTick(dt) {
   for (let k = dmFx.sombras.length - 1; k >= 0; k--) {
     const S = dmFx.sombras[k]; S.t -= dt; if (S.t > 0) continue;
     dmFx.sombras.splice(k, 1);
-    const D = ET.sentinela, x = dmCX() + (S.D.ii + 0.5 - S.D.side * 1.5) * T, y = dmCY() + S.D.jf * T;
+    const D = ET.fronteira, x = dmCX() + (S.D.ii + 0.5 - S.D.side * 1.5) * T, y = dmCY() + S.D.jf * T;
     for (const [i, j] of S.D.bar) burst(dmCX() + (i + 0.5) * T, dmCY() + (j + 0.5) * T, 5, '#3a4460', 60, -20, 0.6);
     if (dmFx.seal) dmFx.seal.flash = 0.6;
     sfx.dmVeu(0.7);
-    const m = spawnEnemy('sentinela', x - D.w / 2, y - D.h, -1);   // zona fora da tabela: o 255 não apaga quem nasce na gruta
+    const m = spawnEnemy('fronteira', x - D.w / 2, y - D.h, -1);   // zona fora da tabela: o 255 não apaga quem nasce na gruta
     if (m) { Object.assign(m, { elMinion: true, elSombra: true, memT: 8, aggro: true, xp: Math.min(m.xp || 1, 2), gold: 0, facing: -S.D.side }); burst(x, y - D.h / 2, 14, '#1a1e30', 70, -30, 0.8); }
   }
 }
@@ -642,7 +643,7 @@ const PAL = {
   cabelo2: R6(['#24243a', '#4e4e6c', '#8a8aa6', '#bcbcd4', '#e4e4f4', '#ffffff']),
   vestido2: R6(['#05050c', '#0e1024', '#1c2040', '#2e3460', '#4a5288', '#7a84b8']),
   prata2: R6(['#1a1a2a', '#3a4058', '#6a7490', '#a8b2cc', '#dce2f0', '#ffffff']),
-  sangue: R6(['#2a0610', '#5a0c1c', '#901a2c', '#d02a3a', '#ff6a6a', '#ffc0c0']),
+  rosa: R6(['#1a0614', '#3a0c2c', '#5e1846', '#8a2c66', '#c060a0', '#f0b0d8']),   // a rosa negra da Corte Sem Lua (a Tentação; era carmesim)
   // a Lua Presa e as raízes
   luaB: R6(['#2a3450', '#5a6a8e', '#97a6c4', '#c8d4e8', '#e8eef8', '#ffffff']),
   luaR: R6(['#2a0608', '#6a1018', '#a8222a', '#e04a40', '#ff8a70', '#ffd0c0']),
@@ -703,12 +704,12 @@ DMA.hand = (ph, pose, back) => {
 /* a Dama, de frente para a direita: o cabelo longo flutuando para trás em mechas, a tiara de ouro com a pedra da lua,
    o vestido branco de cintura alta com as mangas compridas, a cauda que varre para trás e a barra que se desfaz em
    luz; ph 1 é a Tentação (mais alta, pele cinza-azulada, olhos brancos acesos, vestido escuro com filete de prata,
-   cabelo branco solto subindo como debaixo d'água, a tiara com pontas e a pedra de sangue, a barra vira fumaça e
+   cabelo branco solto subindo como debaixo d'água, a tiara com pontas e a rosa negra, a barra vira fumaça e
    brasa) */
 function paintDama(ph, pose, fr) {
   const Q = pp(DMW, DMH), G = GEO(ph), A = fr * Math.PI / 2, P = POSES[pose] || POSES.idle;
   const SK = ph ? PAL.pele2 : PAL.pele, HR = ph ? PAL.cabelo2 : PAL.cabelo, GW = ph ? PAL.vestido2 : PAL.vestido, TR = ph ? PAL.prata2 : PAL.ouro;
-  const SP = ph ? PAL.sangue : PAL.lua, cx = G.cx, hcy = G.hcy, sh = G.sh, waist = G.waist, hem = G.hem;
+  const SP = ph ? PAL.rosa : PAL.lua, cx = G.cx, hcy = G.hcy, sh = G.sh, waist = G.waist, hem = G.hem;
   // 1. as mechas de trás: saem da nuca e caem para trás ondulando; na Tentação sobem e se abrem
   const locks = ph ? 7 : 6;
   for (let k = 0; k < locks; k++) {
@@ -766,7 +767,7 @@ function paintDama(ph, pose, fr) {
       const dis = yb - y;   // quanto falta para a barra
       if (y >= waist && dis < 7 && hash2(x, y, 7421 + fr) < (7 - dis) / 7.5) {
         // o tecido se desfaz: luz (fumaça e brasa na Tentação)
-        if (hash2(x, y, 7422 + fr) < 0.5) Q.put(x, y, ph ? (hash2(x, y, 7423) < 0.4 ? PAL.sangue : PAL.sombra) : PAL.lua, ph ? 3 + hash2(x, y, 7424) * 2 : 4 + hash2(x, y, 7424) * 1.9, !ph || hash2(x, y, 7423) < 0.4);
+        if (hash2(x, y, 7422 + fr) < 0.5) Q.put(x, y, ph ? (hash2(x, y, 7423) < 0.4 ? PAL.rosa : PAL.sombra) : PAL.lua, ph ? 3 + hash2(x, y, 7424) * 2 : 4 + hash2(x, y, 7424) * 1.9, !ph || hash2(x, y, 7423) < 0.4);
         continue;
       }
       if (y < waist && y < sh + 6 && Math.abs(x + 0.5 - (cx + 1.2)) < (sh + 6 - y) * 0.45 && y > sh) { Q.put(x, y, SK, 3.6 - u * 0.6 + cg(x, y, 7431) * 0.3); continue; }   // o decote
@@ -777,8 +778,8 @@ function paintDama(ph, pose, fr) {
       if (y >= waist - 1 && y <= waist) { Q.put(x, y, TR, 3.6 - u * 0.8 + ((x & 1) ? 0.5 : -0.1)); continue; }   // o cinto
       // o bordado logo acima da barra: folhas pequenas
       if (t > 0 && dis > 2.5 && dis < 4.5 && ((x + Math.round(dis)) % 3 === 0)) { Q.put(x, y, TR, 3.4 + (u < 0 ? 0.5 : 0)); continue; }
-      // a Tentação: a saia de baixo carmesim aparece na abertura da frente
-      if (ph && t > 0.25 && u > 0.08 && u < 0.08 + (t - 0.25) * 0.5) { Q.put(x, y, PAL.sangue, 2.2 + fold * 0.8 - u + cg(x, y, 7433) * 0.4); continue; }
+      // a Tentação: a saia de baixo cor de rosa negra aparece na abertura da frente
+      if (ph && t > 0.25 && u > 0.08 && u < 0.08 + (t - 0.25) * 0.5) { Q.put(x, y, PAL.rosa, 2.2 + fold * 0.8 - u + cg(x, y, 7433) * 0.4); continue; }
       Q.put(x, y, GW, v);
     }
   }
@@ -796,7 +797,7 @@ function paintDama(ph, pose, fr) {
   if (ph) { for (const xx of [cx + 1, cx + 2, cx + 4]) { Q.put(xx, ey, PAL.vestido, 5, true); Q.put(xx, ey - 1, SK, 0.6); Q.put(xx, ey + 1, SK, 1.4); } Q.put(cx + 3, ey, SK, 1.6); }
   else { Q.put(cx + 1, ey, PAL.lua, 1.4); Q.put(cx + 2, ey, PAL.lua, 2.6); Q.put(cx + 4, ey, PAL.lua, 2.2); Q.put(cx + 2, ey - 1, PAL.lua, 0.5); Q.put(cx + 1, ey - 2, HR, 1.6); Q.put(cx + 2, ey - 2, HR, 1.8); Q.put(cx + 4, ey - 2, HR, 1.8); }
   Q.put(cx + 5, ey + 1, SK, 2.6); Q.put(cx + 5, ey + 2, SK, 3.2);                                     // o nariz
-  Q.put(cx + 3, ey + 3, ph ? PAL.sangue : SK, ph ? 1.6 : 2.2); Q.put(cx + 4, ey + 3, SK, 2.8);   // a boca
+  Q.put(cx + 3, ey + 3, ph ? PAL.rosa : SK, ph ? 1.6 : 2.2); Q.put(cx + 4, ey + 3, SK, 2.8);   // a boca
   Q.put(cx - 1, ey + 2, SK, 3.2);
   // a orelha pontuda, atrás, subindo para trás por cima do cabelo
   for (const [a, b, v] of [[-2, 1, 3.4], [-3, 0, 3.8], [-4, -1, 3.6], [-5, -2, 3.3], [-6, -3, 3], [-3, 1, 2.4], [-4, 0, 2.6], [-7, -4, 2.8]]) Q.put(cx + a, ey + b, SK, v);
@@ -822,7 +823,7 @@ function paintDama(ph, pose, fr) {
   const hand = arm(P.f, cx + 3, sh + 1.5, 0);
   if (pose !== 'idle') Q.put(hand[0], hand[1], ph ? PAL.prata2 : PAL.lua, 5, true);
   // a barra que se desfaz não ganha contorno (seria uma borda suja); o resto sim
-  Q.outline((rk, x, y) => rk === PAL.lua.k || rk === PAL.sangue.k || rk === PAL.sombra.k || y > hem - 9);
+  Q.outline((rk, x, y) => rk === PAL.lua.k || rk === PAL.rosa.k || rk === PAL.sombra.k || y > hem - 9);
   return { cv: Q.canvas(), em: Q.canvas(Q.em) };
 }
 // o quadro do reflexo: a Dama da Luz, pálida e azulada (assado uma vez por quadro, nada por tela)
@@ -920,11 +921,13 @@ function dmDrawDama(E, sx, sy, fl, opt) {
 DRAW_E.dama = () => {};   // desenhada pelo HOOK.drawWorld, depois da Lua (para passar na frente dela)
 EYES_E.dama = () => {};
 WARN_E.dama = e => e.state === 'raioTell' || e.state === 'laminasTell' || e.state === 'encantoTell' || e.state === 'espinhosTell';
-// as Sentinelas Sombrias: escuras e translúcidas (o filtro de canvas onde houver; o alfa sempre)
+// as Guardas Sombrias: escuras e translúcidas (a tinta do 342, guardada por figura: nada de lc.filter em monstro)
+let dmTintaSombra = null;
 { const _de = drawEnemy; drawEnemy = function (e, cx, cy) {
   if (!e.elSombra) return _de(e, cx, cy);
-  lc.save(); lc.globalAlpha = 0.7 + 0.08 * Math.sin(gameTime * 3 + e.seed); lc.filter = 'grayscale(1) brightness(0.8) sepia(0.7) hue-rotate(185deg) saturate(1.8) contrast(1.15)';
-  try { _de(e, cx, cy); } finally { lc.restore(); }
+  const T = dmTintaSombra || (dmTintaSombra = tintMake([['grayscale', 1], ['brightness', 0.8], ['sepia', 0.7], ['hue', 185], ['saturate', 1.8], ['contrast', 1.15]]));
+  lc.save(); lc.globalAlpha = 0.7 + 0.08 * Math.sin(gameTime * 3 + e.seed);
+  try { tintDraw(T, () => _de(e, cx, cy)); } finally { lc.restore(); }
   // a fumaça que escorre delas
   if (Math.random() < 0.3) parts.push({ x: e.x + rnd(0, e.w), y: e.y + rnd(0, e.h), vx: rnd(-6, 6), vy: rnd(-20, -6), g: 0, life: 0.8, max: 0.8, col: Math.random() < 0.5 ? '#141a2c' : '#2e3854', size: 1, smoke: true });
 }; }

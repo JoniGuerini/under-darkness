@@ -40,7 +40,7 @@
    chamada pelo 269.
    Carrega depois do 265 e do 256, antes do 49 (que escala ET). Prefixo `lv`. */
 
-const LVQ_L = layerLo('mar') + 2;
+const LVQ_L = layerBossLvl('mar');
 const LVQ = { hp: Math.round(330 * (1 + 0.3 * (LVQ_L - 1))), dmg: Math.round(9 * (1 + 0.2 * (LVQ_L - 1))), xp: 600, p2: 0.6, p3: 0.25, mare1: 40, mare2: 24, amp: 3, seg: 0.3, apagar: 8, apagarCada: 20, len: 420 };
 const lvState = { dead: false };
 ET.leviata = { name: 'O Leviatã', w: 46, h: 38, hp: LVQ.hp, dmg: LVQ.dmg, xp: LVQ.xp, kb: 0, fly: true, phase: true, blood: '#2a4a48', boss: true };

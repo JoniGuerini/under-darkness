@@ -59,7 +59,12 @@ const UDW = { pages: {}, nav: [], rolls: new Map(), imgs: new Map() };
     if (type === 'serpraiz') Object.assign(e, { hole: 1, mx: 110, my: 120, state: 'strike', len: 22, sdx: 1, sdy: 0, ox: 0, oy: 0 });
     // o Olho-Cometa (246) precisa da cauda, do olhar e da pálpebra que o spawn dele põe: parado, a cauda sai para trás e para cima
     if (type === 'olhocometa') Object.assign(e, { lx: 0, ly: 0, look: [1, 0], lid: 0.2, pup: 3, rainbow: false, hidden: false, tail: Array.from({ length: 22 }, (_, i) => [-i * 3, -i * 1.4 + Math.sin(i * 0.5) * 2]) });
-    lc.clearRect(0, 0, 260, 160); drawEnemy(e, 0, 0);
+    // o ponteiro (293) precisa do ângulo da barra; o enxame de tesselas, dos ladrilhos que o spawn dele põe (at1TsInit)
+    if (type === 'ponteiro') e.th = 0.6;
+    if (type === 'tesselas' && typeof at1TsInit === 'function') at1TsInit(e);
+    // sem mundo gerado ainda (a alma penada do 106 pergunta se está dentro da rocha): nada é sólido
+    const rs = rectSolid; if (typeof tiles === 'undefined' || !tiles) rectSolid = () => false;
+    lc.clearRect(0, 0, 260, 160); try { drawEnemy(e, 0, 0); } finally { rectSolid = rs; }
     return pack2(crop(low));
   });
   UDW.enemyImg = (type, scale = 3) => pix(UDW.enemyArt(type), scale, 'sprite');

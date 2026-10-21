@@ -1,55 +1,63 @@
-# As camadas 5 a 16: regras gerais
+# As camadas: regras gerais
 
-Passo 2 do planejamento das 16 camadas (o mapa do passo 1 está em [../camadas.md](../camadas.md)). Esta pasta tem uma ficha de implementação por camada nova, no formato da ficha de bioma (Parte 1 de [../biomas.md](../biomas.md)) e no nível de detalhe da [../abismo-spec.md](../abismo-spec.md). Este arquivo junta o que vale para todas: a progressão, a geração aos poucos, os números de cada camada, as regras da casa e o rodízio das salas de chefe.
+Este arquivo junta o que vale para todas as camadas: a progressão, a geração aos poucos, os números de cada camada, as regras da casa e o rodízio das salas de chefe. O mapa está em [../camadas.md](../camadas.md). **Desde o revamp de 2026-10-21 são 20 camadas de 5 níveis** (do 1 ao 100): o que mudou, o contrato das camadas novas (`camadaExt`) e os números reservados delas estão em [00-revamp.md](00-revamp.md), que vale por cima deste arquivo onde os dois discordarem. As seções 2 em diante guardam o planejamento de antes como histórico.
+
+As fichas, na ordem do jogo (`LAYERS`, `js/129-camadas.js`):
 
 | Arquivo | Camada |
 |---|---|
 | [05-minas-fungicas.md](05-minas-fungicas.md) | 5. As Minas Fúngicas |
-| [06-cidade-afundada.md](06-cidade-afundada.md) | 6. A Cidade Afundada |
-| [07-floresta-petrificada.md](07-floresta-petrificada.md) | 7. A Floresta Petrificada |
-| [08-fortaleza-anoes.md](08-fortaleza-anoes.md) | 8. A Fortaleza dos Anões |
-| [09-colmeia.md](09-colmeia.md) | 9. A Colmeia |
-| [10-nave-caida.md](10-nave-caida.md) | 10. A Nave Caída (camada extra; as de baixo descem uma posição quando forem feitas) |
-| [11-reino-elfico.md](11-reino-elfico.md) | 11. O Reino Élfico (camada extra, debaixo da Nave Caída) |
-| [10-mar-sem-sol.md](10-mar-sem-sol.md) | 10. O Mar Sem Sol |
-| [11-covil-dragao.md](11-covil-dragao.md) | 11. O Covil do Dragão |
-| [12-ossario-titas.md](12-ossario-titas.md) | 12. O Ossário dos Titãs |
-| [13-cidade-antigos.md](13-cidade-antigos.md) | 13. A Cidade dos Antigos |
-| [14-saloes-pesadelo.md](14-saloes-pesadelo.md) | 14. Os Salões do Pesadelo |
-| [15-abismo.md](15-abismo.md) | 15. O Abismo (o que muda quando ele descer) |
-| [16-escuridao.md](16-escuridao.md) | 16. A Escuridão |
+| [06-brejo-bruxas.md](06-brejo-bruxas.md) | 6. O Brejo das Bruxas |
+| [06-cidade-afundada.md](06-cidade-afundada.md) | 7. A Cidade Afundada |
+| [07-floresta-petrificada.md](07-floresta-petrificada.md) | 8. A Floresta Petrificada |
+| [08-fortaleza-anoes.md](08-fortaleza-anoes.md) | 9. A Fortaleza dos Anões |
+| [11-reino-elfico.md](11-reino-elfico.md) | 10. O Reino Élfico |
+| [10-mar-sem-sol.md](10-mar-sem-sol.md) | 11. O Mar Sem Sol |
+| [11-covil-dragao.md](11-covil-dragao.md) | 12. O Covil do Dragão |
+| [12-ossario-titas.md](12-ossario-titas.md) | 13. O Ossário dos Titãs |
+| [14-necropole.md](14-necropole.md) | 14. A Necrópole do Rei Eterno |
+| [13-cidade-antigos.md](13-cidade-antigos.md) | 15. A Cidade dos Antigos |
+| [16-prisao-deuses.md](16-prisao-deuses.md) | 16. A Prisão dos Deuses |
+| [17-campo-guerra.md](17-campo-guerra.md) | 17. O Campo da Última Guerra |
+| [15-abismo.md](15-abismo.md) | 18. O Abismo |
+| [19-ruinas-acendedores.md](19-ruinas-acendedores.md) | 19. As Ruínas dos Acendedores |
+| [16-escuridao.md](16-escuridao.md) | 20. A Escuridão |
+| [09-colmeia.md](09-colmeia.md), [10-nave-caida.md](10-nave-caida.md), [14-saloes-pesadelo.md](14-saloes-pesadelo.md) | fora da campanha desde 2026-10-21 (arquivos `js/190-199`, `240-249` e `300-309` fora do `index.html`, para virarem fases paralelas) |
 
 ---
 
-## 1. A tabela das 16 camadas
+## 1. A tabela das 20 camadas
 
-Cada camada tem 558 m de altura e 4 faixas (desde 2026-10-12; veja a seção 1b). Os números de metros abaixo são os do jogo de hoje, contados do chão do vilarejo. Os números de nível seguem a curva que o jogo já usa: a vida dos monstros cresce 30% por nível e o dano das armas cresce 30% por nível de item, então uma camada nova sobe 2 níveis de monstro e 2 níveis de item.
+Cada camada tem 558 m de altura e 4 faixas (desde 2026-10-12; veja a seção 1b). Os metros são contados do chão do vilarejo. Os níveis são os vistos no jogo (revamp de 2026-10-21).
 
 | # | Camada | Metros | Monstros | Chefe (nível) | Metal | Nível da forja |
 |---|---|---|---|---|---|---|
-| 1 | As Cavernas | 18 a 558 | 1 a 4 | A Mãe-Teia (4) | Cobre | 2 |
-| 2 | A Catedral | 558 a 1116 | 5 a 6 | O Rei Esqueleto (6) | Ferro | 3 |
-| 3 | As Cavernas de Gelo | 1116 a 1674 | 7 a 8 | O Yeti Ancestral (9) | Ouro | 5 |
-| 4 | A Mina Abandonada | 1674 a 2232 | 9 a 10 | O Rei Goblin (10) | Cobalto | 6 |
-| 5 | As Minas Fúngicas | 2232 a 2790 | 11 a 12 | A Mãe-Esporo (13) | Esporita | 9 |
-| 6 | A Cidade Afundada | 2790 a 3348 | 13 a 14 | O Sineiro Afogado (15) | Prata | 11 |
-| 7 | A Floresta Petrificada | 3348 a 3906 | 15 a 16 | O Cervo de Pedra (17) | Platina | 13 |
-| 8 | A Fortaleza dos Anões | 3906 a 4464 | 17 a 18 | O Autômato-Forja (19) | Mithril | 15 |
-| 9 | A Colmeia | 4464 a 5022 | 19 a 20 | A Rainha da Colmeia (21) | Ambrita | 17 |
-| 10 | A Nave Caída (extra) | 5022 a 5580 | 21 a 22 | O Olho-Cometa (23) | Xenita | 19 |
-| 11 | O Reino Élfico (extra) | 5580 a 6138 | 23 a 24 | A Dama do Espelho (25) | Lunarita | 21 |
-| 12 | O Mar Sem Sol (feito) | 6138 a 6696 | 25 a 26 | O Leviatã (27) | Oricalco | 23 |
-| 11 | O Covil do Dragão | 6696 a 7254 | 23 a 24 | Cinzarel, o Dragão Ancião (25) | Dracônio | 21 |
-| 12 | O Ossário dos Titãs | 7254 a 7812 | 25 a 26 | O Último Titã (27) | Adamantita | 23 |
-| 13 | A Cidade dos Antigos | 7812 a 8370 | 27 a 28 | O Arquiteto (29) | Ferro Estelar | 25 |
-| 14 | Os Salões do Pesadelo | 8370 a 8928 | 29 a 30 | O Sem-Rosto (31) | Onirita | 27 |
-| 15 | O Abismo | 8928 a 9486 | 31 a 32 | O Príncipe do Caos (33) | Infernita | 29 |
-| 16 | A Escuridão | 9486 a 10044 | 33 a 34 | Nox, Aquele Que Apaga (37) | Noctírio | 31 |
+| 1 | As Cavernas | 18 a 558 | 1 a 4 | A Mãe-Teia (5) | Cobre | 2 |
+| 2 | A Catedral | 558 a 1116 | 6 a 9 | O Rei Esqueleto (10) | Ferro | 3 |
+| 3 | As Cavernas de Gelo | 1116 a 1674 | 11 a 14 | O Yeti Ancestral (15) | Ouro | 5 |
+| 4 | A Mina Abandonada | 1674 a 2232 | 16 a 19 | O Rei Goblin (20) | Cobalto | 6 |
+| 5 | As Minas Fúngicas | 2232 a 2790 | 21 a 24 | A Mãe-Esporo (25) | Esporita | 9 |
+| 6 | O Brejo das Bruxas | 2790 a 3348 | 26 a 29 | A Velha do Brejo (30) | Ferro-do-brejo | 11 |
+| 7 | A Cidade Afundada | 3348 a 3906 | 31 a 34 | O Sineiro Afogado (35) | Prata | 13 |
+| 8 | A Floresta Petrificada | 3906 a 4464 | 36 a 39 | O Cervo de Pedra (40) | Platina | 15 |
+| 9 | A Fortaleza dos Anões | 4464 a 5022 | 41 a 44 | O Autômato-Forja (45) | Mithril | 17 |
+| 10 | O Reino Élfico | 5022 a 5580 | 46 a 49 | A Dama do Espelho (50) | Lunarita | 19 |
+| 11 | O Mar Sem Sol | 5580 a 6138 | 51 a 54 | O Leviatã (55) | Oricalco | 21 |
+| 12 | O Covil do Dragão | 6138 a 6696 | 56 a 59 | Cinzarel, o Dragão Ancião (60) | Dracônio | 23 |
+| 13 | O Ossário dos Titãs | 6696 a 7254 | 61 a 64 | O Último Titã (65) | Adamantita | 25 |
+| 14 | A Necrópole do Rei Eterno | 7254 a 7812 | 66 a 69 | O Rei Eterno (70) | Sepulcrita | 27 |
+| 15 | A Cidade dos Antigos | 7812 a 8370 | 71 a 74 | O Arquiteto (75) | Ferro Estelar | 29 |
+| 16 | A Prisão dos Deuses | 8370 a 8928 | 76 a 79 | O Lobo Atado (80) | Ferro Divino | 31 |
+| 17 | O Campo da Última Guerra | 8928 a 9486 | 81 a 84 | O General Caído (85) | Belicita | 33 |
+| 18 | O Abismo | 9486 a 10044 | 86 a 89 | O Príncipe do Caos (90) | Infernita | 35 |
+| 19 | As Ruínas dos Acendedores | 10044 a 10602 | 91 a 94 | O Último Acendedor (95) | Ardorita | 37 |
+| 20 | A Escuridão | 10602 a 11160 | 96 a 99 | Nox, Aquele Que Apaga (100) | Noctírio | 39 |
 
-- **Monstros:** a coluna é o nível dos monstros, do topo ao fundo da camada. Regra do Jonathan (2026-10-10): **cada camada começa 1 nível acima do último da camada de cima**, nunca repete nem volta. Da catedral para baixo são 2 níveis por camada: o primeiro na metade de cima, o segundo da metade para baixo (a partir de 279 m da camada, `LAYER_D / 2`). 30% dos monstros nascem 1 nível acima, mas nunca passam do topo da própria camada. As cavernas, por serem a primeira, vão de 1 a 4 (1 nível a cada 150 m, os 50 m do desenho vezes 3). No código: `layerLvl(primeiro, d)` em `js/52-caverna-api.js`.
-- **Nível da forja:** o nível de item das 9 peças forjadas daquele metal. Na camada 5 em diante ele é o nível do primeiro monstro da camada menos 2 (2n − 1, com n a posição da camada): o equipamento forjado é bom para entrar na camada e fica para trás quando o drop dela começa a superar.
+- **Monstros:** a camada N tem monstros dos níveis vistos 5N − 4 a 5N − 1, um nível a cada quarto da altura dela (nas Cavernas, um a cada 150 m), e 30% nascem 1 nível acima, nunca passando do 5N − 1. O chefe é o 5N. O rótulo mostra `nvDe(e.lvl)`; vida, dano, XP e velocidade usam a força `e.lvl` da escala de antes (`lvlPw(n)`: igual até o 4, depois 0,4n + 2,5). No código: `layerLvl(layerLo(id), d)` em `js/52-caverna-api.js`, `layerLo`, `layerBossLvl`, `lvlPw` e `nvDe` em `js/129-camadas.js`.
+- **Nível da forja:** o nível de item das 9 peças forjadas daquele metal. Da camada 5 em diante é 2n − 1, com n a posição da camada (`layerForgeIl`, `js/129`); o revamp não mudou essa conta.
 - **Barras por metal:** de 5 minérios por barra no cobalto e 6 na infernita, sobe 1 a cada 3 camadas: 6 da esporita à platina, 7 do mithril ao oricalco, 8 do dracônio ao ferro estelar, 9 na onirita e na infernita, 10 no noctírio.
 - **Bases e lendários de drop:** as bases temáticas de cada camada (armas e armaduras que só caem lá) nascem no nível do primeiro monstro da camada; o lendário do chefe, no nível do chefe.
+- **Barras por metal das camadas novas:** 6 no ferro-do-brejo, 8 na sepulcrita e no ferro divino (as fichas de cada camada dizem o resto).
 
 ---
 
@@ -99,6 +107,8 @@ Decisão do Jonathan (2026-10-10): um personagem novo nasce com as 4 primeiras c
 ---
 
 ## 3. Números reservados por camada
+
+> Os números das cinco camadas do revamp (Brejo, Necrópole, Prisão, Guerra e Acendedores: arquivos 370 a 419, blocos 864 a 1023) estão em [00-revamp.md](00-revamp.md). A Colmeia, a Nave Caída e os Salões do Pesadelo saíram da campanha, mas os números deles continuam reservados para as fases paralelas.
 
 Para várias camadas poderem ser feitas em paralelo sem brigar por número.
 

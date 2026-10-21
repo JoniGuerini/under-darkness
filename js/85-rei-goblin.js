@@ -296,7 +296,7 @@ function rgMinions() { let n = 0; for (const m of enemies) if (m.rgMinion && !m.
 function rgStart() {
   const B = mnBoss; rgGates(true);
   const D = ET.reigoblin, e = spawnEnemy('reigoblin', (B.cx + 4) * T - D.w / 2, B.fy * T - D.h - 1, MN_ZONE0 + 3);
-  Object.assign(e, { boss: true, lvl: 10, hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: pl.x < B.cx * T ? -1 : 1, cd: 1, hornT: 0, onFoot: false });
+  Object.assign(e, { boss: true, lvl: layerBossLvl('mina'), hp: D.hp, maxHp: D.hp, dmg: D.dmg, gold: 0, facing: pl.x < B.cx * T ? -1 : 1, cd: 1, hornT: 0, onFoot: false });
   rgSet(e, 'intro', 2.6);
   rgBoss = e; bossFight = { e, rg: true }; rgFx.wreck = null;
   const bn = document.querySelector('#bossbar .bn'); if (bn) { bn.firstChild.textContent = 'O Rei Goblin'; bn.lastChild.textContent = 'e sua Escavadeira'; }

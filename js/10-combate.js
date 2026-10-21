@@ -171,7 +171,7 @@ function rollDrops(e) {
   }
   if (e.type !== 'slime' && !e.boss && Math.random() < 0.06) dropLoot(cx, cy, 'tocha', 1);
   if (e.boss) dropLoot(cx, cy, 'ouro', 250 + Math.floor(Math.random() * 100));
-  else if (Math.random() < 0.55) { const N = Math.max(1, e.lvl | 0); dropLoot(cx, cy, 'ouro', N + Math.floor(Math.random() * (N + 1))); }   // gold is never certain; when it drops: level N gives N to 2N coins (Jonathan, 2026-10-12)
+  else if (Math.random() < 0.55) { const N = Math.max(1, nvDe(e.lvl)); dropLoot(cx, cy, 'ouro', N + Math.floor(Math.random() * (N + 1))); }   // gold is never certain; when it drops: level N gives N to 2N coins (Jonathan, 2026-10-12)
 }
 function pickupMsg(id, n, item) {
   const it = ITEMS[id];

@@ -27,6 +27,7 @@ function layerRows() {
     floresta: () => g('FP_S0'), anoes: () => g('AN_S0'), colmeia: () => g('CM_S0'), nave: () => g('NV_S0'), elfos: () => g('EL_S0'), mar: () => g('MS_S0'),
     dragao: () => g('DG_S0'), titas: () => g('TT_S0'), antigos: () => g('AT_S0'), pesadelo: () => g('PS_S0'), abismo: () => g('AB_S0'), escuro: () => g('ES_S0')
   };
+  for (const id in GEN_NOMES) if (!S0[id]) S0[id] = () => g(GEN_NOMES[id][0]);   // as camadas novas (129, 2026-10-21)
   const out = [];
   for (const L of LAYERS) { const f = S0[L.id], y = f ? f() : null; if (y !== null) out.push({ id: L.id, y0: y }); }
   out.sort((a, b) => a.y0 - b.y0);
@@ -42,6 +43,7 @@ const LAYER_ORES = {
   dragao: ['DG_O_CARVAO', 'DG_O_DRACONIO'], titas: ['TT_O_CARVAO', 'TT_O_ADAMANTITA'], antigos: ['AT_O_CARVAO', 'AT_O_ESTELAR'], pesadelo: ['PS_O_CARVAO', 'PS_O_ONIRITA'],
   abismo: ['AB_O_CARVAO', 'AB_O_INFERNITA'], escuro: ['ES_O_CARVAO', 'ES_O_NOCTIRIO']
 };
+for (const id in CAMADA_EXT) if (CAMADA_EXT[id].minerios) LAYER_ORES[id] = CAMADA_EXT[id].minerios;   // as camadas novas (129, 2026-10-21)
 
 /* ---------- as quedas ---------- */
 function quebraQuedas(y0, y1, R) {

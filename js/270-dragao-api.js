@@ -28,17 +28,11 @@ const DRAGAO = true;
 const DG_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: o Mar Sem Sol se existir, senão o Reino Élfico; { id, S0, D, soils, halls, climb, boss, thin }
 // halls são os poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
-function dgAbove() {
-  if (typeof MAR !== 'undefined' && MAR && typeof MS_S0 !== 'undefined')
-    return { id: 'mar', S0: MS_S0, D: typeof MS_D !== 'undefined' ? MS_D : 186, soils: typeof MS_SOILS !== 'undefined' ? MS_SOILS : null, halls: typeof msExits !== 'undefined' ? msExits : [],
-      climb: typeof MS_CORDAME !== 'undefined' ? MS_CORDAME : CHAIN, boss: typeof msBoss !== 'undefined' ? msBoss : null, thin: STONE };
-  if (typeof ELFOS !== 'undefined' && ELFOS && typeof EL_S0 !== 'undefined')
-    return { id: 'elfos', S0: EL_S0, D: EL_D, soils: typeof EL_SOILS !== 'undefined' ? EL_SOILS : null, halls: typeof elExits !== 'undefined' ? elExits : [], climb: typeof EL_ESCADA !== 'undefined' ? EL_ESCADA : CHAIN, boss: typeof elBoss !== 'undefined' ? elBoss : null, thin: typeof EL_PEDRA_POCO !== 'undefined' ? EL_PEDRA_POCO : STONE };
-  if (typeof NAVE !== 'undefined' && NAVE && typeof NV_S0 !== 'undefined')
-    return { id: 'nave', S0: NV_S0, D: NV_D, soils: typeof NV_SOILS !== 'undefined' ? NV_SOILS : null, halls: typeof nvExits !== 'undefined' ? nvExits : [], climb: CHAIN, boss: typeof nvBoss !== 'undefined' ? nvBoss : null, thin: STONE };
+function dgAbove() {   // 2026-10-21: a camada de cima vem da lista (129, camadaAcima)
+  const a = camadaAcima('dragao'); if (a) return a;
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const DG_TOP = (typeof MS_TOP !== 'undefined' ? MS_TOP : typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + LAYER_D;   // metros abaixo do chão do vilarejo
+const DG_TOP = layerTop('dragao');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do DG_TOP: Chaminés de Vapor, Túneis Kobold, Tubos de Lava, Leito de Ouro, (rocha-mãe)
 const DG_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const DG_BAND_NAMES = ['chamines', 'tuneis', 'tubos', 'leito'];

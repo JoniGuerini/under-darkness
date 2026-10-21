@@ -3,7 +3,8 @@
 /* ================= início e busca ================= */
 (() => {
   const gear = () => Object.keys(ITEMS).filter(id => ITEMS[id].slot);
-  const ativos = () => { const s = new Set(['rei', 'maeteia', 'filhote', 'yetiancestral', 'reigoblin', 'maeesporo', 'principecaos', 'sineiro', 'cervo', 'nox', 'autoforja', 'rainha', 'olhocometa', 'dama', 'leviata', 'cinzarel', 'tita', 'arquiteto', 'semrosto']); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
+  // os chefes das camadas (UDW_CAMADAS, textos.js) e todo monstro que nasce em alguma faixa
+  const ativos = () => { const s = new Set(UDW_CAMADAS().filter(C => C.chefe).map(C => C.chefe[0])); s.add('filhote'); for (const z in CATH_SPAWN) for (const [t] of CATH_SPAWN[z][0]) s.add(t); return s; };
   UDW.ativos = ativos;
 
   UDW.pages.inicio = {
@@ -26,7 +27,7 @@
         ${card('alquimia', 'Alquimia', ALQ_RECIPES.length, `${HERBS.length} ervas, ${ALQ_RECIPES.filter(rc => ALQ[rc.id].kind !== 'elixir').length} poções e ${ALQ_RECIPES.filter(rc => ALQ[rc.id].kind === 'elixir').length} elixires no alambique da Marta`)}
         ${card('inimigos', 'Inimigos', Object.keys(ET).length, `${A.size} aparecem no mundo de hoje; os outros estão nas cavernas desligadas`)}
         ${card('npcs', 'Moradores', NPCS.length, NPCS.map(n => n.name).join(', '))}
-        ${card('biomas', 'Biomas', LAYERS.length, `${LAYERS.map(L => L.nome).join(', ').replace(/, ([^,]*)$/, ' e $1')}: ${Object.keys(PROP_DEFS).length} objetos de cena, ${UDW.cathBlocks().length} blocos de construção`)}
+        ${card('biomas', 'Camadas', LAYERS.length, `${LAYERS.length} camadas de 5 níveis, do 1 ao ${5 * LAYERS.length} (${LAYERS.map(L => L.nome).join(', ').replace(/, ([^,]*)$/, ' e $1')}): ${Object.keys(PROP_DEFS).length} objetos de cena, ${UDW.cathBlocks().length} blocos de construção`)}
         ${card('regras', 'Regras do jogo', '', 'herói, níveis, defesa, vigor, poção, dia e noite, tamanho do mundo')}
       </section>`;
     }

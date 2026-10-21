@@ -267,5 +267,5 @@ function render() {
   // enemy level tags
   sc.font = `600 ${fpx(S * 3.1)}px "UD Pixel", monospace`; sc.textAlign = 'center';
   if (mapOpen && state === 'play') drawMap();
-  for (const e of enemies) if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) outlinedText(`${ET[e.type].name} · Nv ${e.lvl}`, (e.x + e.w / 2 - cx) * S, (e.y - cy - 9) * S, sc.font, Math.max(2, S * 0.8), '#120d12', '#efe2c4');
+  for (const e of enemies) if (e.showHp > 0 && !e.boss && !(e.type === 'ghost' && e.vis < 0.4)) outlinedText(`${ET[e.type].name} · Nv ${nvDe(e.lvl)}`, (e.x + e.w / 2 - cx) * S, (e.y - cy - 9) * S, sc.font, Math.max(2, S * 0.8), '#120d12', '#efe2c4');
 }

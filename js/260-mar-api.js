@@ -26,16 +26,11 @@ const MAR = true;
 const MS_D = LAYER_D;                                   // metros de camada
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam e os
 // poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); quem não existe ainda é pulado
-function msAbove() {
-  if (typeof ELFOS !== 'undefined' && ELFOS && typeof EL_S0 !== 'undefined')
-    return { id: 'elfos', S0: EL_S0, D: EL_D, soils: typeof EL_SOILS !== 'undefined' ? EL_SOILS : null, halls: typeof elExits !== 'undefined' ? elExits : [], climb: typeof EL_ESCADA !== 'undefined' ? EL_ESCADA : CHAIN, boss: typeof elBoss !== 'undefined' ? elBoss : null, thin: typeof EL_PEDRA_POCO !== 'undefined' ? EL_PEDRA_POCO : STONE, root: typeof EL_RAIZ !== 'undefined' ? EL_RAIZ : null };
-  if (typeof NAVE !== 'undefined' && NAVE && typeof NV_S0 !== 'undefined')
-    return { id: 'nave', S0: NV_S0, D: NV_D, soils: typeof NV_SOILS !== 'undefined' ? NV_SOILS : null, halls: typeof nvExits !== 'undefined' ? nvExits : [], climb: typeof NV_ESCADA !== 'undefined' ? NV_ESCADA : CHAIN, boss: typeof nvBoss !== 'undefined' ? nvBoss : null, thin: typeof NV_REATOR !== 'undefined' ? NV_REATOR : STONE, root: null };
-  if (typeof COLMEIA !== 'undefined' && COLMEIA && typeof CM_S0 !== 'undefined')
-    return { id: 'colmeia', S0: CM_S0, D: CM_D, soils: typeof CM_SOILS !== 'undefined' ? CM_SOILS : null, halls: typeof cmExits !== 'undefined' ? cmExits : [], climb: typeof CM_ESCADA_FAVO !== 'undefined' ? CM_ESCADA_FAVO : CHAIN, boss: typeof cmBoss !== 'undefined' ? cmBoss : null, thin: typeof CM_CERA_REAL !== 'undefined' ? CM_CERA_REAL : STONE, root: null };
+function msAbove() {   // 2026-10-21: a camada de cima vem da lista (129, camadaAcima)
+  const a = camadaAcima('mar'); if (a) return a;
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE, root: null };
 }
-const MS_TOP = (typeof EL_TOP !== 'undefined' ? EL_TOP : 1860) + LAYER_D;   // metros abaixo do chão do vilarejo (2046)
+const MS_TOP = layerTop('mar');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do MS_TOP: Praias Negras, Floresta de Algas, A Fossa, Chaminés Negras, (rocha-mãe)
 const MS_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const MS_BAND_NAMES = ['praias', 'floresta', 'fossa', 'chamines'];

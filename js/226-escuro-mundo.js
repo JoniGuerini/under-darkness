@@ -26,13 +26,21 @@ for (const t of [ES_APAGADA, ES_BREU, ES_VIDRO, ES_RAIZ, ES_CASCA, ES_PRIMEVA, E
 const ES_HOST = new Uint8Array(NT);    // o que a camada pode sobrescrever (o enchimento debaixo do Abismo)
 for (let t = 0; t < NT; t++) if (AB_SOILS[t] || t === STONE || t === DEEP) ES_HOST[t] = 1;
 ES_HOST[BEDROCK] = 0;
-const ES_CLIMB = t => t === ES_CORRENTE || t === ES_RAIZ_PEND || t === CHAIN || t === AB_ESCADA || t === AB_CORRENTE;
+// a camada de cima (129: camadaAcima): o Abismo, ou As Ruínas dos Acendedores quando existem (esBuild acerta)
+let esAcima = null, esUpClimbs = [];
+const ES_CLIMB = t => t === ES_CORRENTE || t === ES_RAIZ_PEND || t === CHAIN || t === AB_ESCADA || t === AB_CORRENTE || esUpClimbs.includes(t);
 const esClimbT = y => escuroBand(y) === 2 ? ES_RAIZ_PEND : ES_CORRENTE;
 const ES_WALL_OF = b => b === 0 ? WES_APAGADA : b === 1 ? WES_BREU : b === 2 ? WES_RAIZ : WES_PRIMEVA;
 
 function esBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  ES_S0 = Math.min(WH - 12, AB_S0 + Math.min(AB_D, WH - 8 - AB_S0));
+  const A = esAcima = camadaAcima('escuro'), ACI = A && A.id !== 'abismo' ? A : null;   // ACI: a camada de cima não é o Abismo
+  const A_S0 = ACI ? ACI.S0 : AB_S0, A_D = ACI ? ACI.D : AB_D;
+  esUpClimbs = ACI ? [ACI.climb, ...(typeof AC_CORRENTE !== 'undefined' && ACI.id === 'acendedores' ? [AC_CORRENTE] : [])].filter(t => t) : [];
+  if (ACI) for (const S of [ACI.soils, ACI.host]) if (S && S.length) for (let t = 0; t < NT; t++) if (S[t] && t !== BEDROCK) ES_HOST[t] = 1;
+  const upSoil = t => ACI ? !!((ACI.soils && ACI.soils[t]) || t === ACI.thin) : AB_SOILS[t] && t !== AB_FERRO_NEGRO && t !== AB_TIJOLO;
+  const UP_THIN = ACI ? ACI.thin : AB_CAOS, UP_THINW = ACI ? (ACI.thinW || WES_APAGADA) : WAB_CAOS, UP_MOUTH = ACI ? ACI.mouth : AB_BRASEIRO;
+  ES_S0 = Math.min(WH - 12, A_S0 + Math.min(A_D, WH - 8 - A_S0));
   const S0 = ES_S0, YB = Math.min(WH - 8, S0 + ES_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x7e5d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
   const mb = m => Math.round(m * DB / LAYER_DESIGN);
@@ -47,7 +55,7 @@ function esBuild() {
   for (let x = 0; x < WW; x++) {
     for (let y = S0 - 8; y < S0; y++) {   // a pedra do caos dos Templos esfria nas últimas linhas
       const i = y * WW + x, k = (y - (S0 - 8)) / 8, h = nz(x, y, 12, 0x7b3);
-      if (SOLID[tiles[i]] && AB_SOILS[tiles[i]] && tiles[i] !== AB_FERRO_NEGRO && tiles[i] !== AB_TIJOLO && h < k * 0.85) tiles[i] = ES_APAGADA;
+      if (SOLID[tiles[i]] && upSoil(tiles[i]) && h < k * 0.85) tiles[i] = ES_APAGADA;
       if (walls[i] && h < k * 0.6) walls[i] = WES_APAGADA;
     }
     for (let y = S0; y < WH; y++) {
@@ -56,7 +64,7 @@ function esBuild() {
       // abaixo da camada a faixa é sempre a última (d >= ES_D - 5): a mesma pedra e parede, sem ruído
       if (y >= YB) { tiles[i] = ES_PRIMEVA; walls[i] = ES_WALL_OF(3); continue; }
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x7b4);
-      if (k < 1 && h > 0.5 + k * 0.5) { tiles[i] = AB_CAOS; walls[i] = WAB_CAOS; continue; }   // lascas do caos nas primeiras linhas
+      if (k < 1 && h > 0.5 + k * 0.5) { tiles[i] = UP_THIN; walls[i] = UP_THINW; continue; }   // lascas do caos nas primeiras linhas
       const d = db(x, y), b = bandOf(d);   // cada faixa lê um ruído só (as Raízes, o delas)
       let t;
       if (b === 0) t = nz(x, y, 34, 0x7a1) > 0.72 ? ES_BREU : ES_APAGADA;
@@ -106,7 +114,8 @@ function esBuild() {
   // ---------- 2a. as duas descidas: do chão de dois templos do Abismo, longe um do outro e do Trono ----------
   const landY = S0 + 18;   // o poço tem o mesmo tamanho de antes: o Posto fica logo no topo
   {
-    const ab = abBoss, all = abChambers.filter(c => c.kind === 'templo' && c.fy && (!ab || Math.abs(wdx(c.cx - ab.cx)) > ab.w / 2 + 30)).sort((a, b) => a.cx - b.cx);
+    const ab = ACI ? ACI.boss : abBoss, all = (ACI ? (ACI.exits || []).map(c => ({ cx: c.cx !== undefined ? c.cx : c.x0 + (c.w || 3) / 2, fy: c.fy })).filter(c => c.fy)
+      : abChambers.filter(c => c.kind === 'templo' && c.fy)).filter(c => !ab || Math.abs(wdx(c.cx - ab.cx)) > (ab.w || 0) / 2 + 30).sort((a, b) => a.cx - b.cx);
     // só os templos do último andar do Trono: o poço até o Posto fica curto como antes
     const low = all.filter(c => c.fy > S0 - 40), temples = low.length >= 2 && low.some(a => low.some(b => Math.abs(wdx(a.cx - b.cx)) > 120)) ? low : all;
     const picks = [];
@@ -298,13 +307,13 @@ function esBuild() {
   for (const E of esArrivals) {
     const x0 = E.x0, y0 = E.fy, y1 = E.land.fy - E.land.h - 1;
     for (let y = y0; y <= y1; y++) {
-      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); tiles[i] = AIR; if (!walls[i] || y >= S0 - 4) walls[i] = y < S0 ? WAB_CAOS : WES_APAGADA; esKeep.add(i); }
+      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); tiles[i] = AIR; if (!walls[i] || y >= S0 - 4) walls[i] = y < S0 ? UP_THINW : WES_APAGADA; esKeep.add(i); }
       const k = (y - y0) / Math.max(1, y1 - y0);
-      for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); tiles[i] = y === y0 ? AB_CAOS : hash2(x, y, seed ^ 0x7f1) < 1 - k * 1.2 ? AB_CAOS : ES_APAGADA; esKeep.add(i); }
+      for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); tiles[i] = y === y0 ? UP_THIN : hash2(x, y, seed ^ 0x7f1) < 1 - k * 1.2 ? UP_THIN : ES_APAGADA; esKeep.add(i); }
     }
     for (let y = y0 - 2; y < E.land.fy; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]]) tiles[i] = ES_CORRENTE; esKeep.add(i); }
     // a boca, nos Templos do Caos: dois braseiros acesos do Inferno ladeando o furo
-    for (const x of [x0 - 3, x0 + 6]) if (at(x, y0 - 1) === AIR && SOLID[at(x, y0)]) set(x, y0 - 1, AB_BRASEIRO);
+    if (UP_MOUTH) for (const x of [x0 - 3, x0 + 6]) if (at(x, y0 - 1) === AIR && SOLID[at(x, y0)]) set(x, y0 - 1, UP_MOUTH);
   }
   // os Grandes Vãos: o fundo dos poços (espinhos de vidro), uma corrente da borda ao fundo; a laje de penumbra sobre alguns
   for (const P of esPits) {

@@ -26,7 +26,7 @@ const genFeita = id => { const k = genIdx(id); return k >= 0 && k <= genFeito; }
 // o topo previsto das camadas que ainda não existem: cada uma começa onde a de cima termina (como cada gerador faz)
 function genPreve() {
   for (let k = Math.max(1, genFeito + 1); k < LAYERS.length; k++) {
-    const id = LAYERS[k].id, n = GEN_NOMES[id], up = genLinhas(LAYERS[k - 1].id); if (!n || !up) continue;
+    const id = LAYERS[k].id, n = GEN_NOMES[id], ua = layerAcimaId(id), up = ua && genLinhas(ua); if (!n || !up || !genLinhas(id)) continue;
     const s = Math.min(WH - 12, up[0] + Math.min(up[1] - up[0], WH - 8 - up[0]));
     try { (0, eval)(`${n[0]} = ${s}`); } catch (e) { }
   }
@@ -34,7 +34,8 @@ function genPreve() {
 function genPassos() {   // os passes de depois de uma leva, só nas camadas novas
   for (const P of GEN_POS) if (!P.id || genNova(P.id)) { try { P.fn(); } catch (err) { console.error(err); } }
 }
-function genFundoAcerta() { const r = genLinhas(LAYERS[genFeito].id); genFundo = genFeito >= LAYERS.length - 1 || !r ? WH : Math.min(WH, r[1] + 4); }
+function genFundoAcerta() { let r = null; for (let j = genFeito; j >= 0 && !r; j--) r = genLinhas(LAYERS[j].id);   // a camada mais funda que existe (2026-10-21)
+   genFundo = genFeito >= LAYERS.length - 1 || !r ? WH : Math.min(WH, r[1] + 4); }
 // a próxima leva: os passos de uma camada (o Pesadelo e o Abismo saem juntos: um embrulha o outro) e os passes
 function genProxima() {
   const ids = []; for (const P of GEN_FILA) if (!ids.includes(P.id)) ids.push(P.id);
@@ -69,7 +70,7 @@ function genMais(ate) {
   tiles.set(tilesGen); walls.set(wallsGen);   // a geração vê o mundo como a semente deixou
   const ini = genFeito + 1;
   while (genFeito < ate && genProxima()) { }
-  const topo = genLinhas(LAYERS[ini].id)[0];
+  let topo = WH; for (let j = ini; j <= genFeito; j++) { const r = genLinhas(LAYERS[j].id); if (r) { topo = r[0]; break; } }
   // a camada de trás (36) e as águas, da primeira linha que a geração mexeu para baixo
   let first = topo; for (let i = 0, n = topo * WW; i < n; i++) if (tiles[i] !== velho[i] || walls[i] !== velhoW[i]) { first = (i / WW) | 0; break; }
   const yD = Math.max(0, first - 6);

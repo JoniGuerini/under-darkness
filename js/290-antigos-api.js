@@ -28,20 +28,11 @@ const AT_D = LAYER_D;                                   // metros de camada
 /* a camada logo acima: a primeira linha, a altura, o chão natural (o material dela afina nas nossas primeiras linhas)
    e os poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }). Quem ainda não existe é pulado: o Ossário,
    o Covil, o Mar Sem Sol e o Reino Élfico, nessa ordem (as cinco camadas novas foram feitas ao mesmo tempo). */
-function atAbove() {
-  if (typeof TITAS !== 'undefined' && TITAS && typeof TT_S0 !== 'undefined')
-    return { id: 'ossario', S0: TT_S0, D: typeof TT_D !== 'undefined' ? TT_D : 186, TOP: typeof TT_TOP !== 'undefined' ? TT_TOP : null, soils: typeof TT_SOILS !== 'undefined' ? TT_SOILS : null, halls: typeof ttExits !== 'undefined' ? ttExits : [], boss: typeof ttBoss !== 'undefined' ? ttBoss : null };
-  if (typeof DRAGAO !== 'undefined' && DRAGAO && typeof DG_S0 !== 'undefined')
-    return { id: 'covil', S0: DG_S0, D: typeof DG_D !== 'undefined' ? DG_D : 186, TOP: typeof DG_TOP !== 'undefined' ? DG_TOP : null, soils: typeof DG_SOILS !== 'undefined' ? DG_SOILS : null, halls: typeof dgExits !== 'undefined' ? dgExits : [], boss: typeof dgBoss !== 'undefined' ? dgBoss : null };
-  if (typeof MAR !== 'undefined' && MAR && typeof MS_S0 !== 'undefined')
-    return { id: 'mar', S0: MS_S0, D: typeof MS_D !== 'undefined' ? MS_D : 186, TOP: typeof MS_TOP !== 'undefined' ? MS_TOP : null, soils: typeof MS_SOILS !== 'undefined' ? MS_SOILS : null, halls: typeof msExits !== 'undefined' ? msExits : [], boss: typeof msBoss !== 'undefined' ? msBoss : null };
-  if (typeof ELFOS !== 'undefined' && ELFOS && typeof EL_S0 !== 'undefined')
-    return { id: 'elfos', S0: EL_S0, D: EL_D, TOP: EL_TOP, soils: EL_SOILS, halls: elExits, boss: elBoss };
-  if (typeof NAVE !== 'undefined' && NAVE && typeof NV_S0 !== 'undefined')
-    return { id: 'nave', S0: NV_S0, D: NV_D, TOP: NV_TOP, soils: typeof NV_SOILS !== 'undefined' ? NV_SOILS : null, halls: nvExits, boss: nvBoss };
+function atAbove() {   // 2026-10-21: a camada de cima vem da lista (129, camadaAcima)
+  const a = camadaAcima('antigos'); if (a) return a;
   return { id: 'mina', S0: MN_S0, D: MN_D, TOP: typeof MN_TOP !== 'undefined' ? MN_TOP : 558, soils: MN_SOILS, halls: [], boss: null };
 }
-const AT_TOP = (() => { const a = atAbove(); return (a.TOP !== null ? a.TOP : 2418) + LAYER_D; })();   // metros abaixo do chão do vilarejo
+const AT_TOP = layerTop('antigos');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do AT_TOP: As Escadarias, A Cidade Inversa, As Máquinas, A Cratera da Estrela
 const AT_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AT_BAND_NAMES = ['escadarias', 'inversa', 'maquinas', 'cratera'];

@@ -444,7 +444,8 @@ const AMBI = (function () {
       beds: [['brown', 'lowpass', 55, 95, 0.7, 0.4, 0.55, 3.5], ['pink', 'lowpass', 300, 600, 0.8, 0.1, 0.24, 0.9], ['pink', 'bandpass', 160, 260, 1.5, 0.04, 0.1, 3, c => c.band === 2 ? 1.5 : 1]],
       ev: [[4, 'pop', c => c.band === 1 ? 1.2 : c.band === 2 ? 0.1 : 0.5], [0.3, 'bubble', c => c.band === 1 ? 1 : 0.15], [0.05, 'chains', c => c.band === 0 || c.band === 3 ? 1 : 0.2], [0.08, 'whisper', c => c.band === 3 ? 1.5 : 0.3], [0.05, 'heart', c => c.band === 2 ? 1 : 0], [0.15, 'drip', c => c.band === 2 ? 1 : 0], [0.025, 'roar'], [0.02, 'groan']]
     }
-  };
+  };  for (const id in CAMADA_EXT) if (CAMADA_EXT[id].ambiente) DEF[id] = CAMADA_EXT[id].ambiente;   // as camadas novas trazem o cenário delas (129, 2026-10-21)
+
 
   // monta um cenário num contexto de áudio e devolve { out, schedule(t0, t1, c), stop(t) }
   function create(A, dest, name) {
@@ -504,6 +505,7 @@ if (typeof document !== 'undefined') (function () {
       else if (z === 4) { c.name = 'catedral'; c.band = 3; }
       else if (z >= 5 && z <= 8) { c.name = 'catedral'; c.band = z - 5; }
       else if (in4(typeof PS_ZONE0 !== 'undefined' ? PS_ZONE0 : null, 'pesadelo') || in4(typeof CV_ZONE0 !== 'undefined' ? CV_ZONE0 : null, 'caverna') || in4(typeof IC_ZONE0 !== 'undefined' ? IC_ZONE0 : null, 'gelo') || in4(typeof MN_ZONE0 !== 'undefined' ? MN_ZONE0 : null, 'mina') || in4(typeof FG_ZONE0 !== 'undefined' ? FG_ZONE0 : null, 'fungo') || in4(typeof CD_ZONE0 !== 'undefined' ? CD_ZONE0 : null, 'cidade') || in4(typeof CM_ZONE0 !== 'undefined' ? CM_ZONE0 : null, 'colmeia') || in4(typeof FP_ZONE0 !== 'undefined' ? FP_ZONE0 : null, 'floresta') || in4(typeof AN_ZONE0 !== 'undefined' && typeof ANOES !== 'undefined' ? AN_ZONE0 : null, 'anoes') || in4(typeof AB_ZONE0 !== 'undefined' ? AB_ZONE0 : null, 'abismo') || in4(typeof ES_ZONE0 !== 'undefined' ? ES_ZONE0 : null, 'escuro') || in4(typeof NV_ZONE0 !== 'undefined' ? NV_ZONE0 : null, 'nave') || in4(typeof EL_ZONE0 !== 'undefined' && typeof ELFOS !== 'undefined' ? EL_ZONE0 : null, 'elfos') || in4(typeof MS_ZONE0 !== 'undefined' && typeof MAR !== 'undefined' && MAR ? MS_ZONE0 : null, 'mar') || in4(typeof DG_ZONE0 !== 'undefined' && typeof DRAGAO !== 'undefined' ? DG_ZONE0 : null, 'dragao') || in4(typeof AT_ZONE0 !== 'undefined' && typeof ANTIGOS !== 'undefined' ? AT_ZONE0 : null, 'antigos') || in4(typeof TT_ZONE0 !== 'undefined' ? TT_ZONE0 : null, 'titas')) { }
+      else if (Object.keys(CAMADA_EXT).some(id => CAMADA_EXT[id].ambiente && in4(CAMADA_EXT[id].zona0, id))) { }   // as camadas novas (129)
       else c.name = 'caverna';   // as cavernas antigas (zonas 1 a 3)
       c.cervo = !(typeof fpBoss !== 'undefined' && fpBoss && fpBoss.dead);   // os cascos somem quando o Cervo morre (146)
       // a Cidade Afundada: perto do Poço (12 blocos da boca, e dentro dele) quase tudo some

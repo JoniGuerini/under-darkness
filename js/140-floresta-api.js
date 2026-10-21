@@ -22,7 +22,7 @@
 
 const FLORESTA = true;
 const FP_D = LAYER_D;                                   // metros de camada
-const FP_TOP = CD_TOP + LAYER_D;                        // onde a camada começa, em metros abaixo do chão do vilarejo (1116)
+const FP_TOP = layerTop('floresta');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do FP_TOP: Bosque Soterrado, Mata de Cristal, Raízes Profundas, Clareira dos
 // Gigantes, (rocha-mãe)
 const FP_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);

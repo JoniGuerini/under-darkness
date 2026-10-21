@@ -21,12 +21,12 @@
 
 const CIDADE = true;
 const CD_D = LAYER_D;                                   // metros de camada
-const CD_TOP = FG_TOP + LAYER_D;                        // onde a camada começa, em metros abaixo do chão do vilarejo (930)
+const CD_TOP = layerTop('cidade');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do CD_TOP: Cisternas Altas, Ruas Tortas, Bairro do Poço, Palácio do Sino, (rocha-mãe)
 const CD_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const CD_BAND_NAMES = ['cisternas', 'ruas', 'bairro', 'palacio'];
 const CD_ZONE0 = 29;                                // zonas 29..32 (o 139 põe os nomes depois das das Minas Fúngicas)
-let CD_S0 = FG_S0 + FG_D;                           // a primeira linha da camada no mundo atual (cdBuild acerta)
+let CD_S0 = (() => { const a = camadaAcima('cidade'); return a ? a.S0 + a.D : FG_S0 + FG_D; })();   // a primeira linha da camada no mundo atual (cdBuild acerta; a de cima pelo 129)
 
 // blocos sólidos (288 a 301)
 const CD_ATERRO = 288, CD_CANTARIA = 289, CD_TIJOLO = 290, CD_CALCAMENTO = 291, CD_TELHA = 292, CD_MADEIRAME = 293, CD_LIMO = 294, CD_LODO = 295,

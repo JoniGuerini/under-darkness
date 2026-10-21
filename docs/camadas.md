@@ -1,60 +1,48 @@
-# As 16 camadas de Under Darkness
+# As 20 camadas de Under Darkness
 
-Passo 1 do planejamento: o mapa com o nome e a temática de cada camada, da primeira (As Cavernas) até a décima sexta. Nada disto está implementado além das camadas marcadas como **existe**. O passo 2 é a ficha de implementação de cada camada (no formato da Parte 1 de [biomas.md](biomas.md)). O passo 3 é o roadmap. As fichas do passo 2 estão na pasta [camadas/](camadas/00-geral.md), começando pelas regras gerais.
+O mapa da descida: o nome, o tema, o chefe e o metal de cada camada, da primeira (As Cavernas) até a vigésima (A Escuridão). Desde o revamp de 2026-10-21 são **20 camadas de 5 níveis cada**, do nível 1 ao 100. O que mudou e por quê está em [camadas/00-revamp.md](camadas/00-revamp.md); as regras que valem para todas estão em [camadas/00-geral.md](camadas/00-geral.md); cada camada tem a sua ficha na pasta [camadas/](camadas/00-geral.md).
 
-Para validar, troque `[ ]` por `[x]` (aprovado) ou `[-]` (trocar) em cada camada.
-
----
-
-## A ideia da descida
-
-Quanto mais fundo, mais antigo e mais estranho. As 16 camadas formam 4 atos de 4 camadas:
-
-1. **Ato I. Debaixo do vilarejo (1 a 4):** o que está logo abaixo da gente. Bichos, mortos, gelo e mineiros. São as 4 camadas que já existem.
-2. **Ato II. O mundo esquecido (5 a 8):** o que a superfície perdeu e esqueceu. Uma colônia tomada por fungo, uma cidade inteira soterrada, uma floresta virada pedra e a fortaleza dos anões.
-3. **Ato III. Os reinos sem sol (9 a 12):** lugares que nunca foram da superfície. A colmeia que expulsou os anões, um mar subterrâneo, o covil de um dragão e os ossos dos titãs.
-4. **Ato IV. Antes do mundo (13 a 16):** o que já estava aqui antes de tudo. A cidade dos Antigos, o lugar onde o sonho vira real, o Inferno e, no fundo, a Escuridão que dá nome ao jogo.
-
-Cada camada traz um metal novo para a forja, na ordem da descida (regra de [regras-de-bioma.md](regras-de-bioma.md)). O cristal não entra na lista: é pedra preciosa, não metal.
+A ordem que vale é a do registro do jogo, `LAYERS` em `js/129-camadas.js`. Esta tabela só a repete.
 
 ---
+
+## Os níveis
+
+- A camada **N** tem monstros dos níveis **5N − 4 a 5N − 1** (um nível a cada quarto da altura dela; 30% nascem um acima, nunca passando do 5N − 1) e o chefe no **5N**. Nox, o último chefe, é o nível 100.
+- O rótulo do monstro mostra o nível visto, `nvDe(e.lvl)`. As contas de vida, dano, XP e velocidade usam a força de antes, `e.lvl` (`lvlPw(n)`), para o equilíbrio das armas e da forja não mudar.
+- Cada camada tem 558 m (o desenho de 186 m esticado `LAYER_K = 3` vezes); a camada N começa a (N − 1) × 558 m. O mundo tem 11.246 blocos de altura.
 
 ## O mapa
 
-| | # | Camada | Temática | Quem mora lá | Metal |
-|---|---|---|---|---|---|
-| [x] | 1 | **As Cavernas** (existe) | terra úmida, raízes, galerias de calcita e o ninho das aranhas | bichos da caverna, chefe A Mãe-Teia | Cobre |
-| [x] | 2 | **A Catedral Abandonada** (existe) | catedral gótica soterrada, claustro e criptas | mortos-vivos, chefe O Rei Esqueleto | Ferro |
-| [x] | 3 | **As Cavernas de Gelo** (existe) | um frio antigo que congelou tudo debaixo das criptas | feras do gelo, chefe O Yeti Ancestral | Ouro |
-| [x] | 4 | **A Mina Abandonada** (existe) | a mina que cavou fundo demais; escoras, trilhos e fornalhas | mineiros mortos e goblins, chefe O Rei Goblin | Cobalto |
-| [ ] | 5 | **As Minas Fúngicas** | uma colônia mais funda que a mina, tomada por um fungo antigo; micélio nos corpos e túneis alagados | os Tomados (gente e bicho virando fungo), chefe A Mãe-Esporo | Esporita: metal verde-azulado que o micélio deposita na rocha |
-| [ ] | 6 | **A Cidade Afundada** | uma cidade inteira que a terra engoliu: ruas, casas tortas, cisternas e o palácio. Absorve a ideia das Catacumbas Alagadas como faixa de cima | os únicos humanos vivos do jogo: saqueadores e o culto que adora o que está lá embaixo; chefe O Sumo-Sacerdote do culto | Prata |
-| [ ] | 7 | **A Floresta Petrificada** | uma floresta inteira virada pedra, com folhas de cristal; é o lugar do cristal abundante | bestas de raiz, dríades de pedra, chefe A Árvore-Mãe | Platina |
-| [ ] | 8 | **A Fortaleza dos Anões** | salões de pedra e bronze, canais de lava e forjas de runas. É de onde veio a forja do Grimaldo | autômatos de runa e os fantasmas dos anões, chefe O Guardião da Forja | Mithril |
-| [ ] | 9 | **A Colmeia** | o que expulsou os anões: túneis de cera e resina, ovos e câmaras de âmbar | insetos gigantes, chefe A Rainha da Colmeia | Ambrita: metal cor de mel endurecido na resina |
-| [x] | 10 | **A Nave Caída** (camada extra, pedida pelo Jonathan em 2026-10-11) | uma nave de discos voadores que caiu do céu e furou a terra até aqui: cratera de vidro, casco, laboratórios de espécimes e o reator ainda aceso, tudo em neon ([ficha](camadas/10-nave-caida.md)) | os Visitantes (homenzinhos verdes, discos abdutores, gosmas, astronautas perdidos), chefe O Olho-Cometa | Xenita |
-| [x] | 11 | **O Reino Élfico** (camada extra, pedida pelo Jonathan em 2026-10-11, inspirada no Senhor dos Anéis e no Warcraft) | a mata de prata debaixo da Lua Presa, os salões lavrados do rei, a corte que bebeu do poço e as grutas do Poço da Lua ([ficha](camadas/11-reino-elfico.md)) | o Reino (sentinelas, arqueiros, sabres-da-noite, hipogrifos, guardiões) e os Desterrados (magísteres sangrentos, caçadores vendados), chefe A Dama do Espelho | Lunarita |
-| [ ] | 10 | **O Mar Sem Sol** | um mar subterrâneo do tamanho da camada, praias de areia negra, luz de bichos do fundo e navios que ninguém sabe como chegaram | gente-peixe e criaturas abissais, chefe O Leviatã | Oricalco (o metal de Atlântida) |
-| [x] | 13 | **O Covil do Dragão** (feito em 2026-10-11; logo debaixo do Mar Sem Sol, de 6696 a 7254 m) | um vulcão por dentro: chaminés de vapor, túneis kobold, tubos de lava e o Leito de Ouro, com o ouro solto que desliza ([ficha](camadas/11-covil-dragao.md)) | kobolds (falange, fundeiro, fundidor, armadilheiro, montado) e a cria do dragão (ninhada de dracos, camaleão de cinza, serpe, draco couraçado, wyrm constritor), chefe Cinzarel, o Dragão Ancião, na Cratera do Tesouro | Dracônio: metal temperado no fogo do dragão |
-| [x] | 14 | **O Ossário dos Titãs** (feito em 2026-10-11, js/280 a 289; debaixo do Covil do Dragão e em cima da Cidade dos Antigos, de 7254 a 7812 m; [ficha](camadas/12-ossario-titas.md)) | o cemitério dos gigantes que seguravam o mundo; os ossos deles são o próprio terreno | os nascidos dos titãs e os carniceiros dos ossos, chefe O Último Titã | Adamantita (o metal da foice de Cronos) |
-| [ ] | 13 | **A Cidade dos Antigos** | uma civilização mais velha que tudo, com geometria impossível, máquinas que ainda funcionam e uma estrela caída | construtos e vigias dos Antigos, chefe O Arquiteto | Ferro Estelar, da estrela caída |
-| [ ] | 14 | **Os Salões do Pesadelo** | o lugar onde o sonho vira real: corredores que se repetem, espelhos e portas para lugares que não existem | as coisas do pesadelo, chefe O Rosto Sem Nome | Onirita: metal que só existe enquanto alguém sonha com ele |
-| [ ] | 15 | **O Abismo** (existe, hoje é a 5ª) | o Inferno: portões de cinza, rios de fogo, entranhas e o trono do caos | demônios, chefe O Príncipe do Caos | Infernita |
-| [x] | 16 | **A Escuridão** (existe, hoje logo abaixo do Abismo) | o fundo do mundo e a origem da escuridão que sobe por todas as camadas; quase sem luz, onde o mapa é o próprio perigo ([ficha](camadas/16-escuridao.md)) | o que a Escuridão gera, chefe Nox, Aquele Que Apaga | Noctírio |
+| # | Camada | Níveis | Tema | Chefe | Metal | Ficha |
+|---|---|---|---|---|---|---|
+| 1 | As Cavernas | 1–5 | terra úmida, galerias de calcita e o ninho das aranhas | A Mãe-Teia | cobre | [caverna-spec](caverna-spec.md) |
+| 2 | A Catedral | 6–10 | catedral gótica soterrada, claustro e criptas | O Rei Esqueleto | ferro | [catedral-spec](catedral-spec.md) |
+| 3 | As Cavernas de Gelo | 11–15 | um frio antigo que congelou tudo debaixo das criptas | O Yeti Ancestral | ouro | [gelo-spec](gelo-spec.md) |
+| 4 | A Mina Abandonada | 16–20 | escoras, trilhos, goblins e fornalhas | O Rei Goblin | cobalto | [mina-spec](mina-spec.md) |
+| 5 | As Minas Fúngicas | 21–25 | uma colônia tomada por um fungo antigo | A Mãe-Esporo | esporita | [05](camadas/05-minas-fungicas.md) |
+| 6 | **O Brejo das Bruxas** (nova) | 26–30 | turfa, palafitas, forcas e o círculo de pedras | A Velha do Brejo | ferro-do-brejo | [06](camadas/06-brejo-bruxas.md) |
+| 7 | A Cidade Afundada | 31–35 | a cidade que a terra engoliu, o culto do Poço | O Sineiro Afogado | prata | [06](camadas/06-cidade-afundada.md) |
+| 8 | A Floresta Petrificada | 36–40 | floresta de granito com folhas de cristal | O Cervo de Pedra | platina | [07](camadas/07-floresta-petrificada.md) |
+| 9 | A Fortaleza dos Anões | 41–45 | salões de cantaria, canais de lava, forjas de runas | O Autômato-Forja | mithril | [08](camadas/08-fortaleza-anoes.md) |
+| 10 | O Reino Élfico | 46–50 | a mata de prata, os salões do rei e a Corte dos Espinhos (monstros trocados no revamp) | A Dama do Espelho | lunarita | [11](camadas/11-reino-elfico.md) |
+| 11 | O Mar Sem Sol | 51–55 | mar subterrâneo, praias negras e navios encalhados | O Leviatã | oricalco | [10](camadas/10-mar-sem-sol.md) |
+| 12 | O Covil do Dragão | 56–60 | um vulcão por dentro, kobolds e o Leito de Ouro | Cinzarel, o Dragão Ancião | dracônio | [11](camadas/11-covil-dragao.md) |
+| 13 | O Ossário dos Titãs | 61–65 | os ossos dos titãs são o terreno | O Último Titã | adamantita | [12](camadas/12-ossario-titas.md) |
+| 14 | **A Necrópole do Rei Eterno** (nova) | 66–70 | a cidade dos mortos de um reino inteiro | O Rei Eterno | sepulcrita | [14](camadas/14-necropole.md) |
+| 15 | A Cidade dos Antigos | 71–75 | geometria perfeita, máquinas e a estrela caída | O Arquiteto | ferro estelar | [13](camadas/13-cidade-antigos.md) |
+| 16 | **A Prisão dos Deuses** (nova) | 76–80 | correntes sobre abismos, celas de pedra viva, o Tártaro | O Lobo Atado | ferro divino | [16](camadas/16-prisao-deuses.md) |
+| 17 | **O Campo da Última Guerra** (nova) | 81–85 | o campo de batalha de anjos e demônios | O General Caído | belicita | [17](camadas/17-campo-guerra.md) |
+| 18 | O Abismo | 86–90 | o Inferno: cinza, rios de fogo e o trono do caos | O Príncipe do Caos | infernita | [15](camadas/15-abismo.md) |
+| 19 | **As Ruínas dos Acendedores** (nova) | 91–95 | a cidade dos braseiros apagados e a Fornalha do Mundo | O Último Acendedor | ardorita | [19](camadas/19-ruinas-acendedores.md) |
+| 20 | A Escuridão | 96–100 | o fundo do mundo, quase sem luz | Nox, Aquele Que Apaga | noctírio | [16](camadas/16-escuridao.md) |
 
----
+O número no nome da ficha é o do planejamento antigo; vale a coluna **#**.
 
-## O que muda nas camadas que já existem
+## Fora da campanha
 
-- **As Cavernas, a Catedral, o Gelo e a Mina ficam onde estão** (camadas 1 a 4). A ordem delas já sobe de dificuldade e de metal.
-- **O Abismo sai da 5ª e vai para a 15ª**, como você sugeriu: é a penúltima, logo acima da Escuridão. Na prática ele continua debaixo da Mina até as camadas 5 a 14 existirem, e desce a cada camada nova que entrar no meio.
-- **Quando o Abismo descer**, sobem junto o nível dos demônios (hoje 11 a 12), o nível da infernita na forja e a profundidade das faixas. As fendas de entrada passam a sair do fundo da camada 14, e não mais das Fornalhas Esquecidas da Mina.
-- **Ideias antigas que entraram no mapa:** as Minas Fúngicas (Parte 6 de biomas.md) viram a camada 5. A Cidade Afundada, as Catacumbas Alagadas, a Floresta Petrificada e a Forja dos Anões (Parte 7) viram as camadas 6, 7 e 8, com as catacumbas dentro da cidade.
+A Colmeia (`js/190` a `199`), A Nave Caída (`js/240` a `249`) e Os Salões do Pesadelo (`js/300` a `309`) saíram da geração no revamp. Os arquivos continuam na pasta, fora do `index.html`, para virarem fases paralelas depois (portal ou evento). As fichas ficam como estavam: [09-colmeia](camadas/09-colmeia.md), [10-nave-caida](camadas/10-nave-caida.md), [14-saloes-pesadelo](camadas/14-saloes-pesadelo.md).
 
----
+## Ainda em aberto
 
-## Para decidir no passo 2
-
-- **O tamanho do mundo.** Decidido e feito. São 18 camadas, e desde 2026-10-12 cada uma tem 558 m (o desenho de 186 m esticado `LAYER_K = 3` vezes, `js/01-base.js` e `js/129-camadas.js`): o mundo tem 10.130 blocos de altura, e a camada na posição N começa a (N − 1) x 558 m. Menos penhasco e minério perto da borda saem do `js/313-quedas-minerios.js`. Cada camada só é gerada quando o herói entra na de cima dela (`js/312-gera-aos-poucos.js`). Detalhes em [camadas/00-geral.md](camadas/00-geral.md), seções 1b e 2.
-- **O caminho de volta.** Com tantas camadas, o teleporte do vilarejo precisa de uma parada por camada ou por ato.
-- **A camada 16.** Decidido e feito (2026-10-10): A Escuridão, o chefe Nox e o noctírio (ficha em [camadas/16-escuridao.md](camadas/16-escuridao.md)). Ela fica sempre logo abaixo do Abismo, como a última camada, e os números dela (níveis, forja, pedras) seguem a posição no registro de camadas (`js/129-camadas.js`).
+- **O caminho de volta.** Com 20 camadas, o teleporte do vilarejo precisa de uma parada por camada ou por grupo de camadas.

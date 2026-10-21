@@ -7,8 +7,16 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.44.4';
+const VERSAO = '0.45.0';
 const NOVIDADES = [
+  { v: '0.45.0', data: '21/10/2026', titulo: 'As 20 camadas', itens: [
+    'Novas camadas: Brejo das Bruxas, Necrópole do Rei Eterno, Prisão dos Deuses, Campo da Última Guerra e Ruínas dos Acendedores.',
+    'Monstros novos no Reino Élfico.',
+    'Níveis de 1 a 100, 5 por camada.',
+    'A Nave Caída, os Salões do Pesadelo e a Colmeia saíram do mundo.',
+    'O caminho para baixo agora abre depois de todos os chefes da camada.',
+    'Saves antigos ganham um mundo novo.',
+  ] },
   { v: '0.44.4', data: '15/10/2026', titulo: 'Rostos novos', itens: [
     'Rostos novos do Odo e do Teodoro.',
   ] },

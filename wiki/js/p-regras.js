@@ -20,7 +20,11 @@
       h += `<h2>Escudo e vigor</h2><ul class="regras"><li>Cada golpe no escudo gasta ${VIG_BLOCK} de vigor; um aparo no tempo certo gasta ${VIG_PARRY}. Golpe de chefe pesa ${N(VIG_BOSS, 1)} vezes mais.</li>
         <li>Com vigor zero, a guarda quebra: o escudo cai e só volta quando o vigor chegar a ${VIG_BACK}.</li>
         <li>O vigor só recupera com o escudo abaixado: ${VIG_REGEN} por segundo (${VIG_REGEN_BROKEN} com a guarda quebrada), depois de ${N(VIG_DELAY, 1)} s.</li></ul>`;
-      h += `<h2>Experiência</h2><p class="nota">Monstros dão pouca experiência; minerar não dá nenhuma.</p><div class="tw"><table class="grade compacta"><thead><tr><th>Nível</th>${Array.from({ length: 15 }, (_, i) => `<th class="n">${i + 1}</th>`).join('')}</tr></thead><tbody><tr><td>XP para subir</td>${Array.from({ length: 15 }, (_, i) => `<td class="n">${xpNeed(i + 1)}</td>`).join('')}</tr></tbody></table></div>`;
+      { const NV = [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 99];
+        h += `<h2>Experiência</h2><p class="nota">Monstros dão pouca experiência; minerar não dá nenhuma. O herói vai do nível 1 ao 100 nas ${LAYERS.length} camadas: o XP para subir é 10 × força<sup>1,5</sup>, com a força da escala de antes (igual ao nível até o 4, depois 0,4 × nível + 2,5). Saves de antes do revamp de 2026-10-21 passam o nível do herói para a escala nova uma vez só.</p><div class="tw"><table class="grade compacta"><thead><tr><th>Nível</th>${NV.map(l => `<th class="n">${l}</th>`).join('')}</tr></thead><tbody><tr><td>XP para subir</td>${NV.map(l => `<td class="n">${xpNeed(l)}</td>`).join('')}</tr></tbody></table></div>`; }
+      h += `<h2>Camadas e níveis</h2><p class="nota">A ordem é a do registro do jogo (js/129-camadas.js). Cada camada tem ${LAYER_D} m e 5 níveis: na camada N os monstros vão do nível 5N−4 ao 5N−1, um nível a cada quarto da altura (nas Cavernas, um a cada ${50 * LAYER_K} m), 30% nascem um nível acima, nunca passando do 5N−1, e o chefe é o 5N. O nível no rótulo do monstro é esse; vida, dano e XP seguem a força (igual ao nível até o 4, depois 0,4 × nível + 2,5). Detalhes em <a href="#/docs/camada-00-revamp">O revamp das camadas</a>.</p>`
+        + UDW.table([{ t: '#', cls: 'n' }, { t: 'Camada' }, { t: 'Profundidade', cls: 'n' }, { t: 'Monstros', cls: 'n' }, { t: 'Chefe' }, { t: 'Nível do chefe', cls: 'n' }, { t: 'Nível de item da forja', cls: 'n' }],
+          UDW_CAMADAS().map(C => ({ cells: [C.pos, `<a href="#/biomas/${C.id}">${UDW.esc(C.nome)}</a>`, `${C.de} a ${C.ate} m`, `${C.nvLo} a ${C.nvHi}`, C.chefe && ET[C.chefe[0]] ? `<a href="#/chefes/${C.chefe[0]}">${UDW.esc(ET[C.chefe[0]].name)}</a>` : '', C.nvChefe, C.pos >= 5 ? layerForgeIl(C.id) : '—'], keys: [C.pos, C.nome, C.de, C.nvLo, '', C.nvChefe, C.pos] })), 'compacta');
       h += `<h2>Baú do vilarejo</h2><div class="stats">${UDW.stat(STASH_PER, 'casas por aba')}${UDW.stat('sem limite', 'abas')}${UDW.stat(N(stashPreco(1e9), 0).replace(/\B(?=(\d{3})+$)/g, '.'), 'preço máximo de uma aba')}</div>
         <ul class="regras"><li>Começa com uma aba. O + no fim da fileira de abas mostra o preço da próxima e pede confirmação antes de gastar.</li>
         <li>Dá para comprar quantas abas quiser. As que não cabem na fileira ficam de lado: as setas (ou a rodinha do mouse) andam com a fileira e o botão de lista mostra todas numa coluna.</li>
@@ -35,7 +39,7 @@
         <li>Lua: muda de fase uma vez por noite; o ciclo tem ${LUA_DIAS} fases e dura ${LUA_DIAS} dias do jogo. A lua cheia clareia um pouco a noite e a lua nova escurece.</li>
         <li>A superfície é segura: nenhum monstro nasce debaixo do céu aberto.</li>
         <li>Os monstros só percebem o herói com linha de visão, um caminho curto pelo chão ou muito perto; e procuram caminho até ele.</li>
-        <li>O nível dos monstros sobe 1 a cada ${CATEDRAL ? 40 : 20} m de profundidade.</li></ul>`;
+        <li>O nível dos monstros sobe com a profundidade: 5 níveis por camada (veja Camadas e níveis acima).</li></ul>`;
       return h;
     }
   };

@@ -20,7 +20,7 @@ const CV_ZONE0 = 9;                               // zone ids 9..12 (ZONE_NAMES 
 let CV_S0 = 46;                                   // the village floor row of the current world (set by buildCaves)
 // monster level in a layer below the caves (Jonathan 2026-10-10): every layer starts 1 above the last level of the one above it.
 // lo on the top half, lo + 1 from the middle of the layer down (d: rows below its top); 30% come 1 higher but never past the layer's top (caves 1-4, then layerLo in 129: cathedral 5-6, ice 7-8, mine 9-10, fungal mines 11-12, abyss 13-14)
-function layerLvl(lo, d) { return Math.min(lo + 1, lo + (d >= LAYER_D / 2 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0)); }
+function layerLvl(lo, d) { const n0 = nvDe(lo), k = Math.min(3, Math.floor(4 * Math.max(0, d) / LAYER_D)); return lvlPw(Math.min(n0 + 3, n0 + k + (Math.random() < 0.3 ? 1 : 0))); }   // 2026-10-21: 4 níveis vistos por camada (5N-4 a 5N-1), um a cada quarto da altura; devolve a força (129)
 
 // foreground blocks (solid)
 const CV_TERRA = 54, CV_ARGILA = 55, CV_ROCHA = 56, CV_MUSGO = 57, CV_CALCITA = 58, CV_CASCALHO = 59, CV_XISTO = 60, CV_TEIA = 61;

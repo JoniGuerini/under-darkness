@@ -15,7 +15,7 @@
 
 /* ---------- tuning ---------- */
 const REI = {
-  hp: 760, dmg: 20, xp: 320, lvl: 6,
+  hp: 760, dmg: 20, xp: 320, lvl: layerBossLvl('catedral'),
   speed: [34, 42, 56],            // walk speed per phase
   wind: [0.62, 0.5, 0.42],        // smash wind-up
   rec: [0.7, 0.55, 0.45],         // recovery after a smash (the punish window)

@@ -24,7 +24,7 @@ const HB_BAG = 8, HB_N = 2 + HB_BAG;
 const hb = { sel: 0 };
 let toolNews = false, blockTip = false, mapNews = false;
 const HERO_HP = 20;   // the hero's own life before gear (rebalanced 2026-10-08, was 50)
-const xpNeed = l => Math.round(25 * Math.pow(l, 1.5));
+const xpNeed = l => Math.round(10 * Math.pow(lvlPw(l), 1.5));   // 2026-10-21: o herói vai do 1 ao 100 nas 20 camadas (a força da escala de antes, 129)
 function recalc() {
   // gear numbers: js/48-itemizacao.js. The weapon gives a damage range and its speed; % damage and speed from any piece apply on top
   const tot = {}; for (const k of STAT_KEYS) tot[k] = 0;

@@ -24,17 +24,29 @@ let cdChambers = [], cdStreets = [], cdHouses = [], cdCamps = [], cdTemples = []
 const cdKeep = new Set();   // o Poço, a torre, as entradas, o pouso, as bordas das bacias: túneis e decoração não mexem
 const CD_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e objetos podem ficar
 for (const t of [CD_ATERRO, CD_CANTARIA, CD_TIJOLO, CD_CALCAMENTO, CD_TELHA, CD_MADEIRAME, CD_LIMO, CD_LODO, CD_MARMORE, CD_ENTULHO, CD_O_CARVAO, CD_O_PRATA]) CD_SOILS[t] = 1;
-const CD_HOST = new Uint8Array(NT);    // o que a camada pode sobrescrever (o enchimento debaixo das Minas Fúngicas)
-for (let t = 0; t < NT; t++) if (FG_HOST[t] || FG_SOILS[t]) CD_HOST[t] = 1;
+// a camada logo acima (129, camadaAcima; 2026-10-21: o Brejo das Bruxas entrou entre as Minas e a Cidade); sem ela, as
+// Minas Fúngicas, com os mesmos números de antes
+function cdAbove() {
+  const a = camadaAcima('cidade'); if (a) return a;
+  return { id: 'fungo', S0: FG_S0, D: FG_D, soils: FG_SOILS, host: FG_HOST, halls: typeof fungDown !== 'undefined' ? fungDown : [], climb: FG_ESCADA, thin: FG_CARNE, thinW: WFG_CARNE };
+}
+let cdUp = cdAbove();   // a de cima no cdBuild atual: a rocha que rareia no topo, o furo das entradas, a corda delas
+const cdUpFg = () => !cdUp || cdUp.id === 'fungo';
+const cdUpT = (h) => cdUpFg() ? (h > 0.75 ? FG_XISTO : FG_CARNE) : cdUp.thin || CD_ATERRO;   // a rocha de cima
+const cdUpW = () => cdUpFg() ? WFG_CARNE : cdUp.thinW || WCD_LIMO;
+const cdUpRope = () => cdUpFg() ? FG_CORDAO : cdUp.climb || CHAIN;                           // a corda das entradas
+const CD_HOST = new Uint8Array(NT);    // o que a camada pode sobrescrever (o enchimento debaixo da camada de cima)
+for (let t = 0; t < NT; t++) if (FG_HOST[t] || FG_SOILS[t] || (cdUp.host && cdUp.host[t]) || (cdUp.soils && cdUp.soils[t])) CD_HOST[t] = 1;
 CD_HOST[BEDROCK] = 0;
-const CD_CLIMB = t => t === CD_ESCADA || t === CD_CORRENTE || t === FG_CORDAO || t === FG_ESCADA || t === CHAIN;
+const CD_CLIMB = t => t === CD_ESCADA || t === CD_CORRENTE || t === FG_CORDAO || t === FG_ESCADA || t === CHAIN || t === cdUpRope();
 // a Torre do Sino (o 137 usa): dentro dela, com margem m
 function inCdHall(tx, ty, m = 0) { const B = cdBoss; return !!B && Math.abs(wdx(tx - B.cx)) < B.w / 2 + m && ty >= B.top - m && ty <= B.fy + m; }
 const inCdPoco = (tx, ty, m = 0) => { const P = cdPoco; return !!P && Math.abs(wdx(tx - P.cx)) <= 6 + m && ty >= P.top - 2 - m && ty <= P.bot + m; };
 
 function cdBuild() {
   const NN = WW * WH, W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  CD_S0 = Math.min(WH - 12, FG_S0 + Math.min(FG_D, WH - 8 - FG_S0));
+  const A = cdUp = cdAbove();
+  CD_S0 = Math.min(WH - 12, A.S0 + Math.min(A.D, WH - 8 - A.S0));
   const S0 = CD_S0, YB = Math.min(WH - 8, S0 + CD_D), DB = YB - S0;
   const R = mulberry32(seed ^ 0x6c1d), nz = (x, y, c, s) => depthNz(W1(x), y, c, seed ^ s);
   const mb = m => Math.round(m * DB / LAYER_DESIGN);
@@ -50,7 +62,7 @@ function cdBuild() {
   for (let x = 0; x < WW; x++) {
     for (let y = S0 - 8; y < S0; y++) {   // a carne e o xisto de cima rareiam nas últimas linhas do Coração
       const i = y * WW + x, k = (y - (S0 - 8)) / 8, h = nz(x, y, 12, 0x6b2);
-      if (SOLID[tiles[i]] && FG_SOILS[tiles[i]] && h < k * 0.85) tiles[i] = CD_ATERRO;
+      if (SOLID[tiles[i]] && ((A.soils && A.soils[tiles[i]]) || tiles[i] === A.thin) && h < k * 0.85) tiles[i] = CD_ATERRO;
     }
     for (let y = S0; y < WH; y++) {
       const i = y * WW + x;
@@ -59,7 +71,7 @@ function cdBuild() {
       // FP_HOST), então a parede de mármore ou cantaria que o ruído escolhia não chega ao mundo
       if (y >= YB + 8) { tiles[i] = CD_ATERRO; walls[i] = WCD_CANTARIA; continue; }
       const k = (y - S0) / 8, h = nz(x, y, 12, 0x6b3);
-      if (k < 1 && h > 0.4 + k * 0.6) { tiles[i] = h > 0.75 ? FG_XISTO : FG_CARNE; walls[i] = WFG_CARNE; continue; }
+      if (k < 1 && h > 0.4 + k * 0.6) { tiles[i] = cdUpT(h); walls[i] = cdUpW(); continue; }
       const b = bandOf(y - S0), n1 = nz(x, y, 30, 0x6a1), n2 = y < YB ? nz(x, y, 16, 0x6a2) : 0;   // n2 só dentro da camada
       let t = CD_ATERRO, w = b === 0 ? WCD_LIMO : b === 3 ? (n1 > 0.5 ? WCD_MARMORE : WCD_CANTARIA) : n1 > 0.55 ? WCD_CANTARIA : WCD_TIJOLO;
       if (y >= YB) t = CD_ATERRO;
@@ -108,7 +120,7 @@ function cdBuild() {
     const C = { cx: x0 + w / 2, cy: fy - h / 2, w, h, band: 0, kind: 'cisterna', x0: W1(x0), fy, top: fy - h, ledge };
     cdChambers.push(C); return C;
   };
-  const fd = (typeof fungDown !== 'undefined' ? fungDown : []).filter(c => c.fy);
+  const fd = (A.halls || []).map(c => c.cx !== undefined ? c : Object.assign({}, c, { cx: c.x0 + (c.w || 3) / 2 })).filter(c => c.fy);
   const landFy = S0 + 26;   // a cisterna de chegada logo abaixo do Coração: o furo da raiz fica curto
   for (const F of fd.slice(0, 2)) {
     const side = R() < 0.5 ? -1 : 1, w = 40, h = 14, xs = W1(Math.round(F.cx) - 2);   // xs..xs+3: o furo da raiz
@@ -501,13 +513,13 @@ function cdBuild() {
   for (const E of cdEntries) {
     const x0 = E.x0, L = E.ledge;
     for (let y = E.fy; y < L; y++) {
-      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); if (y < S0 - 1 || !inCdHallRow(E.C, y)) { tiles[i] = AIR; walls[i] = y < S0 ? WFG_CARNE : WCD_LIMO; } }
-      for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (y < E.C.top) { if (!SOLID[tiles[i]]) tiles[i] = y < S0 ? FG_CARNE : CD_LIMO; cdKeep.add(i); } }
+      for (let x = x0; x < x0 + 4; x++) { const i = I(x, y); if (y < S0 - 1 || !inCdHallRow(E.C, y)) { tiles[i] = AIR; walls[i] = y < S0 ? cdUpW() : WCD_LIMO; } }
+      for (const x of [x0 - 1, x0 + 4]) { const i = I(x, y); if (y < E.C.top) { if (!SOLID[tiles[i]]) tiles[i] = y < S0 ? cdUpT(0) : CD_LIMO; cdKeep.add(i); } }
     }
-    for (let y = E.fy - 2; y < L; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = FG_CORDAO; cdKeep.add(i); } }
+    for (let y = E.fy - 2; y < L; y++) { const i = I(x0 + 1, y); if (!SOLID[tiles[i]] || y === E.fy) { tiles[i] = cdUpRope(); cdKeep.add(i); } }
     for (let y = E.fy + 1; y < L; y++) { const i = I(x0 + 2, y); if (!SOLID[tiles[i]]) { tiles[i] = CD_ESCADA; cdKeep.add(i); } }
     for (let y = E.fy - 3; y < E.C.top + 1; y++) for (let x = x0; x < x0 + 4; x++) cdKeep.add(I(x, y));
-    for (let y = E.fy + 9; y < E.C.top - 3; y += 10) for (const x of [x0, x0 + 3]) set(x, y, y < S0 ? FG_CARNE : CD_LIMO);   // um degrau a cada dez: só o cordão e a escada passam
+    for (let y = E.fy + 9; y < E.C.top - 3; y += 10) for (const x of [x0, x0 + 3]) set(x, y, y < S0 ? cdUpT(0) : CD_LIMO);   // um degrau a cada dez: só o cordão e a escada passam
     // o pouso: cantaria seca, parede de cantaria, uma lanterna acesa no teto
     const Ld = E.land;
     for (let y = Ld.fy - Ld.h - 1; y <= Ld.fy; y++) for (let x = Ld.x0 - 1; x <= Ld.x0 + Ld.w; x++) {
@@ -717,7 +729,7 @@ function cdPlug(B) {
 /* ---------- as bocas das entradas por último, e o que ficou de tábua, telha ou entulho tapando o único caminho sai ---------- */
 function cdExitClear() {
   const W1 = x => x >= 0 && x < WW ? x : ((x % WW) + WW) % WW, I = (x, y) => y * WW + W1(x);
-  for (const E of cdEntries) for (let y = E.fy - 3; y < E.fy + 2; y++) for (let x = E.x0; x < E.x0 + 4; x++) { const i = I(x, y); tiles[i] = x === E.x0 + 1 ? FG_CORDAO : AIR; cdKeep.add(i); }
+  for (const E of cdEntries) for (let y = E.fy - 3; y < E.fy + 2; y++) for (let x = E.x0; x < E.x0 + 4; x++) { const i = I(x, y); tiles[i] = x === E.x0 + 1 ? cdUpRope() : AIR; cdKeep.add(i); }
   const reach = new Uint8Array(WW * WH), st = [];
   const flood = s0 => { if (reach[s0] || SOLID[tiles[s0]]) return; reach[s0] = 1; st.push(s0); while (st.length) { const c = st.pop(), x = c % WW, row = c - x; for (const nb of [row + W1(x - 1), row + W1(x + 1), c - WW, c + WW]) if (nb >= 0 && nb < WW * WH && !reach[nb] && !SOLID[tiles[nb]]) { reach[nb] = 1; st.push(nb); } } };
   for (const E of cdEntries) flood(I(E.x0 + 2, E.fy - 1));

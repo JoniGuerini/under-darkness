@@ -9,9 +9,11 @@
    guirlanda de flores-da-lua. Nos Salões do Rei: a estátua do rei élfico com a espada apontada para baixo (a dos
    Argonath: numa, a mão erguida), a armadura élfica no cabide, a estante de pergaminhos, a fonte de prata (a água corre
    ao vivo), a tapeçaria da lua, o lustre de galhos com velas azuis, o vitral de folha e a mesa longa com cálices. Na
-   Corte Desterrada, a mesma corte apodrecida: a estátua do rei quebrada com a cabeça coroada no chão, o altar de mana
-   sangrenta com o cristal girando no ar, a gaiola de magíster pendurada, a tapeçaria rasgada carmesim e ouro, a árvore
-   morta pequena, a mesa de alquimia derrubada e o braseiro vil de fogo carmesim. No Poço da Lua: o poço da lua de
+   Corte dos Espinhos (revamp de 2026-10-21: a corte que seguiu a Dama e virou a Corte Sem Lua, onde a roseira-brava
+   cresceu por cima de tudo): a estátua do rei quebrada e enredada com a cabeça coroada no chão, o anel de cogumelos
+   das fadas (as lamelas acesas, os esporos subindo), as máscaras de osso penduradas num ramo de roseira, a tapeçaria
+   ameixa tomada pela roseira, a roseira-brava grande com as rosas negras, a mesa do banquete sem fim (as frutas das
+   fadas acesas) e a pedra-vidente com o furo por onde passa a luz das fadas. Nas Grutas da Lua: a bacia de luar de
    pedra (a água acesa tremendo), a estátua da Dama coberta de musgo, o arco de raízes, o cristal lunar grande, a
    lanterna flutuante (uma gota de vidro acesa que sobe e desce debaixo de um nó de raiz) e a raiz-mãe grossa
    atravessando a parede.
@@ -26,9 +28,7 @@
      'brilho' cintila de vez em quando (flores, cristais, o espelhinho da Dama) (drawTop);
      'olho'   o olho élfico da pedra de vigia: a íris acesa escorrega para o lado do herói (drawGlow + drawTop);
      'jato'   um fio d'água caindo da fonte, com o respingo (drawTop); 'agua' o espelho d'água tremendo (drawTop);
-     'mote'   pontinhos de luar subindo da água do poço (drawTop);
-     'fogo'   as línguas do fogo carmesim do braseiro vil e as brasas subindo (drawGlow + drawTop);
-     'cristal' o cristal de mana sangrenta do altar, girando e flutuando (drawGlow + drawTop);
+     'mote'   pontinhos de luar subindo da água do poço (drawTop); com `c`, na cor dada (os esporos verdes da Corte);
      'flut'   a gota de vidro da lanterna flutuante, subindo e descendo (drawWorld: escurece com o lugar; a chama no
               drawTop e o halo no drawGlow vão junto).
    Registrados com defProp (`elfos: true`), postos pelo 255 a partir do EL_PROP_PLAN (o elPlaceProps é o nvPlaceProps
@@ -36,7 +36,7 @@
    Flags que o gerador deve respeitar (poucas: quase tudo serve em qualquer lugar da sua faixa):
      clareira: true  só dentro das clareiras da Mata (elGlades): a casa de flet pendurada (precisa do teto alto da copa);
      salao: true     só dentro dos salões lavrados dos Salões (elHalls sem ruin): a estátua do rei;
-     ruina: true     só dentro dos salões em ruína da Corte (elHalls com ruin): a estátua do rei quebrada;
+     ruina: true     só dentro dos salões enredados da Corte (elHalls com ruin): a estátua do rei quebrada;
      gruta: true     só dentro das grutas da lua do Poço (elGrottos): a estátua da Dama;
      alto: n         precisa de n blocos de ar livres (as estátuas, o arco de raízes, a casa de flet, a lanterna alta). */
 const EL_PROP_PLAN = {};
@@ -67,7 +67,16 @@ const HX = {
   raiz: ['#16181e', '#262a32', '#3a404a', '#525a66', '#6e7884', '#929ca8'],
   poco: ['#0a1418', '#12242a', '#1c363e', '#284a54', '#38626c', '#4e7e88'],
   corda: ['#2a2620', '#45403a', '#625c52', '#80786c', '#9e9688', '#bcb4a6'],
-  // a Corte: mármore profanado, vinho, carmesim, ouro velho, madeira morta, cristal de mana sangrenta
+  // a Corte dos Espinhos: mármore enredado, lenho de espinheiro, ameixa, rosa negra, os acúleos, a pedra-vidente, os cogumelos
+  enredado: ['#1e1a22', '#342e3a', '#4c4554', '#686070', '#88808e', '#aaa2ae'],
+  lenho: ['#080c0a', '#101812', '#18241c', '#223226', '#2e4232', '#3e5642'],
+  espinho: ['#060a08', '#0e160f', '#182419', '#223424', '#2e4630', '#3e5a40'],
+  ameixa: ['#140a14', '#24121f', '#381c30', '#4e2844', '#68385a', '#864c74'],
+  rosa: ['#12060e', '#22091a', '#360f2a', '#4c183c', '#662450', '#843466'],
+  ossoE: ['#2e2a22', '#4a4438', '#6a6250', '#8e846c', '#b0a68a', '#d0c6a8'],
+  vidente: ['#1a1c1a', '#2c302c', '#444a44', '#5e665e', '#7e887e', '#a4aea4'],
+  cogumelo: ['#3a3a34', '#5a5a50', '#7e7e70', '#a2a492', '#c8cab6', '#ecefe0'],
+  // sobras da Corte antiga (o 256 e a estátua do rei ainda usam algumas)
   profano: ['#221a20', '#382c34', '#52444c', '#6e5e66', '#8c7a80', '#ac9a9e'],
   vinho: ['#1a060c', '#2e0c16', '#481422', '#641e30', '#842c40', '#a84458'],
   carmesim: ['#2a0608', '#4a0c12', '#721820', '#a0242e', '#cc3a42', '#f07070'],
@@ -848,10 +857,26 @@ function longTable(k) {   // 68 x 26: a mesa longa: o tampo de madeira clara com
   return P.done();
 }
 
-/* =============================== A CORTE DESTERRADA =============================== */
-function brokenKing(k) {   // 64 x 80: o rei dos Salões em mármore profanado, quebrado na diagonal (do ombro esquerdo à cintura direita): sobram o plinto rachado, o ombro e o braço esquerdo, as mãos no pomo, a espada de ponta para baixo; a cabeça coroada caída no chão ao lado do plinto; veios de ouro velho, manchas de vinho, o espinheiro subindo (k 1: quebrado nos joelhos, só a barra da cota e a lâmina partida; a cabeça tombada do outro jeito)
-  const W = 64, H = 80, P = painter(W, H), s = 25601 + k, R = RP.profano, oy = H - 104;
-  const Q = kingStatue(0, R, true, RP.ouroV);
+/* =============================== A CORTE DOS ESPINHOS =============================== */
+// uma rosa negra pequena (3 x 3) e um ramo de roseira-brava com acúleos e folhinhas, para tudo da Corte
+function rosaP(P, x, y, s, big = false) {
+  x = Math.round(x); y = Math.round(y);
+  P.put(x, y, RP.rosa, 4.4); P.put(x + 1, y, RP.rosa, 3.2); P.put(x, y + 1, RP.rosa, 3); P.put(x + 1, y + 1, RP.rosa, 2.2); P.put(x, y - 1, RP.rosa, 3.6);
+  if (big) { P.put(x - 1, y, RP.rosa, 3.8); P.put(x + 2, y + 1, RP.rosa, 1.8); P.put(x - 1, y + 1, RP.rosa, 2.6); P.put(x + 1, y - 1, RP.rosa, 3); }
+  if (hash2(x, y, s) < 0.5) P.put(x, y, RP.rosa, 5.2);
+}
+function briar(P, pts, s, rosas = 0.2, folhas = 0.25) {
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = pts[i]; P.put(x, y, RP.espinho, 3.2 + (i % 3 === 0 ? 0.6 : 0)); P.put(x + 1, y, RP.espinho, 1.8);
+    const h = hash2(i, 0, s);
+    if (i % 3 === 1) P.put(x + (h < 0.5 ? -1 : 2), y - 1, RP.ossoE, 3.6);                                   // o acúleo
+    if (h > 1 - folhas) { const sd = hash2(i, 1, s) < 0.5 ? -1 : 1; P.put(x + sd * 1.5, y, RP.musgo, 3.8); P.put(x + sd * 2.2, y - 0.6, RP.musgo, 3); }
+    if (h < rosas && i > 2) rosaP(P, x + 1, y - 1, s + i);
+  }
+}
+function brokenKing(k) {   // 64 x 80: o rei dos Salões em mármore enredado, quebrado na diagonal (do ombro esquerdo à cintura direita): sobram o plinto rachado, o ombro e o braço esquerdo, as mãos no pomo, a espada de ponta para baixo; a cabeça coroada caída no chão ao lado do plinto; musgo nos sulcos, a roseira-brava subindo pelo plinto e entrando na quebra (k 1: quebrado nos joelhos, só a barra da cota e a lâmina partida; a cabeça tombada do outro jeito)
+  const W = 64, H = 80, P = painter(W, H), s = 25601 + k, R = RP.enredado, oy = H - 104;
+  const Q = kingStatue(0, R, true, RP.musgo);
   const brk = x => k ? 74 + Math.round(Math.abs(Math.sin(x * 1.3 + 2)) * 4 + (x - 23) * 0.1) : 36 + Math.round((x - 23) * 0.55 + Math.abs(Math.sin(x * 1.7 + s)) * 3 + (x % 4 === 0 ? 1.5 : 0));
   const isSword = (x, y) => Math.abs(x + 0.5 - 23) < 2.5 && y > 46;
   for (let y = 0; y < 104; y++) for (let x = 0; x < 46; x++) {
@@ -860,196 +885,185 @@ function brokenKing(k) {   // 64 x 80: o rei dos Salões em mármore profanado, 
     const RR = Q.ramps[Q.rid[kk]] === RP.prata ? R : Q.ramps[Q.rid[kk]]; P.z = Q.zb[kk]; P.put(x, y + oy, RR, Q.val[kk] + (RR !== Q.ramps[Q.rid[kk]] ? -0.2 : 0) + (y - b < 2 ? 1.1 + hash2(x, y, s) * 0.6 : 0));
   }
   P.z = 1;
-  // a rachadura que desce o plinto e os veios de ouro que descem da quebra
-  { let x = 30; for (let y = 90 + oy; y < H; y++) { x += (hash2(y, 0, s) - 0.5) * 1.6; P.put(x, y, RP.vinho, 1); P.put(x + 1, y, R, 3.9); } }
-  for (let q = 0; q < 4; q++) { let x = 12 + q * 7, y = brk(12 + q * 7) + oy + 3; for (let j = 0; j < 22; j++) { x += (hash2(j, q, s) - 0.5) * 1.8; y += 1; if (P.is(x, y, R)) P.put(x, y, q % 2 ? RP.vinho : RP.ouroV, q % 2 ? 1.4 : 4); } }
-  stain(P, RP.vinho, -0.08, s + 2, (x, y) => (y > H - 22 ? 0.25 : -0.1), 0.3, [R]);
+  // a rachadura que desce o plinto
+  { let x = 30; for (let y = 90 + oy; y < H; y++) { x += (hash2(y, 0, s) - 0.5) * 1.6; P.put(x, y, RP.sombra, 2); P.put(x + 1, y, R, 3.9); } }
+  stain(P, RP.musgo, -0.1, s + 2, (x, y) => (y > H - 22 ? 0.3 : -0.1), 0.2, [R]);
   P.z = 8;
   // a cabeça coroada caída, de pé sobre o toco do pescoço, tombada
-  const Hd = painter(18, 25); kingHead(Hd, 0.5, 0, R, s + 3, RP.ouroV, true);
+  const Hd = painter(18, 25); kingHead(Hd, 0.5, 0, R, s + 3, RP.musgo, true);
   for (let x = 6; x < 12; x++) Hd.put(x, 23, R, 1.6 + hash2(x, 2, s) * 2), Hd.put(x, 24, R, 1.2);
-  for (let y = 0; y < 25; y++) for (let x = 0; x < 18; x++) if (Hd.is(x, y, R) && (x < 5 || x > 12 || y > 19) && cn(x, y, 5, 5, s) > 0.72) Hd.put(x, y, RP.vinho, 1.4 + Hd.v(x, y) * 0.35);
+  for (let y = 0; y < 25; y++) for (let x = 0; x < 18; x++) if (Hd.is(x, y, R) && (x < 5 || x > 12 || y > 19) && cn(x, y, 5, 5, s) > 0.18) Hd.put(x, y, RP.musgo, 1.4 + Hd.v(x, y) * 0.35);
   if (!k) blit(P, Hd, 45, H - 27, 0.32, 9, 12); else blit(P, Hd, 44, H - 25, -0.55, 9, 12);
-  rubble(P, 40, 63, H - 1, 3, R, s + 4); rubble(P, 46, 60, H - 1, 2, RP.ouroV, s + 5);
+  rubble(P, 40, 63, H - 1, 3, R, s + 4); rubble(P, 46, 60, H - 1, 2, RP.lenho, s + 5);
   if (k) { rubble(P, 2, 44, 90 + oy - 1, 3, R, s + 6); }
-  // o espinheiro subindo pelo plinto
+  // a roseira-brava subindo pelo plinto e um ramo passando pela coroa caída
   P.z = 9;
-  for (let j = 0; j < 34; j++) { const y = H - 1 - j * 0.9, x = 2 + Math.sin(j * 0.45) * 2.2 + j * 0.12; P.put(x, y, RP.morta, 3); if (j % 3 === 0) P.put(x + (j % 2 ? 1 : -1), y - 1, RP.morta, 4.2); if (j % 5 === 2) { P.put(x + 1, y + 1, RP.carmesim, 4.6); P.put(x + 2, y + 1, RP.carmesim, 3); } }
+  { const pts = []; for (let j = 0; j < 46; j++) pts.push([2 + Math.sin(j * 0.45) * 2.2 + j * 0.16, H - 1 - j * 0.95]); briar(P, pts, s + 7, 0.14, 0.3); }
+  { const pts = []; for (let j = 0; j < 18; j++) pts.push([40 + j, H - 3 - Math.sin(j * 0.4) * 3]); briar(P, pts, s + 8, 0.18, 0.2); }
   seams(P);
   chip(P, 0.18, s, [R]);
   return P.done();
 }
-function bloodAltar() {   // 36 x 44: o altar de mana sangrenta: base em degraus de mármore profanado, o corpo com runas carmesim acesas, o tampo de ouro velho, o pano carmesim com franja, três garras de ouro segurando no ar o cristal (o cristal gira ao vivo)
-  const W = 36, H = 44, P = painter(W, H), s = 25621, R = RP.profano;
-  P.rect(1, H - 4, 34, 4, R, (i, j, x, y) => 3.4 + (j === 0 ? 1 : 0) - j * 0.4 - i * 0.04 + cg(x, y, s) * 0.4);
-  P.rect(3, H - 7, 30, 3, R, (i, j, x, y) => 3.6 + (j === 0 ? 0.9 : 0) - i * 0.04 + cg(x, y, s) * 0.4);
-  ashlar(P, 6, 25, 24, 12, R, s, 4, 8, null, 2.4);
-  for (let q = 0; q < 2; q++) runeN(P, 8 + q * 17, 29, q + 4, CR.carm, CR.claro);
-  P.z = 1;
-  // o tampo de ouro velho
-  P.rect(3, 22, 30, 3, RP.ouroV, (i, j) => 4.2 - j * 1.1 - i * 0.05 + (i % 5 === 0 && j === 1 ? 0.8 : 0));
-  // o pano carmesim caindo na frente, ponta em V, a franja de ouro, a fênix bordada
-  for (let y = 24; y < 36; y++) for (let x = 12; x < 24; x++) { const dx = Math.abs(x + 0.5 - 18), bot = 34 - dx * 0.5; if (y > bot) continue; P.put(x, y, RP.carmesim, 2.8 - (x - 12) * 0.08 + Math.sin(x * 1.2) * 0.3 + cg(x, y, s) * 0.3); if (y > bot - 1) P.put(x, y + 1, RP.ouro, 4 - (x - 12) * 0.1); }
-  for (const [x, y] of [[18, 26], [17, 27], [18, 27], [19, 27], [16, 28], [20, 28], [15, 27], [21, 27], [18, 28], [18, 29], [17, 30], [19, 30]]) P.put(x, y, RP.ouroV, 4.2 - (x - 15) * 0.15);
-  P.z = 2;
-  // as três garras de ouro: sobem do tampo e se curvam para o cristal
-  tube(P, t => [18, 22 - t * 6], t => 3 - t, RP.ouroV, s + 3, 2.6);
-  for (const sd of [-1, 1]) { tube(P, bez([18 + sd * 9, 22], [18 + sd * 14, 14], [18 + sd * 10, 4], [18 + sd * 4, 3]), t => 3 - t * 2.2, RP.ouroV, s + sd, sd < 0 ? 3.4 : 2.4); tube(P, bez([18 + sd * 5, 22], [18 + sd * 8, 18], [18 + sd * 7, 14], [18 + sd * 4, 14]), t => 2.2 - t * 1.4, RP.ouroV, s + 5 + sd, sd < 0 ? 3.2 : 2.2); }
-  // lascas de cristal de mana no tampo
-  for (const [x, h] of [[9, 3], [26, 4], [28, 2]]) for (let j = 0; j < h; j++) { P.put(x, 21 - j, RP.sangue, 4 - j * 0.3); P.put(x + 1, 21 - j, RP.sangue, 2.6); }
-  P.N(9, 19, CR.claro); P.N(26, 18, CR.claro);
-  P.mark('cristal', 18, 8);
-  seams(P);
-  grime(P, 0.7, 0.05, s + 1, (x, y) => (y > 36 ? 0.3 : 0), [R]);
+function fairyRing(k) {   // 44 x 18 (k 1: 32 x 16): o anel de cogumelos das fadas: cogumelos pálidos de chapéu largo em roda (os de trás menores e mais escuros), as lamelas acesas em verde-pálido por baixo, o musgo mais verde dentro do anel; os esporos sobem ao vivo
+  const W = k ? 32 : 44, H = k ? 16 : 18, P = painter(W, H), s = 25621 + k, cx = W / 2, rx = W / 2 - 4, ry = k ? 2.6 : 3.2, by = H - 4;
+  const n = k ? 9 : 12, list = [];
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + hash2(i, 0, s) * 0.3; list.push({ a, x: cx + Math.cos(a) * rx, y: by + Math.sin(a) * ry, back: Math.sin(a) < 0, sz: 0.7 + hash2(i, 1, s) * 0.6 }); }
+  const cogu = m => {
+    const sz = m.sz * (m.back ? 0.75 : 1), h = Math.round(2 + sz * 3), cw = 1.4 + sz * 1.8, dk = m.back ? -0.9 : 0, x = m.x, y = m.y;
+    for (let j = 0; j < h; j++) { P.put(x, y - j, RP.cogumelo, 3.4 + dk - j * 0.1); P.put(x + 1, y - j, RP.cogumelo, 2.2 + dk); }
+    const ty = y - h;
+    for (let i = -Math.ceil(cw); i <= Math.ceil(cw); i++) { const u = i / cw; if (Math.abs(u) > 1.05) continue; P.N(x + 0.5 + i, ty + 1, Math.abs(u) < 0.5 ? (m.back ? '#8ce0a8' : '#c8f8d0') : '#3a7a5a'); }   // as lamelas acesas
+    P.ell(x + 0.5, ty, cw + 0.4, 1.5 + sz * 0.5, (xx, yy, dx, dy) => { if (dy > 0.35) return; P.put(xx, yy, RP.cogumelo, 4 + dk - dx * 1.2 - dy * 1.4 + (hash2(xx, yy, s) < 0.12 ? -1 : 0)); });
+  };
+  // o musgo verde dentro do anel e o capim em volta
+  P.ell(cx, by, rx + 1, ry + 1, (x, y, dx, dy, d) => P.put(x, y, RP.musgo, 2.6 - dy * 0.8 + (d > 0.7 ? -0.6 : 0.3) + cg(x, y, s) * 0.5));
+  for (let x = 2; x < W - 2; x++) if (hash2(x, 3, s) < 0.35) { const y = by + Math.sin((x - cx) / rx * 1.4) * 0.5 + ry - 1; P.put(x, y - 1, RP.musgo, 3.6); P.put(x, y - 2, RP.musgo, 4.2); }
+  P.z = 1; for (const m of list) if (m.back) cogu(m);
+  P.z = 2; for (const m of list) if (!m.back) cogu(m);
+  for (let x = 1; x < W - 1; x++) { P.put(x, H - 1, RP.musgo, 1.6 + hash2(x, 5, s)); if (hash2(x, 6, s) < 0.5) P.put(x, H - 2, RP.musgo, 2.4); }
+  P.mark('mote', 6, by - 2, { w: W - 12, n: 7, c: '#b8f0c8' });
+  P.mark('brilho', Math.round(list[1].x), Math.round(list[1].y) - 4);
   return P.done();
 }
-function magisterCage(k) {   // 26 x 56: a gaiola de magíster pendurada: a corrente de ouro velho, a cúpula com o florão, as barras em roda (as da frente claras, as de trás escuras), três aros, a base com a ponta (k 0: um orbe de mana carmesim preso dentro; k 1: a portinhola arrancada, o esqueleto de um elfo encolhido no fundo)
-  const W = 26, H = 56, P = painter(W, H), s = 25641 + k, R = RP.ouroV, cx = 13;
-  for (let y = 0; y < 12; y++) { const q = y % 4; P.put(cx - 1 + (q === 2 ? 1 : 0), y, R, q < 2 ? 4 - q : 3); if (q < 2) P.put(cx, y, R, 2.4); }
-  const y0 = 18, y1 = 46, rx = 9.5;
-  // as barras de trás, escuras
-  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, x = cx + Math.sin(a) * rx, front = Math.cos(a) > 0; if (front) continue; for (let y = y0; y < y1; y++) P.put(x, y, R, 1.4); }
-  P.z = 1;
-  if (!k) {
-    P.ell(cx, 32, 4.2, 4.2, (x, y, dx, dy, d) => P.N(x, y, d < 0.2 ? CR.miolo : d < 0.5 ? CR.claro : d < 0.8 ? CR.carm : CR.fundo));
-    P.mark('brilho', cx - 1, 31);
-  } else {
-    // o esqueleto encolhido: o crânio caído, as costelas, os ossos dos braços e das pernas
-    P.ell(cx - 3, 40, 2.6, 2.4, (x, y, dx, dy) => P.put(x, y, RP.osso, 4 - dx - dy)); P.put(cx - 4, 40, RP.sombra, 1); P.put(cx - 2, 40, RP.sombra, 1);
-    for (let r = 0; r < 3; r++) for (let x = 0; x < 5; x++) P.put(cx - 1 + x, 37 + r * 2, RP.osso, 3.6 - x * 0.3);
-    P.line(cx + 1, 36, cx + 2, 44, RP.osso, 3.2); P.line(cx + 4, 43, cx - 2, 45, RP.osso, 3.4); P.line(cx + 5, 38, cx + 7, 44, RP.osso, 3);
-  }
-  P.z = 2;
-  // as barras da frente e os aros
-  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, x = cx + Math.sin(a) * rx, c = Math.cos(a); if (c <= 0) continue; if (k && i === 1) continue; for (let y = y0; y < y1; y++) P.put(x, y, R, 2.6 + c * 1.2 - Math.sin(a) * 0.8); }
-  for (const y of [y0, 32, y1 - 1]) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) { const u = (x - cx) / rx; P.put(x, y, R, 3.8 - u * 1.4); P.put(x, y + 1, R, 2.2 - u * 0.8); }
-  if (k) { for (let j = 0; j < 12; j++) P.put(cx + rx + 2 + j * 0.3, y0 + 6 + j, R, 2.8); for (let j = 0; j < 12; j++) P.put(cx + rx + 5 + j * 0.3, y0 + 5 + j, R, 2.2); }
-  // a cúpula com o florão e a base com a ponta
-  P.ell(cx, y0, rx + 0.5, 6, (x, y, dx, dy, d) => { if (dy > 0) return; P.put(x, y, R, 3.4 - dx * 1.3 - dy * 0.6 + (Math.abs(((dx + 1) * 4) % 1 - 0.5) < 0.12 ? -0.8 : 0)); });
-  P.blob(cx, y0 - 7, 1.8, 1.8, R, s, 3.4);
-  P.rect(cx - rx, y1, Math.ceil(rx * 2) + 1, 3, R, (i, j) => 3.8 - j * 1 - i * 0.08);
-  for (let j = 0; j < 6; j++) { const hw = 3 - j * 0.5; for (let x = Math.floor(cx - hw); x < cx + hw; x++) P.put(x, y1 + 3 + j, R, 3.4 - (x - cx) * 0.4); }
-  P.put(cx - 1, y0 - 3, RP.sangue, 4.4); P.N(cx, y0 - 3, CR.claro);
-  seams(P);
-  grime(P, 0.6, 0.0, s + 2, null, [R]);
+function hangingMasks(k) {   // 30 x 48: as máscaras da Corte penduradas: um ramo de roseira-brava descendo do teto e, presas nele por fitas ameixa, as máscaras de osso dos convidados que nunca foram embora (uma de cervo com galhos, uma de raposa, uma de pássaro de bico comprido; k 1: só duas, uma partida ao meio)
+  const W = 30, H = 48, P = painter(W, H), s = 25641 + k;
+  const pts = []; for (let j = 0; j < 40; j++) pts.push([14 + Math.sin(j * 0.22 + k) * 6, j]);
+  briar(P, pts, s, 0.1, 0.3);
+  const fita = (x0, y0, x1, y1) => { P.line(x0, y0, x1, y1, RP.ameixa, 3); P.line(x0 + 1, y0, x1 + 1, y1, RP.ameixa, 1.8); };
+  const mask = (cx, cy, kind, broken) => {
+    P.z++;
+    // o rosto oval de osso, os furos dos olhos, o nariz, as linhas pintadas
+    P.ell(cx, cy, 4.2, 5.2, (x, y, dx, dy, d) => { if (broken && x > cx + 0.5 + Math.sin(y) * 0.6) return; P.put(x, y, RP.osso, 3.8 - dx * 1.1 - dy * 0.9 + cg(x, y, s) * 0.3); });
+    for (const sd of [-1, 1]) { if (broken && sd > 0) continue; P.put(cx + sd * 1.6, cy - 0.6, RP.sombra, 0.5); P.put(cx + sd * 1.6 + 0.6, cy - 0.6, RP.sombra, 1); P.put(cx + sd * 2.2, cy + 0.6, RP.rosa, 3.6); }
+    P.put(cx, cy + 1.4, RP.osso, 2.2); P.line(cx - 1, cy + 3, cx + (broken ? 0 : 1), cy + 3, RP.rosa, 2.6);
+    if (kind === 0) for (const sd of [-1, 1]) { if (broken && sd > 0) continue; let x = cx + sd * 2, y = cy - 4.4; for (let i = 0; i < 6; i++) { x += sd * 0.5; y -= 0.9; P.put(x, y, RP.osso, 4 - i * 0.25); if (i === 2 || i === 4) P.put(x + sd * 1.2, y - 0.4, RP.osso, 3.2); } }
+    else if (kind === 1) for (const sd of [-1, 1]) { P.put(cx + sd * 3, cy - 5, RP.osso, 3.8); P.put(cx + sd * 3.4, cy - 6, RP.osso, 3); P.put(cx + sd * 2.4, cy - 4.6, RP.rosa, 3); }
+    else { for (let j = 0; j < 6; j++) { P.put(cx - 0.5, cy + 2 + j, RP.osso, 3.6 - j * 0.3); P.put(cx + 0.5, cy + 2 + j, RP.osso, 2.4 - j * 0.2); } for (let x = -3; x <= 3; x++) P.put(cx + x, cy - 4.8 - Math.abs(x) * 0.3, RP.ameixa, 3.4); }
+  };
+  const M = k ? [[8, 22, 0, false], [21, 34, 2, true]] : [[7, 16, 0, false], [22, 26, 1, false], [10, 37, 2, false]];
+  for (const [x, y, kind, br] of M) { const vx = 14 + Math.sin(y * 0.22 + k) * 6; fita(vx, y - 7, x, y - 5); mask(x, y, kind, br); }
   return P.done();
 }
-function tornTapestry(k) {   // 34 x 58: a tapeçaria rasgada carmesim e ouro: a vara de ouro velho com uma ponta quebrada, o pano carmesim com a barra de ouro, a fênix bordada de asas abertas, rasgos, a barra de baixo em farrapos, queimado nas beiras (k 1: a vara caída de um lado, o pano pendurado torto, rasgado ao meio)
+function roseTapestry(k) {   // 34 x 58: a tapeçaria tomada pela roseira: a vara de espinheiro, o pano ameixa desbotado com a barra verde-espinho, a grande rosa bordada no meio com o ramo e os espinhos, rasgos, a barra de baixo em farrapos, e a roseira de verdade subindo por cima (k 1: a vara caída de um lado, o pano pendurado torto, rasgado ao meio)
   const W = 34, H = 58, P = painter(W, H), s = 25661 + k, x0 = 3, x1 = 31;
   const sl = k ? 0.32 : 0;
   const bot = x => 40 + Math.round(cn(x, 0, 3, 3, s) * 12 + hash2(x, 1, s) * 4) + Math.round((x - x0) * sl);
-  const hole = (x, y) => cn(x, y, 7, 9, s + 2) + (k && Math.abs(x - 19 + (y - 20) * 0.15) < 1.6 && y > 18 ? 1 : 0) > 0.86;
+  const hole = (x, y) => cn(x, y, 7, 9, s + 2) * 0.8 + (k && Math.abs(x - 19 + (y - 20) * 0.15) < 1.6 && y > 18 ? 1 : 0) > 0.3;
   for (let x = x0; x < x1; x++) for (let y = 3 + Math.round((x - x0) * sl); y < bot(x); y++) {
     if (hole(x, y)) continue;
     const yy = y - Math.round((x - x0) * sl), fold = Math.sin((x - x0) * 0.75) * 0.5, border = x < x0 + 2 || x > x1 - 3 || yy < 5 || (yy > 34 && yy < 37);
-    let v = (border ? 3.2 : 2.4) + fold - (x - x0) * 0.03 + cg(x, y, s) * 0.35 + ((x + yy) % 4 === 0 && !border ? -0.3 : 0);
+    let v = (border ? 3 : 2.6) + fold - (x - x0) * 0.03 + cg(x, y, s) * 0.35 + ((x + yy) % 4 === 0 && !border ? -0.3 : 0);
     const nearHole = hole(x + 1, y) || hole(x - 1, y) || hole(x, y + 1) || hole(x, y - 1) || y > bot(x) - 3;
     if (nearHole) v -= 1.3;
-    P.put(x, y, border ? RP.ouroV : RP.carmesim, v);
+    P.put(x, y, border ? RP.espinho : RP.ameixa, v);
   }
-  // a fênix de ouro: o corpo, as asas abertas em penas, a cauda, a cabeça erguida
-  const fx = 17, fy = 20 + (k ? 5 : 0);
-  const PHX = ['.......x.......', '......xxx......', 'x.....xx......x', 'xx....xx.....xx', '.xx...xxx...xx.', '.xxx.xxxxx.xxx.', '..xxxxxxxxxxx..', '...xxxxxxxxx...', '.....xxxxx.....', '......xxx......', '.....x.x.x.....', '....x..x..x....', '...x...x...x...', '..x....x....x..'];
-  for (let j = 0; j < PHX.length; j++) for (let i = 0; i < 15; i++) {
-    if (PHX[j][i] !== 'x') continue; const x = fx - 7 + i, y = fy - 7 + j + Math.round((x - x0) * sl); if (!P.has(x, y)) continue;
-    const up = j > 0 && PHX[j - 1][i] === 'x', lf = i > 0 && PHX[j][i - 1] === 'x';
-    P.put(x, y, RP.ouro, 3.3 + (up ? 0 : 0.9) + (lf ? 0 : 0.5) - i * 0.06 - j * 0.03 + ((i + j) % 3 === 0 ? -0.5 : 0));
+  // a rosa bordada: as pétalas em espiral, o ramo descendo com dois espinhos e duas folhas
+  const fx = 17, fy = 17 + (k ? 5 : 0);
+  const ROSE = ['...xxxxx...', '..xx.xx.x..', '.xx.x..x.x.', '.x.x.xx.xx.', '.x.x.x..x..', '..x.x.xx...', '...xxxx....', '.....x.....', '...x.x.....', '..xx.x.xx..', '.....x.xx..', '.....x.....', '....x......'];
+  for (let j = 0; j < ROSE.length; j++) for (let i = 0; i < 11; i++) {
+    if (ROSE[j][i] !== 'x') continue; const x = fx - 5 + i, y = fy - 6 + j + Math.round((x - x0) * sl); if (!P.has(x, y)) continue;
+    const stem = j > 6;
+    P.put(x, y, stem ? RP.espinho : RP.rosa, (stem ? 3.8 : 4) - i * 0.08 + (j % 2 ? -0.4 : 0.3));
   }
-  // a vara
-  if (!k) { for (let x = 0; x < 26; x++) { P.put(x, 1, RP.ouroV, 4.2 - x * 0.04); P.put(x, 2, RP.ouroV, 2.4); } P.blob(1.5, 1.5, 1.8, 1.8, RP.ouroV, s, 3.2); for (let x = 26; x < 29; x++) P.put(x, 2 + (x - 26), RP.ouroV, 2.6); }
-  else for (let x = 0; x < W; x++) { const y = 1 + Math.round(x * sl); P.put(x, y, RP.ouroV, 4.2 - x * 0.04); P.put(x, y + 1, RP.ouroV, 2.4); }
+  // a vara de espinheiro
+  if (!k) { for (let x = 0; x < 26; x++) { P.put(x, 1, RP.lenho, 4 - x * 0.04); P.put(x, 2, RP.lenho, 2.4); if (x % 5 === 2) P.put(x, 0, RP.ossoE, 3.4); } for (let x = 26; x < 29; x++) P.put(x, 2 + (x - 26), RP.lenho, 2.6); }
+  else for (let x = 0; x < W; x++) { const y = 1 + Math.round(x * sl); P.put(x, y, RP.lenho, 4 - x * 0.04); P.put(x, y + 1, RP.lenho, 2.4); }
   // os fios soltos embaixo
-  for (let x = x0 + 1; x < x1 - 1; x += 3) { const b = bot(x); if (!P.has(x, b - 1)) continue; for (let j = 0; j < 3 + (x % 4); j++) P.put(x + (j > 2 ? 1 : 0), b + j, j % 2 ? RP.ouroV : RP.carmesim, 2.4); }
+  for (let x = x0 + 1; x < x1 - 1; x += 3) { const b = bot(x); if (!P.has(x, b - 1)) continue; for (let j = 0; j < 3 + (x % 4); j++) P.put(x + (j > 2 ? 1 : 0), b + j, j % 2 ? RP.espinho : RP.ameixa, 2.2); }
+  // a roseira de verdade subindo pela borda do pano
+  P.z = 3;
+  { const pts = []; for (let j = 0; j < 44; j++) pts.push([x1 - 3 + Math.sin(j * 0.35) * 2.4 - j * 0.12, H - 2 - j * 1.1]); briar(P, pts, s + 9, 0.16, 0.35); }
   return P.done();
 }
-function deadTree(k) {   // 46 x 60 (k 1: 38 x 46): a árvore morta pequena: o tronco preto retorcido saindo das raízes, galhos em garra afinando em ponta, a seiva carmesim acesa nas rachaduras, espinhos, um oco escuro (k 1: menor, o tronco partido no alto)
-  const W = k ? 38 : 46, H = k ? 46 : 60, P = painter(W, H), s = 25681 + k, R = RP.morta, cx = W / 2;
+function thornBush(k) {   // 46 x 60 (k 1: 38 x 46): a roseira-brava grande: ramos verde-preto grossos e tortos saindo de um toco, abrindo em arcos que caem de volta, acúleos para todo lado, folhinhas escuras e as rosas negras (algumas abertas, o miolo claro) (k 1: menor, mais fechada)
+  const W = k ? 38 : 46, H = k ? 46 : 60, P = painter(W, H), s = 25681 + k, R = RP.lenho, cx = W / 2;
   const br = (x, y, ang, len, wd, depth, sd) => {
-    const bend = (hash2(depth, Math.round(x * 7), sd) - 0.5) * 1.1, ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, mx = (x + ex) / 2 + Math.cos(ang + Math.PI / 2) * bend * len * 0.3, my = (y + ey) / 2 + Math.sin(ang + Math.PI / 2) * bend * len * 0.3;
-    const end = depth <= 0 ? 0.15 : 0.6;
-    bark(P, bez([x, y], [mx, my], [mx, my], [ex, ey]), t => Math.max(0.9, wd * (1 - t * (1 - end))), R, sd, { base: 2.5, sulcos: wd > 3 ? 2 : 0, seiva: wd > 3 ? 0.22 : 0, cor: CR.fundo, cor2: CR.carm });
-    for (let i = 1; i < 4; i++) { if (hash2(i, depth, sd) < 0.5) continue; const t = i / 4, px = x + (ex - x) * t, py = y + (ey - y) * t, sg = i % 2 ? 1 : -1; P.put(px + Math.cos(ang + sg * 1.3) * (wd * 0.5 + 1), py + Math.sin(ang + sg * 1.3) * (wd * 0.5 + 1), R, 3.4); }
-    if (depth <= 0) return;
-    const n = 2;
-    for (let i = 0; i < n; i++) br(ex, ey, ang + (i - 0.5) * (0.8 + hash2(i, depth, sd) * 0.35) + (hash2(i, depth + 3, sd) - 0.5) * 0.35, len * (0.66 + hash2(i, depth + 7, sd) * 0.12), Math.max(1, wd * end * 0.95), depth - 1, sd + i * 13 + depth);
+    const bend = (hash2(depth, Math.round(x * 7), sd) - 0.5) * 1.3, ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, mx = (x + ex) / 2 + Math.cos(ang + Math.PI / 2) * bend * len * 0.35, my = (y + ey) / 2 + Math.sin(ang + Math.PI / 2) * bend * len * 0.35;
+    const end = depth <= 0 ? 0.25 : 0.65;
+    bark(P, bez([x, y], [mx, my], [mx, my], [ex, ey]), t => Math.max(0.9, wd * (1 - t * (1 - end))), R, sd, { base: 2.6, sulcos: wd > 3 ? 1 : 0 });
+    for (let i = 1; i < 6; i++) { const t = i / 6, px = x + (ex - x) * t, py = y + (ey - y) * t, sg = i % 2 ? 1 : -1; P.put(px + Math.cos(ang + sg * 1.4) * (wd * 0.5 + 1), py + Math.sin(ang + sg * 1.4) * (wd * 0.5 + 1), RP.ossoE, 3.4); if (hash2(i, depth + 9, sd) < 0.35) leaf(P, px + Math.cos(ang - sg * 1.2) * (wd * 0.5 + 2), py + Math.sin(ang - sg * 1.2) * (wd * 0.5 + 2), ang - sg * 0.9, 3.6, 2, RP.musgo, sd + i, 2.6, false); }
+    if (depth <= 0) { if (hash2(1, depth, sd) < 0.75) rosaP(P, ex - 1, ey - 1, sd, hash2(2, depth, sd) < 0.4); return; }
+    for (let i = 0; i < 2; i++) br(ex, ey, ang + (i - 0.5) * (0.9 + hash2(i, depth, sd) * 0.4) + 0.25, len * (0.7 + hash2(i, depth + 7, sd) * 0.12), Math.max(1, wd * end * 0.95), depth - 1, sd + i * 13 + depth);
   };
-  for (const [a, l] of [[2.9, 12], [0.25, 12], [2.4, 7], [0.7, 8]]) bark(P, bez([cx, H - 5], [cx + Math.cos(a) * l * 0.4, H - 3], [cx + Math.cos(a) * l * 0.8, H - 1.5], [cx + Math.cos(a) * l, H - 1]), t => 4.4 - t * 3.4, R, s + Math.round(a * 10), { base: 2.3 });
-  const top = k ? 18 : 26, trunk = bez([cx, H - 2], [cx - 4, H - 14], [cx + 5, top + 10], [cx - 1, top]);
-  bark(P, trunk, t => 8.5 - t * 4, R, s, { base: 2.5, sulcos: 3, seiva: 0.3, cor: CR.fundo, cor2: CR.carm });
-  if (!k) { br(cx - 1, top + 1, -Math.PI / 2 - 0.55, 12, 4.4, 2, s + 1); br(cx, top + 1, -Math.PI / 2 + 0.6, 12, 4, 2, s + 2); br(cx + 2, top + 13, -0.3, 9, 2.8, 1, s + 3); br(cx - 2, top + 18, Math.PI + 0.35, 7, 2.2, 1, s + 4); }
-  else { br(cx - 1, top + 2, -Math.PI / 2 - 0.9, 10, 3.4, 1, s + 1); br(cx + 1, top + 8, -0.4, 9, 2.8, 1, s + 2); for (let x = -3; x <= 3; x++) P.put(cx - 1 + x, top - 1 - Math.abs(Math.sin(x * 2.1)) * 3, R, 3.2); }
-  P.ell(cx + 1, H - 15, 1.8, 2.6, (x, y, dx, dy, d) => P.put(x, y, RP.sombra, d > 0.6 ? 3 : 1));
-  for (let x = 2; x < W - 2; x++) if (hash2(x, 9, s) < 0.6) P.put(x, H - 1, RP.morta, 1.6 + hash2(x, 8, s));
+  const base = H - 3;
+  P.ell(cx, base, 5, 3, (x, y, dx, dy) => P.put(x, y, R, 2.8 - dx - dy));   // o toco
+  if (!k) { br(cx - 1, base - 2, -Math.PI / 2 - 0.5, 16, 3.6, 2, s + 1); br(cx + 1, base - 2, -Math.PI / 2 + 0.55, 16, 3.4, 2, s + 2); br(cx, base - 2, -Math.PI / 2 - 0.05, 20, 3, 2, s + 3); br(cx + 2, base - 1, -0.35, 12, 2.4, 1, s + 4); br(cx - 2, base - 1, Math.PI + 0.4, 12, 2.4, 1, s + 5); }
+  else { br(cx - 1, base - 2, -Math.PI / 2 - 0.45, 12, 3, 2, s + 1); br(cx + 1, base - 2, -Math.PI / 2 + 0.5, 12, 2.8, 2, s + 2); br(cx, base - 1, -0.3, 9, 2, 1, s + 3); }
+  for (let x = 2; x < W - 2; x++) if (hash2(x, 9, s) < 0.55) P.put(x, H - 1, RP.musgo, 1.6 + hash2(x, 8, s) * 1.4);
+  for (let i = 0; i < 4; i++) { const x = 4 + hash2(i, 11, s) * (W - 8); P.put(x, H - 1, RP.rosa, 2.6); P.put(x + 1, H - 1, RP.rosa, 1.8); }   // pétalas caídas
   return P.done();
 }
-function alchemyTable(k) {   // 56 x 32: a mesa de alquimia derrubada: o tampo de cabeça para baixo no chão, as quatro pernas para o ar (uma partida), frascos quebrados, o alambique de cobre caído, a poça de mana carmesim acesa, pergaminhos (k 1: em pé mas com uma perna quebrada, o tampo inclinado, tudo escorregando)
-  const W = 56, H = 32, P = painter(W, H), s = 25701 + k, R = RP.couro;
-  const flask = (x, by, r, tall, lv) => {   // um frasco redondo de vidro com o líquido carmesim (lv: até onde vai o líquido, de 0 a 1)
-    P.ell(x, by - r, r, r, (xx, yy, dx, dy, d) => { const liq = (dy + 1) / 2 > 1 - lv; if (liq) P.put(xx, yy, RP.sangue, 3.4 - dx * 1.2 - dy * 0.3); else P.put(xx, yy, RP.vidro, 2.2 - dx * 0.9); if (dx < -0.3 && dx > -0.7 && dy < 0 && dy > -0.7) P.tint(xx, yy, '#e8f0ff', 0.55); });
-    for (let j = 0; j < tall; j++) { P.put(x - 1, by - 2 * r - j, RP.vidro, 3.6); P.put(x, by - 2 * r - j, RP.vidro, 2.4); }
-    P.put(x - 1, by - 2 * r - tall, RP.couro, 3.4); P.put(x, by - 2 * r - tall, RP.couro, 2.4);
-  };
-  if (!k) {
-    // as pernas para o ar (atrás do tampo), torneadas, uma partida; a travessa
-    for (const [x, l, lean] of [[6, 16, -0.12], [12, 17, 0.05], [33, 9, 0.1], [39, 16, 0.18]]) bark(P, t => [x + t * l * lean, H - 6 - t * l], t => 2.6 + Math.sin(t * Math.PI * 3) * 0.5, R, s + x, { base: x > 30 ? 2.2 : 2.7 });
-    for (let x = 34; x < 37; x++) P.put(x, H - 16, R, 1.4 + hash2(x, 1, s) * 2.4);
-    for (let x = 7; x < 40; x++) { P.put(x, H - 13, R, 2.9 - x * 0.02); P.put(x, H - 12, R, 1.6); }
-    P.z = 1;
-    // o tampo virado: a tábua grossa no chão, a quina aparecendo, inclinado numa pedra
-    for (let x = 2; x < 44; x++) { const y0 = H - 6 + Math.round((x - 2) * 0.03); for (let y = y0; y < y0 + 4; y++) P.put(x, y, R, 3.4 + (y === y0 ? 0.9 : y === y0 + 3 ? -1.1 : 0) + ((x + 2) % 9 === 0 ? -1.1 : 0) - x * 0.02 + cg(x, y, s) * 0.4); }
-    for (let x = 4; x < 42; x += 9) P.put(x, H - 4, RP.ouroV, 4);
-    P.z = 2;
-    // a poça de mana derramada, acesa
-    for (let x = 40; x < 55; x++) { const t = (x - 40) / 15, hgt = Math.round(Math.sin(t * Math.PI) * 1.4); for (let j = 0; j <= hgt; j++) P.N(x, H - 1 - j, j === hgt ? (x % 4 ? CR.claro : CR.miolo) : CR.carm); }
-    flask(48, H - 2, 3, 3, 0.35);
-    { const Q = painter(14, 10); Q.ell(4, 5, 3.4, 3.4, (xx, yy, dx, dy) => Q.put(xx, yy, RP.vidro, 2.4 - dx - dy * 0.5)); for (let j = 0; j < 5; j++) { Q.put(8 + j, 4, RP.vidro, 3.6); Q.put(8 + j, 5, RP.vidro, 2.4); } blit(P, Q, 17, H - 15, 0.1, 0, 0); }
-    for (const [x, y] of [[45, H - 3], [53, H - 2], [30, H - 7], [26, H - 7]]) { P.put(x, y, RP.vidro, 4.4); P.put(x + 1, y, RP.vidro, 2.6); }
-    // o alambique de cobre caído em cima, o bico para fora
-    P.ell(30, H - 10, 4.4, 3.8, (x, y, dx, dy, d) => P.put(x, y, RP.cobre, 3.4 - (dx + dy) * 1.1 - d * 0.4 + cg(x, y, s) * 0.3));
-    tube(P, bez([33, H - 13], [37, H - 16], [41, H - 16], [44, H - 13]), () => 1.6, RP.cobre, s + 4, 3);
-    P.rect(4, H - 8, 9, 2, RP.papel, (i, j) => 3.8 - j * 0.8 - i * 0.05); P.ell(13, H - 7, 1.6, 1.6, (x, y, dx, dy, d) => P.put(x, y, RP.papel, d < 0.3 ? 1.4 : 3.4));
-    P.mark('brilho', 47, H - 2);
-  } else {
-    const tilt = x => 12 + (x - 4) * 0.16;
-    bark(P, t => [8, tilt(8) + 3 + t * (H - tilt(8) - 4)], () => 2.6, R, s + 1, { base: 2.8 });
-    bark(P, t => [46, tilt(46) + 3 + t * 6], () => 2.6, R, s + 2, { base: 2.4 }); for (let x = 45; x < 48; x++) P.put(x, tilt(46) + 10, R, 1.4 + hash2(x, 3, s) * 2);
-    P.z = 1;
-    for (let x = 4; x < 52; x++) for (let j = 0; j < 3; j++) P.put(x, tilt(x) + j, R, 3.4 + (j === 0 ? 0.8 : j === 2 ? -1 : 0) - (x - 4) * 0.01 + cg(x, j, s) * 0.4);
-    bark(P, t => [36 + t * 12, H - 2 - t * 0.5], () => 2.4, R, s + 3, { base: 2.2 });
-    flask(14, tilt(14), 3, 4, 0.55); flask(24, tilt(24), 2.6, 6, 0.7); flask(33, tilt(33) - 0.5, 2.4, 2, 0.3);
-    for (let x = 30; x < 48; x++) if (x < 40 || hash2(x, 5, s) < 0.5) P.N(x, Math.round(tilt(x)) - 1, x % 3 ? CR.carm : CR.claro);
-    for (let j = 0; j < 7; j++) if (j % 2 === 0) P.N(51, tilt(51) + 4 + j * 1.8, CR.carm);
-    for (let x = 47; x < 55; x++) P.N(x, H - 1, x % 3 ? CR.carm : CR.claro);
-    P.ell(41, tilt(41) - 3, 3.4, 3, (x, y, dx, dy, d) => P.put(x, y, RP.cobre, 3.4 - (dx + dy) * 1.1 - d * 0.4));
-    tube(P, bez([43, tilt(41) - 5], [46, tilt(41) - 9], [49, tilt(41) - 9], [51, tilt(41) - 6]), () => 1.4, RP.cobre, s + 4, 3);
-    P.mark('brilho', 50, H - 2);
+function feastTable(k) {   // 58 x 28: a mesa do banquete sem fim: o tampo de lenho de espinheiro coberto por uma toalha ameixa comprida com a barra rendada, as pernas em raiz torta; em cima, cálices de osso, um prato com as frutas das fadas (acesas em verde-pálido: quem come não volta), uma travessa, pétalas, e a roseira que cresceu por cima da mesa (k 1: a mesa caída de um lado, a toalha escorregando, os cálices no chão)
+  const W = 58, H = 28, P = painter(W, H), s = 25701 + k, R = RP.lenho;
+  const top = x => k ? 12 + Math.max(0, x - 30) * 0.28 : 12;
+  // as pernas tortas
+  for (const [x, lean] of [[6, -0.1], [50, 0.1]]) { const t0 = top(x) + 3; bark(P, t => [x + t * lean * 6, t0 + t * (H - 1 - t0) * (k && x > 30 ? 0.6 : 1)], t => 2.6 - t * 0.6, R, s + x, { base: 2.6 }); }
+  if (k) { for (let x = 47; x < 52; x++) P.put(x, H - 1 - hash2(x, 1, s) * 2, R, 2 + hash2(x, 2, s)); }
+  P.z = 1;
+  // o tampo e a toalha caindo em dobras dos dois lados, a renda embaixo
+  for (let x = 2; x < W - 2; x++) {
+    const y0 = Math.round(top(x)), fold = Math.sin(x * 0.9) * 0.6, drop = (x < 10 || x > W - 11) ? 9 + Math.round(Math.sin(x * 0.7) * 1.5) : 4;
+    P.put(x, y0, R, 4); P.put(x, y0 + 1, R, 2.6);
+    for (let j = 1; j <= drop; j++) P.put(x, y0 + 1 + j, RP.ameixa, 3.2 + fold - j * 0.12 + cg(x, j, s) * 0.3);
+    if ((x + Math.round(top(x))) % 2 === 0) P.put(x, y0 + 2 + drop, RP.osso, 3); else P.put(x, y0 + 2 + drop, RP.ameixa, 1.6);
   }
+  for (let x = 2; x < W - 2; x++) P.put(x, Math.round(top(x)), RP.ameixa, 4.2 + Math.sin(x * 0.9) * 0.4);   // a toalha por cima do tampo
+  P.z = 2;
+  // os cálices de osso
+  const calice = (x, y, tomb) => {
+    if (tomb) { for (let i = 0; i < 4; i++) { P.put(x + i, y, RP.osso, 3.8 - i * 0.3); P.put(x + i, y - 1, RP.osso, 3 - i * 0.2); } P.put(x + 4, y, RP.rosa, 2.4); return; }
+    P.ell(x, y - 4, 1.8, 1.6, (xx, yy, dx, dy) => { if (dy < -0.4) return; P.put(xx, yy, RP.osso, 3.8 - dx * 1.2); });
+    P.put(x - 1, y - 5, RP.rosa, 2.6); P.put(x, y - 5, RP.rosa, 3.4);
+    P.put(x, y - 2, RP.osso, 3); P.put(x, y - 1, RP.osso, 2.6); P.line(x - 1, y, x + 1, y, RP.osso, 3.2);
+  };
+  if (!k) { calice(12, 11, false); calice(42, 11, false); calice(47, 11, true); } else { calice(12, 11, false); calice(20, 11, true); calice(53, H - 1, true); }
+  // o prato com as frutas das fadas, acesas
+  const px = k ? 26 : 28, py = Math.round(top(px)) - 1;
+  for (let x = px - 5; x <= px + 5; x++) { P.put(x, py, RP.osso, 3.6 - (x - px) * 0.12); }
+  for (const [ox, oy] of [[-3, -1], [-1, -1], [1, -1], [3, -1], [-2, -3], [0, -3], [2, -3], [-1, -5], [1, -5]]) { P.N(px + ox, py + oy, (ox + oy) % 3 === 0 ? '#f4fff0' : '#8ce0a8'); P.N(px + ox + 1, py + oy, '#3a7a5a'); P.N(px + ox, py + oy + 1, '#5ab88a'); }
+  P.mark('brilho', px - 1, py - 5); P.mark('mote', px - 4, py - 4, { w: 9, n: 4, c: '#b8f0c8' });
+  // a travessa com o pão de pedra (há muito virou pedra) e as pétalas
+  if (!k) { P.ell(20, 10, 3.4, 1.6, (x, y, dx, dy) => P.put(x, y, RP.enredado, 3.6 - dx - dy)); P.line(16, 11, 24, 11, RP.osso, 3.2); }
+  for (let i = 0; i < 6; i++) { const x = 5 + hash2(i, 3, s) * (W - 10); P.put(x, Math.round(top(x)) - 1, RP.rosa, 3); }
+  // a roseira que cresceu por cima da mesa
+  P.z = 4;
+  { const pts = []; for (let j = 0; j < 30; j++) pts.push([W - 4 - j * 0.9, H - 1 - (j < 12 ? j * 1.1 : 13 + Math.sin(j * 0.5) * 1.6)]); briar(P, pts, s + 5, 0.15, 0.3); }
   seams(P);
   return P.done();
 }
-function felBrazier(k) {   // 26 x 34 (k 1: 22 x 44): o braseiro vil: a bacia de ouro velho com a faixa lavrada, as brasas carmesim, três pernas em garra (k 1: no alto de um pilar de mármore profanado); o fogo carmesim é ao vivo
-  const W = k ? 22 : 26, H = k ? 44 : 34, P = painter(W, H), s = 25721 + k, R = RP.ouroV, cx = W / 2, by = k ? 10 : 13;
-  if (!k) {
-    for (const [x0, x1] of [[cx - 4, cx - 10], [cx + 4, cx + 10], [cx, cx]]) tube(P, bez([x0, by + 6], [x0 + (x1 - x0) * 0.2, by + 12], [x1, H - 8], [x1, H - 2]), () => (x0 === cx ? 1.8 : 2.2), R, s + x0, x0 === cx ? 2.2 : 3);
-    for (const x of [cx - 10, cx + 10, cx]) P.rect(x - 1.5, H - 2, 4, 2, R, (i, j) => 3.4 - i * 0.5 - j);
-  } else {
-    ashlar(P, cx - 6, by + 8, 12, H - by - 11, RP.profano, s, 5, 6, null, 2.5);
-    P.rect(cx - 8, H - 3, 16, 3, RP.profano, (i, j) => 3.6 - j - i * 0.05); P.rect(cx - 7, by + 6, 14, 2, RP.profano, (i, j) => 4 - j * 1.2 - i * 0.05);
-    for (let y = by + 10; y < H - 4; y += 6) runeN(P, cx - 1.5, y, y, CR.fundo, CR.carm);
+function hagstone(k) {   // 24 x 40 (k 1: 32 x 24): a pedra-vidente: a pedra cinza gasta pela água, em pé, com o furo redondo de lado a lado; quem olha pelo furo vê o povo das fadas, e a luz verde-pálida deles passa por ele; furinhos menores, musgo, fitas ameixa amarradas como promessa (k 1: a pedra deitada, mais larga, com dois furos)
+  const W = k ? 32 : 24, H = k ? 24 : 40, P = painter(W, H), s = 25721 + k, R = RP.vidente, cx = W / 2;
+  const holes = k ? [[11, 12, 3.2], [22, 15, 1.4]] : [[13, 11, 3.4], [9, 29, 1]];
+  const inHole = (x, y) => holes.some(([hx, hy, r]) => Math.hypot(x + 0.5 - hx, y + 0.5 - hy) < r);
+  // a pedra: um menir arredondado (ou deitada), o grão fino
+  const halfW = y => k ? (W / 2 - 1) * Math.sqrt(Math.max(0, 1 - Math.pow((y - (H / 2 + 2)) / (H / 2 - 2), 2))) * (0.9 + cn(y, 0, 4, 4, s) * 0.3)
+    : (W / 2 - 2) * (0.62 + 0.38 * Math.min(1, y / (H * 0.55))) * Math.sqrt(Math.max(0, 1 - Math.pow(Math.max(0, (H * 0.3 - y) / (H * 0.3)), 2))) * (0.92 + cn(y, 0, 4, 4, s) * 0.25);
+  const lean = y => k ? 0 : (H - y) * 0.06;
+  for (let y = k ? 4 : 1; y < H; y++) { const hw = halfW(y), c0 = cx + lean(y) + (k ? 0 : -1); for (let x = Math.floor(c0 - hw); x <= c0 + hw; x++) {
+    if (inHole(x, y)) continue;
+    const dx = (x + 0.5 - c0) / Math.max(1, hw), dy = (y - H / 2) / (H / 2);
+    P.put(x, y, R, 3.3 - dx * 1.3 - dy * 0.6 - dx * dx * 0.6 + cn(x, y, 8, 8, s) * 0.8 + cg(x, y, s) * 0.35);
+  } }
+  // os furos: a borda funda em cima, clara embaixo; no fundo do grande a luz das fadas
+  for (const [hx, hy, r] of holes) {
+    P.ell(hx, hy, r + 1, r + 1, (x, y) => { const d = Math.hypot(x + 0.5 - hx, y + 0.5 - hy); if (d >= r && d < r + 1 && P.has(x, y)) P.put(x, y, R, y < hy ? 1.2 : 4.4); });
+    if (r > 2) P.ell(hx, hy, r, r, (x, y, dx, dy, d) => P.N(x, y, d < 0.35 ? '#f4fff0' : d < 0.65 ? '#c8f8d0' : d < 0.85 ? '#8ce0a8' : '#3a7a5a'));
+    else P.ell(hx, hy, r, r, (x, y) => P.put(x, y, RP.sombra, 1));
   }
-  // as brasas
-  for (let x = Math.floor(cx - 8); x < cx + 8; x++) { const t = (x - cx + 8) / 16, h = Math.round(1 + Math.sin(t * Math.PI) * 1.5 + hash2(x, 0, s)); for (let j = 0; j < h; j++) { const v = hash2(x, j, s); if (v < 0.3) P.N(x, by - j, v < 0.12 ? CR.claro : CR.carm); else P.put(x, by - j, RP.morta, 2.4 + v * 1.5); } }
-  // a bacia: meia elipse, a borda acesa, a faixa lavrada com losangos
-  P.ell(cx, by, 9.5, 6.5, (x, y, dx, dy, d) => { if (dy < 0) return; P.put(x, y, R, 3.4 - dx * 1.3 - dy * 0.8 + (Math.abs(dy - 0.4) < 0.1 ? 0.9 : 0) + ((x + y) % 4 === 0 && Math.abs(dy - 0.55) < 0.2 ? -1 : 0) + cg(x, y, s) * 0.3); });
-  for (let x = Math.floor(cx - 10); x < cx + 10; x++) { const u = (x + 0.5 - cx) / 10; P.put(x, by, R, 4.4 - u * 1.2); }
-  P.put(cx - 10, by - 1, R, 4); P.put(cx + 9, by - 1, R, 3);
-  P.mark('fogo', cx - 7, by - 1, { w: 14 });
-  seams(P);
+  moss(P, 0.1, s + 1, (x, y) => (y > H - 8 ? 0.4 : -0.1), [R]);
+  // as fitas amarradas: uma faixa em volta da pedra e as pontas penduradas
+  P.z = 2;
+  const fy = k ? 17 : 21;
+  for (let x = 2; x < W - 2; x++) { if (!P.has(x, fy) || inHole(x, fy)) continue; P.put(x, fy, RP.ameixa, 3.6 - (x - cx) * 0.08); P.put(x, fy + 1, RP.ameixa, 2.2); }
+  for (let j = 0; j < 7; j++) { P.put(cx + 3 + Math.sin(j * 0.8) * 0.6, fy + 2 + j, RP.ameixa, 3.4 - j * 0.15); P.put(cx + 5 + Math.sin(j * 0.6 + 1) * 0.6, fy + 2 + j * 0.8, RP.rosa, 3.2 - j * 0.15); }
+  for (let x = 1; x < W - 1; x++) if (hash2(x, 4, s) < 0.6) P.put(x, H - 1, RP.musgo, 1.6 + hash2(x, 5, s) * 1.4);
+  P.mark('brilho', holes[0][0], holes[0][1]);
+  P.mark('mote', holes[0][0] - 2, holes[0][1] - 1, { w: 4, n: 3, c: '#c8f8d0' });
   return P.done();
 }
 
-/* =============================== O POÇO DA LUA =============================== */
-function moonWell() {   // 58 x 30: o poço da lua: a mureta redonda de pedra-do-poço (vista de lado), a beira de mármore com crescentes de prata, runas azuis acesas fracas, a água acesa aparecendo por cima da beira, dois pilaretes com crescentes; musgo e cogumelos-de-luar no pé
+/* =============================== AS GRUTAS DA LUA =============================== */
+function moonWell() {   // 58 x 30: a bacia de luar: a mureta redonda de pedra-do-poço (vista de lado), a beira de mármore com crescentes de prata, runas azuis acesas fracas, a água acesa aparecendo por cima da beira, dois pilaretes com crescentes; musgo e cogumelos-de-luar no pé
   const W = 58, H = 30, P = painter(W, H), s = 25801, R = RP.poco, cx = 29;
   // a beira de trás do poço e a água: a lâmina clara de cima com reflexos acesos, o fundo azul
   for (let x = 6; x < 52; x++) P.put(x, 9, R, 3.3 - (x - 6) * 0.02);
@@ -1229,16 +1243,16 @@ def('el_tapecaria_lua', 'Tapeçaria da lua', Wl, 'fundo', ['saloes'], [moonTapes
 def('el_lustre', 'Lustre de galhos com velas azuis', C, 'frente', ['saloes'], [chandelier()], { luz: [{ x: 28, y: 14, r: 0.9 }], brilho: EL_COL.lua });
 def('el_vitral', 'Vitral de folha', Wl, 'fundo', ['saloes'], [leafWindow(0), leafWindow(1)], { luz: [{ x: 16, y: 26, r: 0.55 }], brilho: EL_COL.lua });
 def('el_mesa_calices', 'Mesa longa com cálices', F, 'frente', ['saloes'], [longTable(0), longTable(1)]);
-// A Corte Desterrada
-def('el_rei_quebrado', 'Estátua do rei quebrada', F, 'frente', ['corte'], [brokenKing(0), brokenKing(1)], { ruina: true });
-def('el_altar_sangue', 'Altar de mana sangrenta', F, 'frente', ['corte'], [bloodAltar()], { luz: [{ x: 18, y: 10, r: 0.85 }], brilho: EL_COL.carmesim, anim: { k: 'el_cristal' } });
-def('el_gaiola', 'Gaiola de magíster pendurada', C, 'frente', ['corte'], [magisterCage(0), magisterCage(1)], { luz: [{ x: 13, y: 32, r: 0.3 }], brilho: EL_COL.carmesim });
-def('el_tapecaria_rasgada', 'Tapeçaria rasgada carmesim e ouro', Wl, 'fundo', ['corte'], [tornTapestry(0), tornTapestry(1)]);
-def('el_arvore_morta', 'Árvore morta pequena', F, 'frente', ['corte'], [deadTree(0), deadTree(1)], { luz: [{ x: 23, y: 40, r: 0.1 }], brilho: EL_COL.carmesim });
-def('el_mesa_alquimia', 'Mesa de alquimia derrubada', F, 'frente', ['corte'], [alchemyTable(0), alchemyTable(1)], { luz: [{ x: 30, y: 28, r: 0.3 }], brilho: EL_COL.carmesim });
-def('el_braseiro_vil', 'Braseiro vil', F, 'frente', ['corte'], [felBrazier(0), felBrazier(1)], { luz: [{ x: 12, y: 6, r: 0.9 }], brilho: EL_COL.carmesim, anim: { k: 'el_fogo' } });
-// O Poço da Lua
-def('el_poco_lua', 'Poço da lua', F, 'frente', ['poco'], [moonWell()], { luz: [{ x: 29, y: 10, r: 0.85 }], brilho: EL_COL.lua, anim: { k: 'el_agua' } });
+// A Corte dos Espinhos
+def('el_rei_quebrado', 'Estátua do rei quebrada e enredada', F, 'frente', ['corte'], [brokenKing(0), brokenKing(1)], { ruina: true });
+def('el_circulo_fadas', 'Anel de cogumelos das fadas', F, 'frente', ['corte'], [fairyRing(0), fairyRing(1)], { luz: [{ x: 20, y: 10, r: 0.45 }], brilho: EL_COL.fada });
+def('el_mascaras', 'Máscaras da Corte penduradas', C, 'frente', ['corte'], [hangingMasks(0), hangingMasks(1)]);
+def('el_tapecaria_roseira', 'Tapeçaria tomada pela roseira', Wl, 'fundo', ['corte'], [roseTapestry(0), roseTapestry(1)]);
+def('el_roseira', 'Roseira-brava grande', F, 'frente', ['corte'], [thornBush(0), thornBush(1)]);
+def('el_banquete', 'Mesa do banquete sem fim', F, 'frente', ['corte'], [feastTable(0), feastTable(1)], { luz: [{ x: 28, y: 8, r: 0.35 }], brilho: EL_COL.fada });
+def('el_pedra_vidente', 'Pedra-vidente', F, 'frente', ['corte'], [hagstone(0), hagstone(1)], { luz: [{ x: 13, y: 11, r: 0.45 }], brilho: EL_COL.fada });
+// As Grutas da Lua
+def('el_poco_lua', 'Bacia de luar', F, 'frente', ['poco'], [moonWell()], { luz: [{ x: 29, y: 10, r: 0.85 }], brilho: EL_COL.lua, anim: { k: 'el_agua' } });
 def('el_dama_estatua', 'Estátua da Dama', Wl, 'fundo', ['poco'], [ladyStatue(0), ladyStatue(1)], { gruta: true, alto: 8, luz: [{ x: 21, y: 35, r: 0.3 }], brilho: EL_COL.lua, anim: { k: 'el_agua' } });
 def('el_arco_raizes', 'Arco de raízes', Wl, 'fundo', ['poco'], [rootArch()], { alto: 6, luz: [{ x: 31, y: 20, r: 0.3 }], brilho: EL_COL.lua });
 def('el_cristal_lunar', 'Cristal lunar grande', F, 'frente', ['poco'], [moonCrystal(0), moonCrystal(1)], { luz: [{ x: 19, y: 26, r: 0.75 }], brilho: '#cfe6ff' });
@@ -1249,7 +1263,7 @@ def('el_raiz_mae', 'Raiz-mãe atravessando a parede', Wl, 'fundo', ['poco'], [mo
 Object.assign(EL_PROP_PLAN, {
   mata: { chao: [['el_cervo', 0.06, 1], ['el_pedra_vigia', 0.08, 1], ['el_harpa', 0.05, 1], ['el_lanterna_pe', 0.16, 2], ['el_banco_raiz', 0.1, 1]], teto: [['el_flet_casa', 0.06, 1], ['el_guirlanda', 0.22, 2], ['el_lanterna_flutuante', 0.04, 1]], fundo: [['el_arco_aljava', 0.08, 1]] },
   saloes: { chao: [['el_armadura', 0.1, 1], ['el_estante', 0.1, 1], ['el_fonte', 0.06, 1], ['el_mesa_calices', 0.07, 1], ['el_lanterna_pe', 0.07, 1], ['el_pedra_vigia', 0.03, 1]], teto: [['el_lustre', 0.16, 2]], fundo: [['el_rei_estatua', 0.07, 1], ['el_tapecaria_lua', 0.14, 2], ['el_vitral', 0.1, 2], ['el_arco_aljava', 0.04, 1]] },
-  corte: { chao: [['el_rei_quebrado', 0.07, 1], ['el_altar_sangue', 0.06, 1], ['el_arvore_morta', 0.1, 1], ['el_mesa_alquimia', 0.08, 1], ['el_braseiro_vil', 0.14, 2]], teto: [['el_gaiola', 0.12, 1]], fundo: [['el_tapecaria_rasgada', 0.14, 2]] },
+  corte: { chao: [['el_rei_quebrado', 0.07, 1], ['el_circulo_fadas', 0.08, 1], ['el_roseira', 0.12, 1], ['el_banquete', 0.07, 1], ['el_pedra_vidente', 0.1, 2]], teto: [['el_mascaras', 0.12, 1]], fundo: [['el_tapecaria_roseira', 0.14, 2]] },
   poco: { chao: [['el_poco_lua', 0.06, 1], ['el_cristal_lunar', 0.14, 2]], teto: [['el_lanterna_flutuante', 0.2, 2], ['el_guirlanda', 0.05, 1]], fundo: [['el_dama_estatua', 0.06, 1], ['el_arco_raizes', 0.06, 1], ['el_raiz_mae', 0.1, 1]] }
 });
 
@@ -1264,7 +1278,7 @@ const elBob = p => Math.round(Math.sin(gameTime * 1.3 + p.X * 0.013) * 3);
 const elFlick = (p, j) => 0.8 + Math.sin(gameTime * 11 + j * 2.3 + p.X) * 0.1 + Math.sin(gameTime * 23 + j) * 0.08;
 let elGl = null;
 const elGlowC = (c, r) => { const G = elGl || (elGl = {}), k = c + r; return G[k] || (G[k] = glow(r, c)); };
-const FL_LUA = ['#24407a', '#4a7ad0', '#9cc8ff', '#ffffff'], FL_CARM = ['#5a0812', '#b01a2a', '#ff5a4a', '#ffd0a0'];
+const FL_LUA = ['#24407a', '#4a7ad0', '#9cc8ff', '#ffffff'];
 HOOK.drawWorld.push((cx, cy) => {
   if (typeof visProps === 'undefined') return;
   for (let i = 0; i < visProps.length; i++) {
@@ -1278,14 +1292,12 @@ HOOK.drawGlow.push((cx, cy) => {
   for (let i = 0; i < visProps.length; i++) {
     const p = visProps[i]; if (!p.def.elfos) continue;
     const X = Math.round(p.X + p.sh - cx), Y = Math.round(p.Y - cy), hl = p.def.elHalo[p.v], nv = p.def.elLuz[p.v], A = p.def.anim;
-    const br = A && A.k === 'el_fogo' ? 0.8 + Math.sin(gameTime * 9 + p.X) * 0.12 : 0.9 + Math.sin(gameTime * 1.4 + p.X * 0.05) * 0.1;
+    const br = 0.9 + Math.sin(gameTime * 1.4 + p.X * 0.05) * 0.1;
     if (hl) { lc.globalAlpha = 0.58 * br; lc.drawImage(hl, X - EL_HR, Y - EL_HR); }
     if (nv) { lc.globalAlpha = 0.45 * br; lc.drawImage(nv, X, Y); }
     const V = elPt(p, 'vela'); if (V) for (let j = 0; j < V.length; j++) { const q = V[j]; lc.globalAlpha = (q.l ? 0.55 : 0.45) * elFlick(p, j); lc.drawImage(elGlowC(q.c, q.l ? 9 : 7), X + q.x - (q.l ? 9 : 7), Y + q.y - (q.l ? 8 : 6)); }
     if (!A) continue;
-    if (A.k === 'el_fogo') { const Fq = elPt(p, 'fogo'); if (Fq) { const q = Fq[0]; lc.globalAlpha = 0.55 * br; lc.drawImage(elGlowC('#ff3040', 16), X + q.x + (q.w >> 1) - 16, Y + q.y - 20); } }
-    else if (A.k === 'el_cristal') { const Cq = elPt(p, 'cristal'); if (Cq) { const q = Cq[0], b = 0.5 + 0.5 * Math.sin(gameTime * 2.2 + p.X); lc.globalAlpha = 0.4 + 0.3 * b; lc.drawImage(elGlowC('#ff3a4a', 14), X + q.x - 14, Y + q.y - 14 + Math.round(Math.sin(gameTime * 1.7) * 1.5)); } }
-    else if (A.k === 'el_flut') { const Fq = elPt(p, 'flut'); if (Fq) { lc.globalAlpha = 0.6 * elFlick(p, 0); lc.drawImage(elGlowC(EL_COL.lua, 12), X + Fq[0].x - 12, Y + Fq[0].y - 12 + elBob(p)); } }
+    if (A.k === 'el_flut') { const Fq = elPt(p, 'flut'); if (Fq) { lc.globalAlpha = 0.6 * elFlick(p, 0); lc.drawImage(elGlowC(EL_COL.lua, 12), X + Fq[0].x - 12, Y + Fq[0].y - 12 + elBob(p)); } }
     else if (A.k === 'el_olho') { const O = elPt(p, 'olho'); if (O) { lc.globalAlpha = 0.3 + 0.15 * Math.sin(gameTime * 2 + p.X); lc.drawImage(elGlowC(EL_COL.lua, 7), X + O[0].x - 7, Y + O[0].y - 7); } }
   }
   lc.globalAlpha = 1;
@@ -1310,29 +1322,9 @@ HOOK.drawTop.push((cx, cy) => {
     // os fios d'água da fonte: tracejado descendo, o respingo embaixo
     const Jt = elPt(p, 'jato'); if (Jt) for (let j = 0; j < Jt.length; j++) { const q = Jt[j]; for (let k = 0; k < q.len; k++) { const ph = ((k - gameTime * 22 + j * 3) % 4 + 4) % 4; lc.globalAlpha = 0.75; lc.fillStyle = ph < 1 ? '#e8f6ff' : ph < 2.5 ? '#6cb0dc' : '#3a82b8'; lc.fillRect(X + q.x + (k > q.len * 0.5 ? (q.x > 20 ? 1 : 0) : 0), Y + q.y + k, 1, 1); } const sp = (gameTime * 3 + j) % 1; lc.globalAlpha = 0.7 * (1 - sp); lc.fillStyle = '#cfe8ff'; lc.fillRect(X + q.x - 1 - Math.round(sp * 2), Y + q.y + q.len - Math.round(Math.sin(sp * Math.PI) * 2), 1, 1); lc.fillRect(X + q.x + 1 + Math.round(sp * 2), Y + q.y + q.len - Math.round(Math.sin(sp * Math.PI) * 2), 1, 1); }
     // os pontinhos de luar subindo da água
-    const Mt = elPt(p, 'mote'); if (Mt) for (const q of Mt) for (let k = 0; k < (q.n || 6); k++) { const h = hash2(k, p.X, 13), t = (gameTime * (0.18 + h * 0.15) + h) % 1; lc.globalAlpha = 0.85 * (1 - t) * Math.min(1, t * 6); lc.fillStyle = k % 3 ? '#cfe6ff' : '#ffffff'; lc.fillRect(X + q.x + Math.round(h * q.w + Math.sin(t * 7 + k) * 1.5), Y + q.y - Math.round(t * 26), 1, 1); }
+    const Mt = elPt(p, 'mote'); if (Mt) for (const q of Mt) for (let k = 0; k < (q.n || 6); k++) { const h = hash2(k, p.X, 13), t = (gameTime * (0.18 + h * 0.15) + h) % 1; lc.globalAlpha = 0.85 * (1 - t) * Math.min(1, t * 6); lc.fillStyle = k % 3 ? (q.c || '#cfe6ff') : (q.c ? '#f4fff0' : '#ffffff'); lc.fillRect(X + q.x + Math.round(h * q.w + Math.sin(t * 7 + k) * 1.5), Y + q.y - Math.round(t * (q.c ? 16 : 26)), 1, 1); }
     const A = p.def.anim; if (!A) continue;
-    if (A.k === 'el_fogo') {   // as línguas carmesim: colunas que sobem e encolhem, o miolo claro embaixo, brasas subindo
-      const Fq = elPt(p, 'fogo'); if (!Fq) continue; const q = Fq[0], T = Math.floor(gameTime * 10);
-      for (let c = 0; c < q.w; c++) {
-        const env = Math.sin(Math.PI * (c + 0.5) / q.w), h = Math.round(env * (5 + (Math.sin(gameTime * 9 + c * 1.7 + p.X) + 1) * 2.2 + hash2(c, T, p.X) * 2.5));
-        for (let j = 0; j < h; j++) { const t = j / Math.max(1, h); lc.globalAlpha = t > 0.85 ? 0.6 : 1; lc.fillStyle = t < 0.25 && env > 0.6 ? FL_CARM[3] : t < 0.55 ? FL_CARM[2] : t < 0.85 ? FL_CARM[1] : FL_CARM[0]; lc.fillRect(X + q.x + c, Y + q.y - j, 1, 1); }
-      }
-      for (let k = 0; k < 4; k++) { const h = hash2(k, p.X, 21), t = (gameTime * (0.5 + h * 0.4) + h) % 1; lc.globalAlpha = 1 - t; lc.fillStyle = k % 2 ? '#ff8a6a' : '#ffd0a0'; lc.fillRect(X + q.x + Math.round(h * q.w + Math.sin(t * 8 + k) * 2), Y + q.y - 6 - Math.round(t * 18), 1, 1); }
-    } else if (A.k === 'el_cristal') {   // o cristal de quatro faces girando no ar entre as garras
-      const Cq = elPt(p, 'cristal'); if (!Cq) continue; const q = Cq[0], a = gameTime * 1.8 + p.X, oy = Math.round(Math.sin(gameTime * 1.7) * 1.5), hc = 4, hp = 7, Wd = 4.2, R = ['#500a14', '#801422', '#b42032', '#e0404a', '#ff9090', '#ffe0e0'];
-      lc.globalAlpha = 1;
-      for (let j = -hc; j <= hp; j++) {
-        const hw = j < 0 ? Wd * (1 + j / (hc + 0.5)) : Wd * (1 - j / (hp + 0.5)); if (hw <= 0.2) continue;
-        for (let f = 0; f < 4; f++) {
-          const t0 = a + f * Math.PI / 2, nA = t0 + Math.PI / 4; if (Math.cos(nA) <= 0) continue;
-          const xa = Math.sin(t0) * hw, xb = Math.sin(t0 + Math.PI / 2) * hw, x0 = Math.round(Math.min(xa, xb)), x1 = Math.round(Math.max(xa, xb)); if (x1 <= x0) continue;
-          const lit = 0.5 - 0.5 * Math.sin(nA) + (j < 0 ? 0.15 : 0); lc.fillStyle = R[clamp(Math.round(lit * 4 + 0.5), 0, 5)];
-          lc.fillRect(X + q.x + x0, Y + q.y + oy + j, x1 - x0, 1);
-        }
-      }
-      lc.fillStyle = '#ffe0e0'; lc.fillRect(X + q.x + Math.round(Math.sin(a + Math.PI) * 2), Y + q.y + oy - 1, 1, 2);
-    } else if (A.k === 'el_flut') {   // a chama da gota flutuante
+    if (A.k === 'el_flut') {   // a chama da gota flutuante
       const Fq = elPt(p, 'flut'); if (!Fq) continue; const x = X + Fq[0].x, y = Y + Fq[0].y + elBob(p), f = Math.floor(gameTime * 7 + p.X) % 4;
       lc.globalAlpha = 1; lc.fillStyle = FL_LUA[1]; lc.fillRect(x - 1, y - 1, 3, 3); lc.fillStyle = FL_LUA[2]; lc.fillRect(x, y - 2 - (f === 1 ? 1 : 0), 1, 3 + (f === 1 ? 1 : 0)); lc.fillRect(x - 1, y, 3, 1); lc.fillStyle = '#ffffff'; lc.fillRect(x, y, 1, 1);
     } else if (A.k === 'el_olho') {   // a íris acesa escorrega um pixel para o lado do herói

@@ -455,7 +455,7 @@ let cvPacking = false;
   if (!CAVERNA || e.boss || D.boss || zone === 4 || e.reiMinion) return e;
   const d = Math.floor((py + e.h) / T) - CV_S0;
   if (d >= 6) {
-    const lvl = d < CAVE_D ? Math.min(4, 1 + Math.min(3, Math.floor(d / (50 * LAYER_K))) + (Math.random() < 0.3 ? 1 : 0)) : layerLvl(5, d - CAVE_D), m = 1 + 0.3 * (lvl - 1);
+    const lvl = d < CAVE_D ? Math.min(4, 1 + Math.min(3, Math.floor(d / (50 * LAYER_K))) + (Math.random() < 0.3 ? 1 : 0)) : layerLvl(layerLo('catedral'), d - CAVE_D), m = 1 + 0.3 * (lvl - 1);
     Object.assign(e, { lvl, hp: Math.round(D.hp * m), maxHp: Math.round(D.hp * m), dmg: Math.round(D.dmg * (1 + 0.2 * (lvl - 1))), xp: Math.max(1, Math.round(D.xp * 0.18 * (1 + 0.15 * (lvl - 1)))), gold: Math.max(1, Math.round(D.xp * 0.5 * (1 + 0.25 * (lvl - 1)))) });
   }
   if (zone >= CV_ZONE0 && zone <= CV_ZONE0 + 3) {

@@ -32,7 +32,7 @@
    Save: nox ({ dead, kills }). Embrulha esDress (226 chama), endBossFight, hitEnemy, killEnemy, computeLight, recalc,
    makeSave e newWorld. Carrega logo depois do 226, antes do 87. */
 
-const NOX_L = layerBossLvl('escuro') + 2;   // o último chefe: dois níveis acima do de uma camada comum
+const NOX_L = layerBossLvl('escuro');   // o último chefe: nível 100 (2026-10-21)
 const NOX = { lvl: NOX_L, hp: Math.round(330 * (1 + 0.3 * (NOX_L - 1)) / 10) * 10, dmg: Math.round(9 * (1 + 0.2 * (NOX_L - 1))), xp: 600, p2: 0.6, p3: 0.25, burn: 0.015, night: 12 };
 const noxState = { dead: false, kills: 0 };
 ET.nox = { name: 'Nox, Aquele Que Apaga', w: 30, h: 60, hp: NOX.hp, dmg: NOX.dmg, xp: NOX.xp, kb: 0, fly: true, phase: true, boss: true, blood: '#05060a' };

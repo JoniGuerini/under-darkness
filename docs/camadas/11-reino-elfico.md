@@ -170,3 +170,65 @@ Família nova (ninguém no jogo é élfico). Sem dano de contato genérico: só 
 - **Chefe:** a Dama do Espelho (a tentação de Galadriel + o poço da lua de Warcraft), numa gruta com espelho d'água e a lua presa, sem trono.
 - **Metal:** Lunarita (o mithril continua só dos anões).
 - **Água:** os poços das grutas da lua usam a água de verdade (171), rasos; o espelho do chefe é bloco firme, para a luta não virar nado.
+
+## Revamp de 2026-10-21
+
+Pedido do Jonathan: a camada tinha bonecos tirados do Warcraft (os elfos sangrentos, o caçador de demônios, o Poço do Sol); trocar por elfos e fadas de fantasia geral (Tolkien, folclore, contos de fadas sombrios). O que está acima nesta ficha continua valendo onde esta seção não diz outra coisa.
+
+### Lugar e níveis
+
+- A camada agora é a **10ª**, logo abaixo da **Fortaleza dos Anões** (a de cima pela corrente `camadaAcima('elfos')`) e acima do Mar. Monstros nos níveis **46 a 50** (`layerLvl(layerLo('elfos'), d)`), a Dama em `layerBossLvl('elfos')`.
+- As duas descidas saem das duas salas de descida da Fortaleza (`A.halls`) e caem nos dois Postos de Guarda (as câmaras de pouso). Como em todas as camadas desde o 353, entre a Fortaleza e o Reino há o selo de rocha (3 linhas de cada lado): o poço de raízes vai do selo até o pouso, e o caminho natural é o da sala do chefe da Fortaleza.
+
+### As faixas
+
+| Faixa | Nome (zona) | O que mudou |
+|---|---|---|
+| 0 | A Mata de Prata | só os monstros |
+| 1 | Os Salões do Rei | só os monstros |
+| 2 | **A Corte dos Espinhos** (era A Corte Desterrada), subtítulo "a roseira cresceu por cima do trono" | tema novo inteiro (abaixo) |
+| 3 | As Grutas da Lua (era O Poço da Lua) | nome; o "Poço da lua" virou "Bacia de luar" |
+
+**A Corte dos Espinhos:** a parte da corte que seguiu a Dama quando ela se perdeu no espelho e virou a Corte Sem Lua: um baile que nunca acabou, os convidados de máscara, e a roseira-brava que cresceu por cima de tudo. Nada de carmesim e ouro, de mana ou de cristal sangrento.
+- **Paleta:** mármore enredado (cinza-violeta), lenho de espinheiro (verde-preto), ameixa (os panos), rosa negra (vinho escuro quase preto), osso das máscaras, a pedra-vidente cinza e o verde-pálido das fadas como única luz de cor.
+- **Blocos (mesmos números):** 678 Mármore Enredado (era Mármore Profanado: mármore com musgo e galhos de roseira por cima, uma rosa aqui e ali), 679 Lenho de Espinheiro (era Madeira Morta), 680 Pedra-Vidente (era Cristal Sangrento: pedra gasta com furinhos acesos em verde-pálido, emite 0,4), 695 Roseira-brava (era o espinho vil), parede 97 de painéis ameixa com galhos. A flâmula da Corte virou ameixa com uma rosa.
+- **Objetos (`js/252`):** a estátua do rei quebrada e enredada (mármore com musgo e a roseira subindo), o anel de cogumelos das fadas (lamelas acesas, esporos verdes subindo), as máscaras da Corte penduradas num ramo de roseira (cervo, raposa, pássaro), a tapeçaria ameixa tomada pela roseira, a roseira-brava grande com rosas negras, a mesa do banquete sem fim (cálices de osso, as frutas das fadas acesas) e a pedra-vidente (menir com o furo por onde passa a luz das fadas). Saíram o altar de mana, a gaiola de magíster, o braseiro vil, a mesa de alquimia, a árvore morta e a tapeçaria carmesim e ouro (e as animações `el_fogo`/`el_cristal`). A luz da faixa nasce do lugar: as lamelas, as frutas e o furo da pedra; nada aceso por gente.
+- **Chão e partículas:** folhas e anéis de cogumelo no chão da Corte (no lugar dos cristaizinhos), pétalas escuras e esporos verde-pálidos no ar.
+
+### Os 10 monstros
+
+| Faixas | Monstro (id) | Era | Jeito de lutar |
+|---|---|---|---|
+| 0, 1 | Guarda-Fronteira (`fronteira`) | Sentinela da Lua | corpo a corpo: pose de golpe (0,5 s) e corte duplo, recua num salto; ou salta por cima do herói em arco e corta pelas costas ao pousar |
+| 0, 1 | Arqueiro da Mata (`arqueiro`) | (mantido) | distância: mira com a linha, solta |
+| 0, 3 | Cão-Fada (`caofada`) | Sabre-da-Noite | emboscada: anda invisível, se revela com três latidos e anéis no ar (0,8 s), dá o bote e some de novo |
+| 0, 3 | Fogo-Fátuo (`fatuo`) | (mantido) | enxame: incha e avança |
+| 0, 1, 3 | Sílfide (`silfide`) | Hipogrifo | voador: pula de ponto em ponto no ar, junta o vento (0,65 s) e solta uma rajada que empurra; foge quando apanha ou quando o herói chega perto |
+| 1, 2 | Guardião do Salão (`guardiao`) | (mantido) | pesado com escudo: estocada e pancada de escudo |
+| 1, 2, 3 | Carpideira (`carpideira`) | Espectro Élfico | voador que atravessa a rocha: o lamento (1 s, a boca abre e o ar treme) solta um anel que machuca e empurra para longe |
+| 2, 3 | Encantadora Mascarada (`mascarada`) | Magíster Sangrento | distância: três rosas negras giram em volta; carrega (0,8 s) e solta pétalas que perseguem; some e deixa uma cópia de máscara inofensiva no lugar |
+| 2, 3 | Musa Faminta (`musa`) | Caçador Vendado | a que suga: canta (0,9 s, o fio de luz cresce até o herói) e prende o fio por até 3 s, tirando vida aos poucos, curando a si e deixando o herói **enlevado** (lento); o fio quebra se o herói se afasta 9 blocos, se a rocha corta a linha ou se ela apanha |
+| 2 | Cavaleiro de Espinhos (`cavespinho`) | Antigo da Mata | pesado: ergue a arma (0,7 s) e dá a pancada de alcance longo; finca o pé (0,5 s) e a roseira racha o chão até o herói e prende os pés dele |
+
+Nenhum copia monstro de outra camada. Todo ataque tem aviso (pose, som, marca ou fio); nenhum machuca por encostar, fora o bote do Fogo-Fátuo (`touch` só nele, como antes).
+
+**Ids novos:** os ids antigos `sentinela` e `cacador` eram os mesmos de dois monstros do Gelo (`js/72` e `js/78`) e o Reino, carregando depois, sobrescrevia os dois. Os ids novos são todos únicos, e os monstros do Gelo voltaram a ser os deles.
+
+### Itens e estados
+
+- **Materiais novos (`js/257`):** folha-de-prata, asa de sílfide, essência-fátua, pelo de cão-fada, rosa negra, lágrima de carpideira. **Bases novas:** lâmina-folha (espada), escudo-folha, elmo alado.
+- **Troca nos saves (`js/258`, `elTrocaItens` embrulhando `migrateSave`):** cristal sangrento → rosa negra, pena de hipogrifo → asa de sílfide, presa de sabre → pelo de cão-fada, lágrima de espectro → lágrima de carpideira, glaive lunar → lâmina-folha. Sem subir o wg.
+- **Estados (`js/259`):** o "silenciado" do magíster saiu. Entrou **enlevado** (da Musa): o herói fica lento e não conjura arco, nevasca nem fogo enquanto dura; as notas da canção giram sobre a cabeça. O **enraizado** (da roseira do Cavaleiro e do Guarda) prende os pés, com as raízes desenhadas no chão.
+
+### A Dama do Espelho
+
+Fica, sem trono, na mesma gruta. Mudou: as "Sentinelas Sombrias" viraram **Guardas Sombrias** (o Guarda-Fronteira de sombra); a sombra agora é pintada com `tintDraw` (antes usava `lc.filter` em monstro, que a regra proíbe); a fase da Tentação usa a rampa da rosa negra no lugar do vermelho-sangue; os drops trocaram cristal sangrento por rosa negra e o glaive pela lâmina-folha. **Conserto:** o 256 carrega depois do 353 e o embrulho dele no `endBossFight` não deixava o 353 abrir o caminho; agora o próprio 256 marca o chefe como vencido e chama `rotaAbre('elfos')` na vitória.
+
+### Como ficou no jogo (testes de 2026-10-21)
+
+- Mundo inteiro em 8 sementes (1, 2, 3, 7, 42, 777, 2026, 12345): sem erro. Geração do Reino: 2,2 a 4,0 s.
+- Alcance com os caminhos abertos: 99,8 a 99,9% do espaço aberto do Reino ligado a partir dos pousos; a partir do vilarejo 97,8 a 99,8% (nas sementes 7 e 42 a enchente do vilarejo para antes, numa camada de cima, como já era). As 2 entradas, as 2 saídas e as 2 portas da gruta da Dama ligadas em todas as sementes.
+- Teleporte da tela de Testes para as 4 faixas: ok.
+- Luta com a Dama do começo ao fim com `deusOn = true`: as três fases, todos os golpes, vitória em ~1 min; o caminho para o Mar abre (66 de 66 células).
+- Os 10 monstros nascendo sozinhos nas faixas e atacando o herói, sem erro.
+- Prints: `/mnt/project-files/revamp/elfos/` (monstros antes e depois, a Corte antes e depois, objetos da Corte antes e depois, o caminho aberto depois da Dama).

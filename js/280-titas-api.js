@@ -31,17 +31,11 @@ const TT_D = LAYER_D;                                   // metros de camada
 const ttG = n => { try { return (0, eval)(n); } catch (err) { return undefined; } };
 // a camada logo acima: a primeira linha, a altura, o chão natural, a rocha em que as últimas linhas afinam, a escada
 // dela e os poços de onde as duas descidas saem ({ x0, x1, cx, fy, w, top }); a mais funda que existir
-function ttAbove() {
-  for (const [on, P, ex, bs] of [['DRAGAO', 'DG', 'dgExits', 'dgBoss'], ['MAR', 'MS', 'msExits', 'msBoss']]) {
-    if (!ttG(on) || ttG(P + '_S0') === undefined) continue;
-    const climb = ttG(P + '_ESCADA') ?? ttG(P + '_CRAVOS') ?? ttG(P + '_CORDA') ?? CHAIN;
-    return { id: P, S0: ttG(P + '_S0'), D: ttG(P + '_D') || 186, soils: ttG(P + '_SOILS') || null, halls: ttG(ex) || [], climb, boss: ttG(bs) || null, thin: STONE };
-  }
-  if (typeof ELFOS !== 'undefined' && ELFOS && typeof EL_S0 !== 'undefined')
-    return { id: 'elfos', S0: EL_S0, D: EL_D, soils: EL_SOILS, halls: elExits, climb: EL_ESCADA, boss: elBoss, thin: EL_PEDRA_POCO };
+function ttAbove() {   // 2026-10-21: a camada de cima vem da lista (129, camadaAcima)
+  const a = camadaAcima('titas'); if (a) return a;
   return { id: 'mina', S0: MN_S0, D: MN_D, soils: MN_SOILS, halls: [], climb: CHAIN, boss: null, thin: STONE };
 }
-const TT_TOP = (ttG('DG_TOP') ?? ttG('MS_TOP') ?? (typeof EL_TOP !== 'undefined' ? EL_TOP : 2046)) + LAYER_D;   // metros abaixo do chão do vilarejo (2418 com as cinco)
+const TT_TOP = layerTop('titas');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do TT_TOP: Campo das Costelas, A Espinha, Vale dos Crânios, Leito do Último, (rocha-mãe)
 const TT_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const TT_BAND_NAMES = ['costelas', 'espinha', 'cranios', 'leito'];

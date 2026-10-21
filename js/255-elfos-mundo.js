@@ -1,29 +1,30 @@
 'use strict';
 
 /* ================= o Reino Élfico: o mundo (docs/camadas/11-reino-elfico.md, seção 3) =================
-   A décima primeira camada, debaixo da Nave Caída (elAbove, 250). Em cima, a mata de prata crescida debaixo da Lua
-   Presa; depois os salões lavrados do rei, a corte que apodreceu e, no fundo, as grutas do poço da lua. Em passos:
-     1. a rocha por faixa: o Metal do Reator da Nave afina e vira Solo Élfico; Solo com bolsões de Mármore-Lua na
-        Mata; Mármore-Lua nos Salões; Mármore Profanado na Corte; Pedra-do-Poço com veios de Raiz-Mãe no Poço
+   A décima camada, debaixo da Fortaleza dos Anões (a de cima vem de camadaAcima; elAbove, 250). Em cima, a mata de
+   prata crescida debaixo da Lua Presa; depois os salões lavrados do rei, a Corte dos Espinhos (a corte que seguiu a
+   Dama e virou a Corte Sem Lua: a roseira-brava cresceu por cima de tudo) e, no fundo, as Grutas da Lua. Em passos:
+     1. a rocha por faixa: a rocha da camada de cima (a Fortaleza dos Anões) afina e vira Solo Élfico; Solo com bolsões de Mármore-Lua na
+        Mata; Mármore-Lua nos Salões; Mármore Enredado na Corte; Pedra-do-Poço com veios de Raiz-Mãe nas Grutas
      2. as salas: as duas descidas (o poço de raízes com a Escada de Corda e o Posto de Guarda 12 x 6), o Espelho da
         Lua do outro lado do mundo (a caixa sólida que o 256 veste com elDress) e os dois corredores até as portas, as
-        clareiras e as grotas de folha, os salões lavrados, os abismos com ponte e as galerias, os salões em ruína e os
-        bosques mortos, as grutas da lua (duas com as Raízes Fundas, a saída para baixo)
-     3. as ligações: túneis de raiz na Mata e no Poço, galerias retas nos Salões e na Corte, escadarias entre as faixas
+        clareiras e as grotas de folha, os salões lavrados, os abismos com ponte e as galerias, os salões enredados e os
+        roseirais, as grutas da lua (duas com as Raízes Fundas, a saída para baixo)
+     3. as ligações: túneis de raiz na Mata e nas Grutas, galerias retas nos Salões e na Corte, escadarias entre as faixas
      4. as cascas: as árvores de prata (tronco do chão ao teto, copa de folhagem no teto, flets de tábua com escada de
-        corda), mármore e pedra lavrada nos salões com colunas de raiz, ruína e madeira morta na Corte, cristais e raízes
-        no Poço
-     5. os veios: carvão no solo e na madeira morta, lunarita no mármore e na pedra-do-poço (metade nos Salões e no Poço)
+        corda), mármore e pedra lavrada nos salões com colunas de raiz, mármore enredado, lenho de espinheiro e pedras-videntes
+        na Corte, cristais e raízes nas Grutas
+     5. os veios: carvão no solo e no lenho de espinheiro, lunarita no mármore e na pedra-do-poço (metade nos Salões e nas Grutas)
    Depois (elAfter): tudo alcançável das descidas, Escada de Corda ou Cipó em todo desnível de 5, os estragos (entulho e
-   espinheiros na Corte), a decoração de 1 bloco, os objetos (252) e a água que brilha nos poços. Por fim o Espelho
+   roseira-brava na Corte), a decoração de 1 bloco, os objetos (252) e a água que brilha nos poços. Por fim o Espelho
    (256: elDress), as bocas das descidas e a subida garantida (elClimbFix). O 87 liga o resto depois.
    A camada tem LAYER_K vezes a altura do desenho: cada faixa vira LAYER_K andares da altura da faixa no desenho, cada
    andar com as suas salas (do mesmo tamanho) e o seu anel; entre os andares, túneis de raiz em ziguezague e escadarias.
-   Também: a terceira camada, as zonas 53 a 56, o spawn por faixa e o nível (23 e 24 pela posição no 129), as
+   Também: a terceira camada, as zonas 53 a 56, o spawn por faixa e o nível (46 a 50 pela posição no 129), as
    partículas e a lunarita na fornalha e nas lojas. */
 
 const EL_SOILS = new Uint8Array(NT);   // o chão da camada: onde decoração e objetos podem ficar
-for (const t of [EL_SOLO, EL_MADEIRA, EL_FOLHAGEM, EL_MARMORE, EL_LAVRADA, EL_TABUA, EL_PROFANO, EL_MORTA, EL_CRISTAL_SANGUE, EL_PEDRA_POCO, EL_RAIZ, EL_CRISTAL_LUA, EL_O_CARVAO, EL_O_LUNARITA]) EL_SOILS[t] = 1;
+for (const t of [EL_SOLO, EL_MADEIRA, EL_FOLHAGEM, EL_MARMORE, EL_LAVRADA, EL_TABUA, EL_ENREDADO, EL_LENHO, EL_VIDENTE, EL_PEDRA_POCO, EL_RAIZ, EL_CRISTAL_LUA, EL_O_CARVAO, EL_O_LUNARITA]) EL_SOILS[t] = 1;
 let elChambers = [], elCorr = [], elBridges = [], elDead = [];
 // (a escada da camada de cima fica guardada: elAbove() monta um objeto a cada chamada e isto roda por bloco)
 let elUpClimb = CHAIN;
@@ -61,7 +62,7 @@ function elBuild() {
       let tt = EL_SOLO, w = WEL_MATA;
       if (b === 0) { if (n1 > 0.66 || (d > mb(36) && n2 > 0.6)) tt = EL_MARMORE; }
       else if (b === 1) { tt = n2 > 0.78 ? EL_SOLO : EL_MARMORE; w = WEL_SALAO; }
-      else if (b === 2) { tt = n1 > 0.8 ? EL_MARMORE : EL_PROFANO; w = WEL_PROFANO; }
+      else if (b === 2) { tt = n1 > 0.8 ? EL_MARMORE : EL_ENREDADO; w = WEL_ENREDADO; }
       else { const rib = Math.abs(nz(x, y, 22, 0x5a4) - 0.5); tt = rib < 0.028 ? EL_RAIZ : n1 > 0.82 ? EL_MARMORE : EL_PEDRA_POCO; w = WEL_POCO; }
       tiles[i] = tt; walls[i] = w;
       if (agua.length) agua[i] = 0;
@@ -89,7 +90,7 @@ function elBuild() {
       if (dx * dx + dy * dy < 1 + (hash2(W1(x) >> 1, y >> 1, s) - 0.5) * 0.18 + (nz(x, y, 40, s) - 0.5) * 0.25) dig(x, y);
     }
   };
-  // túnel de raiz (Mata e Poço): anda para o alvo com curvas suaves; r ~1.4 dá 3 de altura. Nunca mais íngreme que
+  // túnel de raiz (Mata e Grutas): anda para o alvo com curvas suaves; r ~1.4 dá 3 de altura. Nunca mais íngreme que
   // uns 35 graus: com o alvo embaixo ele vai em ziguezague (side), sem poço reto
   const worm = (xa, ya, xb, yb, r, s) => {
     let x = xa, y = ya, side = 1; const tx = xa + wdx(xb - xa), Rw = mulberry32(seed ^ s);
@@ -113,7 +114,7 @@ function elBuild() {
     for (let k = 0; k < steps * 2; k++, x += s) { if (k % 2 === 1) f += fs; for (let y = f - 5; y < f; y++) dig(x, y); hard(x, f); }
   };
 
-  // ---------- 2a. as duas descidas: dos Rasgos no Casco da Nave, um poço de raízes até o Posto de Guarda ----------
+  // ---------- 2a. as duas descidas: das salas de descida da camada de cima (a Fortaleza dos Anões), um poço de raízes até o Posto de Guarda ----------
   {
     const ub = A.boss, halls = (A.halls || []).map(c => ({ cx: c.cx !== undefined ? c.cx : c.x0 + (c.w || 4) / 2, x0: c.x0, fy: c.fy })).filter(c => c.fy && c.fy < S0 + 2 && (!ub || Math.abs(wdx(c.cx - ub.cx)) > (ub.r || ub.w || 20) + 20)).sort((a, b) => a.cx - b.cx);
     const picks = [];
@@ -145,7 +146,7 @@ function elBuild() {
   {
     const w = 64, h = 26;
     const ax = elEntries.length ? elEntries.reduce((s, e) => s + wdx(e.x0 - elEntries[0].x0), 0) / elEntries.length + elEntries[0].x0 : SPX;
-    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 30)), fy = Math.min(YB - 16, md(K - 1, 168)), top = fy - h;   // longe das 10 linhas que o Abismo afina
+    const cx = W1(Math.round(ax + WW / 2 + (R() - 0.5) * 30)), fy = Math.min(YB - 16, md(K - 1, 168)), top = fy - h;   // longe das 10 linhas que a camada de baixo afina
     const x0 = W1(cx - 32), x1 = W1(cx + 31);
     elBoss = { cx, x0, x1, w, h, top, fy,
       doors: [{ side: -1, x: W1(cx - 35), fy }, { side: 1, x: W1(cx + 34), fy }],
@@ -234,7 +235,7 @@ function elBuild() {
     elCorr.push({ x0: W1(x0), len, fy }); elChambers.push(C); k++;
   }
 
-  // ---------- 2f. a Corte Desterrada: salões em ruína e bosques mortos ----------
+  // ---------- 2f. a Corte dos Espinhos: salões enredados e roseirais ----------
   hallsOf(2, 5 * WSC, 108, 148, true);
   for (let k = 0, tries = 0; k < 3 * WSC * K && tries < 300 * K; tries++) {
     const j = k % K, w = 26 + ((R() * 15) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = md(j, 104) + h / 2 + R() * Math.max(0, sp(104, 146) - h);
@@ -246,7 +247,7 @@ function elBuild() {
     elGlades.push(G); elDead.push(G); elChambers.push(G); k++;
   }
 
-  // ---------- 2g. o Poço da Lua: grutas redondas com um poço no fundo ----------
+  // ---------- 2g. as Grutas da Lua: grutas redondas com uma bacia d'água no fundo ----------
   for (let k = 0, tries = 0; elGrottos.length < 5 * WSC * K + 4 && tries < 500 * K; tries++) {
     const j = k % K, w = 18 + ((R() * 11) | 0), h = 12 + ((R() * 5) | 0), cx = (R() * WW) | 0, cy = md(j, 152) + h / 2 + R() * Math.max(0, sp(152, 182) - h);
     if (busy(cx, cy, w, h, 6) || !awayFromBoss(cx, cy, Math.max(w, h) / 2 + 6) || cy + h / 2 > YB - 4) continue;
@@ -318,10 +319,10 @@ function elBuild() {
   const trunk = (tx, fy, dead) => {
     let top = fy - 1; while (top > fy - 40 && at(tx + 1, top - 1) === AIR) top--;
     if (fy - top < 6) return null;
-    const T0 = dead ? EL_MORTA : EL_MADEIRA;
+    const T0 = dead ? EL_LENHO : EL_MADEIRA;
     let sh = 0;
     for (let y = fy - 1; y >= top - 1; y--) {
-      if (dead && (fy - y) % 5 === 4) sh += hash2(tx, y, seed ^ 0x52) < 0.5 ? -1 : 1;   // a madeira morta se retorce
+      if (dead && (fy - y) % 5 === 4) sh += hash2(tx, y, seed ^ 0x52) < 0.5 ? -1 : 1;   // o espinheiro se retorce
       for (let x = tx + sh; x < tx + sh + 3; x++) { const i = I(x, y); if (elKeep.has(i)) continue; tiles[i] = T0; }
     }
     // as raízes do pé: uma fileira mais larga em cima do chão
@@ -332,7 +333,7 @@ function elBuild() {
   // flets de tábua em volta e a escada de corda do chão ao flet
   for (const G of elGlades) {
     const x0 = Math.floor(G.cx - G.w / 2) - 2, x1 = Math.ceil(G.cx + G.w / 2) + 2, y0 = Math.floor(G.cy - G.h / 2) - 3, y1 = G.fy + 1;
-    lining(x0, y0, x1, y1, G.dead ? EL_PROFANO : EL_SOLO, G.dead ? WEL_PROFANO : WEL_FOLHAS, G.dead ? EL_PROFANO : EL_SOLO, G.dead ? EL_PROFANO : EL_FOLHAGEM);
+    lining(x0, y0, x1, y1, G.dead ? EL_ENREDADO : EL_SOLO, G.dead ? WEL_ENREDADO : WEL_FOLHAS, G.dead ? EL_ENREDADO : EL_SOLO, G.dead ? EL_ENREDADO : EL_FOLHAGEM);
     G.flets = [];
     for (const tx of G.trees) {
       // o chão debaixo do tronco: desce até achar chão firme perto do fundo da clareira
@@ -362,7 +363,7 @@ function elBuild() {
   for (const C of elChambers) if (C.kind === 'grota' && C.band === 0) lining(Math.floor(C.cx - C.w / 2) - 2, Math.floor(C.cy - C.h / 2) - 2, Math.ceil(C.cx + C.w / 2) + 2, Math.ceil(C.cy + C.h / 2) + 2, EL_SOLO, WEL_MATA, EL_SOLO, EL_FOLHAGEM);
   // os salões: pedra lavrada na casca, chão lavrado, painel lavrado atrás; colunas de raiz a cada 8 do chão à abóbada
   for (const H of elHalls) {
-    lining(H.x0 - 2, H.top - 2, H.x0 + H.w + 1, H.fy + 1, H.ruin ? EL_PROFANO : EL_LAVRADA, H.ruin ? WEL_PROFANO : WEL_SALAO, H.ruin ? EL_PROFANO : EL_LAVRADA, H.ruin ? EL_PROFANO : EL_LAVRADA);
+    lining(H.x0 - 2, H.top - 2, H.x0 + H.w + 1, H.fy + 1, H.ruin ? EL_ENREDADO : EL_LAVRADA, H.ruin ? WEL_ENREDADO : WEL_SALAO, H.ruin ? EL_ENREDADO : EL_LAVRADA, H.ruin ? EL_ENREDADO : EL_LAVRADA);
     for (let x = H.x0 + 4; x < H.x0 + H.w - 3; x += 8) {
       if (at(x, H.fy - 1) !== AIR) continue;
       let y = H.fy - 1; while (y > H.top - 6 && at(x, y - 1) === AIR) y--;
@@ -375,7 +376,7 @@ function elBuild() {
       for (let x = cx - rw; x <= cx + rw; x++) {
         if (at(x, H.fy - 1) === EL_COLUNA) for (let yy = H.top - 4; yy < H.fy; yy++) if (at(x, yy) === EL_COLUNA) set(x, yy, AIR);
         const mh = Math.max(0, Math.round((1 - Math.abs(x - cx) / (rw + 1)) * 2.4));
-        for (let j = 1; j <= mh; j++) if (at(x, H.fy - j) === AIR) set(x, H.fy - j, EL_PROFANO);
+        for (let j = 1; j <= mh; j++) if (at(x, H.fy - j) === AIR) set(x, H.fy - j, EL_ENREDADO);
       }
     }
   }
@@ -391,8 +392,8 @@ function elBuild() {
       for (let y = Q.fy - 6; y <= Q.fy; y++) {
         const i = I(x, y); if (inElHall(W1(x), y, 1) || y < S0 + 1 || y >= YB - 1) continue;
         const b = elfosBand(y);
-        if (!SOLID[tiles[i]]) { walls[i] = b >= 3 ? WEL_POCO : b === 2 ? WEL_PROFANO : WEL_SALAO; continue; }
-        if ((y === Q.fy || y === Q.fy - 6) && EL_SOILS[tiles[i]] && !elKeep.has(i)) tiles[i] = b === 2 ? EL_PROFANO : b >= 3 ? EL_PEDRA_POCO : EL_LAVRADA;
+        if (!SOLID[tiles[i]]) { walls[i] = b >= 3 ? WEL_POCO : b === 2 ? WEL_ENREDADO : WEL_SALAO; continue; }
+        if ((y === Q.fy || y === Q.fy - 6) && EL_SOILS[tiles[i]] && !elKeep.has(i)) tiles[i] = b === 2 ? EL_ENREDADO : b >= 3 ? EL_PEDRA_POCO : EL_LAVRADA;
       }
     }
   }
@@ -408,12 +409,12 @@ function elBuild() {
       }
     }
   }
-  // a Corte: cachos de cristal de mana sangrenta nas paredes dos salões em ruína
+  // a Corte: pedras-videntes (a pedra furada que deixa ver o povo das fadas) nas paredes dos salões enredados
   for (const H of elHalls) if (H.ruin) for (let k = 0, n = 1 + ((R() * 2) | 0); k < n; k++) {
     const ex = H.x0 + 2 + R() * (H.w - 4), ey = H.top + R() * 3, r = 1.2 + R();
     for (let y = Math.floor(ey - r); y <= ey + r; y++) for (let x = Math.floor(ex - r); x <= ex + r; x++) {
       if (Math.hypot(x + 0.5 - ex, y + 0.5 - ey) > r) continue;
-      const i = I(x, y); if (elKeep.has(i) || !SOLID[tiles[i]] || !EL_SOILS[tiles[i]]) continue; tiles[i] = EL_CRISTAL_SANGUE;
+      const i = I(x, y); if (elKeep.has(i) || !SOLID[tiles[i]] || !EL_SOILS[tiles[i]]) continue; tiles[i] = EL_VIDENTE;
     }
   }
   // o Espelho da Lua: a caixa toda sólida, pedra-do-poço com parede do poço (o 256 escreve dentro)
@@ -446,7 +447,7 @@ function elBuild() {
   for (const X of elExits) {
     for (let y = X.top - 1; y < X.fy; y++) {
       for (let x = X.x0; x < X.x0 + 3; x++) { const i = I(x, y); if (y >= X.top) { tiles[i] = AIR; walls[i] = WEL_POCO; elKeep.add(i); } }
-      if (y >= X.top) for (const x of [X.x0 - 1, X.x0 + 3]) { const i = I(x, y); tiles[i] = (y - X.top) % 6 === 3 ? EL_MORTA : EL_RAIZ; elKeep.add(i); }
+      if (y >= X.top) for (const x of [X.x0 - 1, X.x0 + 3]) { const i = I(x, y); tiles[i] = (y - X.top) % 6 === 3 ? EL_LENHO : EL_RAIZ; elKeep.add(i); }
     }
     for (let y = X.C.top + 1; y < X.fy; y++) { const i = I(X.x0 + 1, y); if (!SOLID[tiles[i]]) { tiles[i] = EL_ESCADA; elKeep.add(i); } }
     for (let x = X.x0 - 2; x <= X.x0 + 4; x++) { elKeep.add(I(x, X.top)); if (x < X.x0 || x > X.x0 + 2) { const i = I(x, X.top); if (SOLID[tiles[i]]) tiles[i] = EL_RAIZ; } }
@@ -466,9 +467,9 @@ function elBuild() {
     }
   };
   vein(EL_O_CARVAO, 22 * WSC * K, 0, 60, 3, 8, t => t === EL_SOLO);
-  vein(EL_O_CARVAO, 6 * WSC * K, 98, 150, 3, 7, t => t === EL_PROFANO || t === EL_MORTA);
+  vein(EL_O_CARVAO, 6 * WSC * K, 98, 150, 3, 7, t => t === EL_ENREDADO || t === EL_LENHO);
   vein(EL_O_LUNARITA, 13 * WSC * K, 46, 98, 2, 5, t => t === EL_MARMORE);
-  vein(EL_O_LUNARITA, 7 * WSC * K, 98, 150, 2, 5, t => t === EL_PROFANO || t === EL_MARMORE);
+  vein(EL_O_LUNARITA, 7 * WSC * K, 98, 150, 2, 5, t => t === EL_ENREDADO || t === EL_MARMORE);
   vein(EL_O_LUNARITA, 6 * WSC * K, 150, 186, 2, 5, t => t === EL_PEDRA_POCO || t === EL_MARMORE);
 }
 
@@ -573,13 +574,13 @@ function elAfter() {
     if (ok) for (let yy = y; yy < k; yy++) if (at(x, yy) === AIR) put(x, yy, EL_ESCADA);
   }
 
-  // ---------- 3. os estragos: espinheiros no chão dos bosques mortos e dos salões em ruína ----------
+  // ---------- 3. os estragos: roseira-brava no chão dos roseirais e dos salões enredados ----------
   for (const C of [...elDead, ...elHalls.filter(H => H.ruin)]) {
     const x0 = Math.floor(C.x0 !== undefined ? C.x0 : C.cx - C.w / 2), w = C.w;
     for (let x = x0 + 1; x < x0 + w - 1; x++) {
       let y = C.fy - 1; while (y > C.fy - 6 && at(x, y + 1) === AIR) y++;
       const i = I(x, y); if (tiles[i] !== AIR || elKeep.has(i) || !elSolid(at(x, y + 1)) || EL_CLIMB(at(x - 1, y)) || EL_CLIMB(at(x + 1, y)) || EL_CLIMB(at(x, y - 1))) continue;
-      if (R3() < (C.dead ? 0.16 : 0.06)) put(x, y, EL_ESPINHO);
+      if (R3() < (C.dead ? 0.16 : 0.06)) put(x, y, EL_ROSEIRA);
     }
   }
 
@@ -602,12 +603,12 @@ function elAfter() {
       else { if (q < 0.035) put(x, y, EL_ORVALHO); else if (q < 0.05 && gap > 4) { for (let j = 0, n = 2 + ((R3() * 4) | 0); j < n && at(x, y + j) === AIR && at(x, y + j + 2) === AIR; j++) put(x, y + j, EL_CIPO); } else if (q < 0.06 && gap >= 3) put(x, y, EL_LANTERNA); }
       continue;
     }
-    // vaga-lumes no ar perto da parede (Mata e Poço); cogumelo-de-luar grudado na parede do Poço
+    // vaga-lumes no ar perto da parede (Mata e Grutas); cogumelo-de-luar grudado na parede das Grutas
     if (!floor && (b === 0 || b === 3) && q < 0.006 && at(x - 1, y) === AIR && at(x + 1, y) === AIR && at(x, y + 1) === AIR) { put(x, y, EL_VAGALUME); continue; }
     if (!floor || EL_CLIMB(at(x - 1, y)) || EL_CLIMB(at(x + 1, y)) || (agua.length && agua[i])) continue;
     if (b === 0) { if (q < 0.05) put(x, y, EL_FOLHAS); else if (q < 0.075) put(x, y, EL_SAMAMBAIA); else if (q < 0.095) put(x, y, EL_FLOR); else if (q < 0.1) put(x, y, EL_RUNA); }
     else if (b === 1) { if (q < 0.012) put(x, y, EL_BRASEIRO); else if (q < 0.02) put(x, y, EL_RUNA); else if (q < 0.03) put(x, y, EL_FLOR); }
-    else if (b === 2) { if (q < 0.03) put(x, y, EL_FOLHAS); else if (q < 0.04 && dn === EL_PROFANO) put(x, y, EL_CRISTALINHO); }
+    else if (b === 2) { if (q < 0.025) put(x, y, EL_FOLHAS); else if (q < 0.045) put(x, y, EL_COGUMELO); }   // os anéis de cogumelo das fadas
     else { if (q < 0.03) put(x, y, EL_COGUMELO); else if (q < 0.05) put(x, y, EL_CRISTALINHO); else if (q < 0.065) put(x, y, EL_FLOR); else if (q < 0.07) put(x, y, EL_RUNA); }
   }
 
@@ -671,7 +672,7 @@ function elClimbFix() {
     }
     return hit >= 0 ? win(hit) : false;
   };
-  const soft = t => t === EL_SOLO || t === EL_MARMORE || t === EL_LAVRADA || t === EL_PROFANO || t === EL_PEDRA_POCO || t === EL_TABUA || t === EL_FOLHAGEM;
+  const soft = t => t === EL_SOLO || t === EL_MARMORE || t === EL_LAVRADA || t === EL_ENREDADO || t === EL_PEDRA_POCO || t === EL_TABUA || t === EL_FOLHAGEM;
   const repair = () => {
     let best = null;
     for (let y = Y0 + 2; y < YB - 1; y++) for (let x = 0; x < WW; x++) {
@@ -728,7 +729,7 @@ function elClimbFix() {
 }
 
 /* ---------- os objetos (252): por faixa, no chão, debaixo do teto e na parede. As flags do 252 decidem onde cada um
-   pode ficar (clareira: só nas clareiras e nos bosques; salao: só nos salões lavrados; ruina: só nos salões em ruína;
+   pode ficar (clareira: só nas clareiras e nos bosques; salao: só nos salões lavrados; ruina: só nos salões enredados;
    gruta: só nas grutas da lua). Nunca sobre escada, cipó, espinho ou água; nunca no pouso nem no Espelho ---------- */
 function elPlaceProps() {
   if (typeof EL_PROP_PLAN === 'undefined') return;
@@ -800,7 +801,7 @@ function elPlaceProps() {
 }; }
 
 /* ---------- a terceira camada atrás do Reino: a mata ao longe com a Lua Presa na Mata, os salões ao longe nos Salões
-   e na Corte, as raízes da Árvore-Mãe no Poço ---------- */
+   e na Corte, as raízes da Árvore-Mãe nas Grutas ---------- */
 { const _cd = cathedralDeep; cathedralDeep = function () {
   _cd();
   if (!ELFOS) return;
@@ -814,17 +815,17 @@ function elPlaceProps() {
 
 /* ---------- zonas, spawn, nível ---------- */
 { const _cz = cathZone; cathZone = function (tx, ty) { if (ELFOS && ty >= EL_S0 && ty < EL_S0 + EL_D) return EL_ZONE0 + clamp(elfosBand(ty), 0, 3); return _cz(tx, ty); }; }
-// pesos da ficha (seção 6)
+// pesos da ficha (seção 6, revista no revamp de 2026-10-21)
 Object.assign(CATH_SPAWN, {
-  [EL_ZONE0]: [[['sentinela', 4], ['arqueiro', 3], ['sabre', 2], ['fatuo', 3], ['antigo', 2]], 8],
-  [EL_ZONE0 + 1]: [[['sentinela', 3], ['arqueiro', 3], ['guardiao', 3], ['hipogrifo', 2], ['espectro', 2]], 9],
-  [EL_ZONE0 + 2]: [[['guardiao', 2], ['espectro', 3], ['magister', 3], ['cacador', 3], ['antigo', 2], ['arqueiro', 2]], 9],
-  [EL_ZONE0 + 3]: [[['fatuo', 3], ['sabre', 2], ['hipogrifo', 2], ['magister', 2], ['cacador', 3], ['espectro', 2]], 10]
+  [EL_ZONE0]: [[['fronteira', 4], ['arqueiro', 3], ['fatuo', 3], ['caofada', 2], ['silfide', 2]], 8],
+  [EL_ZONE0 + 1]: [[['fronteira', 3], ['arqueiro', 3], ['guardiao', 3], ['silfide', 2], ['carpideira', 2]], 9],
+  [EL_ZONE0 + 2]: [[['cavespinho', 3], ['mascarada', 3], ['musa', 2], ['carpideira', 2], ['guardiao', 2]], 9],
+  [EL_ZONE0 + 3]: [[['fatuo', 3], ['caofada', 2], ['silfide', 2], ['mascarada', 2], ['musa', 2], ['carpideira', 2]], 10]
 });
 // tipos que ainda não existem saem da tabela (o 253 e o 254 registram os elfos)
 for (let z = EL_ZONE0; z < EL_ZONE0 + 4; z++) CATH_SPAWN[z][0] = CATH_SPAWN[z][0].filter(([t]) => ET[t]);
 const EL_NO_SPAWN = (tx, ty) => inElLand(tx, ty, 3) || inElHall(tx, ty, 4) || elExits.some(X => Math.abs(wdx(tx - X.cx)) < 3 && ty >= X.top - 2);
-// níveis 23 e 24 (layerLvl no 52, a posição no 129); nada nasce no posto de guarda, no Espelho nem nas raízes fundas
+// níveis 46 a 50 (layerLvl no 52, a posição no 129); nada nasce no posto de guarda, no Espelho nem nas raízes fundas
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
   const e = _sp(type, px, py, zone), D = ET[type];
   if (!ELFOS || !e || e.boss || (D && D.boss) || e.elMinion) return e;
@@ -838,8 +839,8 @@ const EL_NO_SPAWN = (tx, ty) => inElLand(tx, ty, 3) || inElHall(tx, ty, 4) || el
 }; }
 HOOK.update.push(() => { for (let k = enemies.length - 1; k >= 0; k--) if (enemies[k].elVoid) enemies.splice(k, 1); });
 
-/* ---------- partículas: folhas de prata caindo e pólen de luz na Mata, poeira de luar nos Salões, cinza e brasas
-   carmesim na Corte, faíscas azuis subindo do Poço ---------- */
+/* ---------- partículas: folhas de prata caindo e pólen de luz na Mata, poeira de luar nos Salões, pétalas escuras
+   caindo e esporos verde-pálidos subindo na Corte, faíscas azuis subindo das Grutas ---------- */
 HOOK.update.push(dt => {
   if (!ELFOS || !pl || pl.dead || state !== 'play') return;
   const pty = Math.floor((pl.y + pl.h / 2) / T), b = elfosBand(pty); if (b < 0 || b > 3) return;
@@ -849,14 +850,14 @@ HOOK.update.push(dt => {
     if (!air(x, y)) return;
     if (b === 0) parts.push(Math.random() < 0.55 ? { x, y, vx: rnd(-8, 8), vy: rnd(4, 10), g: 0, life: 3.5, max: 3.5, col: Math.random() < 0.5 ? '#c8dcec' : '#8ab4cc', size: 1 } : { x, y, vx: rnd(-2, 2), vy: rnd(-4, -1), g: 0, life: 2.5, max: 2.5, col: '#e6f2ff', size: 1 });
     else if (b === 1) parts.push({ x, y, vx: rnd(-2, 2), vy: rnd(-1, 2), g: 0, life: 3, max: 3, col: Math.random() < 0.6 ? '#dce8f8' : '#9cc8ff', size: 1 });
-    else if (b === 2) parts.push(Math.random() < 0.6 ? { x, y, vx: rnd(-3, 3), vy: rnd(2, 6), g: 2, life: 3, max: 3, col: '#6a5a5c', size: 1 } : { x, y, vx: rnd(-3, 3), vy: rnd(-12, -4), g: -1, life: 1.6, max: 1.6, col: Math.random() < 0.5 ? '#ff5a4a' : '#f0c050', size: 1 });
+    else if (b === 2) parts.push(Math.random() < 0.6 ? { x, y, vx: rnd(-6, 6), vy: rnd(3, 7), g: 1, life: 3.4, max: 3.4, col: Math.random() < 0.6 ? '#662450' : '#4c183c', size: 1 } : { x, y, vx: rnd(-2, 2), vy: rnd(-7, -2), g: -0.5, life: 2.4, max: 2.4, col: Math.random() < 0.6 ? '#b8f0c8' : '#8ce0a8', size: 1 });
     else parts.push({ x, y, vx: rnd(-2, 2), vy: rnd(-9, -3), g: -1, life: 2.6, max: 2.6, col: Math.random() < 0.6 ? '#9cc8ff' : '#e6f2ff', size: 1 });
   }
 });
 
 /* ---------- a forja e o vilarejo: a lunarita na fornalha (257 tem os itens), as lojas ---------- */
 FURN.min_lunarita = { bar: 'barra_lunarita', n: 8, t: 10 };
-Object.assign(MAT_VAL, { min_lunarita: 58, barra_lunarita: 470, folha_prata: 12, pena_hipogrifo: 26, essencia_fatua: 30, presa_sabre: 28, cristal_sangrento: 120, lagrima_espectro: 34 });
-{ const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'folha_prata' || id === 'lagrima_espectro'; c.hint = c.hint.replace(/\.$/, '') + ', folhas de prata e lágrimas de espectro.'; }
-{ const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || ['min_lunarita', 'barra_lunarita', 'presa_sabre'].includes(id); f.hint = f.hint.replace(/\.$/, '') + ', lunarita e presas de sabre.'; }
-if (SHOPS.maga) { const m = SHOPS.maga, b = m.buys; if (typeof b === 'function') { m.buys = id => b(id) || ['pena_hipogrifo', 'essencia_fatua', 'cristal_sangrento'].includes(id); if (m.hint) m.hint = m.hint.replace(/\.$/, '') + ', penas de hipogrifo, essência fátua e cristal sangrento.'; } }
+Object.assign(MAT_VAL, { min_lunarita: 58, barra_lunarita: 470, folha_prata: 12, asa_silfide: 26, essencia_fatua: 30, pelo_caofada: 28, rosa_negra: 120, lagrima_carpideira: 34 });
+{ const c = SHOPS.curandeira, b = c.buys; c.buys = id => b(id) || id === 'folha_prata' || id === 'lagrima_carpideira'; c.hint = c.hint.replace(/\.$/, '') + ', folhas de prata e lágrimas de carpideira.'; }
+{ const f = SHOPS.ferreiro, b = f.buys; f.buys = id => b(id) || ['min_lunarita', 'barra_lunarita', 'pelo_caofada'].includes(id); f.hint = f.hint.replace(/\.$/, '') + ', lunarita e pelo de cão-fada.'; }
+if (SHOPS.maga) { const m = SHOPS.maga, b = m.buys; if (typeof b === 'function') { m.buys = id => b(id) || ['asa_silfide', 'essencia_fatua', 'rosa_negra'].includes(id); if (m.hint) m.hint = m.hint.replace(/\.$/, '') + ', asas de sílfide, essência fátua e rosas negras.'; } }

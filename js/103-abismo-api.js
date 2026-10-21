@@ -22,27 +22,18 @@ const AB_D = LAYER_D;                                   // metres of abyss
 const AB_ANTIGOS = typeof ANTIGOS !== 'undefined' && ANTIGOS;   // a Cidade dos Antigos (290), 2026-10-11
 const AB_FUNGO = typeof FUNGO !== 'undefined' && FUNGO, AB_CIDADE = typeof CIDADE !== 'undefined' && CIDADE, AB_FLORESTA = typeof FLORESTA !== 'undefined' && FLORESTA, AB_ANOES = typeof ANOES !== 'undefined' && ANOES, AB_COLMEIA = typeof COLMEIA !== 'undefined' && COLMEIA, AB_NAVE = typeof NAVE !== 'undefined' && NAVE, AB_ELFOS = typeof ELFOS !== 'undefined' && ELFOS, AB_TITAS = typeof TITAS !== 'undefined' && TITAS, AB_DRAGAO = typeof DRAGAO !== 'undefined' && DRAGAO;   // o Covil do Dragão (270), 2026-10-11
 const AB_MAR = typeof MAR !== 'undefined' && MAR;   // o Mar Sem Sol (260), 2026-10-11
-const AB_TOP = (typeof PS_TOP !== 'undefined' ? PS_TOP : AB_ANTIGOS ? AT_TOP : AB_TITAS ? TT_TOP : AB_DRAGAO ? DG_TOP : AB_MAR ? MS_TOP : AB_ELFOS ? EL_TOP : AB_NAVE ? NV_TOP : AB_COLMEIA ? CM_TOP : AB_ANOES ? AN_TOP : AB_FLORESTA ? FP_TOP : AB_CIDADE ? CD_TOP : AB_FUNGO ? FG_TOP : typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + LAYER_D;   // where the abyss starts, metres below the village floor (930)
+const AB_TOP = layerTop('abismo');   // where the abyss starts, metres below the village floor (2026-10-21: from the layer list, 129)
 // band tops in metres below AB_TOP: Portões de Cinza, Rios de Fogo, As Entranhas, Trono do Caos, (bedrock)
 const AB_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const AB_BAND_NAMES = ['portoes', 'rios', 'entranhas', 'trono'];
 const AB_ZONE0 = ZONE_NAMES.length;                 // zone ids 21..24 (108 pushes the names)
-let AB_S0 = typeof PESADELO !== 'undefined' && PESADELO ? PS_S0 + PS_D : AB_ANTIGOS ? AT_S0 + AT_D : AB_TITAS ? TT_S0 + TT_D : AB_DRAGAO ? DG_S0 + DG_D : AB_MAR ? MS_S0 + MS_D : AB_ELFOS ? EL_S0 + EL_D : AB_NAVE ? NV_S0 + NV_D : AB_COLMEIA ? CM_S0 + CM_D : AB_ANOES ? AN_S0 + AN_D : AB_FLORESTA ? FP_S0 + FP_D : AB_CIDADE ? CD_S0 + CD_D : AB_FUNGO ? FG_S0 + FG_D : MN_S0 + MN_D;   // the first abyss row of the current world (set by abBuild)
+let AB_S0 = (() => { const a = camadaAcima('abismo'); return a ? a.S0 + a.D : MN_S0 + MN_D; })();   // the first abyss row of the current world (set by abBuild)
 // the layer right above: its first row and depth, its natural ground (the abyss's ash creeps into it), the rock its
 // last rows thin out into, and the halls the two rifts open from
-const abAbove = () => typeof PESADELO !== 'undefined' && PESADELO ? { S0: PS_S0, D: PS_D, soils: PS_SOILS, thin: PS_SONO, thinW: WPS_SONO, halls: psExits, boss: psBoss }
-  : AB_ANTIGOS ? { S0: AT_S0, D: AT_D, soils: AT_SOILS, thin: AT_THIN, thinW: WAT_LAJE, halls: atExits, boss: atBoss }
-  : AB_TITAS ? { S0: TT_S0, D: TT_D, soils: TT_SOILS, thin: TT_ROCHA, thinW: WTT_ROCHA, halls: ttExits, boss: ttBoss }
-  : AB_DRAGAO ? { S0: DG_S0, D: DG_D, soils: DG_SOILS, thin: DG_OBSIDIANA, thinW: WDG_OBSIDIANA, halls: dgExits, boss: dgBoss }
-  : AB_MAR ? { S0: MS_S0, D: MS_D, soils: MS_SOILS, thin: MS_SULFETO, thinW: WMS_SULFETO, halls: msExits, boss: msBoss }
-  : AB_ELFOS ? { S0: EL_S0, D: EL_D, soils: EL_SOILS, thin: EL_PEDRA_POCO, thinW: WEL_POCO, halls: elExits, boss: elBoss }
-  : AB_NAVE ? { S0: NV_S0, D: NV_D, soils: NV_SOILS, thin: NV_REATOR, thinW: WNV_REATOR, halls: nvExits, boss: nvBoss }
-  : AB_COLMEIA ? { S0: CM_S0, D: CM_D, soils: CM_SOILS, thin: CM_CERA_REAL, thinW: WCM_REAL, halls: cmExits, boss: cmBoss }
-  : AB_ANOES ? { S0: AN_S0, D: AN_D, soils: AN_SOILS, thin: AN_GRANITO, thinW: WAN_GRANITO, halls: anExits, boss: anBoss }
-  : AB_FLORESTA ? { S0: FP_S0, D: FP_D, soils: FP_SOILS, thin: FP_GRANITO, thinW: WFP_GRANITO, halls: fpExits, boss: fpBoss }
-  : AB_CIDADE ? { S0: CD_S0, D: CD_D, soils: CD_SOILS, thin: CD_ATERRO, thinW: WCD_TIJOLO, halls: cdDown, boss: cdBoss }
-  : AB_FUNGO ? { S0: FG_S0, D: FG_D, soils: FG_SOILS, thin: FG_CARNE, thinW: WFG_CARNE, halls: fungDown, boss: fungBoss }
-  : { S0: MN_S0, D: MN_D, soils: MN_SOILS, thin: MN_ESCORIA, thinW: WMN_TIJOLO, halls: mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy), boss: mnBoss };
+const abAbove = () => {   // 2026-10-21: the layer right above comes from the list (129, camadaAcima)
+  const a = camadaAcima('abismo'); if (a) return a;
+  return { S0: MN_S0, D: MN_D, soils: MN_SOILS, thin: MN_ESCORIA, thinW: WMN_TIJOLO, halls: mnChambers.filter(c => c.kind === 'fornalha' && !c.boss && c.fy), boss: mnBoss };
+};
 
 // foreground blocks (solid): ash rock, basalt, obsidian, magma crust (glowing cracks), living flesh, packed bone,
 // brimstone, black iron (bridges and platforms), hell brick (ruins and temples), chaos stone, the boss hall's gate

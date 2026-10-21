@@ -29,6 +29,7 @@ const RUMO_COR = {
   colmeia: '#ffd060', nave: '#b0ffb0', elfos: '#d8e4ff', mar: '#90d0ff', dragao: '#ff9a60', titas: '#e8e0d0', antigos: '#ffe8a0', pesadelo: '#f0a0ff',
   abismo: '#ff7a50', escuro: '#d0d0e0'
 };
+for (const id in CAMADA_EXT) { const X = CAMADA_EXT[id]; if (X.salaFn) SALA_FN[id] = X.salaFn; if (X.cor) RUMO_COR[id] = X.cor; }   // as camadas novas (129, 2026-10-21)
 const descida = {
   salas: {},     // id -> { cx, cy, x0, x1, top, bot }: o centro e a caixa da sala do chefe
   selos: {},     // id da camada de baixo -> [primeira linha, linha depois da última] do selo
@@ -175,7 +176,7 @@ genPos(() => {
       const k = genIdx(id); if (k < 0) continue;
       const s = salaAcha(id); if (s) descida.salas[id] = s;
       if (k < 1) continue;   // as Cavernas: a superfície não tem chefe
-      const up = LAYERS[k - 1].id;
+      const up = layerAcimaId(id); if (!up) continue;
       if (!descida.salas[up]) { const su = salaAcha(up); if (su) descida.salas[up] = su; }
       seloFaz(id); mexeu = true;
       const R = rotaAcha(up, id); if (R) descida.rotas[up] = R; else delete descida.rotas[up];
@@ -225,15 +226,7 @@ HOOK.update.push(dt => {
     if (A.y >= R.ty + 60) { descida.abrindo.splice(k, 1); saveGame(); }
   }
 });
-{ const _eb = endBossFight; endBossFight = function (won) {
-  const F = bossFight, e = F && F.e;
-  const r = _eb.apply(this, arguments);
-  if (won && e) {
-    const k = genCamadaDe(Math.floor((e.y + e.h / 2) / T));
-    if (k >= 0) { const id = LAYERS[k].id; descida.vencidos.add(id); rotaAbre(id); saveGame(); }
-  }
-  return r;
-}; }
+// a vitória sobre o chefe abre o caminho: o embrulho do endBossFight está no 363, que carrega depois de todos os chefes
 
 /* ---------- o save: os chefes vencidos (o caminho aberto também está nos diffs) ---------- */
 { const _mk = makeSave; makeSave = function () { const o = _mk(); o.vencidos = [...descida.vencidos]; return o; }; }

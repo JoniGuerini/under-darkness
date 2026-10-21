@@ -1,73 +1,83 @@
 'use strict';
 
-/* ================= o Reino Élfico: os guardiões, parte um =================
-   Cinco dos dez bichos da décima primeira camada (docs/camadas/11-reino-elfico.md, seção 6; os outros cinco estão no
-   254). Os do Reino são altos e finos, de prata, azul-lua, branco e o verde-folha dos mantos; os avisos acendem em
-   prata e azul.
-   - a Sentinela da Lua (sentinela), a guerreira de capuz azul e armadura de prata com o glaive de três lâminas; rápida.
-     O glaive acende azul na mão (0,5 s) e vem o corte duplo; depois ela salta para trás. De 4 a 9 blocos, o glaive
-     acende atrás do ombro (0,5 s) e ela o arremessa: ele vai girando em linha e volta para a mão (acerta na ida e na
-     volta, uma vez cada);
+/* ================= o Reino Élfico: os guardiões e as fadas, parte um =================
+   Cinco dos dez bichos da décima camada (docs/camadas/11-reino-elfico.md, seção 6 e "Revamp de 2026-10-21"; os outros
+   cinco estão no 254). Revamp de 2026-10-21: saíram a Sentinela da Lua (o glaive de três lâminas que volta), o
+   Sabre-da-Noite e o Antigo da Mata, que eram bonecos do Warcraft; entraram a Guarda-Fronteira, o Cão-Fada e a
+   Sílfide. Os ids mudaram junto (a `sentinela` e o `cacador` antigos também apagavam os bichos do Gelo de mesmo nome).
+   Os do Reino são altos e finos, de prata, cinza-folha e o verde dos mantos; os avisos acendem em prata e azul. As
+   fadas acendem em verde-pálido.
+   - a Guarda-Fronteira (fronteira), a guarda élfica da mata com a capa cinza de folha, a cota de prata e a espada
+     longa em folha de salgueiro; rápida. A lâmina acende na mão (0,5 s) e vem o corte duplo; depois ela salta para
+     trás. De 3 a 7 blocos ela se agacha com a espada acesa para trás (0,55 s) e salta POR CIMA do herói: cai do outro
+     lado e corta para trás na hora (quem fica parado leva; quem anda para trás dela, não);
    - o Arqueiro da Mata (arqueiro), de cabelo de prata solto e manto verde-prata; prefere ficar no alto (flets,
      pontes, degraus) e a uns 9 blocos. Puxa a corda e a ponta da flecha brilha (0,7 s): três flechas em leque, em
      arco. Quando o herói chega perto, salta para trás e para cima;
-   - o Sabre-da-Noite (sabre), a pantera violeta-escura de presas longas e a meia-lua de prata na testa; espreita
-     invisível (só um tremor no ar). Reaparece agachado, os olhos acendem (0,5 s), e vem o bote longo em arco; depois
-     some de novo. Um golpe enquanto espreita o mostra por um instante;
+   - o Cão-Fada (caofada), o cù-sìth do folclore: um cão do tamanho de um bezerro, de pelo verde-musgo desgrenhado, a
+     cauda enrolada e trançada sobre as costas, as orelhas caídas e os olhos verde-pálidos. Espreita invisível (só um
+     tremor no ar). Reaparece e LATE TRÊS VEZES (0,8 s, um anel no ar a cada latido): no terceiro vem o bote longo em
+     arco; depois some de novo. Um golpe enquanto espreita o mostra por um instante;
    - o Fogo-Fátuo (fatuo), luzinhas azul-prata em grupos de 3 a 5 (el1Grupo) que giram em volta do herói. O grupo para
      e as luzes incham (0,6 s); cada uma se lança e detona por toque (`touch`, o único daqui) e suga 6 de mana. A que
      erra estoura sozinha, sem dano;
-   - o Antigo da Mata (antigo), a árvore viva de casca prateada, copa azul-prata e olhos de seiva azul; lento. Bate o
-     pé (0,45 s) e uma rachadura corre pelo chão até onde o herói estava (0,55 s): raízes rompem ali (dano e
-     elEnraizar 1,2 s, do 250; o 259 prende os pés). Perto, ergue o galho (0,55 s) e o tapa joga o herói longe.
+   - a Sílfide (silfide), a fada do ar: pequena, de pele pálida, cabelo de folhas e quatro asas de libélula; voa aos
+     trancos a uns 5 blocos. Para no ar, as asas viram um borrão e o vento converge para as mãos dela (0,65 s): sai
+     a Rajada, uma meia-lua de vento em linha reta que dá pouco dano e EMPURRA o herói para longe (cuidado com as
+     pontes sem corrimão). Golpeada, ou com o herói em cima dela, dispara para longe.
+   Os espinhos que correm pelo chão (el1Pisa / el1Rompe: a rachadura de roseira e os espinhos que rompem e prendem os
+   pés) ficam aqui porque o desenho e o tempo são os de antes; quem os chama agora é o Cavaleiro de Espinhos (254).
    O 255 põe o nível (embrulha spawnEnemy por fora) e as tabelas de spawn. O pincel é o do 55 (cp, contorno, cache),
    rampas de 6 tons com luz de cima à esquerda; brilhos pelo HOOK.drawGlow e EYES_E, os pontinhos acesos por cima do
    escuro (HOOK.drawTop). Materiais e bases do 257 (filtrados). Prefixo el1. */
 
 /* ---------- números ---------- */
 Object.assign(ET, {
-  sentinela: { name: 'Sentinela da Lua', w: 9, h: 22, hp: 90, dmg: 20, xp: 30, kb: 0.75, fly: false, blood: '#b83a48' },
+  fronteira: { name: 'Guarda-Fronteira', w: 9, h: 22, hp: 90, dmg: 20, xp: 30, kb: 0.75, fly: false, blood: '#b83a48' },
   arqueiro: { name: 'Arqueiro da Mata', w: 8, h: 22, hp: 70, dmg: 22, xp: 28, kb: 0.9, fly: false, blood: '#b83a48' },
-  sabre: { name: 'Sabre-da-Noite', w: 20, h: 11, hp: 140, dmg: 26, xp: 38, kb: 0.45, fly: false, blood: '#8a2a4a' },
+  caofada: { name: 'Cão-Fada', w: 20, h: 12, hp: 140, dmg: 26, xp: 38, kb: 0.45, fly: false, blood: '#4a6a3a' },
   fatuo: { name: 'Fogo-Fátuo', w: 6, h: 6, hp: 26, dmg: 10, xp: 9, kb: 1.2, fly: true, touch: 1, blood: '#c8e4ff' },   // touch: só no bote (atkCD segura o resto)
-  antigo: { name: 'Antigo da Mata', w: 16, h: 30, hp: 320, dmg: 32, xp: 52, kb: 0.12, fly: false, blood: '#5a92c8' }
+  silfide: { name: 'Sílfide', w: 10, h: 12, hp: 80, dmg: 22, xp: 30, kb: 1, fly: true, blood: '#c8e8f0' }
 });
-const EL1_TYPES = ['sentinela', 'arqueiro', 'sabre', 'fatuo', 'antigo'];
+const EL1_TYPES = ['fronteira', 'arqueiro', 'caofada', 'fatuo', 'silfide'];
 // materiais e bases do 257; filtradas agora e de novo a cada mundo
 const EL1_DROPS = {
-  sentinela: [['folha_prata', 0.4], ['min_lunarita', 0.08], ['pocao', 0.07], ['glaive_lunar', 0.015], ['elmo_alado', 0.01]],
+  fronteira: [['folha_prata', 0.4], ['min_lunarita', 0.08], ['pocao', 0.07], ['lamina_folha', 0.015], ['elmo_alado', 0.01]],
   arqueiro: [['folha_prata', 0.3], ['min_lunarita', 0.08], ['pocao', 0.08]],
-  sabre: [['presa_sabre', 0.55, 1, 2], ['min_lunarita', 0.08], ['pocao', 0.08]],
+  caofada: [['pelo_caofada', 0.55, 1, 2], ['min_lunarita', 0.08], ['pocao', 0.08]],
   fatuo: [['essencia_fatua', 0.4], ['min_lunarita', 0.04], ['pocao', 0.04]],
-  antigo: [['folha_prata', 0.6, 1, 3], ['min_lunarita', 0.12], ['pocao', 0.1]]
+  silfide: [['asa_silfide', 0.55], ['min_lunarita', 0.06], ['pocao', 0.07]]
 };
 function el1Tables() { for (const k of EL1_TYPES) DROPS[k] = EL1_DROPS[k].filter(([id]) => ITEMS[id]); }
 el1Tables();
-Object.assign(NAV_WALKERS, { sentinela: 1, arqueiro: 1, sabre: 1, antigo: 1 });
-Object.assign(CV_STEP, { sentinela: 1, arqueiro: 1, sabre: 1, antigo: 1 });
+Object.assign(NAV_WALKERS, { fronteira: 1, arqueiro: 1, caofada: 1 });
+Object.assign(CV_STEP, { fronteira: 1, arqueiro: 1, caofada: 1 });
+ET.fronteira.climbs = true; ET.arqueiro.climbs = true;   // sobem as escadas de corda (o 356 lê `climbs`)
 
-const EL1_GLAIVE = 0.5, EL1_TIRO = 0.5, EL1_CORDA = 0.7, EL1_OLHOS = 0.5, EL1_INCHA = 0.6, EL1_PE = 0.45, EL1_RACHA = 0.55, EL1_GALHO = 0.55;
-const EL1_GL_SP = 230, EL1_GL_MAX = 9.5 * T;      // o glaive arremessado: velocidade e alcance
+const EL1_LAMINA = 0.5, EL1_SALTO = 0.55, EL1_CORDA = 0.7, EL1_LATIDO = 0.8, EL1_INCHA = 0.6, EL1_RACHA = 0.55, EL1_SOPRO = 0.65;
 const EL1_ARCO_SP = 250, EL1_ARCO_G = 360;        // a flecha: velocidade e a gravidade dela
 const EL1_LONGE = 9 * T;                           // a distância do arqueiro
-const EL1_RAIZ_W = 13, EL1_RAIZ_H = 26;           // a área das raízes (meia-largura, altura) em px
+const EL1_RAIZ_W = 13, EL1_RAIZ_H = 26;           // a área dos espinhos (meia-largura, altura) em px
+const EL1_RAJ_SP = 190, EL1_RAJ_MAX = 9 * T;       // a rajada da sílfide: velocidade e alcance
 
 /* ---------- as poses (no desenho de 26 x 28 de frente para a direita, o corpo no x 11, os pés na linha 27) ----------
    low: o corpo desce; lean: o tronco vai para a frente; b/f: o pé de trás e o da frente; hn/hf: a mão de perto e a de
-   longe; cl: quanto o manto voa; g: o ângulo do glaive na mão (null: está voando) */
+   longe; cl: quanto a capa voa; g: o ângulo da espada na mão (0 aponta para a frente) */
 const EL1_BX = 11;
-const EL1_SN = [
-  { low: 0, lean: 0, b: [9.2, 27], f: [13.4, 27], hn: [16.2, 16.6], hf: [8.4, 15.8], cl: 0.6, g: 0.5 },          // 0 parada
-  { low: 0.5, lean: 0.5, b: [7.2, 27], f: [15.2, 27], hn: [16.4, 15.8], hf: [9.8, 15.8], cl: 1.8, g: 0.3 },        // 1-2 andando
-  { low: 0, lean: 0.5, b: [13.2, 27], f: [9.4, 26.6], hn: [15.8, 16.6], hf: [7.6, 15], cl: 1.4, g: 0.8 },
-  { low: 1, lean: -0.6, b: [7.4, 27], f: [15.2, 27], hn: [7.4, 4.8], hf: [15.6, 11.4], cl: 1, g: -0.4 },        // 3 o aviso: erguido atrás, aceso
-  { low: 1.5, lean: 1.5, b: [6.4, 27], f: [16.6, 27], hn: [19.8, 15], hf: [6.2, 12.4], cl: 2.6, g: 1.2 },        // 4 o primeiro corte, para baixo
-  { low: 0.6, lean: 1, b: [7.2, 27], f: [15.8, 27], hn: [19, 6.8], hf: [6.8, 14.2], cl: 2.2, g: -1 },           // 5 o segundo, para cima
-  { low: 0.8, lean: -1, b: [7.6, 27], f: [14.8, 27], hn: [4.8, 9.6], hf: [15.8, 10.2], cl: 1, g: 0 },            // 6 o arremesso: para trás
-  { low: 0.4, lean: 1.3, b: [7.4, 27], f: [15.6, 27], hn: [19.6, 9.8], hf: [6.4, 13.6], cl: 2, g: null },        // 7 soltou
-  { low: 0, lean: 0.2, b: [9.2, 27], f: [13.4, 27], hn: [16, 11.8], hf: [8.4, 15.8], cl: 0.6, g: null },         // 8 a mão aberta esperando
-  { low: 0, lean: -0.4, b: [7.8, 24.2], f: [14.4, 25.4], hn: [14.6, 11.8], hf: [7.4, 12.2], cl: 3, g: 0.2, air: 1 }   // 9 o salto para trás
+const EL1_FR = [
+  { low: 0, lean: 0, b: [9.2, 27], f: [13.4, 27], hn: [15.4, 17.2], hf: [8.4, 15.8], cl: 0.6, g: 1.15 },          // 0 parada: a ponta para baixo
+  { low: 0.5, lean: 0.5, b: [7.2, 27], f: [15.2, 27], hn: [15.8, 16.4], hf: [9.8, 15.8], cl: 1.8, g: 0.9 },       // 1-2 andando
+  { low: 0, lean: 0.5, b: [13.2, 27], f: [9.4, 26.6], hn: [15.2, 16.8], hf: [7.6, 15], cl: 1.4, g: 1.05 },
+  { low: 1, lean: -0.6, b: [7.4, 27], f: [15.2, 27], hn: [8.4, 6.2], hf: [15.6, 11.4], cl: 1, g: -2.2 },         // 3 o aviso: erguida atrás, acesa
+  { low: 1.5, lean: 1.5, b: [6.4, 27], f: [16.6, 27], hn: [18.6, 15.4], hf: [6.2, 12.4], cl: 2.6, g: 0.35 },       // 4 o primeiro corte, para baixo
+  { low: 0.6, lean: 1, b: [7.2, 27], f: [15.8, 27], hn: [18, 8.4], hf: [6.8, 14.2], cl: 2.2, g: -0.7 },          // 5 o segundo, para cima
+  { low: 3, lean: 0.8, b: [6, 27], f: [16, 27], hn: [6.4, 16.4], hf: [14.6, 17.2], cl: 0.4, g: 2.75 },           // 6 agachada para o salto: a lâmina para trás
+  { low: -1.4, lean: 0.2, b: [8.4, 22.6], f: [14.4, 22], hn: [14.6, 7.6], hf: [7.6, 11.4], cl: 3.2, g: -1.6, air: 1 },   // 7 no ar, por cima: a lâmina erguida
+  { low: 1.8, lean: 1.2, b: [5.6, 27], f: [16.4, 27], hn: [19.2, 16.4], hf: [6, 13.2], cl: 2.4, g: 0.15 },        // 8 o corte para trás ao cair
+  { low: 0, lean: -0.4, b: [7.8, 24.2], f: [14.4, 25.4], hn: [14.6, 11.8], hf: [7.4, 12.2], cl: 3, g: 0.5, air: 1 }   // 9 o salto para trás
 ];
+const EL1_LAM_L = 11;   // o comprimento da lâmina em px
+const el1Tip = k => { const o = EL1_FR[k]; return [o.hn[0] + Math.cos(o.g) * EL1_LAM_L, o.hn[1] + Math.sin(o.g) * EL1_LAM_L]; };
 // o arqueiro: bow = [x, y, inclinação] da empunhadura (na mão de longe); hn a mão da corda; pull: a corda puxada
 const EL1_AR = [
   { low: 0, lean: 0, b: [9.2, 27], f: [13.4, 27], bow: [16.2, 15.4, 0.12], hn: [8.8, 15.6], cl: 0.6 },                // 0 parado
@@ -87,21 +97,22 @@ const { cp } = CVB, { cg } = CVART;
 const R6 = a => a.map(h => ph(h));
 const ER = {
   pele: R6(['#3c2c30', '#6e5458', '#a8868a', '#d0b2ac', '#ead6cc', '#fbf0e8']),       // a pele clara dos elfos
-  prata: R6(['#161c2c', '#323c56', '#58668a', '#8a9abc', '#c2d0e8', '#f2f8ff']),      // a armadura
-  lua: R6(['#0a1430', '#142a5c', '#22468e', '#3466b8', '#5a8ede', '#9cc0f4']),        // o azul-lua do pano
+  prata: R6(['#161c2c', '#323c56', '#58668a', '#8a9abc', '#c2d0e8', '#f2f8ff']),      // a cota e a lâmina
+  lua: R6(['#0a1430', '#142a5c', '#22468e', '#3466b8', '#5a8ede', '#9cc0f4']),        // o azul-lua
   folha: R6(['#081816', '#123030', '#1e4a48', '#2e6a64', '#4a8e84', '#7ab8a8']),      // o verde-folha dos mantos
+  cinza: R6(['#121614', '#222a26', '#36403a', '#4e5a52', '#6c7a70', '#94a296']),      // a capa cinza de folha da fronteira
   cabelo: R6(['#40485a', '#687284', '#949eb0', '#bcc6d4', '#dfe5ee', '#ffffff']),     // cabelo de prata
   couro: R6(['#24180e', '#3e2a18', '#5e4226', '#806038', '#a6844e', '#ccac70']),      // couro e madeira clara
   arco: R6(['#2e2a26', '#4c4640', '#746c62', '#a09688', '#cac0b0', '#eee8dc']),       // a madeira prateada do arco
-  casca: R6(['#141a22', '#262e3a', '#3e4856', '#5e6a78', '#86929e', '#b4c0ca']),      // a casca do Antigo
-  copa: R6(['#101a2e', '#1e304c', '#30496c', '#4a6890', '#7690b8', '#b6cce4']),       // as folhas azul-prata
-  seiva: R6(['#06204a', '#0c3a80', '#1a62c0', '#3a92f0', '#86c4ff', '#e0f4ff']),      // a seiva acesa
-  sabre: R6(['#0c0818', '#18122c', '#271e42', '#382c5c', '#4e3e7a', '#6a58a0']),      // o pelo violeta-escuro
-  ventre: R6(['#2a2238', '#443a58', '#62587a', '#857c9c', '#aaa2bc', '#d0cadc']),
-  osso: R6(['#5a5448', '#8a8270', '#b4ac98', '#d8d0bc', '#efe8d8', '#ffffff']),       // as presas
+  cao: R6(['#070c08', '#0e1a12', '#18291c', '#22392a', '#2e4c38', '#40644a']),        // o pelo verde-musgo do cão-fada
+  caoV: R6(['#1a2218', '#2c3828', '#40503a', '#56684e', '#708466', '#90a482']),        // a barriga e o focinho
+  osso: R6(['#5a5448', '#8a8270', '#b4ac98', '#d8d0bc', '#efe8d8', '#ffffff']),       // os dentes, as unhas
   fatuo: R6(['#1a3a6a', '#3a6aa8', '#6a9ad8', '#a6c8f0', '#d8ecff', '#ffffff']),
-  olho: R6(['#1a3a6a', '#2a5ea0', '#4a8ad0', '#7ab4f0', '#b8dcff', '#ffffff'])         // os olhos de luar
+  palida: R6(['#3a4450', '#5e6c7a', '#8496a4', '#acbec8', '#d2e2e8', '#f2fafc']),     // a pele azulada da sílfide
+  asa: R6(['#2a3a4a', '#4a6278', '#7a96ac', '#a8c4d8', '#d4e8f4', '#ffffff']),        // o vidro das asas
+  folhaV: R6(['#0e1e12', '#1a3420', '#2a4e30', '#3e6c44', '#5a8e5a', '#86b47e'])        // o vestido e o cabelo de folhas
 };
+
 const setO = cv => { const o = outlined(cv), l = flip(o); return { r: o, l, wr: whiteOf(o), wl: whiteOf(l) }; };
 // elipse girada com luz de cima à esquerda; pick(u, v, x, y) -> [rampa, ajuste] ou null (pula)
 function ell(P, cx, cy, rx, ry, ang, R, s, base, pick) {
@@ -154,20 +165,18 @@ function manto(P, sx, sy, hipY, cl, R, s, air) {
   poly(P, [[sx - 1.6, sy - 0.6], [sx + 0.6, sy + 0.2], [sx - 0.6, hipY + 2], [sx - 1.4 - cl * 0.5, bot], [sx - back, bot - cl * 0.9], [sx - 3 - cl * 0.6, sy + 4]], R,
     (x, y) => 2.4 - (y - sy) * 0.06 + (Math.abs(Math.sin(x * 1.25 + y * 0.18 + s)) < 0.3 ? -0.9 : 0) + (x > sx - 1.4 ? 0.5 : 0) + cg(x, y, s) * 0.4 + (y >= bot - cl * 0.9 - 0.6 && hash2(x, y, s) < 0.5 ? -0.6 : 0));
 }
-// o glaive de três lâminas: o miolo de prata e três crescentes curvos, com o fio claro por fora
-function glaive(P, cx, cy, ang, sc = 0.85) {
-  for (let i = 0; i < 3; i++) {
-    const a0 = ang + i * Math.PI * 2 / 3;
-    for (let t = 0; t <= 1.001; t += 0.05) {
-      const r = (1.3 + t * 4.6) * sc, a = a0 + t * 1.05, w = ((1 - t) * 1.1 + 0.3) * Math.min(1, sc + 0.1);
-      const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, nx = Math.cos(a + 1.57), ny = Math.sin(a + 1.57);
-      for (let k = -w; k <= w + 0.01; k += 0.5) {
-        const edge = k > w - 0.55, inner = k < -w + 0.45 && w > 0.8;   // o fio claro por fora da curva, a sombra por dentro
-        P.put(x + nx * k, y + ny * k, ER.prata, edge ? 5 : inner ? 2.2 : 4 - t * 0.8 + (ny * k < 0 ? 0.4 : 0));
-      }
-    }
+// a espada longa em folha de salgueiro: o cabo de couro para trás da mão, a guarda curta em folha, a lâmina estreita
+// que engorda um pouco a dois terços e afina na ponta; o fio de cima aceso, a sombra embaixo
+function espada(P, hx, hy, ang) {
+  const ca = Math.cos(ang), sa = Math.sin(ang), nx = -sa, ny = ca;
+  for (let t = 0.6; t <= 3; t += 0.5) P.put(hx - ca * t, hy - sa * t, ER.couro, 2.6 - t * 0.3);
+  P.put(hx - ca * 3.4, hy - sa * 3.4, ER.prata, 3.6);                                   // o pomo
+  for (let k = -1.6; k <= 1.6; k += 0.5) P.put(hx + ca * 0.6 + nx * k, hy + sa * 0.6 + ny * k, ER.prata, k < 0 ? 4.4 : 2.6);   // a guarda
+  for (let t = 1; t <= EL1_LAM_L; t += 0.35) {
+    const q = t / EL1_LAM_L, w = q > 0.92 ? 0.3 : 0.55 + Math.sin(Math.PI * Math.pow(q, 0.75)) * 0.55, x = hx + ca * t, y = hy + sa * t;
+    for (let k = -w; k <= w + 0.01; k += 0.45) { const up = nx * k + ny * k < 0; P.put(x + nx * k, y + ny * k, ER.prata, k > w - 0.4 ? (up ? 5.2 : 2) : up ? 4.4 : 3.2); }
+    if (q > 0.15 && q < 0.7) P.put(x, y, ER.prata, 2.4);                                 // o sulco do meio
   }
-  P.put(cx, cy, ER.lua, 5); P.put(cx - 1, cy, ER.prata, 2); P.put(cx + 1, cy, ER.prata, 2.4); P.put(cx, cy - 1, ER.prata, 1.6); P.put(cx, cy + 1, ER.prata, 1.6);   // o miolo com a pedra azul
 }
 // a cabeça élfica de lado: o rosto fino, o olho (um ponto que o EYES_E acende), a orelha comprida para trás
 function rosto(P, hx, hy, s) {
@@ -178,38 +187,147 @@ function rosto(P, hx, hy, s) {
 }
 function orelha(P, hx, hy) { P.line(hx - 0.4, hy + 0.4, hx - 3.2, hy - 2.4, ER.pele, 3.6); P.put(hx - 3.4, hy - 2.8, ER.pele, 4.6); P.put(hx - 1.4, hy - 0.3, ER.pele, 1.8); }
 
-/* ---------- a Sentinela da Lua, 26 x 28 ---------- */
-function sentinela(k) {
-  const o = EL1_SN[k], P = cp(26, 28), s = 25301 + k * 7;
+
+/* ---------- a Guarda-Fronteira, 26 x 28 ---------- */
+function fronteira(k) {
+  const o = EL1_FR[k], P = cp(26, 28), s = 25301 + k * 7;
   const hipY = 16.2 + o.low, sx = EL1_BX + o.lean, sy = 9.4 + o.low, hx = EL1_BX + 0.6 + o.lean * 1.25, hy = 5.4 + o.low;
-  manto(P, sx, sy, hipY, o.cl, ER.lua, s, o.air);
+  // a capa cinza de folha, comprida, voando para trás (as dobras e a barra puída)
+  manto(P, sx, sy, hipY, o.cl, ER.cinza, s, o.air);
   // a perna e o braço de longe, mais escuros
-  perna(P, EL1_BX - 0.6, hipY, o.b[0], o.b[1], ER.lua, ER.prata, 1.6, s + 1, o.air);
-  braco(P, sx - 0.6, sy + 0.8, o.hf[0], o.hf[1], ER.lua, ER.prata, 1.6, s + 2);
-  // o tronco: a couraça de prata, o cinto, a saia azul com a barra de prata
-  poly(P, [[EL1_BX - 2.4, hipY - 1.2], [EL1_BX + 2.3, hipY - 1.2], [EL1_BX + 3.2 + o.lean * 0.3, hipY + 2.8], [EL1_BX - 3, hipY + 2.8]], ER.lua,
-    (x, y) => (y >= Math.floor(hipY + 2.2) ? (x % 2 ? 4.6 : 3.4) : 2.8 - (x - EL1_BX) * 0.25 + (Math.abs(Math.sin(x * 1.6)) < 0.3 ? -0.8 : 0) + cg(x, y, s) * 0.3));
-  ell(P, sx - 0.1, sy + 3.2, 2.5, 3.7, o.lean * 0.12, ER.prata, s + 3, 3, (u, v, x, y) => [ER.prata, (Math.abs(u) < 0.18 && v < 0.5 ? 0.8 : 0) + (v > 0.82 ? -1 : 0)]);
-  P.put(sx + 0.6, sy + 2.4, ER.lua, 5);   // a meia-lua no peito
+  perna(P, EL1_BX - 0.6, hipY, o.b[0], o.b[1], ER.folha, ER.couro, 1.6, s + 1, o.air);
+  braco(P, sx - 0.6, sy + 0.8, o.hf[0], o.hf[1], ER.cinza, ER.couro, 1.6, s + 2);
+  // o tronco: a túnica verde-folha até a coxa, a cota de prata por baixo aparecendo na barra, o cinto de couro
+  poly(P, [[EL1_BX - 2.4, hipY - 1.2], [EL1_BX + 2.3, hipY - 1.2], [EL1_BX + 3.2 + o.lean * 0.3, hipY + 2.8], [EL1_BX - 3, hipY + 2.8]], ER.folha,
+    (x, y) => (y >= Math.floor(hipY + 2.2) ? (x % 2 ? 4 : 3) : 2.6 - (x - EL1_BX) * 0.25 + (Math.abs(Math.sin(x * 1.6)) < 0.3 ? -0.8 : 0) + cg(x, y, s) * 0.3));
+  for (let x = EL1_BX - 2.6; x <= EL1_BX + 2.8; x += 0.5) P.put(x, hipY + 3, ER.prata, (x * 2 | 0) % 2 ? 4.2 : 2.8);   // a barra da cota
+  ell(P, sx - 0.1, sy + 3.2, 2.5, 3.7, o.lean * 0.12, ER.folha, s + 3, 3, (u, v, x, y) => [Math.abs(u) < 0.5 && v < -0.2 ? ER.prata : ER.folha, (Math.abs(u) < 0.18 && v < 0.5 ? 0.6 : 0) + (v > 0.82 ? -1 : 0) + (((x + y) & 1) && Math.abs(u) < 0.5 && v < -0.2 ? -0.7 : 0)]);
   for (let x = EL1_BX - 2.2; x <= EL1_BX + 2.2; x += 0.5) P.put(x, hipY - 1.2, ER.couro, x > EL1_BX + 1 ? 2 : 3);
-  perna(P, EL1_BX + 0.8, hipY, o.f[0], o.f[1], ER.lua, ER.prata, 2.8, s + 4, o.air);
-  // a cabeça: o capuz azul atrás e em cima, o rosto de lado, a orelha furando o capuz, uma mecha de prata caindo
-  poly(P, [[hx - 3.4, hy + 1.2], [hx + 0.8, hy + 2.8], [sx + 2.4, sy + 1.4], [sx - 2.8, sy + 1.8]], ER.lua, (x, y) => 2.6 + cg(x, y, s) * 0.4 - (y - hy) * 0.1);
-  ell(P, hx - 1, hy - 0.6, 2.8, 3.2, -0.25, ER.lua, s + 5, 2.8, (u, v) => [ER.lua, (u > 0.5 ? 0.6 : 0) - (v > 0.5 ? 0.5 : 0)]);
-  P.put(hx + 0.4, hy - 3.6, ER.lua, 4.4); P.put(hx + 1.2, hy - 3.2, ER.lua, 4); P.put(hx + 1.9, hy - 2.6, ER.lua, 3.4);   // a ponta do capuz caindo na testa
+  perna(P, EL1_BX + 0.8, hipY, o.f[0], o.f[1], ER.folha, ER.couro, 2.8, s + 4, o.air);
+  // a cabeça: o capuz cinza caído nos ombros e em cima da cabeça, o rosto de lado, a orelha furando o capuz, a trança
+  // de prata saindo por baixo
+  poly(P, [[hx - 3.4, hy + 1.2], [hx + 0.8, hy + 2.8], [sx + 2.4, sy + 1.4], [sx - 2.8, sy + 1.8]], ER.cinza, (x, y) => 2.8 + cg(x, y, s) * 0.4 - (y - hy) * 0.1);
+  ell(P, hx - 1, hy - 0.6, 2.8, 3.2, -0.25, ER.cinza, s + 5, 3, (u, v) => [ER.cinza, (u > 0.5 ? 0.6 : 0) - (v > 0.5 ? 0.5 : 0)]);
+  P.put(hx + 0.4, hy - 3.6, ER.cinza, 4.4); P.put(hx + 1.2, hy - 3.2, ER.cinza, 4); P.put(hx + 1.9, hy - 2.6, ER.cinza, 3.4);
   rosto(P, hx, hy, s + 6);
-  for (let x = hx - 0.6; x <= hx + 2; x += 0.5) P.put(x, hy - 2, ER.lua, x > hx + 1.2 ? 3.6 : 4.8);   // a aba do capuz
-  for (let y = hy - 1.6; y <= hy + 2.4; y += 0.5) P.put(hx - 0.8, y, ER.lua, 1.6);                     // a sombra do capuz atrás do rosto
+  for (let x = hx - 0.6; x <= hx + 2; x += 0.5) P.put(x, hy - 2, ER.cinza, x > hx + 1.2 ? 3.6 : 4.8);
+  for (let y = hy - 1.6; y <= hy + 2.4; y += 0.5) P.put(hx - 0.8, y, ER.cinza, 1.6);
   orelha(P, hx - 0.4, hy);
-  P.line(hx + 0.4, hy + 2.4, hx - 0.2, sy + 3.6, ER.cabelo, 4.2); P.put(hx - 0.4, sy + 4, ER.cabelo, 3);
-  // o braço de perto, a ombreira em crescente e o glaive
-  braco(P, sx + 0.8, sy + 0.8, o.hn[0], o.hn[1], ER.lua, ER.prata, 3, s + 7);
-  ell(P, sx + 0.4, sy + 0.8, 2.1, 1.4, -0.3, ER.prata, s + 8, 3.6); P.put(sx - 0.8, sy + 1.4, ER.prata, 5);
-  if (o.g !== null) glaive(P, o.hn[0], o.hn[1], o.g);
+  for (let j = 0; j < 6; j++) P.put(hx - 1.6 - j * 0.35 - o.cl * 0.1 * j, hy + 2 + j * 0.9, ER.cabelo, j % 2 ? 3 : 4.4);   // a trança
+  // o broche de folha prendendo a capa (o verde aceso)
+  P.put(sx + 0.8, sy + 0.6, ER.folha, 5); P.put(sx + 1.4, sy + 0.2, ER.folha, 4); P.put(sx + 0.4, sy + 1, ER.prata, 4.6);
+  // o braço de perto e a espada
+  braco(P, sx + 0.8, sy + 0.8, o.hn[0], o.hn[1], ER.cinza, ER.couro, 3, s + 7);
+  espada(P, o.hn[0], o.hn[1], o.g);
   return setO(P.done());
 }
-// o glaive voando, girando (6 quadros de 20 graus: as três lâminas repetem a cada 120)
-function glaiveSolto(k) { const P = cp(15, 15); glaive(P, 7.5, 7.5, k * Math.PI / 9, 1.05); return setO(P.done()); }
+
+/* ---------- o Cão-Fada, 32 x 16 de frente para a direita (as patas na linha 15) ----------
+   0 parado, 1-2 andando, 3 o latido (o aviso: a cabeça erguida, a boca aberta), 4 o bote (esticado), 5 a queda.
+   by: a altura do meio do corpo; bl: o quanto ele estica; fr/rr: as patas da frente e de trás (perto, longe) */
+const SB = [
+  { by: 7.6, bl: 0, fr: [[22.6, 15], [20.2, 15]], rr: [[8.8, 15], [6.2, 15]], head: [24.8, 5.6], tail: 0 },
+  { by: 7.4, bl: 0.2, fr: [[24.6, 15], [19.4, 15]], rr: [[10.6, 15], [4.8, 15]], head: [25, 5.4], tail: 1 },
+  { by: 7.8, bl: -0.2, fr: [[20.6, 15], [23, 14.4]], rr: [[6.4, 15], [9.6, 14.6]], head: [24.8, 5.8], tail: 2 },
+  { by: 8.2, bl: 0, fr: [[23.6, 15], [21.6, 15]], rr: [[8.6, 15], [6.6, 15]], head: [25.4, 3.6], tail: 3, bark: 1 },
+  { by: 6.6, bl: 1.6, fr: [[30.4, 9.4], [29, 11.4]], rr: [[2, 12], [3.6, 13.6]], head: [26.8, 5.2], tail: 4, bark: 1 },
+  { by: 8.6, bl: 0.6, fr: [[25.6, 15], [23.2, 15]], rr: [[8.6, 14.4], [6, 13.6]], head: [25.4, 6.8], tail: 1 }
+];
+function caofada(k) {
+  const o = SB[k], P = cp(32, 16), s = 25401 + k * 7, by = o.by, st = o.bl;
+  // a cauda: grossa, sobe por cima das costas e enrola; trançada (gomos claros e escuros alternando)
+  const tw = [0, 0.5, -0.4, 0.8, -1.2][o.tail];
+  for (let i = 0; i <= 26; i++) {
+    const t = i / 26, a = Math.PI * (0.95 - t * 1.25) + tw * 0.15, r = 4.6 - t * 2.2, x = 7.4 - st + Math.cos(a) * r * 0.9 + (t < 0.15 ? -t * 6 : -0.9), y = by - 3.6 - Math.sin(a) * r * 0.85;
+    const braid = (i % 4) < 2;
+    P.put(x, y, ER.cao, (braid ? 3.6 : 2.2) - t * 0.4); P.put(x, y + 1, ER.cao, braid ? 2 : 1.2); if (t < 0.5) P.put(x - 0.6, y, ER.cao, 2.6);
+  }
+  // as patas: compridas de cão de caça, o pé largo com as unhas claras
+  const pata = (x0, y0, f, base, ss, front) => {
+    const kx = (x0 + f[0]) / 2 + (front ? -0.4 : 1.4), ky = (y0 + f[1]) / 2 - (front ? 0 : 0.8);
+    tubo(P, x0, y0, kx, ky, front ? 1.5 : 2, 1, ER.cao, base, ss); tubo(P, kx, ky, f[0], f[1] - 0.8, 1, 0.75, ER.cao, base - 0.2, ss + 1);
+    P.line(f[0] - 0.8, f[1], f[0] + 1.2, f[1], ER.cao, base + 0.4); P.put(f[0] + 1.6, f[1], ER.osso, 2.4);
+  };
+  pata(20 + st, by + 1.4, o.fr[1], 0.9, s, true); pata(9 - st, by + 0.8, o.rr[1], 0.9, s + 2, false);
+  // o corpo: comprido, o peito fundo, o pelo desgrenhado em mechas (a borda de cima em tufos), a barriga mais clara
+  ell(P, 14.4, by, 9.2 + st * 0.6, 3.6 - st * 0.25, 0.02, ER.cao, s + 3, 2.4, (u, v, x, y) => {
+    const tuft = Math.abs(Math.sin(x * 1.7 + y * 0.9)) < 0.28 ? -0.9 : Math.abs(Math.sin(x * 1.1 - y * 1.3)) < 0.2 ? 0.8 : 0;
+    return [v > 0.6 ? ER.caoV : ER.cao, (v < -0.6 ? 1.1 : 0) + tuft + (v > 0.6 ? -1.6 : 0) + (u > 0.45 ? 0.3 : 0)];
+  });
+  for (let x = 7; x < 22 + st; x++) if (hash2(x, k, s) < 0.55) { const t = (x - 7) / 15, y = by - 3.4 + Math.abs(t - 0.5) * 1.2 - (hash2(x, 3, s) < 0.4 ? 1 : 0); P.put(x, y, ER.cao, 3.6 + hash2(x, 2, s)); }   // os tufos das costas
+  ell(P, 20.6 + st * 0.6, by + 0.6, 3.2, 3.6, 0, ER.cao, s + 4, 2.7, (u, v) => [ER.cao, v < -0.5 ? 0.8 : 0]);   // o peito
+  for (let j = 0; j < 4; j++) P.put(19.4 + st * 0.6 + j * 0.8, by + 3.8 + (j % 2), ER.cao, 2.2);                   // a franja do peito
+  // a anca
+  ell(P, 8 - st * 0.6, by - 0.2, 3.2, 3.2, 0, ER.cao, s + 5, 2.5, (u, v) => [ER.cao, v < -0.5 ? 0.9 : 0]);
+  pata(21 + st, by + 1.6, o.fr[0], 2.8, s + 6, true); pata(9.6 - st, by + 1.2, o.rr[0], 2.6, s + 8, false);
+  // a cabeça de cão de caça: o crânio, o focinho comprido, o nariz escuro, as orelhas compridas caídas
+  const [hx, hy] = o.head;
+  tubo(P, 20.4 + st * 0.6, by - 1.6, hx - 1, hy + 1.2, 2.6, 2.2, ER.cao, 2.8, s + 9);                       // o pescoço
+  ell(P, hx, hy, 2.8, 2.4, 0.1, ER.cao, s + 10, 3, (u, v) => [ER.cao, v < -0.5 ? 0.7 : 0]);
+  ell(P, hx + 3, hy + 1 - (o.bark ? 0.4 : 0), 2.4, 1.2, o.bark ? -0.25 : 0.12, ER.caoV, s + 11, 2.8, (u, v) => [v > 0.3 ? ER.cao : ER.caoV, v > 0.3 ? 1.2 : 0.4]);
+  P.put(hx + 5.2, hy + 0.4 - (o.bark ? 0.8 : 0), ER.cao, 0.2); P.put(hx + 5, hy + 1 - (o.bark ? 0.8 : 0), ER.cao, 0);   // o nariz
+  if (o.bark) { P.line(hx + 1.6, hy + 2.2, hx + 4.4, hy + 3, ER.cao, 0); P.line(hx + 1.8, hy + 2.8, hx + 4, hy + 3.6, ER.caoV, 1.8); P.put(hx + 3.2, hy + 2.6, ER.osso, 4.4); P.put(hx + 2.2, hy + 2.4, ER.osso, 4); }
+  for (let j = 0; j < 5; j++) { P.put(hx - 1.4 - j * 0.25, hy - 1 + j, ER.cao, 3.6 - j * 0.35); P.put(hx - 0.8 - j * 0.25, hy - 0.8 + j, ER.cao, 2.2 - j * 0.2); }   // a orelha caída
+  P.put(hx + 1.2, hy - 0.6, ER.caoV, 5); P.put(hx + 0.6, hy - 1.2, ER.cao, 0.6);   // o olho (o EYES_E acende) e a sobrancelha
+  return setO(P.done());
+}
+
+/* ---------- a Sílfide, 24 x 22 de frente para a direita (o meio do corpo em 11, 10) ----------
+   0-2 voando (as asas em três alturas), 3 a rajada (o aviso: as asas abertas, as mãos para a frente, o cabelo
+   jogado para a frente), 4 o arranco (o corpo deitado, as asas para trás) */
+const SF = [
+  { wu: -2.05, wl: 2.75, hx: 13.2, hy: 5.4, lean: 0, arm: 0 }, { wu: -2.45, wl: 2.45, hx: 13.2, hy: 5.6, lean: 0, arm: 0 }, { wu: -2.85, wl: 2.15, hx: 13.2, hy: 5.4, lean: 0, arm: 0 },
+  { wu: -1.75, wl: 2.95, hx: 13.8, hy: 5, lean: -0.6, arm: 1 },
+  { wu: -2.95, wl: 3.05, hx: 16.4, hy: 7.6, lean: 2.4, arm: 2 }
+];
+function silfide(k) {
+  const o = SF[k], P = cp(24, 22), s = 25451 + k * 7, cx = 11 + o.lean * 0.6, hipY = 13 - (k === 4 ? 2 : 0);
+  // as quatro asas de libélula atrás: compridas, de vidro claro, as nervuras mais escuras, a ponta com a mancha azul
+  const asa = (rx, ry, ang, L, W, dark) => {
+    const m = L + 1;
+    for (let y = Math.floor(ry - m); y <= ry + m; y++) for (let x = Math.floor(rx - m); x <= rx + m; x++) {
+      const px = x + 0.5 - rx, py = y + 0.5 - ry, u = px * Math.cos(ang) + py * Math.sin(ang), v = -px * Math.sin(ang) + py * Math.cos(ang);
+      if (u < 0 || u > L) continue; const hw = W * Math.sin(Math.PI * Math.pow(u / L, 0.7)); if (Math.abs(v) > hw) continue;
+      const vein = Math.abs(v) < 0.35 || ((u * 1.3 + Math.abs(v) * 2) % 2.6) < 0.45;
+      P.put(x, y, u > L * 0.82 ? ER.lua : ER.asa, (vein ? 2.6 : 4.4) - (dark ? 1.4 : 0) - u / L * 0.6 + (v < 0 ? 0.4 : 0));
+    }
+  };
+  const rx = cx - 1.2, ry = 8.4 + (k === 4 ? 0.6 : 0);
+  asa(rx, ry, o.wu - 0.32, 9.5, 1.9, true); asa(rx, ry + 1, o.wl + 0.28, 7.5, 1.6, true);
+  // as pernas finas pendendo para trás (os pés descalços), o vestido de folhas em ponta
+  const lx = k === 4 ? -5 : -2.4;
+  tubo(P, cx - 0.4, hipY, cx + lx - 1, hipY + (k === 4 ? 3 : 6.6), 0.8, 0.55, ER.palida, 2, s);
+  tubo(P, cx + 0.4, hipY, cx + lx + 0.6, hipY + (k === 4 ? 4 : 7.2), 0.8, 0.55, ER.palida, 3.2, s + 1);
+  for (let i = 0; i < 6; i++) {   // as folhas da saia, em leque para baixo e para trás
+    const a = Math.PI / 2 + 0.55 - i * 0.22 + (k === 4 ? 0.9 : 0), L = 3.6 + (i % 2) * 1.2;
+    for (let t = 0; t <= L; t += 0.5) { const w = Math.sin(Math.PI * t / L) * 1.1; for (let q = -w; q <= w; q += 0.5) P.put(cx - 0.2 + Math.cos(a) * t - Math.sin(a) * q, hipY - 1 + Math.sin(a) * t + Math.cos(a) * q, ER.folhaV, 3 - t * 0.2 + (q < 0 ? 0.6 : -0.3) + (Math.abs(q) < 0.3 ? 0.6 : 0)); }
+  }
+  // o tronco fino
+  ell(P, cx + 0.2 + o.lean * 0.4, 9.8 - (k === 4 ? 1 : 0), 1.5, 2.6, o.lean * 0.3, ER.palida, s + 2, 3.2);
+  for (let x = cx - 1.4; x <= cx + 1.6; x += 0.5) P.put(x + o.lean * 0.4, 8.6 - (k === 4 ? 1 : 0), ER.folhaV, 3.4);   // o corpete de folha
+  // o braço de longe
+  const sx = cx + 0.4 + o.lean * 0.5, sy = 7.8 - (k === 4 ? 1 : 0);
+  const mao = o.arm === 1 ? [sx + 6.4, sy + 0.8] : o.arm === 2 ? [sx + 3, sy + 3.4] : [sx - 1.6, sy + 4.6];
+  tubo(P, sx - 0.4, sy, mao[0] - (o.arm === 1 ? 0.6 : 0), mao[1] - 0.6, 0.6, 0.5, ER.palida, 1.8, s + 3);
+  // a cabeça: o rosto fino, a orelha comprida, o cabelo de folhas voando para trás (para a frente na rajada)
+  const hx = o.hx, hy = o.hy, fw = o.arm === 1 ? 1 : -1;
+  for (let j = 0; j < 6; j++) {
+    let x = hx - 0.4, y = hy - 1.6 + j * 0.5;
+    for (let i = 0; i < 9; i++) { x += fw * (0.7 + j * 0.05); y += Math.sin(i * 0.6 + j + k) * 0.4 + (fw < 0 ? 0.15 : -0.05); P.put(x, y, ER.folhaV, 4 - i * 0.2 - j * 0.18 + (i % 3 === 0 ? 0.6 : 0)); }
+  }
+  ell(P, hx, hy, 1.9, 2.3, 0.1, ER.palida, s + 4, 3.6, (u, v) => [ER.palida, u > 0.6 ? -0.4 : 0]);
+  P.put(hx + 2, hy + 0.4, ER.palida, 4.4); P.put(hx + 1.2, hy - 0.3, ER.lua, 5); P.put(hx + 1.2, hy + 1.6, ER.palida, 1.8);
+  P.line(hx - 0.6, hy + 0.2, hx - 3.2, hy - 2.6, ER.palida, 3.6); P.put(hx - 3.4, hy - 3, ER.palida, 4.8);
+  for (let x = hx - 1.6; x <= hx + 1.2; x += 0.5) P.put(x, hy - 2.2 - (x > hx ? 0.4 : 0), ER.folhaV, 4.4);   // a coroinha de folhas
+  P.put(hx - 0.6, hy - 2.8, ER.folhaV, 5);
+  // as asas da frente, por cima de tudo, um pouco abertas
+  asa(rx + 0.4, ry - 0.2, o.wu, 10, 2.1, false); asa(rx + 0.4, ry + 0.8, o.wl, 8, 1.7, false);
+  // o braço de perto
+  const mao2 = o.arm === 1 ? [sx + 6.8, sy + 2.2] : o.arm === 2 ? [sx + 3.6, sy + 4.4] : [sx + 1.6, sy + 5];
+  tubo(P, sx + 0.4, sy + 0.4, mao2[0], mao2[1], 0.65, 0.55, ER.palida, 3.4, s + 5);
+  return setO(P.done());
+}
+
 
 /* ---------- o Arqueiro da Mata, 26 x 28 ---------- */
 // o arco: a empunhadura em (gx, gy), as pontas curvando para trás; a corda reta ou puxada até (px, py)
@@ -259,57 +377,6 @@ function arqueiro(k) {
   return setO(P.done());
 }
 
-/* ---------- o Sabre-da-Noite, 32 x 16 de frente para a direita (as patas na linha 15) ----------
-   0 parado, 1-2 andando, 3 agachado (o aviso), 4 o bote (esticado, as garras para a frente), 5 a queda.
-   by: a altura do meio do corpo; bl: o quanto ele estica; fr/rr: as patas da frente e de trás (perto, longe) */
-const SB = [
-  { by: 8, bl: 0, fr: [[22.6, 15], [20.2, 15]], rr: [[8.8, 15], [6.2, 15]], head: [24.6, 6.2], tail: 0 },
-  { by: 7.8, bl: 0.2, fr: [[24.6, 15], [19.4, 15]], rr: [[10.6, 15], [4.8, 15]], head: [24.8, 6], tail: 1 },
-  { by: 8.2, bl: -0.2, fr: [[20.6, 15], [23, 14.4]], rr: [[6.4, 15], [9.6, 14.6]], head: [24.6, 6.4], tail: 2 },
-  { by: 10.2, bl: 0.4, fr: [[25.4, 15], [23.6, 15]], rr: [[9.6, 15], [8, 15]], head: [25.6, 8.8], tail: 3 },
-  { by: 7, bl: 1.6, fr: [[30.4, 9.4], [29, 11.4]], rr: [[2, 12], [3.6, 13.6]], head: [26.6, 5.6], tail: 4 },
-  { by: 9.2, bl: 0.6, fr: [[25.6, 15], [23.2, 15]], rr: [[8.6, 14.4], [6, 13.6]], head: [25.4, 7.4], tail: 1 }
-];
-function sabre(k) {
-  const o = SB[k], P = cp(32, 16), s = 25401 + k * 7, by = o.by, st = o.bl;
-  // a cauda: longa e grossa, sobe e enrola na ponta (a ponta clara)
-  const tw = [[0, -1], [0.6, -0.6], [-0.4, -1.2], [-1, 0.2], [1.6, 0.6]][o.tail];
-  for (let i = 0; i <= 18; i++) {
-    const t = i / 18, x = 7 - st - t * 6.6 + Math.sin(t * 3) * tw[0], y = by - 1.4 - t * 4.6 * (1 + tw[1] * 0.3) + t * t * 3 * (1 - t) - Math.sin(t * 5) * 0.6;
-    P.put(x, y, ER.sabre, 3 - t * 0.4 + (t > 0.88 ? 1.4 : 0)); P.put(x, y + 1, ER.sabre, 1.6 - t * 0.4); if (t < 0.4) P.put(x, y - 1, ER.sabre, 2.4);
-  }
-  // as patas: coxa grossa, a canela fina, a pata larga; as da frente com as garras de fora no bote
-  const pata = (x0, y0, f, base, ss, front) => {
-    const kx = (x0 + f[0]) / 2 + (front ? -0.6 : 1.2), ky = (y0 + f[1]) / 2 - (front ? 0 : 0.6);
-    tubo(P, x0, y0, kx, ky, front ? 1.6 : 2.1, 1.1, ER.sabre, base, ss); tubo(P, kx, ky, f[0], f[1] - 0.8, 1.1, 0.85, ER.sabre, base - 0.2, ss + 1);
-    P.line(f[0] - 0.8, f[1], f[0] + 1.4, f[1], ER.sabre, base + 0.4);
-    if (k === 4 && front) { P.put(f[0] + 2, f[1] - 0.6, ER.osso, 5); P.put(f[0] + 2.2, f[1] + 0.4, ER.osso, 4); P.put(f[0] + 1.6, f[1] + 1.2, ER.osso, 3.4); }
-  };
-  pata(20 + st, by + 1.4, o.fr[1], 0.9, s, true); pata(9 - st, by + 0.8, o.rr[1], 0.9, s + 2, false);
-  // o corpo comprido: o dorso com a luz e as listras escuras em faixas, a barriga na sombra
-  ell(P, 14.6, by, 8.8 + st * 0.6, 3.3 - st * 0.25, 0.02, ER.sabre, s + 3, 2.4, (u, v, x, y) => {
-    const stripe = v < 0.35 && Math.abs(Math.sin(x * 0.85 + v * 1.6)) < 0.3 && u < 0.55 && u > -0.85 ? -1.3 : 0;
-    return [v > 0.55 ? ER.ventre : ER.sabre, (v < -0.62 ? 1.2 : 0) + stripe + (v > 0.55 ? -1.6 : 0) + (u > 0.45 ? 0.3 : 0)];
-  });
-  ell(P, 21 + st * 0.6, by + 0.4, 3.1, 3.2, 0, ER.sabre, s + 4, 2.7, (u, v) => [ER.sabre, v < -0.5 ? 0.8 : 0]);   // o ombro
-  ell(P, 8.2 - st * 0.6, by - 0.4, 3.2, 3.1, 0, ER.sabre, s + 5, 2.5, (u, v, x, y) => [ER.sabre, (v < -0.5 ? 0.9 : 0) + (Math.abs(Math.sin(x * 0.85 + v)) < 0.3 && v < 0.2 ? -1.2 : 0)]);   // a anca
-  // a gola de prata com a pedra azul (a montaria das sentinelas)
-  const [hx, hy] = o.head;
-  for (let t = 0; t <= 1; t += 0.1) { const x = lerp(hx - 3.4, hx - 2, t), y = lerp(hy - 1.6, hy + 3.4, t); P.put(x, y, ER.prata, 4.6 - t * 1.6); P.put(x - 0.7, y, ER.prata, 2.8 - t); }
-  P.put(hx - 2.3, hy + 2.2, ER.lua, 5);
-  pata(21 + st, by + 1.6, o.fr[0], 2.8, s + 6, true); pata(9.6 - st, by + 1.2, o.rr[0], 2.6, s + 8, false);
-  // a cabeça: o crânio largo, a bochecha com o tufo, o focinho, as orelhas em ponta, as presas longas
-  ell(P, hx, hy, 3.4, 2.7, 0.1, ER.sabre, s + 9, 3, (u, v) => [ER.sabre, v < -0.5 ? 0.7 : 0]);
-  P.put(hx - 2.6, hy + 2.2, ER.sabre, 2.6); P.put(hx - 2, hy + 2.8, ER.sabre, 2);   // o tufo da bochecha
-  ell(P, hx + 2.9, hy + 1, 1.9, 1.3, 0.15, ER.sabre, s + 10, 3.2, (u, v) => [v > 0.25 ? ER.ventre : ER.sabre, v > 0.25 ? -0.6 : 0.4]);
-  P.put(hx + 4.6, hy + 0.5, ER.sabre, 0.4);   // o nariz
-  for (const [ox, b] of [[-1.6, 2.6], [0, 3.6]]) { P.put(hx + ox, hy - 2.6, ER.sabre, b); P.put(hx + ox + 0.4, hy - 3.6, ER.sabre, b - 0.8); P.put(hx + ox + 0.4, hy - 2.6, ER.ventre, 2); }
-  P.line(hx + 3.2, hy + 2, hx + 3, hy + 4.8, ER.osso, 4.6); P.put(hx + 2.8, hy + 5.2, ER.osso, 3.4); P.line(hx + 2.4, hy + 2.2, hx + 2.3, hy + 3.4, ER.osso, 3.2);
-  if (k === 4 || k === 3) { P.line(hx + 1.8, hy + 1.8, hx + 3.8, hy + 2.1, ER.sabre, 0); P.put(hx + 3.6, hy + 2.8, ER.osso, 2.6); }   // a boca aberta
-  P.put(hx + 1.4, hy - 0.6, ER.olho, 5); P.put(hx + 0.6, hy - 0.6, ER.sabre, 0.8);                       // o olho (o EYES_E acende)
-  P.put(hx - 0.4, hy - 1.8, ER.prata, 4.6); P.put(hx + 0.4, hy - 2.1, ER.prata, 5); P.put(hx - 1.2, hy - 1.2, ER.prata, 3.6);   // a meia-lua de prata na testa
-  return setO(P.done());
-}
 
 /* ---------- o Fogo-Fátuo: a luzinha sem contorno (r o raio do miolo) ---------- */
 function fatuo(r) {
@@ -318,78 +385,18 @@ function fatuo(r) {
   const cv = P.done(); return { r: cv, wr: whiteOf(cv) };
 }
 
-/* ---------- o Antigo da Mata, 34 x 42 (os pés na linha 41, o tronco no x 16) ----------
-   0-1 andando, 2 o pé erguido (aviso), 3 a pisada, 4 o galho erguido (aviso), 5 o tapa */
-const AN = [
-  { lean: 0, low: 0, b: [12, 41], f: [21, 41], hn: [24.6, 30], hf: [7.6, 29] },
-  { lean: 0.4, low: 0.4, b: [14.4, 41], f: [18.8, 40.4], hn: [23.8, 30.6], hf: [8.4, 28.4] },
-  { lean: -1, low: -0.6, b: [12.4, 41], f: [23, 35], hn: [26, 25.4], hf: [6, 25.4] },
-  { lean: 1.2, low: 1.4, b: [11.4, 41], f: [24, 41], hn: [26.4, 32.4], hf: [7.6, 31.4] },
-  { lean: -0.8, low: 0, b: [12, 41], f: [20.6, 41], hn: [9.4, 3.6], hf: [6.4, 27.6] },
-  { lean: 1.4, low: 0.6, b: [11.4, 41], f: [22, 41], hn: [32.6, 22], hf: [7, 29.6] }
-];
-EL1.FACE = 2.6; const EL1_AN_FACE = EL1.FACE;   // o rosto: tantas linhas abaixo do topo do tronco
-function antigo(k) {
-  const o = AN[k], P = cp(34, 42), s = 25501 + k * 7, cx = 16 + o.lean, ty = 15 + o.low, hipY = 32 + o.low * 0.6;
-  // as pernas de raiz: grossas, o pé abre em raízes
-  const pe = (hx, f, base, ss) => {
-    const kx = (hx + f[0]) / 2 + 0.8, ky = (hipY + f[1]) / 2;
-    tubo(P, hx, hipY, kx, ky, 2.7, 2.2, ER.casca, base, ss); tubo(P, kx, ky, f[0], f[1] - 1.6, 2.2, 1.9, ER.casca, base - 0.2, ss + 1);
-    for (const dx of [-2.8, 3, 1, -1.2]) P.line(f[0] + dx * 0.3, f[1] - 1.2, f[0] + dx, f[1], ER.casca, base + (dx > 0 ? 0.4 : -0.4));
-  };
-  pe(cx - 2.4, o.b, 1.2, s);
-  // o braço-galho: dois gomos, os dedos de graveto, folhinhas presas
-  const galho = (x0, y0, h, base, ss) => {
-    const up = h[1] < y0 - 4, mx = (x0 + h[0]) / 2 + (up ? -2 : 0.6), my = (y0 + h[1]) / 2 + (up ? 0 : 1.4);
-    tubo(P, x0, y0, mx, my, 2.1, 1.6, ER.casca, base, ss); tubo(P, mx, my, h[0], h[1], 1.6, 0.9, ER.casca, base, ss + 1);
-    const a = Math.atan2(h[1] - my, h[0] - mx);
-    for (const d of [-0.75, 0, 0.65]) { const L = 2.6 + (d === 0 ? 1 : 0); P.line(h[0], h[1], h[0] + Math.cos(a + d) * L, h[1] + Math.sin(a + d) * L, ER.casca, base + 0.6); }
-    for (let i = 0; i < 3; i++) { const t = 0.3 + i * 0.24, lx = lerp(x0, h[0], t), ly = lerp(y0, h[1], t) - 1.8; P.put(lx, ly, ER.copa, base + 1.6); P.put(lx + 1, ly - 0.4, ER.copa, base + 0.8); P.put(lx - 0.6, ly + 0.4, ER.copa, base); }
-  };
-  galho(cx - 4, ty + 7, o.hf, 1.2, s + 2);
-  // o tronco: casca prateada lisa com sulcos verticais e nós, os ombros largos, o pé alargando em raízes
-  for (let y = Math.floor(ty - 1); y <= hipY + 1; y++) {
-    const t = (y - ty) / (hipY - ty), hw = 4.4 + Math.sin(t * Math.PI) * 1.2 + (t < 0.15 ? (0.15 - t) * 9 : 0) + (t > 0.86 ? (t - 0.86) * 9 : 0), c = cx + (1 - t) * o.lean * 0.6;
-    for (let x = Math.floor(c - hw); x <= c + hw; x++) {
-      const u = (x + 0.5 - c) / hw, w = (x + 0.5 + Math.sin(y * 0.28 + x * 0.4) * 0.9 + 30) % 2.7, groove = w < 0.75 ? -1.3 : w < 1.2 ? 0.5 : 0;
-      P.put(x, y, ER.casca, 3.1 - u * 1.3 - u * u * 0.8 + groove + cg(x, y, s + 3) * 0.2 - (t > 0.9 ? 0.6 : 0));
-    }
-  }
-  ell(P, cx - 1.6, ty + 11, 1.2, 1.5, 0, ER.casca, s + 4, 1); P.put(cx - 2, ty + 10.4, ER.casca, 0); P.put(cx - 1.2, ty + 12.2, ER.casca, 4);   // um nó
-  // o rosto: o oco escuro, as sobrancelhas de casca grossas, os olhos de seiva (o EYES_E acende), a boca rachada,
-  // a barba de líquen prateado
-  const fx = cx + 2.4, fy = ty + EL1_AN_FACE;
-  ell(P, fx, fy, 3, 1.6, 0, ER.casca, s + 5, -0.4);
-  P.put(fx - 1.4, fy, ER.seiva, 5); P.put(fx + 1.2, fy + 0.2, ER.seiva, 5); P.put(fx - 1.4, fy + 0.8, ER.seiva, 2.6); P.put(fx + 1.2, fy + 1, ER.seiva, 2.6);
-  P.line(fx - 3.2, fy - 1.8, fx + 2.8, fy - 1.5, ER.casca, 4.6); P.line(fx - 2.6, fy - 2.6, fx + 1.4, fy - 2.4, ER.casca, 3.8); P.put(fx + 3.4, fy - 1.2, ER.casca, 3);
-  P.line(fx + 0.4, fy + 1.6, fx + 1.2, fy + 3, ER.casca, 4);   // o nariz de nó
-  P.line(fx - 1.4, fy + 4, fx + 2.2, fy + 3.6, ER.casca, 0.2); P.put(fx + 2.6, fy + 3.4, ER.casca, 0.6);
-  for (let i = 0; i < 5; i++) { const x = fx - 1.6 + i, L = 1.6 + hash2(i, 3, s) * 2.6; P.line(x, fy + 4.4, x - 0.4, fy + 4.4 + L, ER.copa, 3.4 - i * 0.3 - (i % 2) * 0.8); }   // a barba de folhas
-  // a copa: nuvens de folhas azul-prata em camadas por cima da cabeça, a borda rendada, pontos de luar
-  const blobs = [[cx - 9.6, ty - 1.6, 3.6, 2.8], [cx + 9.8, ty - 2.4, 3.8, 2.8], [cx - 6.4, ty - 5.6, 6.4, 4.2], [cx + 5.4, ty - 6.2, 6.6, 4.4], [cx - 0.6, ty - 9.4, 7.8, 4.8]];
-  for (const [bx, bY, rx, ry] of blobs) ell(P, bx, bY, rx, ry, 0, ER.copa, s + 6, 2.6, (u, v, x, y) => {
-    if (hash2(x, y, s + 7) < 0.25 && u * u + v * v > 0.68) return null;
-    return [ER.copa, (hash2(x >> 1, y, s + 8) < 0.28 ? -1 : 0) + (Math.abs(Math.sin(x * 1.1 + y * 1.7)) < 0.18 ? 0.9 : 0) + (v < -0.5 ? 0.6 : 0)];
-  });
-  for (const [x, y] of [[cx - 3, ty - 3], [cx + 4, ty - 2], [cx - 7.6, ty - 0.6]]) P.line(x, y + 2.6, x + (x < cx ? -1.6 : 1.6), y - 1.4, ER.casca, 3);   // galhos furando a copa
-  for (let i = 0; i < 10; i++) { const x = cx - 11 + hash2(i, 1, s) * 22, y = ty - 13 + hash2(i, 2, s) * 11; if (P.c[(y | 0) * P.w + (x | 0)]) P.put(x, y, ER.seiva, 4 + hash2(i, 3, s)); }
-  // a perna e o galho de perto
-  pe(cx + 2.4, o.f, 2.8, s + 9);
-  galho(cx + 2.6, ty + 7.6, o.hn, 3, s + 10);
-  return setO(P.done());
-}
 
-EL1.SB = SB; EL1.AN = AN;
+EL1.SB = SB; EL1.SF = SF;
 EL1.get = () => EL1.ready || (EL1.ready = {
-  sn: EL1_SN.map((_, k) => sentinela(k)), gl: [0, 1, 2, 3, 4, 5].map(glaiveSolto),
+  fr: EL1_FR.map((_, k) => fronteira(k)),
   ar: EL1_AR.map((_, k) => arqueiro(k)),
-  sb: SB.map((_, k) => sabre(k)),
+  cf: SB.map((_, k) => caofada(k)),
   ft: [2, 2.6, 3.4].map(fatuo),
-  an: AN.map((_, k) => antigo(k))
+  sf: SF.map((_, k) => silfide(k))
 });
 EL1.GL = {
   lua: glow(4, '#9cc8ff'), luaG: glow(10, '#9cc8ff'), luaM: glow(16, '#9cc8ff'), prata: glow(6, '#e6eef8'),
-  branco: glow(8, '#f8fbff'), seiva: glow(5, '#5ab0ff'), seivaG: glow(12, '#5ab0ff')
+  branco: glow(8, '#f8fbff'), fada: glow(5, '#b8f0c8'), fadaG: glow(12, '#9ae0b4'), vento: glow(9, '#e0f4ff')
 };
 }
 
@@ -400,31 +407,36 @@ const el1Jit = (e, on, k = 44) => on ? Math.round(Math.sin(e.t * k) * 0.7) : 0;
 // um ponto do desenho (x, y no quadro de 26 x 28, ou outro com o corpo em bx e os pés em by) no mundo
 const el1Pt = (e, x, y, bx = EL1_BX, by = 27) => [e.x + e.w / 2 + (x - bx) * e.facing, e.y + e.h - 1 - (by - y)];
 
-const el1SnPose = e => {
+
+
+const el1FrPose = e => {
   const st = e.state;
   if (st === 'wind') return 3;
   if (st === 'slash' || st === 'gap') return e.slashN === 2 ? 5 : 4;
-  if (st === 'twind') return 6;
-  if (st === 'catch') return e.glaive ? (e.stateT > 0.25 ? 7 : 8) : 0;
+  if (st === 'vwind' || st === 'vland') return 6;
+  if (st === 'vault') return 7;
+  if (st === 'vcut') return 8;
   if (st === 'hop') return 9;
-  if (e.glaive) return 8;
   return !e.onGround ? 9 : Math.abs(e.vx) > 4 ? 1 + Math.floor(e.t * 9) % 2 : 0;
 };
-DRAW_E.sentinela = (e, fx, fy, fl) => {
-  const k = el1SnPose(e), bob = k === 0 ? (Math.sin(e.t * 2.6 + e.seed) > 0.7 ? 1 : 0) : 0;
-  el1Blit(cvPick(EL1.get().sn[k], e, fl), e, fx, fy + bob, EL1_BX + 1, 29, el1Jit(e, e.state === 'wind' || e.state === 'twind'));
+const el1FrHot = e => e.state === 'wind' || e.state === 'vwind' || e.state === 'vault' || e.state === 'vland';
+DRAW_E.fronteira = (e, fx, fy, fl) => {
+  const k = el1FrPose(e), bob = k === 0 ? (Math.sin(e.t * 2.6 + e.seed) > 0.7 ? 1 : 0) : 0;
+  el1Blit(cvPick(EL1.get().fr[k], e, fl), e, fx, fy + bob, EL1_BX + 1, 29, el1Jit(e, e.state === 'wind' || e.state === 'vwind'));
 };
-EYES_E.sentinela = (e, fx, fy) => {
-  const k = el1SnPose(e), o = EL1_SN[k], G = EL1.GL, hx = fx + (EL1_BX + 0.6 + o.lean * 1.25 + 1.5 - EL1_BX) * e.facing, hy = fy - 1 - (27 - (5.4 + o.low - 0.2));
-  lc.globalAlpha = 0.35; lc.drawImage(G.lua, Math.round(hx) - 4, Math.round(hy) - 4);   // o olho
-  if (o.g === null) return;
-  const gx = fx + (o.hn[0] - EL1_BX) * e.facing, gy = fy - 1 - (27 - o.hn[1]);
-  if (e.state === 'wind' || e.state === 'twind') { const q = clamp(1 - e.stateT / (e.state === 'wind' ? EL1_GLAIVE : EL1_TIRO), 0, 1); lc.globalAlpha = 0.3 + 0.6 * q; lc.drawImage(G.luaG, Math.round(gx) - 10, Math.round(gy) - 10); }
-  else if (e.state === 'slash' || e.state === 'gap') { lc.globalAlpha = 0.65; lc.drawImage(G.luaG, Math.round(gx) - 10, Math.round(gy) - 10); }
-  else { lc.globalAlpha = 0.16; lc.drawImage(G.lua, Math.round(gx) - 4, Math.round(gy) - 4); }
+EYES_E.fronteira = (e, fx, fy) => {
+  const k = el1FrPose(e), o = EL1_FR[k], G = EL1.GL, hx = fx + (0.6 + o.lean * 1.25 + 1.5) * e.facing, hy = fy - 1 - (27 - (5.4 + o.low - 0.2));
+  lc.globalAlpha = 0.3; lc.drawImage(G.lua, Math.round(hx) - 4, Math.round(hy) - 4);   // o olho
+  // a lâmina acesa: o brilho corre do punho até a ponta
+  const [tx, ty] = el1Tip(k), hot = el1FrHot(e), sw = e.state === 'slash' || e.state === 'vcut' || e.state === 'gap';
+  if (!hot && !sw) return;
+  const q = e.state === 'wind' ? clamp(1 - e.stateT / EL1_LAMINA, 0, 1) : e.state === 'vwind' ? clamp(1 - e.stateT / EL1_SALTO, 0, 1) : 1;
+  for (let j = 1; j <= 3; j++) {
+    const t = j / 3, x = fx + (lerp(o.hn[0], tx, t) - EL1_BX) * e.facing, y = fy - 1 - (27 - lerp(o.hn[1], ty, t));
+    lc.globalAlpha = (sw ? 0.5 : 0.2 + 0.5 * q) * (j === 3 ? 1 : 0.7); lc.drawImage(j === 3 ? G.luaG : G.prata, Math.round(x) - (j === 3 ? 10 : 6), Math.round(y) - (j === 3 ? 10 : 6));
+  }
 };
-WARN_E.sentinela = e => e.state === 'wind' || e.state === 'twind';
-
+WARN_E.fronteira = e => e.state === 'wind' || e.state === 'vwind';
 const el1ArPose = e => e.state === 'aim' ? 3 : e.state === 'loose' ? 4 : e.state === 'hop' || !e.onGround ? 5 : Math.abs(e.vx) > 4 ? 1 + Math.floor(e.t * 9) % 2 : 0;
 DRAW_E.arqueiro = (e, fx, fy, fl) => el1Blit(cvPick(EL1.get().ar[el1ArPose(e)], e, fl), e, fx, fy, EL1_BX + 1, 29, el1Jit(e, e.state === 'aim' && e.stateT < 0.3, 30));
 EYES_E.arqueiro = (e, fx, fy) => {
@@ -436,25 +448,27 @@ EYES_E.arqueiro = (e, fx, fy) => {
 };
 WARN_E.arqueiro = e => e.state === 'aim';
 
-// o sabre: o corpo inteiro some; espreitando, só um tremor (o branco do desenho, quase sem nada, deslocado)
-const el1SbPose = e => e.state === 'reveal' ? 3 : e.state === 'pounce' ? (e.vy < 60 ? 4 : 5) : e.state === 'land' ? 5 : !e.onGround ? 5 : Math.abs(e.vx) > 6 ? 1 + Math.floor(e.t * (Math.abs(e.vx) > 60 ? 10 : 6)) % 2 : 0;
-DRAW_E.sabre = (e, fx, fy, fl) => {
-  const S = EL1.get().sb[el1SbPose(e)], v = e.vis ?? 1;
+
+// o cão-fada: o corpo inteiro some; espreitando, só um tremor (o branco do desenho, quase sem nada, deslocado)
+const el1CfPose = e => e.state === 'bark' ? 3 : e.state === 'pounce' ? (e.vy < 60 ? 4 : 5) : e.state === 'land' ? 5 : !e.onGround ? 5 : Math.abs(e.vx) > 6 ? 1 + Math.floor(e.t * (Math.abs(e.vx) > 60 ? 10 : 6)) % 2 : 0;
+DRAW_E.caofada = (e, fx, fy, fl) => {
+  const S = EL1.get().cf[el1CfPose(e)], v = e.vis ?? 1;
   if (v < 0.98) {   // o tremor no ar: dois fantasmas brancos fracos, um para cada lado, ondulando
     const w = e.facing > 0 ? S.wr : S.wl, j = Math.sin(e.t * 9 + e.seed) * 1.2;
     lc.globalAlpha = 0.07 * (1 - v); el1Blit(w, e, fx, fy, 16, 17, Math.round(j)); lc.globalAlpha = 0.05 * (1 - v); el1Blit(w, e, fx, fy - 1, 16, 17, -Math.round(j));
   }
-  if (v > 0.02) { lc.globalAlpha = v; el1Blit(cvPick(S, e, fl), e, fx, fy, 16, 17, el1Jit(e, e.state === 'reveal' && e.stateT < 0.25, 40)); }
+  // no latido o corpo dá um tranco a cada latido
+  const kick = e.state === 'bark' && ((EL1_LATIDO - e.stateT) % 0.27) < 0.06 ? -1 : 0;
+  if (v > 0.02) { lc.globalAlpha = v; el1Blit(cvPick(S, e, fl), e, fx, fy + kick, 16, 17); }
   lc.globalAlpha = 1;
 };
-EYES_E.sabre = (e, fx, fy) => {
+EYES_E.caofada = (e, fx, fy) => {
   const v = e.vis ?? 1; if (v < 0.05) return;
-  const o = EL1.SB[el1SbPose(e)], x = fx + (o.head[0] + 1.4 - 15) * e.facing, y = fy - 1 - (15 - (o.head[1] - 0.6));
-  const hot = e.state === 'reveal' ? 0.4 + 0.55 * clamp(1 - e.stateT / EL1_OLHOS, 0, 1) : e.state === 'pounce' ? 0.8 : 0.25;
-  lc.globalAlpha = hot * v; lc.drawImage(e.state === 'reveal' || e.state === 'pounce' ? EL1.GL.luaG : EL1.GL.lua, Math.round(x) - (e.state === 'reveal' || e.state === 'pounce' ? 10 : 4), Math.round(y) - (e.state === 'reveal' || e.state === 'pounce' ? 10 : 4));
+  const o = EL1.SB[el1CfPose(e)], x = fx + (o.head[0] + 1.2 - 15) * e.facing, y = fy - 1 - (15 - (o.head[1] - 0.6));
+  const big = e.state === 'bark' || e.state === 'pounce', hot = e.state === 'bark' ? 0.5 + 0.45 * clamp(1 - e.stateT / EL1_LATIDO, 0, 1) : e.state === 'pounce' ? 0.8 : 0.25;
+  lc.globalAlpha = hot * v; lc.drawImage(big ? EL1.GL.fadaG : EL1.GL.fada, Math.round(x) - (big ? 12 : 5), Math.round(y) - (big ? 12 : 5));
 };
-WARN_E.sabre = e => e.state === 'reveal';
-
+WARN_E.caofada = e => e.state === 'bark';
 // o fogo-fátuo: o miolo; inchando cresce; o rastro e as faíscas vão no drawTop
 const el1FtBob = e => e.state === 'dash' ? 0 : Math.sin(e.t * 3.1 + e.seed) * 1.5;
 DRAW_E.fatuo = (e, fx, fy, fl) => {
@@ -467,18 +481,29 @@ EYES_E.fatuo = (e, fx, fy) => {
 };
 WARN_E.fatuo = e => e.state === 'swell';
 
-const el1AnPose = e => e.state === 'stomp' ? 2 : e.state === 'crack' || e.state === 'roots' ? 3 : e.state === 'slapW' ? 4 : e.state === 'slap' ? 5 : e.onGround && Math.abs(e.vx) > 3 ? Math.floor(e.t * 3) % 2 : 0;
-DRAW_E.antigo = (e, fx, fy, fl) => el1Blit(cvPick(EL1.get().an[el1AnPose(e)], e, fl), e, fx, fy, 17, 43, el1Jit(e, (e.state === 'stomp' || e.state === 'slapW') && e.stateT < 0.25, 36));
-EYES_E.antigo = (e, fx, fy) => {
-  const o = EL1.AN[el1AnPose(e)], G = EL1.GL, cx = 16 + o.lean, ex = fx + (cx + 2.4 - 16) * e.facing, ey = fy - 1 - (41 - (15 + o.low + EL1.FACE + 0.3));
-  const hot = e.state === 'stomp' || e.state === 'slapW' ? 0.7 + 0.25 * Math.sin(e.t * 30) : 0.35 + 0.08 * Math.sin(e.t * 2);
-  lc.globalAlpha = hot; for (const ox of [-1.4, 1.2]) lc.drawImage(G.seiva, Math.round(ex + ox * e.facing) - 5, Math.round(ey) - 5);
-  if (e.state === 'slapW') { const h = o.hn; lc.globalAlpha = 0.3 + 0.4 * clamp(1 - e.stateT / EL1_GALHO, 0, 1); lc.drawImage(G.seivaG, Math.round(fx + (h[0] - 16) * e.facing) - 12, Math.round(fy - 1 - (41 - h[1])) - 12); }
+
+// a sílfide: voa aos trancos; no aviso as asas viram um borrão (dois quadros de asa por cima, meio apagados)
+const el1SfBob = e => e.state === 'dart' ? 0 : Math.sin(e.t * 4.2 + e.seed) * 1.6;
+const el1SfPose = e => e.state === 'swind' ? 3 : e.state === 'dart' || e.state === 'gust' ? 4 : Math.floor(e.t * 16 + e.seed) % 3;
+DRAW_E.silfide = (e, fx, fy, fl) => {
+  const B = EL1.get().sf, k = el1SfPose(e), y = Math.round(fy - e.h / 2 + el1SfBob(e)), jx = el1Jit(e, e.state === 'swind', 50);
+  if (e.state === 'swind') {   // o borrão das asas
+    lc.globalAlpha = 0.35; el1Blit(cvPick(B[Math.floor(e.t * 40) % 3], e, false), e, fx, y, 12, 11, jx); lc.globalAlpha = 1;
+  }
+  el1Blit(cvPick(B[k], e, fl), e, fx, y, 12, 11, jx);
 };
-WARN_E.antigo = e => e.state === 'stomp' || e.state === 'slapW';
+EYES_E.silfide = (e, fx, fy) => {
+  const G = EL1.GL, o = EL1.SF[el1SfPose(e)], y = Math.round(fy - e.h / 2 + el1SfBob(e));
+  const ex = fx + (o.hx + 1.2 - 11) * e.facing, ey = y + (o.hy - 0.3 - 10);
+  lc.globalAlpha = 0.3; lc.drawImage(G.lua, Math.round(ex) - 4, Math.round(ey) - 4);
+  if (e.state !== 'swind') return;
+  const q = clamp(1 - e.stateT / EL1_SOPRO, 0, 1), hx = fx + (o.hx - 11 + 4) * e.facing, hy = y - 3;
+  lc.globalAlpha = 0.2 + 0.55 * q; lc.drawImage(G.vento, Math.round(hx) - 9, Math.round(hy) - 9);
+};
+WARN_E.silfide = e => e.state === 'swind';
 
 /* ================= comportamento ================= */
-const el1Glaives = [], el1Flechas = [], el1Grupos = [], el1Rachas = [], el1Raizes = [], el1Pops = [];
+const el1Sopros = [], el1Aneis = [], el1Flechas = [], el1Grupos = [], el1Rachas = [], el1Raizes = [], el1Pops = [];
 let el1Agrupando = false;
 const el1Near = (e, r = 220) => clamp(1 - Math.hypot(pl.x - e.x, pl.y - e.y) / r, 0, 1);
 const el1Live = e => e && !e.dead && enemies.includes(e);
@@ -486,75 +511,91 @@ function el1Sparks(x, y, n, cols, sp = 40, g = 0, life = 0.4) {
   if (el1Fx.length > 500) return;
   for (let i = 0; i < n; i++) el1P({ x: x + rnd(-1, 1), y: y + rnd(-1, 1), vx: rnd(-sp, sp), vy: rnd(-sp, sp), g, life: life * rnd(0.6, 1), max: life, col: cols[Math.floor(Math.random() * cols.length)], size: 1 });
 }
-const EL1_LUA = ['#9cc8ff', '#c8e0ff', '#f8fbff'], EL1_PRATA = ['#e6eef8', '#b4c2d6', '#ffffff'], EL1_SEIVA = ['#3a92f0', '#86c4ff', '#e0f4ff'], EL1_FOLHA = ['#5896b0', '#90c6dc', '#34708c'];
+const EL1_LUA = ['#9cc8ff', '#c8e0ff', '#f8fbff'], EL1_PRATA = ['#e6eef8', '#b4c2d6', '#ffffff'], EL1_FADA = ['#5ab88a', '#b8f0c8', '#f4fff0'], EL1_VENTO = ['#e0f4ff', '#c8e4f0', '#ffffff'], EL1_FOLHA = ['#5896b0', '#90c6dc', '#34708c'];
 // o chão logo abaixo de (x, y) em px (a linha de cima do bloco), até max blocos
 function el1Floor(x, y, max = 10) { const tx = Math.floor(x / T), ty = Math.floor(y / T); for (let k = 0; k < max; k++) if (solidAt(tx, ty + k)) return (ty + k) * T; return null; }
 // ar livre acima da cabeça (px, até max blocos)
 function el1Room(e, max = 8) { const x0 = Math.floor((e.x + 1) / T), x1 = Math.floor((e.x + e.w - 1) / T), ty = Math.floor(e.y / T); for (let k = 1; k <= max; k++) for (let x = x0; x <= x1; x++) if (solidAt(x, ty - k)) return (k - 1) * T + (e.y - ty * T); return max * T; }
 
-/* ---------- a Sentinela da Lua ---------- */
-AI.sentinela = function (e, dt, dx, dy, dist, aggro) {
-  e.stateT -= dt; e.throwCD = (e.throwCD || 0) - dt;
+
+/* ---------- a Guarda-Fronteira ---------- */
+AI.fronteira = function (e, dt, dx, dy, dist, aggro) {
+  e.stateT -= dt; e.vaultCD = (e.vaultCD || 0) - dt;
   const ecx = e.x + e.w / 2, pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
-  if (e.state === 'wind') {   // o glaive acende azul na mão
+  if (e.state === 'wind') {   // a lâmina acende na mão, erguida atrás
     e.vx = approach(e.vx, 0, 700 * dt); e.facing = Math.sign(dx) || e.facing;
-    if (Math.random() < dt * 14) { const [x, y] = el1Pt(e, EL1_SN[3].hn[0], EL1_SN[3].hn[1]); el1Sparks(x, y, 1, EL1_LUA, 20, -20, 0.4); }
+    if (Math.random() < dt * 14) { const [x, y] = el1Pt(e, ...el1Tip(3)); el1Sparks(x, y, 1, EL1_LUA, 20, -20, 0.4); }
     if (e.stateT <= 0) el1Slash(e, 1);
     return;
   }
-  if (e.state === 'slash') {
-    const reach = 20, hb = { x: e.facing > 0 ? ecx - 2 : ecx - reach + 2, y: e.y - (e.slashN === 2 ? 8 : 2), w: reach, h: e.h + (e.slashN === 2 ? 8 : 4) };
-    if (!e.swingHit && !pl.dead && overlap(hb, pl)) { e.swingHit = true; const r = hurtPlayer(e.dmg, ecx, e, false); if (r === 'hit') el1Sparks(pcx, pcy, 6, EL1_LUA, 70); }
+  if (e.state === 'slash' || e.state === 'vcut') {
+    const back = e.state === 'vcut', reach = back ? 24 : 21, up = e.slashN === 2;
+    const hb = { x: e.facing > 0 ? ecx - 2 : ecx - reach + 2, y: e.y - (up ? 8 : 2), w: reach, h: e.h + (up ? 8 : 4) };
+    if (!e.swingHit && !pl.dead && overlap(hb, pl)) { e.swingHit = true; const r = hurtPlayer(e.dmg * (back ? 1.15 : 1), ecx, e, false); if (r === 'hit') el1Sparks(pcx, pcy, 6, EL1_LUA, 70); }
     e.vx = approach(e.vx, 0, 600 * dt);
-    if (e.stateT <= 0) { if (e.slashN === 1) { e.state = 'gap'; e.stateT = 0.1; } else el1HopBack(e); }
+    if (e.stateT <= 0) {
+      if (back) { e.state = 'walk'; e.atkCD = 0.9 + Math.random() * 0.6; }
+      else if (e.slashN === 1) { e.state = 'gap'; e.stateT = 0.1; } else el1HopBack(e);
+    }
     return;
   }
   if (e.state === 'gap') { e.vx = approach(e.vx, 0, 600 * dt); if (e.stateT <= 0) el1Slash(e, 2); return; }
   if (e.state === 'hop') { e.airT = (e.airT || 0) + dt; if (e.onGround && e.airT > 0.12) { e.state = 'walk'; e.vx *= 0.3; } else if (e.airT > 1.5) e.state = 'walk'; return; }
-  if (e.state === 'twind') {   // o glaive acende atrás do ombro
-    e.vx = approach(e.vx, 0, 700 * dt); e.facing = Math.sign(dx) || e.facing;
-    if (Math.random() < dt * 14) { const [x, y] = el1Pt(e, EL1_SN[6].hn[0], EL1_SN[6].hn[1]); el1Sparks(x, y, 1, EL1_LUA, 20, -20, 0.4); }
-    if (e.stateT <= 0) el1Throw(e);
+  if (e.state === 'vwind') {   // agachada, a espada acesa para trás: o salto vem
+    e.vx = approach(e.vx, 0, 800 * dt); e.facing = Math.sign(dx) || e.facing;
+    if (e.stateT > 0.12) e.tgX = pcx + (Math.sign(dx) || e.facing) * 2.2 * T;
+    if (Math.random() < dt * 16) { const [x, y] = el1Pt(e, ...el1Tip(6)); el1Sparks(x, y, 1, EL1_LUA, 20, -20, 0.4); }
+    if (e.stateT <= 0) el1Vault(e);
     return;
   }
-  if (e.state === 'catch') {   // o glaive voando: fica, de mão aberta, recuando devagar se o herói vem
-    e.facing = Math.sign(dx) || e.facing;
-    const dir = aggro && dist < 3 * T ? -Math.sign(dx) : 0;
-    walk(e, dt, dir, 34, 400, 260, dy, false);
-    if (!e.glaive) { e.state = 'walk'; e.atkCD = Math.max(e.atkCD, 0.6 + Math.random() * 0.5); }
+  if (e.state === 'vault') {
+    e.airT += dt;
+    if (e.onGround && e.airT > 0.15) { e.state = 'vland'; e.stateT = 0.09; e.vx *= 0.2; e.facing = Math.sign(pl.x + pl.w / 2 - ecx) || -e.facing; burst(ecx, e.y + e.h, 4, '#6e7a72', 40, 300, 0.35); }
+    else if (e.airT > 1.8) { e.state = 'walk'; e.atkCD = 0.8; }
+    return;
+  }
+  if (e.state === 'vland') {   // pousou do outro lado: vira e corta para trás
+    e.vx = approach(e.vx, 0, 900 * dt);
+    if (e.stateT <= 0) { e.state = 'vcut'; e.stateT = 0.16; e.swingHit = false; e.vx = e.facing * 60; e.slashN = 1; e.arcFx = { n: 3, t: 0 }; sfx.el1Corte(Math.max(0.4, el1Near(e)), 3); }
     return;
   }
   e.state = 'walk';
   let dir = 0, chase = false;
   if (aggro) { dir = Math.abs(dx) < 12 ? 0 : Math.sign(dx); chase = true; }
   else { cvWander(e, dt); dir = e.wander; }
-  walk(e, dt, dir, aggro ? 64 + e.lvl * 0.8 : 28, 800, 290, dy, chase);
+  walk(e, dt, dir, aggro ? 66 + e.lvl * 0.8 : 28, 800, 290, dy, chase);
   if (dir) e.facing = dir; else if (aggro) e.facing = Math.sign(dx) || e.facing;
   if (!aggro || e.atkCD > 0 || !e.onGround || pl.dead) return;
-  if (Math.abs(dx) < 26 && Math.abs(dy) < 16 && clearPath(e, pl)) { e.state = 'wind'; e.stateT = EL1_GLAIVE; e.vx = 0; e.facing = Math.sign(dx) || e.facing; sfx.el1Glaive(Math.max(0.4, el1Near(e))); }
-  else if (e.throwCD <= 0 && dist > 4 * T && dist < 9 * T && Math.abs(dy) < 5 * T && e.sees) {
-    const [hx, hy] = el1Pt(e, EL1_SN[6].hn[0], EL1_SN[6].hn[1]);
-    if (losClear(ecx, hy, pcx, pcy) && losClear(hx, hy, pcx, pcy)) { e.state = 'twind'; e.stateT = EL1_TIRO; e.vx = 0; e.facing = Math.sign(dx) || e.facing; sfx.el1Glaive(Math.max(0.4, el1Near(e)), 1.3); }
-    else e.throwCD = 0.5;
+  if (Math.abs(dx) < 26 && Math.abs(dy) < 16 && clearPath(e, pl)) { e.state = 'wind'; e.stateT = EL1_LAMINA; e.vx = 0; e.facing = Math.sign(dx) || e.facing; sfx.el1Lamina(Math.max(0.4, el1Near(e))); }
+  else if (e.vaultCD <= 0 && Math.abs(dx) > 3 * T && Math.abs(dx) < 7 * T && Math.abs(dy) < 2 * T && e.sees && pl.onGround) {
+    // só salta se cabe por cima (o teto alto) e se há chão do outro lado do herói
+    const lx = pcx + Math.sign(dx) * 2.2 * T, fl = el1Floor(lx, pl.y, 4);
+    if (el1Room(e, 6) > 4 * T && fl !== null && !rectSolid(lx - e.w / 2, fl - e.h - 1, e.w, e.h) && losClear(ecx, e.y - 2 * T, pcx, pcy - 2 * T)) {
+      e.state = 'vwind'; e.stateT = EL1_SALTO; e.vx = 0; e.facing = Math.sign(dx) || e.facing; e.tgX = lx; e.vaultCD = 3.5 + Math.random() * 2;
+      sfx.el1Lamina(Math.max(0.4, el1Near(e)), 0.8);
+    } else e.vaultCD = 0.6;
   }
 };
 function el1Slash(e, n) {
   e.state = 'slash'; e.stateT = 0.14; e.slashN = n; e.swingHit = false; e.vx = e.facing * (n === 1 ? 120 : 80);
   sfx.el1Corte(Math.max(0.4, el1Near(e)), n);
-  const k = n === 2 ? 5 : 4, [x, y] = el1Pt(e, EL1_SN[k].hn[0], EL1_SN[k].hn[1]); el1Sparks(x, y, 4, EL1_LUA, 50);
+  const [x, y] = el1Pt(e, ...el1Tip(n === 2 ? 5 : 4)); el1Sparks(x, y, 4, EL1_LUA, 50);
   e.arcFx = { n, t: 0 };
 }
 function el1HopBack(e) {
   e.state = 'hop'; e.airT = 0; e.atkCD = 1 + Math.random() * 0.6;
   const room = el1Room(e, 5); e.vy = -Math.min(210, Math.sqrt(2 * GRAV * Math.max(4, room - 2))); e.vx = -e.facing * 150; e.onGround = false;
 }
-function el1Throw(e) {
-  const [x, y] = el1Pt(e, EL1_SN[7].hn[0], EL1_SN[7].hn[1]), a = Math.atan2(pl.y + pl.h / 2 - y, pl.x + pl.w / 2 - x);
-  const G = { x, y, vx: Math.cos(a) * EL1_GL_SP, vy: Math.sin(a) * EL1_GL_SP, ph: 'out', d: 0, owner: e, hit: false, a: 0, dmg: e.dmg, t: 0, back: 0 };
-  el1Glaives.push(G); e.glaive = G; e.state = 'catch'; e.stateT = 0.5; e.throwCD = 3 + Math.random() * 1.5;
-  sfx.el1Arremesso(Math.max(0.4, el1Near(e)));
+// o salto por cima: o arco alto que passa uns 2 blocos acima da cabeça do herói e cai do outro lado
+function el1Vault(e) {
+  const ex = e.x + e.w / 2, ey = e.y + e.h, top = Math.min(ey - 4 * T, pl.y - 1.6 * T), room = el1Room(e, 6);
+  const H = clamp(ey - top, 3 * T, Math.max(3 * T, room - 2)), v0 = Math.sqrt(2 * GRAV * H);
+  const lf = el1Floor(e.tgX, pl.y, 4) ?? ey, h = lf - ey, disc = v0 * v0 + 2 * GRAV * h, t = disc > 0 ? (v0 + Math.sqrt(disc)) / GRAV : 0.8;
+  e.vy = -v0; e.vx = clamp((e.tgX - ex) / Math.max(0.4, t), -320, 320); e.onGround = false; e.state = 'vault'; e.airT = 0;
+  e.facing = Math.sign(e.vx) || e.facing;
+  sfx.el1Salto(Math.max(0.5, el1Near(e)), 1);
+  const [x, y] = el1Pt(e, ...el1Tip(6)); el1Sparks(x, y, 5, EL1_LUA, 40, 0, 0.4);
 }
-
 /* ---------- o Arqueiro da Mata ---------- */
 // o melhor lugar alto por perto: em pé, uns 9 blocos do herói, mais alto que ele (refeito de tempo em tempo)
 function el1Alto(e) {
@@ -623,23 +664,30 @@ function el1Volley(e) {
   sfx.el1Flecha(Math.max(0.35, el1Near(e, 260)));
 }
 
-/* ---------- o Sabre-da-Noite ---------- */
-AI.sabre = function (e, dt, dx, dy, dist, aggro) {
+
+/* ---------- o Cão-Fada ---------- */
+AI.caofada = function (e, dt, dx, dy, dist, aggro) {
   e.stateT -= dt; e.showT = (e.showT || 0) - dt;
   const ecx = e.x + e.w / 2, pcx = pl.x + pl.w / 2;
   const want = e.state === 'stalk' ? (e.showT > 0 ? 1 : 0) : e.state === 'fade' ? 0 : 1;
   e.vis = approach(e.vis ?? 0, want, dt * (want > (e.vis ?? 0) ? 4 : 2.6));
-  if (e.state === 'reveal') {   // agachado, os olhos acendem; mira até o último instante
+  if (e.state === 'bark') {   // aparece e late três vezes; mira até o último instante
     e.vx = approach(e.vx, 0, 900 * dt); e.facing = Math.sign(dx) || e.facing;
     if (e.stateT > 0.12) { e.tgX = pcx; e.tgY = pl.y + pl.h; }
+    const el = EL1_LATIDO - e.stateT;
+    while ((e.barkN || 0) < 3 && el >= (e.barkN || 0) * 0.27) {
+      const o = EL1.SB[3], [x, y] = el1Pt(e, o.head[0] + 4, o.head[1] + 2, 15, 15);
+      el1Aneis.push({ x, y, t: 0, n: e.barkN || 0 }); e.barkN = (e.barkN || 0) + 1;
+      sfx.el1Latido(Math.max(0.5, el1Near(e, 320)), e.barkN);
+    }
     if (e.stateT <= 0) el1Pounce(e);
     return;
   }
   if (e.state === 'pounce') {
     e.airT += dt;
     const hb = { x: e.facing > 0 ? ecx : ecx - 16, y: e.y - 4, w: 16, h: e.h + 4 };
-    if (!e.swingHit && !pl.dead && (overlap(hb, pl) || overlap(e, pl))) { e.swingHit = true; const r = hurtPlayer(e.dmg, ecx, e, false); if (r === 'hit') el1Sparks(pcx, pl.y + 8, 6, ['#c8323c', '#ffffff'], 60, 200, 0.4); }
-    if (e.onGround && e.airT > 0.12) { e.state = 'land'; e.stateT = 0.45; e.vx *= 0.25; burst(ecx, e.y + e.h, 5, '#6a5a80', 40, 300, 0.4); }
+    if (!e.swingHit && !pl.dead && (overlap(hb, pl) || overlap(e, pl))) { e.swingHit = true; const r = hurtPlayer(e.dmg, ecx, e, false); if (r === 'hit') el1Sparks(pcx, pl.y + 8, 6, ['#b83a48', '#ffffff'], 60, 200, 0.4); }
+    if (e.onGround && e.airT > 0.12) { e.state = 'land'; e.stateT = 0.45; e.vx *= 0.25; burst(ecx, e.y + e.h, 5, '#3e5a3a', 40, 300, 0.4); }
     else if (e.airT > 2) e.state = 'land', e.stateT = 0.3;
     return;
   }
@@ -656,12 +704,11 @@ AI.sabre = function (e, dt, dx, dy, dist, aggro) {
   } else { cvWander(e, dt); dir = e.wander; sp = 22; }
   walk(e, dt, dir, sp, 600, 280, dy, chase);
   e.facing = aggro ? (Math.sign(dx) || e.facing) : (dir || e.facing);
-  e.purrT = (e.purrT ?? Math.random() * 4) - dt;
-  if (e.purrT <= 0) { e.purrT = 3.5 + Math.random() * 3; const v = el1Near(e, 180); if (v > 0.1) sfx.el1Rosnado(v * 0.6); }
+  e.huffT = (e.huffT ?? Math.random() * 4) - dt;
+  if (e.huffT <= 0) { e.huffT = 3.5 + Math.random() * 3; const v = el1Near(e, 180); if (v > 0.1) sfx.el1Bufo(v * 0.6); }
   if (aggro && e.atkCD <= 0 && e.onGround && e.sees && Math.abs(dx) > 2 * T && Math.abs(dx) < 8.5 * T && Math.abs(dy) < 3 * T && el1Room(e, 4) > 2 * T) {
-    e.state = 'reveal'; e.stateT = EL1_OLHOS; e.vx = 0; e.facing = Math.sign(dx) || e.facing; e.tgX = pcx; e.tgY = pl.y + pl.h;
-    sfx.el1Rosnado(Math.max(0.5, el1Near(e)), 1.4);
-    el1Sparks(ecx, e.y + e.h / 2, 6, EL1_LUA, 30, -20, 0.5);
+    e.state = 'bark'; e.stateT = EL1_LATIDO; e.barkN = 0; e.vx = 0; e.facing = Math.sign(dx) || e.facing; e.tgX = pcx; e.tgY = pl.y + pl.h;
+    el1Sparks(ecx, e.y + e.h / 2, 6, EL1_FADA, 30, -20, 0.5);
   }
 };
 // o bote: um arco longo até onde o herói estava (passa um pouco dele)
@@ -672,7 +719,6 @@ function el1Pounce(e) {
   e.facing = Math.sign(e.vx) || e.facing;
   sfx.el1Bote(Math.max(0.4, el1Near(e)));
 }
-
 /* ---------- o Fogo-Fátuo ---------- */
 // o grupo gira em volta do herói; quando dá, para, as luzes incham, e cada uma se lança (uma depois da outra)
 AI.fatuo = function (e, dt, dx, dy, dist, aggro) {
@@ -749,48 +795,72 @@ function el1GrupoTick(G, dt) {
   return true;
 }
 
-/* ---------- o Antigo da Mata ---------- */
-AI.antigo = function (e, dt, dx, dy, dist, aggro) {
-  e.stateT -= dt;
-  const ecx = e.x + e.w / 2, pcx = pl.x + pl.w / 2;
-  if (e.state === 'stomp') {   // o pé erguido: o alvo é onde o herói pisa agora
-    e.vx = approach(e.vx, 0, 600 * dt); e.facing = Math.sign(dx) || e.facing;
-    if (e.stateT <= 0) el1Pisa(e);
-    return;
-  }
-  if (e.state === 'crack' || e.state === 'roots') { e.vx = approach(e.vx, 0, 600 * dt); if (e.stateT <= 0) { e.state = 'walk'; e.atkCD = 1.6 + Math.random() * 0.8; } return; }
-  if (e.state === 'slapW') {
-    e.vx = approach(e.vx, 0, 600 * dt); e.facing = Math.sign(dx) || e.facing;
-    if (e.stateT <= 0) { e.state = 'slap'; e.stateT = 0.2; e.swingHit = false; e.vx = e.facing * 40; sfx.el1Galho(Math.max(0.4, el1Near(e))); }
-    return;
-  }
-  if (e.state === 'slap') {
-    const hb = { x: e.facing > 0 ? ecx : ecx - 26, y: e.y + 2, w: 26, h: e.h - 4 };
-    if (!e.swingHit && !pl.dead && overlap(hb, pl)) {
-      e.swingHit = true; const r = hurtPlayer(e.dmg, ecx, e, false);
-      if (r === 'hit') { pl.vx = e.facing * 330; pl.vy = -230; pl.onGround = false; el1Sparks(pcx, pl.y + 8, 8, EL1_FOLHA, 70, 200, 0.5); shake(4); }
+
+/* ---------- a Sílfide ---------- */
+// voa aos trancos em volta de um ponto a uns 5 blocos do herói, mais alto que ele; para, carrega o vento e sopra
+AI.silfide = function (e, dt, dx, dy, dist, aggro) {
+  e.stateT -= dt; e.hopT = (e.hopT || 0) - dt;
+  const ecx = e.x + e.w / 2, ecy = e.y + e.h / 2, pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
+  const bounce = () => { if (e.hitWall) e.vx *= -0.6; if (e.hitCeil || e.onGround) e.vy = e.onGround ? -60 : e.vy * -0.6; };
+  if (e.state === 'swind') {
+    const k = Math.pow(0.01, dt); e.vx *= k; e.vy *= k; e.facing = Math.sign(dx) || e.facing;
+    if (Math.random() < dt * 30) {   // o vento converge para as mãos
+      const [hx, hy] = el1SfMao(e), a = Math.random() * 6.28, r = 14 + Math.random() * 6;
+      el1P({ x: hx + Math.cos(a) * r, y: hy + Math.sin(a) * r, vx: -Math.cos(a) * r * 2.6, vy: -Math.sin(a) * r * 2.6, g: 0, life: 0.36, max: 0.36, col: EL1_VENTO[(Math.random() * 3) | 0], size: 1 });
     }
-    e.vx = approach(e.vx, 0, 500 * dt);
-    if (e.stateT <= 0) { e.state = 'recover'; e.stateT = 0.5; e.atkCD = 1.4 + Math.random() * 0.6; }
+    if (e.stateT <= 0) el1Rajada(e);
     return;
   }
-  if (e.state === 'recover') { e.vx = approach(e.vx, 0, 500 * dt); if (e.stateT <= 0) e.state = 'walk'; return; }
-  e.state = 'walk';
-  let dir = 0;
-  if (aggro) dir = Math.abs(dx) < 20 ? 0 : Math.sign(dx); else { cvWander(e, dt); dir = e.wander; }
-  walk(e, dt, dir, aggro ? 17 + e.lvl * 0.25 : 9, 200, 260, dy, aggro);
-  if (dir) e.facing = dir; else if (aggro) e.facing = Math.sign(dx) || e.facing;
-  if (e.onGround && Math.abs(e.vx) > 3) { e.stepT = (e.stepT || 0) - dt; if (e.stepT <= 0) { e.stepT = 0.7; const v = el1Near(e, 200); if (v > 0.05) sfx.el1Passo(v); } }
-  e.creakT = (e.creakT ?? Math.random() * 5) - dt;
-  if (e.creakT <= 0) { e.creakT = 4 + Math.random() * 4; const v = el1Near(e, 220); if (v > 0.05) sfx.el1Range(v); }
-  if (!aggro || e.atkCD > 0 || !e.onGround || pl.dead) return;
-  if (Math.abs(dx) < 30 && Math.abs(dy) < 22 && clearPath(e, pl)) { e.state = 'slapW'; e.stateT = EL1_GALHO; e.vx = 0; sfx.el1Range(Math.max(0.5, el1Near(e)), 1.4); }
-  else if (e.sees && dist < 11 * T && Math.abs(dy) < 4 * T && pl.onGround) { e.state = 'stomp'; e.stateT = EL1_PE; e.vx = 0; e.facing = Math.sign(dx) || e.facing; sfx.el1Range(Math.max(0.5, el1Near(e)), 0.8); }
+  if (e.state === 'gust') { const k = Math.pow(0.05, dt); e.vx *= k; e.vy *= k; if (e.stateT <= 0) e.state = 'fly'; return; }
+  if (e.state === 'dart') { bounce(); if (e.stateT <= 0) { e.state = 'fly'; e.hopT = 0; } return; }
+  e.state = 'fly';
+  if (aggro && dist < 2.2 * T && (e.dartCD || 0) <= gameTime) { el1SfDart(e); return; }   // o herói em cima: dispara para longe
+  if (aggro) {
+    if (e.hopT <= 0 || !e.goal) {   // o próximo tranco: um ponto novo a uns 5 blocos, de um lado ou do outro, acima
+      e.hopT = 0.55 + Math.random() * 0.45;
+      const side = Math.abs(dx) > 2 * T && Math.random() < 0.75 ? -Math.sign(dx) : (Math.random() < 0.5 ? -1 : 1);
+      for (let i = 0; i < 6; i++) {
+        const gx = pcx + side * (4 + Math.random() * 2) * T, gy = pcy - (1.5 + Math.random() * 2.5) * T;
+        if (!rectSolid(gx - e.w / 2, gy - e.h / 2, e.w, e.h) && losClear(gx, gy, pcx, pcy)) { e.goal = [gx, gy]; break; }
+        if (i === 5) e.goal = [ecx + rnd(-T, T), ecy - T * 0.5];
+      }
+      const v = el1Near(e, 160); if (v > 0.1) sfx.el1Asas(v * 0.5);
+    }
+    const [gx, gy] = e.goal, k = Math.min(1, dt * 5);
+    e.vx = lerp(e.vx, clamp((gx - ecx) * 4, -150, 150), k); e.vy = lerp(e.vy, clamp((gy - ecy) * 4, -150, 150), k);
+  } else {
+    const tx = (e.homeX ?? ecx) + Math.sin(e.t * 0.7 + e.seed) * 30, ty = (e.homeY ?? ecy) + Math.sin(e.t * 1.6 + e.seed) * 10, k = Math.min(1, dt * 2);
+    e.vx = lerp(e.vx, clamp((tx - ecx) * 2, -40, 40), k); e.vy = lerp(e.vy, clamp((ty - ecy) * 2, -40, 40), k);
+  }
+  bounce();
+  e.facing = aggro ? (Math.sign(dx) || e.facing) : (Math.sign(e.vx) || e.facing);
+  if (aggro && e.atkCD <= 0 && e.sees && dist < 8.5 * T && dist > 2.5 * T && Math.abs(dy) < 4 * T) {
+    const [hx, hy] = el1SfMao(e);
+    if (losClear(hx, hy, pcx, pcy)) { e.state = 'swind'; e.stateT = EL1_SOPRO; sfx.el1Sopro(Math.max(0.4, el1Near(e, 260))); }
+    else e.atkCD = 0.4;
+  }
 };
-// a pisada: a rachadura segue o chão, coluna a coluna, do pé até onde o herói pisa agora (ou até o chão acabar)
-function el1Pisa(e) {
+const el1SfMao = e => [e.x + e.w / 2 + e.facing * 7, e.y + e.h / 2 - 2];
+function el1SfDart(e) {
+  const a = Math.atan2(e.y - pl.y, e.x - pl.x) + rnd(-0.5, 0.5), sp = 230;
+  e.vx = Math.cos(a) * sp; e.vy = Math.sin(a) * sp - 40; e.state = 'dart'; e.stateT = 0.38; e.dartCD = gameTime + 1.2; e.goal = null;
+  e.atkCD = Math.max(e.atkCD, 0.5);
+  sfx.el1Asas(Math.max(0.4, el1Near(e)), 1.4);
+}
+// a Rajada: a meia-lua de vento em linha reta
+function el1Rajada(e) {
+  const [x, y] = el1SfMao(e), a = Math.atan2(pl.y + pl.h / 2 - y, pl.x + pl.w / 2 - x);
+  el1Sopros.push({ x, y, vx: Math.cos(a) * EL1_RAJ_SP, vy: Math.sin(a) * EL1_RAJ_SP, a, d: 0, dmg: e.dmg * 0.7, hit: false, t: 0 });
+  e.state = 'gust'; e.stateT = 0.3; e.atkCD = 2 + Math.random() * 0.9;
+  e.vx = -Math.cos(a) * 70; e.vy = -Math.sin(a) * 70;   // o coice do sopro
+  sfx.el1Rajada(Math.max(0.4, el1Near(e, 260)));
+}
+
+/* ---------- a rachadura de roseira (quem chama: o Cavaleiro de Espinhos, 254) ---------- */
+// a espada cravada: a rachadura segue o chão, coluna a coluna, do pé até onde o herói pisa agora (ou até o chão acabar)
+function el1Pisa(e, ox = 9) {
   const ecx = e.x + e.w / 2, fy = e.y + e.h, pcx = pl.x + pl.w / 2, dir = Math.sign(pcx - ecx) || e.facing;
-  const pts = []; let x = ecx + dir * 9, y = fy, ok = true;
+  const pts = []; let x = ecx + dir * ox, y = fy, ok = true;
   const end = Math.abs(pcx - x) < 6 ? x : pcx;
   for (let n = 0; n < 90 && (dir > 0 ? x <= end : x >= end); n++) {
     const tx = Math.floor(x / T); let top = null;
@@ -798,17 +868,18 @@ function el1Pisa(e) {
     if (top === null) { ok = false; break; }
     y = top; pts.push([x, y]); x += dir * 3;
   }
-  if (!pts.length) pts.push([ecx + dir * 9, fy]);
+  if (!pts.length) pts.push([ecx + dir * ox, fy]);
   e.state = 'crack'; e.stateT = EL1_RACHA + 0.5; e.facing = dir;
   el1Rachas.push({ pts, t: 0, dur: EL1_RACHA, dmg: e.dmg, done: false, owner: e, dir, ok });
-  burst(ecx + dir * 9, fy - 1, 12, '#5e6a78', 80, 300, 0.6); el1Sparks(ecx + dir * 9, fy - 2, 5, EL1_SEIVA, 50, 200, 0.4);
+  burst(ecx + dir * ox, fy - 1, 12, '#3a3040', 80, 300, 0.6); el1Sparks(ecx + dir * ox, fy - 2, 5, EL1_FADA, 50, 200, 0.4);
   const v = el1Near(e, 320); if (v > 0.02) { sfx.el1Pisa(v); shake(2 + 3 * v); }
 }
-// as raízes rompem: dano e enraizado em quem estiver em cima
+// os espinhos rompem: dano e enraizado em quem estiver em cima
 function el1Rompe(R) {
   const [x, y] = R.pts[R.pts.length - 1];
   el1Raizes.push({ x, y, t: 0, seed: Math.random() * 100, dir: R.dir });
-  burst(x, y - 2, 14, '#3e4856', 90, 300, 0.6); el1Sparks(x, y - 4, 8, EL1_SEIVA, 60, 120, 0.5);
+  burst(x, y - 2, 14, '#2e2436', 90, 300, 0.6); el1Sparks(x, y - 4, 8, EL1_FADA, 60, 120, 0.5);
+  for (let i = 0; i < 6; i++) el1P({ x: x + rnd(-10, 10), y: y - rnd(4, 18), vx: rnd(-30, 30), vy: rnd(-60, -20), g: 120, life: 0.9, max: 0.9, col: i % 2 ? '#843466' : '#4c183c', size: 1 });   // pétalas
   const v = clamp(1 - Math.hypot(pl.x - x, pl.y - y) / 300, 0, 1); if (v > 0.02) { sfx.el1Raiz(v); shake(1 + 2 * v); }
   if (pl.dead) return;
   const hb = { x: x - EL1_RAIZ_W, y: y - EL1_RAIZ_H, w: EL1_RAIZ_W * 2, h: EL1_RAIZ_H };
@@ -819,25 +890,25 @@ function el1Rompe(R) {
   }
 }
 
+
 /* ---------- golpes, mortes, nascimento ---------- */
 { const _hit = hitEnemy; hitEnemy = function (e, dir, mult = 1, melee = false) {
   const r = _hit(e, dir, mult, melee);
   if (!e || e.dead || !EL1_TYPES.includes(e.type)) return r;
-  if (e.type === 'sabre' && (e.state === 'stalk' || e.state === 'fade')) { e.showT = 1.2; e.vis = Math.max(e.vis ?? 0, 0.6); e.atkCD = Math.min(e.atkCD, 0.5); sfx.el1Rosnado(0.7, 1.6); }
-  if (e.type === 'antigo') { e.stun = Math.min(e.stun, e.state === 'stomp' || e.state === 'slapW' ? 0 : 0.1); if (Math.random() < 0.5) sfx.el1Range(0.6, 1.2); el1Sparks(e.x + e.w / 2, e.y + e.h / 2, 3, EL1_FOLHA, 40, 200, 0.6); }
-  if (e.type === 'sentinela' && e.state === 'twind' && e.stun > 0) { e.state = 'walk'; e.atkCD = Math.max(e.atkCD, 0.6); }   // o golpe corta o arremesso
+  if (e.type === 'caofada' && (e.state === 'stalk' || e.state === 'fade')) { e.showT = 1.2; e.vis = Math.max(e.vis ?? 0, 0.6); e.atkCD = Math.min(e.atkCD, 0.5); sfx.el1Bufo(0.7, 1.4); }
+  if (e.type === 'fronteira' && e.state === 'vwind' && e.stun > 0) { e.state = 'walk'; e.atkCD = Math.max(e.atkCD, 0.6); }   // o golpe corta o salto
   if (e.type === 'arqueiro' && e.state === 'aim' && e.stun > 0) { e.state = 'walk'; e.atkCD = Math.max(e.atkCD, 0.8); }
+  if (e.type === 'silfide' && e.state !== 'dart' && (e.dartCD || 0) <= gameTime) el1SfDart(e);   // golpeada: dispara para longe
   return r;
 }; }
 { const _k = killEnemy; killEnemy = function (e) {
   const r = _k(e);
   if (!EL1_TYPES.includes(e.type)) return r;
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2, v = Math.max(0.3, el1Near(e, 260));
-  if (e.type === 'sentinela' || e.type === 'arqueiro') { el1Sparks(cx, cy - 4, 8, EL1_LUA, 50, -20, 0.8); sfx.el1Morre(v); }
-  else if (e.type === 'sabre') { el1Sparks(cx, cy, 10, ['#6a58a0', '#9cc8ff', '#e6eef8'], 50, -20, 0.8); sfx.el1Bote(v * 0.7, 0.6); }
+  if (e.type === 'fronteira' || e.type === 'arqueiro') { el1Sparks(cx, cy - 4, 8, EL1_LUA, 50, -20, 0.8); sfx.el1Morre(v); }
+  else if (e.type === 'caofada') { el1Sparks(cx, cy, 10, EL1_FADA, 50, -20, 0.8); sfx.el1Latido(v * 0.6, 0.6); }
   else if (e.type === 'fatuo') { el1Pops.push({ x: cx, y: cy, t: 0, big: false }); el1Sparks(cx, cy, 10, EL1_LUA, 60, 0, 0.5); sfx.el1Estoura(v, false); }
-  else if (e.type === 'antigo') { burst(cx, cy, 20, '#5e6a78', 90, 300, 0.8); el1Sparks(cx, e.y + 6, 14, EL1_FOLHA, 70, 120, 1); el1Sparks(cx, cy, 8, EL1_SEIVA, 50, 0, 0.8); sfx.el1Range(v, 0.6); }
-  if (e.glaive) e.glaive.owner = null;
+  else if (e.type === 'silfide') { el1Sparks(cx, cy, 12, EL1_VENTO, 50, 40, 0.9); for (let i = 0; i < 5; i++) el1P({ x: cx + rnd(-4, 4), y: cy + rnd(-4, 4), vx: rnd(-30, 30), vy: rnd(-30, 10), g: 60, life: 1.1, max: 1.1, col: i % 2 ? '#5a8e5a' : '#86b47e', size: 1 }); sfx.el1Morre(v * 0.8, 1.3); }
   return r;
 }; }
 { const _sp = spawnEnemy; spawnEnemy = function (type, px, py, zone) {
@@ -845,7 +916,8 @@ function el1Rompe(R) {
   if (!e || !EL1_TYPES.includes(type)) return e;
   for (let k = 0; k < 3 && rectSolid(e.x, e.y, e.w, e.h); k++) e.y -= T;
   e.atkCD = 0.6 + Math.random() * 0.6; e.homeX = e.x + e.w / 2; e.homeY = e.y + e.h / 2;
-  if (type === 'sabre') { e.state = 'stalk'; e.vis = 0; }
+  if (type === 'caofada') { e.state = 'stalk'; e.vis = 0; }
+  else if (type === 'silfide') e.state = 'fly';
   else if (type === 'fatuo') {
     e.state = 'float'; e.orbR = 3.6 + Math.random() * 1.4; e.orbS = (Math.random() < 0.5 ? -1 : 1) * (0.9 + Math.random() * 0.5); e.orbA = Math.random() * 6.28;
     if (!el1Agrupando) {   // o grupo: 3 a 5 luzes juntas
@@ -865,37 +937,27 @@ function el1Rompe(R) {
   return e;
 }; }
 
-/* ---------- a cada quadro: os glaives, as flechas, o grupo, as rachaduras, as raízes ---------- */
+/* ---------- a cada quadro: as rajadas, as flechas, o grupo, os latidos, as rachaduras, os espinhos ---------- */
 function el1Update(dt) {
   for (let i = el1Grupos.length - 1; i >= 0; i--) if (!el1GrupoTick(el1Grupos[i], dt)) el1Grupos.splice(i, 1);
   const pcx = pl.x + pl.w / 2;
   const hitsHero = (x, y, m = 3) => !pl.dead && x > pl.x - m && x < pl.x + pl.w + m && y > pl.y - m && y < pl.y + pl.h + m;
-  // o glaive: vai em linha até o alcance (ou a pedra) e volta para a mão; acerta uma vez na ida e uma na volta
-  for (let i = el1Glaives.length - 1; i >= 0; i--) {
-    const G = el1Glaives[i], O = G.owner && el1Live(G.owner) ? G.owner : null; G.t += dt; G.a += dt * 22;
-    if (G.ph === 'out') {
-      const nx = G.x + G.vx * dt, ny = G.y + G.vy * dt; G.d += EL1_GL_SP * dt;
-      if (solidAt(Math.floor(nx / T), Math.floor(ny / T)) || G.d >= EL1_GL_MAX) { G.ph = 'back'; G.hit = false; G.back = 0; el1Sparks(G.x, G.y, 4, EL1_PRATA, 40); if (G.d < EL1_GL_MAX) sfx.el1Tine(0.6); }
-      else { G.x = nx; G.y = ny; }
-    } else if (G.ph === 'back') {
-      if (!O) { G.ph = 'drop'; G.vx *= 0.2; G.vy = -40; }
-      else {
-        // volta para a mão, acelerando (atravessa a pedra: é magia de lua)
-        const [hx, hy] = el1Pt(O, EL1_SN[8].hn[0], EL1_SN[8].hn[1]), a = Math.atan2(hy - G.y, hx - G.x), d = Math.hypot(hx - G.x, hy - G.y);
-        G.back += dt; const sp = Math.min(EL1_GL_SP * 1.15, 120 + G.back * 260);
-        G.vx = lerp(G.vx, Math.cos(a) * sp, Math.min(1, dt * 9)); G.vy = lerp(G.vy, Math.sin(a) * sp, Math.min(1, dt * 9));
-        G.x += G.vx * dt; G.y += G.vy * dt;
-        if (d < 7 || G.t > 6) { O.glaive = null; el1Glaives.splice(i, 1); el1Sparks(hx, hy, 5, EL1_LUA, 30); sfx.el1Pega(Math.max(0.3, el1Near(O))); continue; }
+  // a rajada: em linha até o alcance ou a pedra; pouco dano e o empurrão
+  for (let i = el1Sopros.length - 1; i >= 0; i--) {
+    const S = el1Sopros[i]; S.t += dt;
+    const nx = S.x + S.vx * dt, ny = S.y + S.vy * dt; S.d += EL1_RAJ_SP * dt;
+    if (solidAt(Math.floor(nx / T), Math.floor(ny / T)) || S.d >= EL1_RAJ_MAX) { el1Sparks(S.x, S.y, 6, EL1_VENTO, 50, 0, 0.35); el1Sopros.splice(i, 1); continue; }
+    S.x = nx; S.y = ny;
+    if (!S.hit && hitsHero(S.x, S.y, 6)) {
+      S.hit = true;
+      const r = hurtPlayer(S.dmg, pcx - Math.sign(S.vx || 1) * 10, null, true);
+      if (r !== 'none') {   // o vento empurra mesmo com o escudo erguido (só menos)
+        const k = r === 'hit' ? 1 : 0.5; pl.vx = Math.sign(S.vx || 1) * 380 * k; pl.vy = Math.min(pl.vy, -160 * k); pl.onGround = false;
+        el1Sparks(pl.x + pl.w / 2, pl.y + pl.h / 2, 8, EL1_VENTO, 70, 0, 0.4);
       }
-    } else {   // sem dona: cai girando e some
-      G.vy += GRAV * 0.5 * dt; G.x += G.vx * dt; G.y += G.vy * dt;
-      if (solidAt(Math.floor(G.x / T), Math.floor(G.y / T)) || G.t > 5) { el1Sparks(G.x, G.y, 8, EL1_PRATA, 40); el1Glaives.splice(i, 1); continue; }
+      el1Sopros.splice(i, 1); continue;
     }
-    if (G.ph !== 'drop' && !G.hit && hitsHero(G.x, G.y, 4)) {
-      const r = hurtPlayer(G.dmg, pcx - Math.sign(G.vx || 1) * 10, null, true);
-      if (r !== 'none' || pl.invuln > 0) { G.hit = true; el1Sparks(G.x, G.y, 6, EL1_LUA, 60); }
-    }
-    G.humT = (G.humT || 0) - dt; if (G.humT <= 0) { G.humT = 0.16; const v = clamp(1 - Math.hypot(pl.x - G.x, pl.y - G.y) / 240, 0, 1); if (v > 0.05) sfx.el1Gira(v); }
+    if (Math.random() < dt * 40) el1P({ x: S.x + rnd(-3, 3), y: S.y + rnd(-5, 5), vx: -S.vx * 0.15, vy: -S.vy * 0.15, g: 0, life: 0.3, max: 0.3, col: EL1_VENTO[(Math.random() * 3) | 0], size: 1 });
   }
   // as flechas: caem em arco, cravam na pedra e somem
   for (let i = el1Flechas.length - 1; i >= 0; i--) {
@@ -910,58 +972,58 @@ function el1Update(dt) {
     }
     if (F.life <= 0) el1Flechas.splice(i, 1);
   }
-  // a rachadura corre pelo chão; no fim, as raízes
+  // a rachadura corre pelo chão; no fim, os espinhos
   for (let i = el1Rachas.length - 1; i >= 0; i--) {
     const R = el1Rachas[i]; R.t += dt;
     if (!R.done && R.t >= R.dur) { R.done = true; el1Rompe(R); }
-    if (Math.random() < dt * 25 && !R.done) { const p = R.pts[Math.min(R.pts.length - 1, Math.floor(R.pts.length * R.t / R.dur))]; burst(p[0], p[1] - 1, 1, '#5e6a78', 40, 300, 0.4); }
+    if (Math.random() < dt * 25 && !R.done) { const p = R.pts[Math.min(R.pts.length - 1, Math.floor(R.pts.length * R.t / R.dur))]; burst(p[0], p[1] - 1, 1, '#3a3040', 40, 300, 0.4); }
     if (R.t > R.dur + 1.2) el1Rachas.splice(i, 1);
   }
   for (let i = el1Raizes.length - 1; i >= 0; i--) { el1Raizes[i].t += dt; if (el1Raizes[i].t > 1) el1Raizes.splice(i, 1); }
   for (let i = el1Pops.length - 1; i >= 0; i--) { el1Pops[i].t += dt; if (el1Pops[i].t > 0.4) el1Pops.splice(i, 1); }
+  for (let i = el1Aneis.length - 1; i >= 0; i--) { el1Aneis[i].t += dt; if (el1Aneis[i].t > 0.45) el1Aneis.splice(i, 1); }
   for (const e of enemies) if (e.arcFx) { e.arcFx.t += dt; if (e.arcFx.t > 0.2) e.arcFx = null; }
 }
 HOOK.update.push(el1Update);
-function clearEl1Fx() { el1Fx.length = 0; el1Glaives.length = 0; el1Flechas.length = 0; el1Grupos.length = 0; el1Rachas.length = 0; el1Raizes.length = 0; el1Pops.length = 0; }
+function clearEl1Fx() { el1Fx.length = 0; el1Sopros.length = 0; el1Aneis.length = 0; el1Flechas.length = 0; el1Grupos.length = 0; el1Rachas.length = 0; el1Raizes.length = 0; el1Pops.length = 0; }
 { const _nw = newWorld; newWorld = function (sd, sv) { clearEl1Fx(); el1Tables(); return _nw(sd, sv); }; }
 
-// a luz que eles dão: os olhos, o glaive aceso, as luzinhas, a seiva do Antigo, as rachaduras
+// a luz que eles dão: os olhos, a lâmina acesa, as luzinhas, os olhos do cão, as rachaduras, os espinhos
 { const _pl = propLights; propLights = function (addL, x0, y0, w, h) {
   _pl(addL, x0, y0, w, h);
   for (const e of enemies) {
     if (e.dead || !EL1_TYPES.includes(e.type)) continue;
     const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
     if (e.type === 'fatuo') addL(cx, cy, e.state === 'swell' || e.state === 'dash' ? 0.6 : 0.45);
-    else if (e.type === 'antigo') addL(cx, e.y + 10, e.state === 'stomp' || e.state === 'slapW' ? 0.5 : 0.32);
-    else if (e.type === 'sabre') { if ((e.vis ?? 1) > 0.5) addL(cx, cy, 0.22); }
-    else addL(cx, cy, e.state === 'wind' || e.state === 'twind' || e.state === 'slash' || e.state === 'aim' ? 0.45 : 0.24);
+    else if (e.type === 'caofada') { if ((e.vis ?? 1) > 0.5) addL(cx + e.facing * 8, e.y + 2, e.state === 'bark' ? 0.36 : 0.2); }
+    else if (e.type === 'silfide') addL(cx, cy, e.state === 'swind' ? 0.42 : 0.22);
+    else addL(cx, cy, el1FrHot(e) || e.state === 'slash' || e.state === 'vcut' || e.state === 'aim' ? 0.45 : 0.24);
   }
-  for (const G of el1Glaives) addL(G.x, G.y, 0.5);
+  for (const S of el1Sopros) addL(S.x, S.y, 0.32);
   for (const R of el1Rachas) if (!R.done) { const p = R.pts[Math.min(R.pts.length - 1, Math.floor(R.pts.length * R.t / R.dur))]; addL(p[0], p[1] - 4, 0.4); }
   for (const R of el1Raizes) addL(R.x, R.y - 10, 0.5 * (1 - R.t));
 }; }
 
-// a luz aditiva: o glaive voando, o arco do corte, as rachaduras, as raízes, os estouros
+// a luz aditiva: o arco do corte, a rajada, as rachaduras, os espinhos, os estouros, os latidos
 HOOK.drawGlow.push((cx, cy) => {
   const G = EL1.GL;
-  for (const g of el1Glaives) { lc.globalAlpha = 0.55; lc.drawImage(G.luaG, Math.round(g.x - cx) - 10, Math.round(g.y - cy) - 10); }
+  for (const S of el1Sopros) { lc.globalAlpha = 0.4; lc.drawImage(G.vento, Math.round(S.x - cx) - 9, Math.round(S.y - cy) - 9); }
   for (const R of el1Rachas) {
     const n = R.done ? R.pts.length : Math.floor(R.pts.length * R.t / R.dur), f = R.done ? Math.max(0, 1 - (R.t - R.dur) / 1.2) : 1;
-    lc.globalAlpha = 0.2 * f; for (let j = 0; j < n; j += 3) lc.drawImage(G.seiva, Math.round(R.pts[j][0] - cx) - 5, Math.round(R.pts[j][1] - cy) - 6);
-    if (!R.done && n > 0) { const p = R.pts[Math.min(n, R.pts.length - 1)]; lc.globalAlpha = 0.55; lc.drawImage(G.seivaG, Math.round(p[0] - cx) - 12, Math.round(p[1] - cy) - 14); }
+    lc.globalAlpha = 0.2 * f; for (let j = 0; j < n; j += 3) lc.drawImage(G.fada, Math.round(R.pts[j][0] - cx) - 5, Math.round(R.pts[j][1] - cy) - 6);
+    if (!R.done && n > 0) { const p = R.pts[Math.min(n, R.pts.length - 1)]; lc.globalAlpha = 0.55; lc.drawImage(G.fadaG, Math.round(p[0] - cx) - 12, Math.round(p[1] - cy) - 14); }
   }
-  for (const R of el1Raizes) { lc.globalAlpha = 0.5 * (1 - R.t); lc.drawImage(G.seivaG, Math.round(R.x - cx) - 12, Math.round(R.y - cy) - 22); }
+  for (const R of el1Raizes) { lc.globalAlpha = 0.45 * (1 - R.t); lc.drawImage(G.fadaG, Math.round(R.x - cx) - 12, Math.round(R.y - cy) - 22); }
   for (const p of el1Pops) { lc.globalAlpha = (p.big ? 0.9 : 0.6) * (1 - p.t / 0.4); lc.drawImage(G.luaM, Math.round(p.x - cx) - 16, Math.round(p.y - cy) - 16); }
+  for (const A of el1Aneis) { lc.globalAlpha = 0.35 * (1 - A.t / 0.45); lc.drawImage(G.fadaG, Math.round(A.x - cx) - 12, Math.round(A.y - cy) - 12); }
   for (const e of enemies) {
-    if (e.dead || e.type !== 'sentinela' || !e.arcFx) continue;
-    const k = e.arcFx.n === 2 ? 5 : 4, [x, y] = el1Pt(e, EL1_SN[k].hn[0], EL1_SN[k].hn[1]); lc.globalAlpha = 0.4 * (1 - e.arcFx.t / 0.2); lc.drawImage(G.luaG, Math.round(x - cx) - 10, Math.round(y - cy) - 10);
+    if (e.dead || e.type !== 'fronteira' || !e.arcFx) continue;
+    const [x, y] = el1Pt(e, ...el1Tip(e.arcFx.n === 2 ? 5 : e.arcFx.n === 3 ? 8 : 4)); lc.globalAlpha = 0.4 * (1 - e.arcFx.t / 0.2); lc.drawImage(G.luaG, Math.round(x - cx) - 10, Math.round(y - cy) - 10);
   }
   lc.globalAlpha = 1;
 });
-// no mundo (com a luz): o glaive girando, as flechas, as raízes
+// no mundo (com a luz): as flechas, os espinhos
 HOOK.drawWorld.push((cx, cy) => {
-  const B = EL1.get();
-  for (const g of el1Glaives) { const img = B.gl[Math.floor(g.a) % 6].r; lc.drawImage(img, Math.round(g.x - cx - img.width / 2), Math.round(g.y - cy - img.height / 2)); }
   for (const F of el1Flechas) {
     const sp = Math.hypot(F.vx, F.vy) || 1, ux = F.vx / sp, uy = F.vy / sp, x = F.x - cx, y = F.y - cy;
     lc.globalAlpha = F.stuck ? Math.min(1, F.stuck * 2) : 1;
@@ -969,41 +1031,48 @@ HOOK.drawWorld.push((cx, cy) => {
     lc.fillStyle = '#c2d0e8'; lc.fillRect(Math.round(x - ux * 7 - uy), Math.round(y - uy * 7 + ux), 1, 1); lc.fillRect(Math.round(x - ux * 7 + uy), Math.round(y - uy * 7 - ux), 1, 1);
   }
   lc.globalAlpha = 1;
-  // as raízes: pontas de casca saindo do chão em leque, sobem rápido, ficam e voltam para baixo
+  // os espinhos: ramos de roseira-brava saindo do chão em leque, com os acúleos para os lados, sobem rápido, ficam e
+  // voltam para baixo; uma rosa negra no alto de alguns
   for (const R of el1Raizes) {
     const up = R.t < 0.12 ? R.t / 0.12 : R.t > 0.7 ? Math.max(0, 1 - (R.t - 0.7) / 0.3) : 1;
     for (let j = 0; j < 7; j++) {
       const ox = (j - 3) * 3.6 + Math.sin(R.seed + j * 2.3) * 1.2, H = (10 + ((j * 7 + R.seed * 3) % 9) + (j === 3 ? 8 : 0)) * up, lean = (j - 3) * 0.22;
+      let tx = 0, ty = 0;
       for (let y = 0; y < H; y++) {
-        const t = y / Math.max(1, H), w = Math.max(0, Math.round((1 - t) * 2.2)), x = Math.round(R.x - cx + ox + lean * y + Math.sin(y * 0.5 + j) * 0.6), yy = Math.round(R.y - cy - y);
-        lc.fillStyle = '#262e3a'; lc.fillRect(x - w - 1, yy, w * 2 + 3, 1);
-        lc.fillStyle = t > 0.85 ? '#b4c0ca' : (y % 4 === 1 ? '#3e4856' : '#5e6a78'); lc.fillRect(x - w, yy, w * 2 + 1, 1);
-        if (w > 0) { lc.fillStyle = '#86929e'; lc.fillRect(x - w, yy, 1, 1); }
+        const t = y / Math.max(1, H), w = Math.max(0, Math.round((1 - t) * 1.6)), x = Math.round(R.x - cx + ox + lean * y + Math.sin(y * 0.45 + j) * 0.9), yy = Math.round(R.y - cy - y);
+        lc.fillStyle = '#080c0a'; lc.fillRect(x - w - 1, yy, w * 2 + 3, 1);
+        lc.fillStyle = t > 0.85 ? '#3e5642' : (y % 4 === 1 ? '#18241c' : '#223226'); lc.fillRect(x - w, yy, w * 2 + 1, 1);
+        if (w > 0) { lc.fillStyle = '#2e4232'; lc.fillRect(x - w, yy, 1, 1); }
+        if (y % 4 === 2 && t < 0.85) { const s = ((y >> 2) + j) % 2 ? 1 : -1; lc.fillStyle = '#5a6a4a'; lc.fillRect(x + s * (w + 2), yy - 1, 1, 1); lc.fillStyle = '#101812'; lc.fillRect(x + s * (w + 1), yy, 1, 1); }   // o acúleo
+        tx = x; ty = yy;
+      }
+      if (j % 3 === 1 && up > 0.6) {   // a rosa negra
+        lc.fillStyle = '#12060e'; lc.fillRect(tx - 2, ty - 2, 4, 3); lc.fillStyle = '#4c183c'; lc.fillRect(tx - 1, ty - 2, 3, 2); lc.fillStyle = '#843466'; lc.fillRect(tx - 1, ty - 2, 1, 1); lc.fillStyle = '#22091a'; lc.fillRect(tx, ty - 1, 1, 1);
       }
     }
   }
 });
-// por cima do escuro: o arco prata do corte, o rastro do glaive, a rachadura acesa, os veios azuis das raízes, as
-// luzinhas dos fátuos e o anel de quem estoura
+// por cima do escuro: o arco prata do corte, as faíscas na lâmina, a ponta da flecha, os fátuos, os anéis dos latidos,
+// o vento da sílfide, a rachadura acesa, os pontinhos verdes dos espinhos, os estouros
 HOOK.drawTop.push((cx, cy) => {
   const now = gameTime;
   for (const e of enemies) {
     if (e.dead) continue;
     const fx = Math.round(e.x + e.w / 2) - cx, fy = Math.round(e.y + e.h) - cy;
     if (fx < -60 || fx > VW + 60 || fy < -60 || fy > VH + 60) continue;
-    if (e.type === 'sentinela' && e.arcFx) {
-      // o crescente do corte: um arco fino de prata na frente dela
-      const p = e.arcFx.t / 0.2, up = e.arcFx.n === 2, r = 13, n = 16;
+    if (e.type === 'fronteira' && e.arcFx) {
+      // o crescente do corte: um arco fino de prata na frente dela (o de trás, baixo e largo)
+      const p = e.arcFx.t / 0.2, up = e.arcFx.n === 2, low = e.arcFx.n === 3, r = low ? 15 : 13, n = 16;
       lc.globalAlpha = 1 - p;
       for (let i = 0; i < n; i++) {
-        const t = i / (n - 1), a = up ? lerp(1.2, -1.5, t) : lerp(-1.4, 1.1, t); if (t > 0.3 + p * 0.9) continue;
-        const x = fx + Math.cos(a) * r * e.facing + e.facing * 2, y = fy - 13 + Math.sin(a) * r * 0.9;
+        const t = i / (n - 1), a = up ? lerp(1.2, -1.5, t) : low ? lerp(-0.9, 1.3, t) : lerp(-1.4, 1.1, t); if (t > 0.3 + p * 0.9) continue;
+        const x = fx + Math.cos(a) * r * e.facing + e.facing * 2, y = fy - (low ? 9 : 13) + Math.sin(a) * r * (low ? 0.6 : 0.9);
         lc.fillStyle = i % 3 === 0 ? '#ffffff' : '#c8e0ff'; lc.fillRect(Math.round(x), Math.round(y), 1, 1); lc.fillStyle = '#5a8ede'; lc.fillRect(Math.round(x - Math.cos(a) * e.facing), Math.round(y - Math.sin(a)), 1, 1);
       }
-    } else if (e.type === 'sentinela' && (e.state === 'wind' || e.state === 'twind')) {
-      // faíscas azuis girando em volta da mão
-      const o = EL1_SN[e.state === 'wind' ? 3 : 6], x = fx + (o.hn[0] - EL1_BX) * e.facing, y = fy - 1 - (27 - o.hn[1]), q = clamp(1 - e.stateT / EL1_GLAIVE, 0, 1);
-      for (let j = 0; j < 3; j++) { const a = now * 9 + j * 2.09; lc.fillStyle = j ? '#9cc8ff' : '#ffffff'; lc.fillRect(Math.round(x + Math.cos(a) * (6 - q * 2)), Math.round(y + Math.sin(a) * (6 - q * 2)), 1, 1); }
+    } else if (e.type === 'fronteira' && (e.state === 'wind' || e.state === 'vwind')) {
+      // faíscas de prata subindo pela lâmina, da guarda até a ponta
+      const k = el1FrPose(e), o = EL1_FR[k], [tx, ty] = el1Tip(k), q = clamp(1 - e.stateT / (e.state === 'wind' ? EL1_LAMINA : EL1_SALTO), 0, 1);
+      for (let j = 0; j < 3; j++) { const t = (now * 2.2 + j / 3) % 1; if (t > 0.3 + q * 0.7) continue; lc.fillStyle = j ? '#c8e0ff' : '#ffffff'; lc.fillRect(Math.round(fx + (lerp(o.hn[0], tx, t) - EL1_BX) * e.facing), Math.round(fy - 1 - (27 - lerp(o.hn[1], ty, t))), 1, 1); }
     } else if (e.type === 'arqueiro' && e.state === 'aim') {
       const q = clamp(1 - e.stateT / EL1_CORDA, 0, 1), x = fx + (EL1_PONTA[0] - EL1_BX) * e.facing, y = fy - 1 - (27 - EL1_PONTA[1]);
       lc.fillStyle = Math.floor(now * 14) % 2 ? '#ffffff' : '#c8e0ff'; lc.fillRect(Math.round(x), Math.round(y), 1, 1);
@@ -1018,39 +1087,53 @@ HOOK.drawTop.push((cx, cy) => {
         for (let i = 0; i < n; i++) { const a = i / n * 6.28 + now * 7; lc.fillRect(Math.round(fx + Math.cos(a) * r), Math.round(y + Math.sin(a) * r), 1, 1); }
       }
       lc.globalAlpha = 1;
-    } else if (e.type === 'sabre' && e.state === 'reveal') {
-      const o = EL1.SB[3], x = fx + (o.head[0] + 1.4 - 15) * e.facing, y = fy - 1 - (15 - (o.head[1] - 0.6));
-      lc.fillStyle = '#ffffff'; lc.fillRect(Math.round(x), Math.round(y), 1, 1);
-    } else if (e.type === 'antigo' && (e.state === 'stomp' || e.state === 'slapW')) {
-      const o = EL1.AN[el1AnPose(e)], ex = fx + (o.lean + 2.4) * e.facing, ey = fy - 1 - (41 - (15 + o.low + EL1.FACE));
-      lc.fillStyle = Math.floor(now * 16) % 2 ? '#e0f4ff' : '#86c4ff'; for (const ox of [-1.4, 1.2]) lc.fillRect(Math.round(ex + ox * e.facing), Math.round(ey), 1, 1);
+    } else if (e.type === 'caofada' && e.state === 'bark') {
+      const o = EL1.SB[3], x = fx + (o.head[0] + 1.2 - 15) * e.facing, y = fy - 1 - (15 - (o.head[1] - 0.6));
+      lc.fillStyle = '#f4fff0'; lc.fillRect(Math.round(x), Math.round(y), 1, 1);
+    } else if (e.type === 'silfide' && e.state === 'swind') {
+      // as linhas de vento girando em volta das mãos, apertando
+      const q = clamp(1 - e.stateT / EL1_SOPRO, 0, 1), y = Math.round(fy - e.h / 2 + el1SfBob(e)) - 2, x = fx + e.facing * 7, r = 10 - q * 6;
+      for (let j = 0; j < 4; j++) for (let s = 0; s < 4; s++) { const a = now * 8 + j * 1.57 + s * 0.18; lc.globalAlpha = (0.4 + q * 0.5) * (1 - s * 0.2); lc.fillStyle = s ? '#c8e4f0' : '#ffffff'; lc.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r * 0.7), 1, 1); }
+      lc.globalAlpha = 1;
     }
   }
-  // a rachadura: a linha escura com o veio azul aceso, correndo até o alvo; a ponta treme
+  // os latidos: um anel de pontinhos verde-pálidos que abre na frente da boca
+  for (const A of el1Aneis) {
+    const q = A.t / 0.45, r = 3 + q * 13, n = 14;
+    lc.globalAlpha = (1 - q) * 0.9; lc.fillStyle = q < 0.3 ? '#f4fff0' : '#b8f0c8';
+    for (let i = 0; i < n; i++) { const a = i / n * 6.28; lc.fillRect(Math.round(A.x - cx + Math.cos(a) * r), Math.round(A.y - cy + Math.sin(a) * r * 0.8), 1, 1); }
+  }
+  // a rajada: a meia-lua de vento, aberta para trás
+  for (const S of el1Sopros) {
+    const ux = Math.cos(S.a), uy = Math.sin(S.a), nx = -uy, ny = ux;
+    for (let i = -5; i <= 5; i++) {
+      const b = Math.abs(i) / 5, back = b * b * 5, x = S.x - cx + nx * i * 1.1 - ux * back, y = S.y - cy + ny * i * 1.1 - uy * back;
+      lc.globalAlpha = 0.9 - b * 0.5; lc.fillStyle = b < 0.3 ? '#ffffff' : '#c8e4f0'; lc.fillRect(Math.round(x), Math.round(y), 1, 1);
+      if (b < 0.7) { lc.globalAlpha = 0.4; lc.fillRect(Math.round(x - ux * 2), Math.round(y - uy * 2), 1, 1); }
+    }
+  }
+  lc.globalAlpha = 1;
+  // a rachadura: a linha escura com o veio verde-pálido aceso, correndo até o alvo
   for (const R of el1Rachas) {
     const n = R.done ? R.pts.length : Math.floor(R.pts.length * R.t / R.dur), f = R.done ? Math.max(0, 1 - (R.t - R.dur) / 1.2) : 1;
     for (let j = 0; j < n; j++) {
       const [x, y] = R.pts[j], wob = Math.round(Math.sin(j * 1.7 + R.dir) * 0.7), sx = Math.round(x - cx), sy = Math.round(y - cy) - 1 + wob;
-      lc.globalAlpha = f; lc.fillStyle = '#0c1220'; lc.fillRect(sx, sy, 3, 1);
-      lc.fillStyle = j % 4 === 0 ? '#e0f4ff' : '#3a92f0'; lc.fillRect(sx + 1, sy, 1, 1);
-      if (j % 5 === 2) { lc.fillStyle = '#0c1220'; lc.fillRect(sx + 1, sy - 1, 1, 1); }
+      lc.globalAlpha = f; lc.fillStyle = '#080c0a'; lc.fillRect(sx, sy, 3, 1);
+      lc.fillStyle = j % 4 === 0 ? '#f4fff0' : '#5ab88a'; lc.fillRect(sx + 1, sy, 1, 1);
+      if (j % 5 === 2) { lc.fillStyle = '#18241c'; lc.fillRect(sx + 1, sy - 1, 1, 1); lc.fillRect(sx + 1, sy - 2, 1, 1); }   // um broto de espinho
     }
-    if (!R.done && n < R.pts.length) {   // o alvo: um círculo de pontinhos azuis no chão onde as raízes vão romper
+    if (!R.done && n < R.pts.length) {   // o alvo: um círculo de pontinhos verdes no chão onde os espinhos vão romper
       const [x, y] = R.pts[R.pts.length - 1], q = R.t / R.dur;
-      lc.globalAlpha = 0.5 + 0.5 * q; lc.fillStyle = Math.floor(now * 12) % 2 ? '#86c4ff' : '#3a92f0';
+      lc.globalAlpha = 0.5 + 0.5 * q; lc.fillStyle = Math.floor(now * 12) % 2 ? '#b8f0c8' : '#5ab88a';
       for (let i = -EL1_RAIZ_W; i <= EL1_RAIZ_W; i += 3) lc.fillRect(Math.round(x + i - cx), Math.round(y - cy) - 1 - (Math.abs(i) < 4 ? 1 : 0), 1, 1);
     }
   }
   lc.globalAlpha = 1;
-  // as raízes: os veios de seiva acesos nelas
+  // os espinhos: pontinhos de luz de fada presos nos ramos
   for (const R of el1Raizes) {
     const up = R.t < 0.12 ? R.t / 0.12 : R.t > 0.7 ? Math.max(0, 1 - (R.t - 0.7) / 0.3) : 1;
-    lc.fillStyle = '#86c4ff';
-    for (let j = 0; j < 7; j += 2) { const ox = (j - 3) * 3.6 + Math.sin(R.seed + j * 2.3) * 1.2, H = (10 + ((j * 7 + R.seed * 3) % 9) + (j === 3 ? 8 : 0)) * up; for (let y = 2; y < H - 2; y += 3) lc.fillRect(Math.round(R.x - cx + ox + (j - 3) * 0.22 * y + Math.sin(y * 0.5 + j) * 0.6), Math.round(R.y - cy - y), 1, 1); }
-  }
-  // o rastro do glaive voando: três pontos de prata seguindo cada lâmina
-  for (const g of el1Glaives) {
-    for (let j = 0; j < 3; j++) { const a = g.a * 0.9 + j * 2.09; lc.fillStyle = j ? '#9cc8ff' : '#ffffff'; lc.fillRect(Math.round(g.x - cx + Math.cos(a) * 7), Math.round(g.y - cy + Math.sin(a) * 7), 1, 1); }
+    lc.fillStyle = '#b8f0c8';
+    for (let j = 0; j < 7; j += 2) { const ox = (j - 3) * 3.6 + Math.sin(R.seed + j * 2.3) * 1.2, H = (10 + ((j * 7 + R.seed * 3) % 9) + (j === 3 ? 8 : 0)) * up; for (let y = 3; y < H - 3; y += 5) lc.fillRect(Math.round(R.x - cx + ox + (j - 3) * 0.22 * y + Math.sin(y * 0.45 + j) * 0.9), Math.round(R.y - cy - y), 1, 1); }
   }
   for (const p of el1Pops) {
     const q = p.t / 0.4, r = 2 + q * (p.big ? 12 : 7), n = p.big ? 20 : 12;
@@ -1062,19 +1145,16 @@ HOOK.drawTop.push((cx, cy) => {
 
 /* ---------- sons ---------- */
 Object.assign(sfx, {
-  // o glaive acendendo: um anel de vidro subindo (p: o tom)
-  el1Glaive(v = 1, p = 1) { tone(660 * p, 0.45, 'sine', 0.022 * v, 520 * p); tone(990 * p, 0.45, 'triangle', 0.008 * v, 700 * p); for (let k = 0; k < 4; k++) tone(1760 * p + k * 220, 0.06, 'sine', 0.008 * v, 0, 0.1 + k * 0.09); },
-  el1Corte(v = 1, n = 1) { noise(0.12, 0.07 * v, n === 2 ? 3400 : 2600, 'bandpass', 0, 1.2); tone(n === 2 ? 1400 : 1100, 0.1, 'sine', 0.02 * v, -500); },
-  el1Arremesso(v = 1) { noise(0.2, 0.06 * v, 2000, 'bandpass', 0, 1); tone(880, 0.18, 'triangle', 0.016 * v, 300); },
-  el1Gira(v = 1) { noise(0.1, 0.022 * v, 3000 + Math.random() * 600, 'bandpass', 0, 2); },
-  el1Tine(v = 1) { tone(2200, 0.18, 'sine', 0.02 * v, -300); tone(3300, 0.1, 'sine', 0.008 * v, -500); },
-  el1Pega(v = 1) { tone(1320, 0.12, 'sine', 0.022 * v, 200); tone(1980, 0.16, 'sine', 0.01 * v, 0, 0.03); },
-  el1Salto(v = 1) { noise(0.12, 0.03 * v, 1200, 'bandpass', 0, 1); },
+  // a lâmina acendendo: um fio de vidro subindo (p: o tom)
+  el1Lamina(v = 1, p = 1) { tone(780 * p, 0.4, 'sine', 0.018 * v, 600 * p); noise(0.35, 0.012 * v, 5200 * p, 'bandpass', 0, 3); for (let k = 0; k < 3; k++) tone(2200 * p + k * 260, 0.05, 'sine', 0.007 * v, 0, 0.12 + k * 0.08); },
+  el1Corte(v = 1, n = 1) { noise(0.12, 0.07 * v, n === 2 ? 3400 : n === 3 ? 2200 : 2600, 'bandpass', 0, 1.2); tone(n === 2 ? 1400 : n === 3 ? 900 : 1100, 0.1, 'sine', 0.02 * v, -500); },
+  el1Salto(v = 1, big = 0) { noise(big ? 0.22 : 0.12, (big ? 0.05 : 0.03) * v, big ? 800 : 1200, 'bandpass', 0, 1); if (big) noise(0.3, 0.02 * v, 3000, 'highpass', 0.05); },
   // o arco: a corda rangendo, o "tuc" da flecha saindo
   el1Corda(v = 1) { tone(140, 0.6, 'sawtooth', 0.006 * v, 60); noise(0.6, 0.012 * v, 900, 'bandpass', 0, 4); tone(1600, 0.5, 'sine', 0.004 * v, 400, 0.2); },
   el1Flecha(v = 1) { for (let k = 0; k < 3; k++) { noise(0.06, 0.05 * v, 1800 + k * 300, 'bandpass', k * 0.03, 2); tone(320 - k * 30, 0.05, 'triangle', 0.02 * v, -120, k * 0.03); } },
-  // o sabre: rosnado grave, o bote, o sumiço (um brilho que desce)
-  el1Rosnado(v = 1, p = 1) { tone(70 * p, 0.6, 'sawtooth', 0.02 * v, -10); noise(0.6, 0.03 * v, 260 * p, 'lowpass', 0, 1); },
+  // o cão-fada: o bufo grave, o latido fundo (k: qual dos três, sobe um pouco), o bote, o sumiço
+  el1Bufo(v = 1, p = 1) { noise(0.35, 0.03 * v, 300 * p, 'lowpass', 0, 1); tone(60 * p, 0.35, 'sawtooth', 0.012 * v, -10); },
+  el1Latido(v = 1, k = 1) { const f = 120 + k * 14; tone(f, 0.16, 'sawtooth', 0.05 * v, -50); tone(f * 2, 0.1, 'square', 0.014 * v, -120); noise(0.14, 0.07 * v, 700 + k * 80, 'bandpass', 0, 1.4); tone(f * 0.5, 0.25, 'sine', 0.05 * v, -20, 0.02); },
   el1Bote(v = 1, p = 1) { noise(0.3, 0.08 * v, 700 * p, 'lowpass'); tone(160 * p, 0.3, 'sawtooth', 0.03 * v, -90); tone(90 * p, 0.35, 'square', 0.012 * v, -40, 0.05); },
   el1Some(v = 1) { for (let k = 0; k < 5; k++) tone(2400 - k * 260, 0.08, 'sine', 0.008 * v, -200, k * 0.05); noise(0.3, 0.01 * v, 6000, 'highpass'); },
   // os fátuos: sininhos de vidro
@@ -1083,13 +1163,14 @@ Object.assign(sfx, {
   el1Lanca(v = 1) { tone(2600, 0.12, 'sine', 0.014 * v, -1400); noise(0.08, 0.02 * v, 5000, 'highpass'); },
   el1Estoura(v = 1, big = false) { tone(big ? 1400 : 2000, 0.2, 'sine', 0.03 * v, -900); noise(0.12, 0.04 * v, 4800, 'highpass'); for (let k = 0; k < 3; k++) tone(2600 + Math.random() * 1200, 0.06, 'sine', 0.01 * v, 0, 0.04 + k * 0.05); },
   el1Suga() { for (let k = 0; k < 4; k++) tone(900 - k * 140, 0.14, 'sine', 0.02, -160, k * 0.06); },
-  // o Antigo: o rangido da madeira, os passos pesados, a pisada, a rachadura, as raízes, o galho
-  el1Range(v = 1, p = 1) { tone(90 * p, 0.7, 'sawtooth', 0.016 * v, 40 * p); noise(0.7, 0.02 * v, 500 * p, 'bandpass', 0, 3); tone(140 * p, 0.4, 'square', 0.004 * v, -30, 0.25); },
-  el1Passo(v = 1) { noise(0.12, 0.05 * v, 220, 'lowpass'); tone(60, 0.12, 'sine', 0.04 * v, -20); },
-  el1Pisa(v = 1) { tone(48, 0.6, 'sine', 0.14 * v, -18); noise(0.4, 0.14 * v, 240, 'lowpass'); for (let k = 0; k < 6; k++) noise(0.03, 0.04 * v, 1800 + Math.random() * 1200, 'bandpass', 0.08 + k * 0.07, 3); },
-  el1Raiz(v = 1) { noise(0.3, 0.12 * v, 500, 'lowpass'); for (let k = 0; k < 5; k++) noise(0.04, 0.05 * v, 1400 + k * 200, 'bandpass', k * 0.025, 4); tone(110, 0.3, 'sawtooth', 0.02 * v, 120); },
-  el1Galho(v = 1) { noise(0.25, 0.1 * v, 600, 'bandpass', 0, 0.8); tone(120, 0.2, 'sine', 0.04 * v, -50); },
-  el1Morre(v = 1) { tone(880, 0.6, 'sine', 0.025 * v, -300); tone(1320, 0.5, 'sine', 0.01 * v, -500, 0.05); noise(0.4, 0.015 * v, 5000, 'highpass'); }
+  // a sílfide: o zumbido das asas, o vento enchendo, a rajada
+  el1Asas(v = 1, p = 1) { noise(0.18, 0.02 * v, 180 * p, 'bandpass', 0, 6); tone(90 * p, 0.18, 'square', 0.004 * v, 10); },
+  el1Sopro(v = 1) { noise(EL1_SOPRO, 0.035 * v, 900, 'bandpass', 0, 0.9); tone(300, EL1_SOPRO, 'sine', 0.006 * v, 500); },
+  el1Rajada(v = 1) { noise(0.4, 0.08 * v, 1400, 'bandpass', 0, 0.7); noise(0.25, 0.03 * v, 4000, 'highpass', 0.04); },
+  // os espinhos: a espada cravando, a rachadura, os ramos rompendo
+  el1Pisa(v = 1) { tone(52, 0.5, 'sine', 0.12 * v, -18); noise(0.35, 0.12 * v, 260, 'lowpass'); for (let k = 0; k < 6; k++) noise(0.03, 0.04 * v, 1800 + Math.random() * 1200, 'bandpass', 0.08 + k * 0.07, 3); },
+  el1Raiz(v = 1) { noise(0.3, 0.1 * v, 600, 'lowpass'); for (let k = 0; k < 7; k++) noise(0.03, 0.05 * v, 2200 + k * 200, 'bandpass', k * 0.02, 5); tone(130, 0.25, 'sawtooth', 0.016 * v, 160); },
+  el1Morre(v = 1, p = 1) { tone(880 * p, 0.6, 'sine', 0.025 * v, -300); tone(1320 * p, 0.5, 'sine', 0.01 * v, -500, 0.05); noise(0.4, 0.015 * v, 5000, 'highpass'); }
 });
 
 /* ---------- as faíscas acesas (com o brilho da cor delas, não o brilho quente das partículas comuns) ---------- */

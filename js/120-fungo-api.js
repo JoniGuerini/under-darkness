@@ -21,7 +21,7 @@
 
 const FUNGO = true;
 const FG_D = LAYER_D;                                   // metros de camada
-const FG_TOP = (typeof MN_TOP !== 'undefined' ? MN_TOP : 558) + LAYER_D;   // onde a camada começa, em metros abaixo do chão do vilarejo (744)
+const FG_TOP = layerTop('fungo');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do FG_TOP: Galerias Tomadas, Bosque de Chapéus, Grutas Alagadas, Coração do Micélio, (rocha-mãe)
 const FG_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const FG_BAND_NAMES = ['galerias', 'bosque', 'grutas', 'coracao'];

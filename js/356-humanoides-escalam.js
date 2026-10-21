@@ -29,6 +29,7 @@ function escalaLate() {
   const ids = ['FP_CIPO', 'FP_RAIZ_ESCADA', 'AN_ESCADA', 'AN_CORRENTE', 'CM_FIO_CERA', 'CM_ESCADA_FAVO', 'ES_CORRENTE', 'ES_RAIZ_PEND',
     'NV_ESCADA', 'NV_CABO', 'EL_ESCADA', 'EL_CIPO', 'MS_CORDAME', 'MS_CORRENTE', 'DG_ESCADA', 'DG_CORDA', 'TT_ESCADA', 'TT_TENDAO',
     'AT_ESCADA', 'AT_CORRENTE', 'PS_ESCADA', 'PS_CORDA'];
+  for (const id in CAMADA_EXT) for (const n of CAMADA_EXT[id].escalar || []) ids.push(n);   // as camadas novas: nomes dos blocos de subir (129, 2026-10-21)
   for (const n of ids) { let t = -1; try { t = Function('return typeof ' + n + " === 'number' ? " + n + ' : -1')(); } catch (e) { } if (t >= 0) CDV_CLIMB[t] = 1; }
 }
 const sobe = e => !!(ET[e.type] && ET[e.type].climbs);

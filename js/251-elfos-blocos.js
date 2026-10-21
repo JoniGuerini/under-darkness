@@ -5,9 +5,10 @@
    prata, os troncos de casca cinza-prata lisa (fios verticais, lenticelas deitadas, nós como olhos) e a copa azul-prata
    colada no teto, folhas compridas penduradas em camadas, com pontos de brilho. Nos Salões, o mármore-lua
    branco-azulado com veios de prata, a pedra lavrada em blocos com ramos e folhas em relevo e um filete de prata
-   embutido, e as tábuas claras dos flets, curvas, com a junta em folha e um pino de prata. Na Corte, o mesmo mármore
-   rachado e manchado de vinho com veios de ouro velho, a madeira morta preta e retorcida com a seiva carmesim nas
-   rachaduras e os prismas de mana sangrenta. No Poço, a pedra azul-petróleo com runas de lua que brilham fraco, a
+   embutido, e as tábuas claras dos flets, curvas, com a junta em folha e um pino de prata. Na Corte dos Espinhos (revamp
+   de 2026-10-21), o mesmo mármore tomado pela roseira-brava (ramos verde-preto com acúleos, folhinhas, uma rosa
+   negra aqui e ali), o lenho de espinheiro verde-preto com nós de espinho e musgo nas rachaduras e a pedra-vidente
+   cinza furada, os furos acesos em verde-pálido de fada. Nas Grutas, a pedra azul-petróleo com runas de lua que brilham fraco, a
    Raiz-Mãe com a seiva azul acesa nos sulcos, os prismas de cristal lunar, o espelho d'água parado e a Lua Presa.
    Como o 241 e o 191, cada material é uma textura contínua de 240x240 amostrada em pixels do mundo; contorno, borda
    acesa, sombra e oclusão vêm do 07. Paredes e terceira camada só leem o tom (.v). A decoração de 1 bloco são sprites
@@ -25,9 +26,9 @@ pal('elFolhagem', ['#0a1420', '#142638', '#203c56', '#305878', '#4a7a9c', '#7aa6
 pal('elMarmore', ['#465064', '#646f86', '#8893aa', '#adb8cc', '#ced7e6', '#edf2f9']);
 pal('elLavrada', ['#363d4b', '#4f5768', '#6b7486', '#8a93a6', '#adb5c5', '#d2d8e3']);
 pal('elTabua', ['#3a3024', '#5a4a38', '#7c6a52', '#a08c6e', '#c2b08e', '#e0d2b2']);
-pal('elProfano', ['#241015', '#3e1c26', '#5c2e3a', '#7e4a52', '#a47a7c', '#cab4b6']);
-pal('elMorta', ['#070609', '#0f0d11', '#18151b', '#221d25', '#2d2630', '#3b323e']);
-pal('elSangue', ['#2a0610', '#4e0c1c', '#7a1428', '#b0203a', '#e04a5a', '#ff9aa0']);
+pal('elProfano', ['#1e1a22', '#342e3a', '#4c4554', '#686070', '#88808e', '#aaa2ae']);   // o mármore enredado (o nome da paleta ficou)
+pal('elMorta', ['#080c0a', '#101812', '#18241c', '#223226', '#2e4232', '#3e5642']);   // o lenho de espinheiro
+pal('elSangue', ['#1a1c1a', '#2c302c', '#444a44', '#5e665e', '#7e887e', '#a4aea4']);   // a pedra-vidente
 pal('elPoco', ['#071216', '#0d1e24', '#142c34', '#1e3e48', '#2a525c', '#3a6a74']);
 pal('elRaiz', ['#22262f', '#373d4a', '#505866', '#6e7786', '#929bab', '#bac2d0']);
 pal('elCristal', ['#1a2a4a', '#2e4a7a', '#4a72ac', '#78a2d8', '#b0d0f4', '#eef8ff']);
@@ -37,7 +38,7 @@ pal('elVeu', ['#2a3444', '#4a5a72', '#7a8ca8', '#a8bad4', '#d4e2f4', '#ffffff'])
 // paredes de fundo: sempre bem mais escuras que o chão da frente
 pal('elMataW', ['#040306', '#070609', '#0b090d', '#0f0c11', '#131016', '#19151c']);
 pal('elSalaoW', ['#06070a', '#0a0b0f', '#0e1015', '#13161c', '#191d24', '#20252e']);
-pal('elProfanoW', ['#090405', '#0e0608', '#14090b', '#1a0d10', '#211115', '#29161a']);
+pal('elProfanoW', ['#08050a', '#0c080e', '#110b14', '#160e1a', '#1c1220', '#231628']);   // os painéis enredados, ameixa-escuro
 pal('elPocoW', ['#030709', '#050b0e', '#081013', '#0b1519', '#0f1b20', '#1c4656']);
 pal('elFolhasW', ['#03050a', '#050a10', '#080f17', '#0b141e', '#0f1a26', '#152230']);
 // a terceira camada: a mata ao longe (o tom 4 e 5 são o luar da Lua Presa entre os troncos), os salões ao longe (a
@@ -56,8 +57,11 @@ const pp = (a, x, y, c) => { x |= 0; y |= 0; if (x >= 0 && y >= 0 && x < T && y 
 const leafIn = (u, w, L, W) => Math.abs(u) < L && Math.abs(w) < W * (1 - (u / L) * (u / L));
 const SILV = RX(['#4e5868', '#7c889a', '#aab6c6', '#d8e2ee', '#ffffff']);                 // o filete e os fios de prata
 const MOONG = RX(['#14305a', '#244e88', '#3a74b8', '#64a0e0', '#a4cdf8', '#e8f6ff']);    // a luz azul da lua (runas, seiva)
-const GOLDV = RX(['#4a300a', '#7a5410', '#b08020', '#d8a83a', '#f4d878']);                // os veios de ouro velho da Corte
-const CRIMS = RX(['#3a0610', '#6a0c1c', '#a01a2c', '#d83a48', '#ff8088']);                // a seiva carmesim
+const GOLDV = RX(['#4a300a', '#7a5410', '#b08020', '#d8a83a', '#f4d878']);                // ouro velho (sobrou para o 252)
+const CRIMS = RX(['#3a0610', '#6a0c1c', '#a01a2c', '#d83a48', '#ff8088']);                // carmesim (sobrou para o 252)
+const ESPV = RX(['#080c0a', '#121c14', '#1e2e20', '#2c4230', '#3e5a42', '#5a7a56']);       // os ramos da roseira-brava
+const ROSAV = RX(['#12060e', '#2a0c20', '#4c183c', '#6e2858', '#984078']);                 // a rosa negra
+const FADAV = RX(['#0e2a1c', '#2e6e4a', '#5ab88a', '#9ae0b4', '#d8fae4']);                 // a luz de fada (verde-pálido)
 const PEBE = RX(['#1e1a22', '#3a3440', '#5a5462', '#7e7888']);                            // pedrinhas no solo
 const GLINT = RX(['#9cc8ff', '#d8ecff', '#ffffff']);
 // rampas de 7 tons para os prismas: carmesim e branco-azulado
@@ -194,32 +198,35 @@ function vTabua(x, y) {
   if (hash2(x, y, 25175) < 0.01) v -= 0.9;
   return v;
 }
-function vProfano(x, y) {   // mármore profanado: o mármore-lua rachado, manchado de vinho escorrido, veios de ouro velho
-  let v = 3.6 + cn(x, y, 8, 8, 25181) * 1.6 + cn(x, y, 40, 40, 25182) * 0.5 + cg(x, y, 25183) * 0.3;
+function vProfano(x, y) {   // mármore enredado: o mármore-lua manchado de musgo, rachado, e por cima a roseira-brava em ramos
+  let v = 3.5 + cn(x, y, 8, 8, 25181) * 1.4 + cn(x, y, 40, 40, 25182) * 0.5 + cg(x, y, 25183) * 0.3;
   const st = cn(x, y, 10, 6, 25184) + cn(x, y, 30, 20, 25185) * 0.5;
-  if (st > 0.0) v -= Math.min(2.6, 0.6 + st * 8);                                                     // a mancha de vinho
-  for (let k = 1; k <= 6; k++) { const s2 = cn(x, y - k * 2, 10, 6, 25184) + cn(x, y - k * 2, 30, 20, 25185) * 0.5; if (s2 > 0.12 && hash2(x, 0, 25186) < 0.35) { v -= 0.9 - k * 0.1; break; } }   // escorrido
-  const wx = wrapT(x + cn(x, y, 8, 8, 25187) * 60), wy = wrapT(y + cn(x, y, 8, 8, 25188) * 60), vein = Math.abs(cn(wx, wy, 6, 6, 25189));
-  if (vein < 0.0055) { MATX = GOLDV[vein < 0.002 ? 4 : 3]; return -9; }
-  if (vein < 0.01) { MATX = GOLDV[1]; return -9; }
+  if (st > 0.06) v -= Math.min(1.8, (st - 0.06) * 7);                                                 // o musgo escuro
   const cr = Math.abs(cn(x, y, 12, 12, 25191));
   if (cr < 0.006) return 0.3;                                                                             // a rachadura
   if (Math.abs(cn(x, y - 1, 12, 12, 25191)) < 0.006) v += 0.9;
   if (cr < 0.014) v -= 0.6;
+  // os ramos: linhas tortas que atravessam a pedra; acúleos claros de um lado, folhinhas, uma rosa de vez em quando
+  const wx = wrapT(x + cn(x, y, 8, 8, 25187) * 70), wy = wrapT(y + cn(x, y, 8, 8, 25188) * 70), br = Math.abs(cn(wx, wy, 5, 5, 25189));
+  if (br < 0.007) { MATX = ESPV[br < 0.0025 ? 4 : 3]; return -9; }
+  if (br < 0.0105) { const k = hash2(x, y, 25192); if (k < 0.12) { MATX = ESPV[5]; return -9; } MATX = ESPV[1]; return -9; }
+  if (br < 0.016 && Math.abs(cn(wx, wy - 1, 5, 5, 25189)) < 0.007) v -= 1;                          // a sombra do ramo
+  const c = cells(x, y, 30, 25193, 1.2);
+  if (c.id < 0.05 && c.d1 < 2.2 && br < 0.05) { MATX = ROSAV[c.d1 < 0.8 ? 4 : c.ox + c.oy < 0 ? 3 : 1]; return -9; }   // a rosa negra
   return v;
 }
-function vMorta(x, y) {   // madeira morta: preta, fibras torcendo para um lado e para o outro, rachaduras com a seiva carmesim
+function vMorta(x, y) {   // lenho de espinheiro: verde-preto, fibras torcendo para um lado e para o outro, musgo nas rachaduras, nós de espinho
   const b = cn(x, y, 6, 4, 25201), dir = b > 0 ? 1 : -1, u = wrapT(x + cn(x, y, 6, 6, 25202) * 30 + dir * y * 0.55), r = u % 5;
   if (Math.abs(b) < 0.012) return 0.3;
   let v = r < 1 ? 0.9 : r < 2 ? 3.6 : r < 3.5 ? 2.8 : 2.0;
   if (Math.abs(b) < 0.03) v -= 0.8;
   v += cn(x, y, 24, 24, 25203) * 1.0 + cg(x, y, 25204) * 0.4;
   const cr = Math.abs(cn(wrapT(x + y * 0.3), y, 12, 8, 25205));
-  if (cr < 0.0045) { MATX = CRIMS[cr < 0.002 ? 4 : 3]; return -9; }
-  if (cr < 0.008) { MATX = CRIMS[1]; return -9; }
+  if (cr < 0.0045) { MATX = ESPV[cr < 0.002 ? 5 : 4]; return -9; }
+  if (cr < 0.008) { MATX = ESPV[2]; return -9; }
   if (cr < 0.013) v -= 1;
   const k = cells(x, y, 40, 25207, 1.3);
-  if (k.id < 0.14 && k.d1 < 4) { if (k.d1 < 1.2) { MATX = CRIMS[2]; return -9; } v = (k.d1 % 1.3) < 0.5 ? 0.6 : 2.8 - (k.ox + k.oy) * 0.12; }
+  if (k.id < 0.14 && k.d1 < 4) { if (k.d1 < 1.2) { MATX = ESPV[5]; return -9; } v = (k.d1 % 1.3) < 0.5 ? 0.6 : 2.8 - (k.ox + k.oy) * 0.12; }
   return v;
 }
 // prismas: células de 16 px, a aresta acesa à esquerda e escura à direita, o miolo fundo, um fio de luz por dentro
@@ -232,7 +239,17 @@ function prismV(x, y, R, s) {
   if (hash2(x, y, s + 2) < 0.004) { MATX = R[6]; return -9; }
   MATX = R[Math.max(1, Math.min(5, Math.round(l)))]; return -9;
 }
-const vSangue = (x, y) => prismV(x, y, SANGR, 25211);
+function vSangue(x, y) {   // pedra-vidente: pedra cinza lisa, gasta pela água, cheia de furos redondos; no fundo dos furos a luz de fada
+  let v = 3 + cn(x, y, 20, 20, 25211) * 1.2 + cn(x, y, 60, 60, 25212) * 0.5 + cg(x, y, 25213) * 0.3;
+  const c = cells(x, y, 14, 25214, 1);
+  if (c.id < 0.3) {
+    const r = 1.6 + c.id * 6;
+    if (c.d1 < r * 0.55) { MATX = FADAV[c.d1 < r * 0.25 ? 3 : 2]; return -9; }          // o fundo aceso
+    if (c.d1 < r) { MATX = FADAV[0]; return -9; }                                      // a borda funda do furo
+    if (c.d1 < r + 1) v += c.oy < 0 ? -0.9 : 0.9;                                      // o lábio: sombra em cima, luz embaixo
+  }
+  return v;
+}
 const vCristal = (x, y) => prismV(x, y, LUAR, 25221);
 function vPoco(x, y) {   // pedra-do-poço: lajes grandes chanfradas, grão fino, e as runas de lua gravadas que brilham fraco
   let v = 2.6 + cn(x, y, 30, 30, 25231) * 1.1 + cn(x, y, 80, 80, 25232) * 0.5 + cg(x, y, 25233) * 0.45;
@@ -326,11 +343,12 @@ function salaoPanel(x, y, s) {
   return v;
 }
 const vSalaoW = (x, y) => salaoPanel(x, y, 25291) - 0.1;
-function vProfanoW(x, y) {   // ruína profanada: os mesmos painéis, rachados, lascados, manchados de vinho
+function vProfanoW(x, y) {   // painéis enredados: os mesmos painéis, rachados, lascados, com os ramos da roseira por cima
   let v = salaoPanel(x, y, 25301) - 0.2;
   const st = cn(x, y, 8, 6, 25302) + cn(x, y, 24, 24, 25303) * 0.5; if (st > 0.05) v -= Math.min(1.6, (st - 0.05) * 6);
   const cr = Math.abs(cn(x, y, 10, 10, 25304)); if (cr < 0.006) return 0.2; if (Math.abs(cn(x, y - 1, 10, 10, 25304)) < 0.006) v += 0.7;
   const ch = cells(x, y, 24, 25305, 1); if (ch.id < 0.18 && ch.d1 < 5) v = 1.2 + cg(x, y, 25306) * 0.6 - (ch.ox + ch.oy) * 0.08;   // um pedaço lascado
+  const br = Math.abs(cn(wrapT(x + cn(x, y, 8, 8, 25307) * 60), y, 6, 6, 25308)); if (br < 0.008) v = br < 0.003 ? 3.6 : 2.6;   // o ramo
   return v;
 }
 function vPocoW(x, y) { const v = vPoco(x, y); return v === -9 ? (MATX === MOONG[1] ? 3.2 : 5.1) : v - 0.3; }
@@ -404,15 +422,15 @@ const EL_SOLID = [
   // id, paleta, textura, dureza, cor no mapa
   [EL_SOLO, 'elSolo', 'solo', 0.6, '#2e2630'], [EL_MADEIRA, 'elMadeira', 'madeira', 0.9, '#7e8796'], [EL_FOLHAGEM, 'elFolhagem', 'folhagem', 0.25, '#4a7a9c'],
   [EL_MARMORE, 'elMarmore', 'marmore', 1.4, '#ced7e6'], [EL_LAVRADA, 'elLavrada', 'lavrada', 1.5, '#8a93a6'], [EL_TABUA, 'elTabua', 'tabua', 0.7, '#c2b08e'],
-  [EL_PROFANO, 'elProfano', 'profano', 1.4, '#7a444c'], [EL_MORTA, 'elMorta', 'morta', 0.9, '#2d2630'], [EL_CRISTAL_SANGUE, 'elSangue', 'sangue', 1.6, '#e04a5a'],
+  [EL_ENREDADO, 'elProfano', 'profano', 1.4, '#686070'], [EL_LENHO, 'elMorta', 'morta', 0.9, '#2e4232'], [EL_VIDENTE, 'elSangue', 'sangue', 1.6, '#7e887e'],
   [EL_PEDRA_POCO, 'elPoco', 'poco', 1.5, '#2a525c'], [EL_RAIZ, 'elRaiz', 'raiz', 1.5, '#929bab'], [EL_CRISTAL_LUA, 'elCristal', 'cristal', 1.6, '#b0d0f4'],
   [EL_ESPELHO, 'elEspelho', 'espelho', 0, '#3e5e80'], [EL_LUA, 'elLua', 'lua', 0, '#ffffff']
 ];
 for (const [t, p, k, dig, col] of EL_SOLID) { MAT[t] = [PALS[p], BKV[k]]; SOLID[t] = 1; BLOCKY[t] = 1; DIG[t] = dig; PCOL[t] = col; }
-for (const t of [EL_SOLO, EL_MARMORE, EL_PROFANO, EL_PEDRA_POCO]) BLEND[t] = 1;
-EMIT[EL_FOLHAGEM] = 0.14; EMIT[EL_CRISTAL_SANGUE] = 0.6; EMIT[EL_PEDRA_POCO] = 0.1; EMIT[EL_RAIZ] = 0.16; EMIT[EL_CRISTAL_LUA] = 0.64; EMIT[EL_ESPELHO] = 0.14; EMIT[EL_LUA] = 1.0;
+for (const t of [EL_SOLO, EL_MARMORE, EL_ENREDADO, EL_PEDRA_POCO]) BLEND[t] = 1;
+EMIT[EL_FOLHAGEM] = 0.14; EMIT[EL_VIDENTE] = 0.4; EMIT[EL_PEDRA_POCO] = 0.1; EMIT[EL_RAIZ] = 0.16; EMIT[EL_CRISTAL_LUA] = 0.64; EMIT[EL_ESPELHO] = 0.14; EMIT[EL_LUA] = 1.0;
 
-WMAT[WEL_MATA] = [PALS.elMataW, BKV.mataW]; WMAT[WEL_SALAO] = [PALS.elSalaoW, BKV.salaoW]; WMAT[WEL_PROFANO] = [PALS.elProfanoW, BKV.profanoW];
+WMAT[WEL_MATA] = [PALS.elMataW, BKV.mataW]; WMAT[WEL_SALAO] = [PALS.elSalaoW, BKV.salaoW]; WMAT[WEL_ENREDADO] = [PALS.elProfanoW, BKV.profanoW];
 WMAT[WEL_POCO] = [PALS.elPocoW, BKV.pocoW]; WMAT[WEL_FOLHAS] = [PALS.elFolhasW, BKV.folhasW];
 DMAT[DP_EL_MATA] = [PALS.dpElMata, BKV.dpMata]; DMAT[DP_EL_SALOES] = [PALS.dpElSaloes, BKV.dpSaloes]; DMAT[DP_EL_RAIZES] = [PALS.dpElRaizes, BKV.dpRaizes];
 
@@ -455,8 +473,8 @@ const EL_ITEMS = {
   marmore_lua: ['Mármore-Lua', EL_MARMORE, 'Pedra branco-azulada com veios de prata. Os elfos lavraram salões inteiros nela.'],
   pedra_lavrada: ['Pedra Lavrada', EL_LAVRADA, 'Bloco de mármore com ramos e folhas em relevo e um filete de prata embutido.'],
   tabua_elfica: ['Tábua Élfica', EL_TABUA, 'Tábua clara e curva dos flets e das pontes. Leve, firme, e não range.'],
-  marmore_profano: ['Mármore Profanado', EL_PROFANO, 'O mármore da Corte, rachado e manchado de vinho. Os veios viraram ouro velho.'],
-  madeira_morta: ['Madeira Morta', EL_MORTA, 'Madeira preta e retorcida. Nas rachaduras ainda escorre uma seiva carmesim.'],
+  marmore_profano: ['Mármore Enredado', EL_ENREDADO, 'O mármore da Corte dos Espinhos. A roseira-brava cresceu por cima e entrou nas rachaduras.'],
+  madeira_morta: ['Lenho de Espinheiro', EL_LENHO, 'Madeira verde-preta e retorcida, dura como osso. Os nós ainda têm espinhos.'],
   pedra_poco: ['Pedra-do-Poço', EL_PEDRA_POCO, 'Pedra azul-petróleo do fundo do reino. As runas de lua gravadas nela ainda brilham.'],
   raiz_mae: ['Raiz-Mãe', EL_RAIZ, 'Um pedaço da raiz da Árvore-Mãe. A seiva azul ainda corre acesa pelos sulcos.']
 };
@@ -481,6 +499,8 @@ const DRE = {
   morta: ['#040306', '#0a080c', '#121016', '#1c1820', '#26202a', '#322a36', '#403644'],
   branco: ['#3e4656', '#6a7488', '#98a2b4', '#c0c8d6', '#dee4ee', '#f2f6fa', '#ffffff'],
   pedra: ['#08141a', '#10242c', '#1a3640', '#284c56', '#3a646e', '#548088', '#78a0a8'],
+  rosa: ['#0c040a', '#22091a', '#3a1030', '#561a46', '#76285e', '#9a4480', '#c87aa8'],
+  ameixa: ['#100810', '#1e0e1a', '#30182a', '#44223c', '#5c3050', '#7a4268', '#9c6088'],
   seca: ['#2a2418', '#4a4030', '#6e6450', '#948a72', '#b8b098', '#d8d2be', '#f2eee2']
 };
 for (const k in DRE) DRE[k] = DRE[k].map(h => ph(h));
@@ -615,10 +635,10 @@ function braseiroSprite(s) {
   return rimOut(a, P[0]);
 }
 const BRASEIRO = [braseiroSprite(25561)];
-/* o espinheiro profanado: galhos pretos tortos saindo do pé, espinhos para todo lado, bagas carmesim com um brilho */
-const MORTA2 = RX(['#08060a', '#16121a', '#241e2a', '#342c3c', '#463c50', '#5a4e66', '#74668a']);
+/* a roseira-brava: ramos verde-preto tortos saindo do pé, acúleos para todo lado, rosas negras com o miolo claro */
+const MORTA2 = RX(['#060a08', '#0e160f', '#182419', '#223424', '#2e4630', '#3e5a40', '#56744e']);
 function espinhoSprite(s) {
-  const a = spr(), M = MORTA2, C = DRE.carmesim, ends = [];
+  const a = spr(), M = MORTA2, C = DRE.rosa, ends = [];
   for (let b = 0; b < 4; b++) {
     const ang = -1.25 + b * 0.83 + (hash2(b, 0, s) - 0.5) * 0.4, L = 6 + hash2(b, 1, s) * 4;
     let x = 5.5 + (b - 1.5) * 0.5, y = 11.5;
@@ -630,7 +650,7 @@ function espinhoSprite(s) {
     }
     ends.push([x, y]);
   }
-  for (let i = 0; i < 4; i++) {   // as bagas
+  for (let i = 0; i < 4; i++) {   // as rosas
     const [ex, ey] = ends[i]; if (hash2(i, 2, s) < 0.25) continue;
     const bx = Math.round(ex + (hash2(i, 3, s) - 0.5) * 2), by = Math.round(ey + 1 + hash2(i, 4, s) * 1.5);
     a.put(bx, by, C, 4.4); a.put(bx + 1, by, C, 3.2); a.put(bx, by + 1, C, 3); a.put(bx + 1, by + 1, C, 2.2); pp(a, bx, by, C[6]);
@@ -639,9 +659,9 @@ function espinhoSprite(s) {
 }
 const ESPINHO = [espinhoSprite(25571), espinhoSprite(25572), flipX(espinhoSprite(25573)), flipX(espinhoSprite(25574))];
 /* a flâmula: a vareta no alto, o pano caindo em dobras, o debrum, o emblema (a estrela élfica de prata no pano azul;
-   o sol de ouro no pano carmesim, na Corte) e a ponta em rabo de andorinha. 0 sozinha, 1 topo, 2 ponta, 3 meio */
+   na Corte, a rosa no pano ameixa desbotado, a vareta de espinheiro) e a ponta em rabo de andorinha. 0 sozinha, 1 topo, 2 ponta, 3 meio */
 function flamulaSprite(cor, k) {
-  const a = spr(), C = cor ? DRE.carmesim : DRE.lua, G = cor ? DRE.ouro : P, rod = k === 0 || k === 1, point = k === 0 || k === 2;
+  const a = spr(), C = cor ? DRE.ameixa : DRE.lua, G = cor ? DRE.casca : P, rod = k === 0 || k === 1, point = k === 0 || k === 2;
   const y0 = rod ? 2 : 0, yEnd = k === 0 ? 11 : k === 2 ? 11 : 11;
   if (rod) { for (let x = 1; x <= 10; x++) { a.put(x, 0, G, 5.4 - x * 0.2); a.put(x, 1, G, 3.4 - x * 0.15); } pp(a, 0, 0, G[6]); pp(a, 11, 0, G[4]); pp(a, 0, 1, G[3]); pp(a, 11, 1, G[2]); }
   for (let y = y0; y <= yEnd; y++) for (let x = 2; x <= 9; x++) {
@@ -654,7 +674,7 @@ function flamulaSprite(cor, k) {
   if (k === 0 || k === 1) {   // o emblema
     const ey = k === 0 ? 4.5 : 6;
     if (!cor) { for (const [dx, dy, v] of [[0, -2, 5], [0, -1, 6], [-1, 0, 5.4], [0, 0, 6.4], [1, 0, 4.8], [0, 1, 5], [0, 2, 4], [-2, 0, 4.6], [2, 0, 3.8], [-1, -1, 4.4], [1, 1, 3.4], [1, -1, 4.2], [-1, 1, 4.2]]) a.put(5 + dx, Math.round(ey) + dy, P, v); }
-    else { for (const [dx, dy, v] of [[0, -2, 5], [-1, -1, 5.2], [1, -1, 4.4], [-2, 0, 4.6], [2, 0, 3.6], [-1, 1, 4.2], [1, 1, 3.4], [0, 2, 3.4], [0, 0, 6]]) a.put(5 + dx, Math.round(ey) + dy, G, v); a.put(6, Math.round(ey), DRE.carmesim, 2); }
+    else { for (const [dx, dy, v] of [[0, -1, 5.4], [-1, -1, 4.8], [1, -1, 4], [-1, 0, 4.6], [0, 0, 6], [1, 0, 3.6], [0, 1, 3.8], [-1, 1, 3], [1, 1, 2.6]]) a.put(5 + dx, Math.round(ey) + dy, DRE.rosa, v); a.put(5, Math.round(ey) + 2, MORTA2, 4); a.put(4, Math.round(ey) + 3, MORTA2, 3.4); }
   }
   return rimOut(a, C[0], false);
 }
@@ -759,21 +779,21 @@ function veuSprite(k) {
 const VEU = [veuSprite(0), veuSprite(1)];
 
 DECO[EL_ESCADA] = ESCADA; DECO[EL_CIPO] = CIPO; DECO[EL_LANTERNA] = LANTERNA; DECO[EL_FLOR] = FLOR; DECO[EL_SAMAMBAIA] = SAMAMBAIA; DECO[EL_RUNA] = RUNA; DECO[EL_BRASEIRO] = BRASEIRO;
-DECO[EL_ESPINHO] = ESPINHO; DECO[EL_FLAMULA] = FLAMULA; DECO[EL_ORVALHO] = ORVALHO; DECO[EL_COLUNA] = COLUNA; DECO[EL_FOLHAS] = FOLHAS; DECO[EL_VAGALUME] = VAGALUME;
+DECO[EL_ROSEIRA] = ESPINHO; DECO[EL_FLAMULA] = FLAMULA; DECO[EL_ORVALHO] = ORVALHO; DECO[EL_COLUNA] = COLUNA; DECO[EL_FOLHAS] = FOLHAS; DECO[EL_VAGALUME] = VAGALUME;
 DECO[EL_COGUMELO] = COGUMELO; DECO[EL_CRISTALINHO] = CRISTALINHO;
 // o véu: sólido mas vazado (a parede aparece entre os fios), como a barreira da Nave; não quebra
 DECO[EL_BARREIRA] = VEU; MAT[EL_BARREIRA] = [PALS.elVeu, BKV.veu]; SOLID[EL_BARREIRA] = 1; BLOCKY[EL_BARREIRA] = 0; SEETHRU[EL_BARREIRA] = 1; DIG[EL_BARREIRA] = 0; PCOL[EL_BARREIRA] = '#e6eef8'; EMIT[EL_BARREIRA] = 0.55;
 const EL_DECO = [
   // id, dureza, cor no mapa, o que solta
   [EL_ESCADA, 0.25, '#c2b08e', 'tabua_elfica'], [EL_CIPO, 0.15, '#9cb8d0', null], [EL_LANTERNA, 0.12, '#b8d6f8', null], [EL_FLOR, 0.03, '#f2f6fa', null], [EL_SAMAMBAIA, 0.03, '#6e90ac', null],
-  [EL_RUNA, 0.5, '#4c7cc0', null], [EL_BRASEIRO, 0.4, '#aeb8c6', null], [EL_ESPINHO, 0.08, '#c22c3e', null], [EL_FLAMULA, 0.08, '#4c7cc0', null], [EL_ORVALHO, 0.03, '#b8d6f8', null],
+  [EL_RUNA, 0.5, '#4c7cc0', null], [EL_BRASEIRO, 0.4, '#aeb8c6', null], [EL_ROSEIRA, 0.08, '#c22c3e', null], [EL_FLAMULA, 0.08, '#4c7cc0', null], [EL_ORVALHO, 0.03, '#b8d6f8', null],
   [EL_COLUNA, 0.9, '#868e9c', 'madeira_prata'], [EL_FOLHAS, 0.02, '#9cb8d0', null], [EL_VAGALUME, 0, '#c8ffe8', null], [EL_COGUMELO, 0.04, '#7eaae4', null], [EL_CRISTALINHO, 0.3, '#d2e8ff', null]
 ];
 for (const [t, dig, col, drop] of EL_DECO) { DIG[t] = dig; PCOL[t] = col; if (drop && ITEMS[drop]) BLOCK_DROP[t] = drop; }
 EMIT[EL_LANTERNA] = 0.95; EMIT[EL_FLOR] = 0.3; EMIT[EL_RUNA] = 0.36; EMIT[EL_BRASEIRO] = 0.9; EMIT[EL_ORVALHO] = 0.2; EMIT[EL_VAGALUME] = 0.26; EMIT[EL_COGUMELO] = 0.42; EMIT[EL_CRISTALINHO] = 0.45;
 // o que cai quando o apoio some (56, 87); escada, cipó e coluna ficam (atravessam vãos)
 for (const t of [EL_LANTERNA, EL_ORVALHO, EL_FLAMULA]) CV_HANGS[t] = 1;
-for (const t of [EL_FLOR, EL_SAMAMBAIA, EL_RUNA, EL_BRASEIRO, EL_ESPINHO, EL_FOLHAS, EL_COGUMELO, EL_CRISTALINHO]) CV_STANDS[t] = 1;
+for (const t of [EL_FLOR, EL_SAMAMBAIA, EL_RUNA, EL_BRASEIRO, EL_ROSEIRA, EL_FOLHAS, EL_COGUMELO, EL_CRISTALINHO]) CV_STANDS[t] = 1;
 
 // que variação vai onde
 const vr = (gx, gy, s, n) => (hash2(wrapX(gx), gy, s) * n) | 0;
@@ -786,7 +806,7 @@ const FLIPC = new Map(); function flipCache(arr, i) { let f = FLIPC.get(arr[i]);
 DECO_PICK[EL_SAMAMBAIA] = (gx, gy, arr) => arr[vr(gx, gy, 25541, 4)];
 const runaK = (gx, gy) => vr(gx, gy, 25551, 3);
 DECO_PICK[EL_RUNA] = (gx, gy, arr) => arr[runaK(gx, gy)];
-DECO_PICK[EL_ESPINHO] = (gx, gy, arr) => arr[vr(gx, gy, 25571, 4)];
+DECO_PICK[EL_ROSEIRA] = (gx, gy, arr) => arr[vr(gx, gy, 25571, 4)];
 DECO_PICK[EL_FLAMULA] = (gx, gy, arr) => { const c = elfosBand(gy) === 2 ? 4 : 0, up = tileAt(gx, gy - 1) === EL_FLAMULA, dn = tileAt(gx, gy + 1) === EL_FLAMULA; return arr[c + (up && dn ? 3 : up ? 2 : dn ? 1 : 0)]; };
 const orvV = (gx, gy) => vr(gx, gy, 25581, 2);
 DECO_PICK[EL_ORVALHO] = (gx, gy, arr) => arr[orvV(gx, gy)];
@@ -831,7 +851,7 @@ HOOK.drawGlow.push((cx, cy) => {
       }
       case EL_BRASEIRO: { const f = 0.9 + Math.sin(tm * 9 + gx * 2) * 0.06 + Math.sin(tm * 21) * 0.04; lc.globalAlpha = 0.32 * f; lc.drawImage(elGlow('fb', 30, FOGO_C), x + 6 - 30, y + 2 - 30); lc.globalAlpha = 0.4 * f; lc.drawImage(elGlow('fs', 10, '#c0e0ff'), x + 6 - 10, y + 1 - 10); break; }
       case EL_CRISTAL_LUA: if ((gx + gy) & 1) break; lc.globalAlpha = 0.15 + Math.sin(tm * 1.6 + gx * 0.5 + gy * 0.3) * 0.05; lc.drawImage(elGlow('c16', 16, '#b0d0ff'), x + 6 - 16, y + 6 - 16); break;
-      case EL_CRISTAL_SANGUE: if ((gx + gy) & 1) break; lc.globalAlpha = 0.15 + Math.sin(tm * 1.9 + gx * 0.7 + gy * 0.2) * 0.05; lc.drawImage(elGlow('r16', 16, '#ff3a4a'), x + 6 - 16, y + 6 - 16); break;
+      case EL_VIDENTE: if ((gx + gy) & 1) break; lc.globalAlpha = 0.12 + Math.sin(tm * 1.3 + gx * 0.7 + gy * 0.2) * 0.04; lc.drawImage(elGlow('f16', 16, '#9ae0b4'), x + 6 - 16, y + 6 - 16); break;
       case EL_RUNA: { const p = 0.5 + Math.sin(tm * 1.4 + hash2(wrapX(gx), gy, 25702) * 20) * 0.5; lc.globalAlpha = 0.1 + p * 0.18; lc.drawImage(elGlow('b12', 12, AZUL_C), x + 6 - 12, y + 7 - 12); break; }
       case EL_FLOR: { const o = florOpen(gx, gy, tm), [fx, fy] = FLOR_C[florV(gx, gy) & 1], X = florV(gx, gy) & 2 ? 11 - fx : fx; lc.globalAlpha = 0.06 + o * 0.2; lc.drawImage(elGlow('b10', 10, AZUL_C), x + X + 0.5 - 10, y + fy - 10); break; }
       case EL_COGUMELO: lc.globalAlpha = 0.16 + Math.sin(tm * 1.1 + gx * 1.7 + gy) * 0.05; lc.drawImage(elGlow('b12', 12, AZUL_C), x + 6 - 12, y + 6 - 12); break;
@@ -905,9 +925,9 @@ HOOK.drawTop.push((cx, cy) => {
         const L = ph0 < 0.04 ? 1 : 2; lc.fillStyle = '#ffffff'; lc.fillRect(x + tp[0], y + tp[1] - L + 1, 1, L * 2 - 1); lc.fillRect(x + tp[0] - L + 1, y + tp[1], L * 2 - 1, 1);
         break;
       }
-      case EL_CRISTAL_LUA: case EL_CRISTAL_SANGUE: {   // uma faísca rápida numa aresta
+      case EL_CRISTAL_LUA: case EL_VIDENTE: {   // uma faísca rápida numa aresta
         const n = Math.floor(tm * 3 + gx * 0.7); if (hash2(wrapX(gx) + n, gy, 25709) > 0.06) break;
-        lc.fillStyle = t === EL_CRISTAL_LUA ? '#ffffff' : '#ffd0d0'; const sx = x + 2 + vr(gx + n, gy, 25710, 8), sy = y + 2 + vr(gx + n, gy, 25711, 8); lc.fillRect(sx, sy - 1, 1, 3); lc.fillRect(sx - 1, sy, 3, 1);
+        lc.fillStyle = t === EL_CRISTAL_LUA ? '#ffffff' : '#d8fae4'; const sx = x + 2 + vr(gx + n, gy, 25710, 8), sy = y + 2 + vr(gx + n, gy, 25711, 8); lc.fillRect(sx, sy - 1, 1, 3); lc.fillRect(sx - 1, sy, 3, 1);
         break;
       }
       case EL_FOLHAGEM: { const n = Math.floor(tm * 1.5 + gx * 0.37); if (hash2(wrapX(gx) + n, gy, 25712) > 0.05) break; lc.fillStyle = '#e8f6ff'; lc.fillRect(x + vr(gx + n, gy, 25713, 12), y + vr(gx + n, gy, 25714, 12), 1, 1); break; }

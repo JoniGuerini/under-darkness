@@ -23,12 +23,14 @@
 
 const ESCURO = true;
 const ES_D = LAYER_D;                                   // metros de camada
-const ES_TOP = AB_TOP + LAYER_D;                        // onde a camada começa, em metros abaixo do chão do vilarejo
+const ES_TOP = layerTop('escuro');   // onde a camada começa, em metros abaixo do chão do vilarejo (a posição na lista, 129; 2026-10-21)
 // topo de cada faixa em metros abaixo do ES_TOP: A Borda Apagada, O Breu, As Raízes da Noite, O Fundo do Mundo, (rocha-mãe)
 const ES_BANDS = [0, 46, 98, 150, 186].map(v => v * LAYER_K);
 const ES_BAND_NAMES = ['borda', 'breu', 'raizes', 'fundo'];
 const ES_ZONE0 = 45;                                // zonas 45..48 (o 229 põe os nomes depois das da Colmeia)
-let ES_S0 = AB_S0 + AB_D;                           // a primeira linha da camada no mundo atual (esBuild acerta)
+// a primeira linha da camada no mundo atual (esBuild acerta): debaixo da camada de cima (129: camadaAcima), o Abismo
+// quando As Ruínas dos Acendedores não existem
+let ES_S0 = (() => { try { const A = camadaAcima('escuro'); if (A && typeof A.S0 === 'number') return A.S0 + A.D; } catch (e) { } return AB_S0 + AB_D; })();
 
 // blocos sólidos (576 a 588)
 const ES_APAGADA = 576, ES_BREU = 577, ES_VIDRO = 578, ES_RAIZ = 579, ES_CASCA = 580, ES_PRIMEVA = 581, ES_LAVRADA = 582, ES_TIJOLO = 583,

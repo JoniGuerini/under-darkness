@@ -133,7 +133,8 @@ const GEM_LAYERS = [
   typeof TITAS !== 'undefined' && { pos: layerPos('titas'), ok: t => t === TT_ROCHA || t === TT_OSSO, pal: 'ttRocha', host: TT_ROCHA, soils: TT_SOILS },
   typeof MAR !== 'undefined' && MAR && { pos: layerPos('mar'), ok: t => t === MS_ROCHA || t === MS_SULFETO, pal: 'msRocha', host: MS_ROCHA, soils: MS_SOILS },
   { pos: layerPos('abismo'), ok: t => t === AB_BASALTO || t === AB_OBSIDIANA || t === AB_CAOS, pal: 'abBasalto', host: AB_BASALTO, soils: AB_SOILS, own: GEM_RUBI },
-  typeof ESCURO !== 'undefined' && { pos: layerPos('escuro'), ok: t => t === ES_BREU || t === ES_PRIMEVA, pal: 'esBreu', host: ES_BREU, soils: ES_SOILS }
+  typeof ESCURO !== 'undefined' && { pos: layerPos('escuro'), ok: t => t === ES_BREU || t === ES_PRIMEVA, pal: 'esBreu', host: ES_BREU, soils: ES_SOILS },
+  ...Object.values(CAMADA_EXT).filter(X => X.gemas && layerPos(X.id)).map(X => Object.assign({ pos: layerPos(X.id) }, X.gemas))   // as camadas novas (129, 2026-10-21)
 ].filter(Boolean);   // a camada que não foi carregada (a wiki carrega só parte do jogo) fica de fora
 // blocos novos: 157 em diante (uma pedra fora da sua camada de origem)
 let gemNextId = 157;
