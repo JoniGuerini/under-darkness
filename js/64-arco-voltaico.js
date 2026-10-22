@@ -129,7 +129,7 @@ function arcJag(a) {
 HOOK.update.push(dt => {
   arcCD -= dt;
   for (let i = arcs.length - 1; i >= 0; i--) { const a = arcs[i]; a.t += dt; if (a.t >= a.life) { arcs.splice(i, 1); continue; } a.flick -= dt; if (a.flick <= 0) { a.flick = 0.04; arcJag(a); } }
-  const h = heldBag(); if (!h || h.s.id !== 'feitico_arco' || pl.dead || pl.bat) return;   // pl.bat: virou morcego (js/66-morcego.js)
+  const h = heldBag(); if (!h || h.s.id !== 'feitico_arco' || pl.dead) return;
   // faíscas na mão enquanto o feitiço está pronto
   if (Math.random() < dt * 6) parts.push({ x: pl.x + pl.w / 2 + pl.facing * rnd(4, 7), y: pl.y + rnd(8, 12), vx: rnd(-10, 10), vy: rnd(-25, -5), g: 0, life: 0.25, max: 0.25, col: Math.random() < 0.5 ? '#bfe6ff' : '#5aa8ff', size: 1, glow: true });
   if (!mouse.l || arcCD > 0 || pl.atkT >= 0 || pl.shieldK >= 0.35 || pl.stunT > 0) return;

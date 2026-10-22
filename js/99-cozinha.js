@@ -232,7 +232,7 @@ addEventListener('keydown', e => {
 const isFood = id => !!(ITEMS[id] && ITEMS[id].food);
 function eatCan(id) {
   if (state !== 'play' || pl.dead || !isFood(id) || countItem(id) < 1) return false;
-  if (pl.bat || (typeof tp !== 'undefined' && tp.cast) || pl.climb) return false;
+  if ((typeof tp !== 'undefined' && tp.cast) || pl.climb) return false;
   if (!pl.onGround) { floatText(pl.x + pl.w / 2, pl.y - 8, 'Pare para comer', '#d9c7a3', 0.8); return false; }
   return true;
 }
@@ -262,7 +262,7 @@ HOOK.update.push(dt => {
   if (E) {
     const moved = keys.KeyA || keys.KeyD || keys.ArrowLeft || keys.ArrowRight || keys.KeyW || keys.ArrowUp || keys.Space || keys.KeyS || keys.ArrowDown;
     if (!mouse.l) E.held = false;
-    if (pl.dead || moved || (mouse.l && !E.held) || mouse.r || keys.ShiftLeft || keys.ShiftRight || !pl.onGround || pl.climb || pl.bat || countItem(E.id) < 1) eatCancel();
+    if (pl.dead || moved || (mouse.l && !E.held) || mouse.r || keys.ShiftLeft || keys.ShiftRight || !pl.onGround || pl.climb || countItem(E.id) < 1) eatCancel();
   }
   if (ck.eat) {
     const E2 = ck.eat; E2.t += dt; E2.bite -= dt;

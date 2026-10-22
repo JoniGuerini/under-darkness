@@ -464,7 +464,7 @@ function icOnIce() {
   return !!(IC_SLIP[tileAt(Math.floor((pl.x + 1) / T), ty)] || IC_SLIP[tileAt(Math.floor((pl.x + pl.w - 1) / T), ty)]);
 }
 { const _up = updatePlayer; updatePlayer = function (dt) {
-  const vx0 = pl.vx, on = GELO && pl.onGround && !pl.dead && !pl.bat && icOnIce();
+  const vx0 = pl.vx, on = GELO && pl.onGround && !pl.dead && icOnIce();
   const r = _up(dt);
   if (on && pl.onGround && !pl.climb) {
     pl.vx = vx0 + (pl.vx - vx0) * 0.22;   // a quarter of the grip: slow to start, slower to stop

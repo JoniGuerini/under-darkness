@@ -37,7 +37,7 @@ function idleBlinkBody(img) {
 }
 function idleBusy() {
   return !pl.onGround || pl.climb || pl.dead || Math.abs(pl.vx) > 6 || pl.atkT >= 0 || pl.mining || pl.shieldK > 0.05 || pl.useT > 0 || pl.stunT > 0
-    || (typeof jump !== 'undefined' && jump.ph) || (typeof crouch !== 'undefined' && crouch.k > 0) || (typeof batSt !== 'undefined' && batSt.on);
+    || (typeof jump !== 'undefined' && jump.ph) || (typeof crouch !== 'undefined' && crouch.k > 0);
 }
 {
   const _playerPose = playerPose;

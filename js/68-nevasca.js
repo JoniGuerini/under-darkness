@@ -196,7 +196,7 @@ HOOK.update.push(dt => {
     if (gone || s.t > 2) nevShards.splice(i, 1);
   }
   // cristais na mão enquanto o feitiço está pronto
-  const h = heldBag(); if (!h || h.s.id !== 'feitico_nevasca' || pl.dead || pl.bat) return;
+  const h = heldBag(); if (!h || h.s.id !== 'feitico_nevasca' || pl.dead) return;
   if (Math.random() < dt * 6) parts.push({ x: pl.x + pl.w / 2 + pl.facing * rnd(4, 7), y: pl.y + rnd(8, 12), vx: rnd(-8, 8), vy: rnd(-18, -4), g: 0, life: 0.3, max: 0.3, col: Math.random() < 0.5 ? '#f2fbff' : '#7cc8ec', size: 1, glow: true });
   if (!mouse.l || nevCD > 0 || pl.atkT >= 0 || pl.shieldK >= 0.35 || pl.stunT > 0) return;
   if (pl.mana < NEV.cost) { if (mouse.lPressed) { floatText(pl.x + pl.w / 2, pl.y - 8, 'Sem mana', '#7fb8ff', 0.8); sfx.bad(); } nevCD = 0.25; return; }

@@ -4,7 +4,7 @@
    Escola de gelo. O feitiço sai do pergaminho de escola que a Aurélia vende e identifica (js/120-121), e fica na barra. Com ele na mão, o clique esquerdo
    gasta mana e abre uma nuvem de neve onde está o mouse: por alguns segundos caem dela fragmentos de gelo que ferem,
    resfriam (o inimigo fica lento) e, com golpes seguidos, congelam o inimigo num bloco de gelo. Chefes só resfriam.
-   Este arquivo só tem os dados (itens, números e ícones) e carrega logo depois de 65-morcego-dados, para a wiki ver também.
+   Este arquivo só tem os dados (itens, números e ícones) e carrega logo depois de 63-arco-dados, para a wiki ver também.
    As regras (aprender, lançar, os fragmentos, resfriar, congelar, desenhar) ficam em js/68-nevasca.js. */
 
 // cost: mana · cd: segundos entre lançamentos · dur: segundos de neve · reach: até onde o mouse alcança a partir do herói

@@ -1,8 +1,8 @@
 'use strict';
 
 /* ================= elementos dos feitiços e os cinco feitiços de fogo: os dados =================
-   Cada feitiço tem um elemento (ITEMS[id].elem): raio, fogo ou gelo. O Arco Voltaico é de raio, a Nevasca é de gelo
-   e a Forma de Morcego não tem elemento. O elemento aparece na dica e decide como o feitiço fere (js/113-fogo.js).
+   Cada feitiço tem um elemento (ITEMS[id].elem): raio, fogo ou gelo. O Arco Voltaico é de raio e a Nevasca é de gelo.
+   O elemento aparece na dica e decide como o feitiço fere (js/113-fogo.js).
    Fogo, o primeiro arquétipo completo, com cinco feitiços bem diferentes entre si:
    - Bola de Fogo: uma bola que voa até a mira e explode em área.
    - Inferno: segure o botão e o herói sopra um cone de chamas para a frente, gastando mana enquanto sopra.

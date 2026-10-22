@@ -228,7 +228,7 @@ HOOK.update.push(dt => {
 
   // o feitiço na mão
   const held = heldBag(), k = held && ESC_SPELL[held.s.id];
-  if (!k || pl.dead || pl.bat) return;
+  if (!k || pl.dead) return;
   const raio = ESC_ELEM[k] === 'raio';
   if (Math.random() < dt * 7) { const [hx, hy] = handXY(); parts.push({ x: hx + rnd(-1, 1), y: hy + rnd(-1, 2), vx: rnd(-10, 10), vy: rnd(-24, -6), g: 0, life: 0.28, max: 0.28, col: raio ? (Math.random() < 0.5 ? '#bfe6ff' : '#5aa8ff') : (Math.random() < 0.5 ? '#ffffff' : '#a8dcf4'), size: 1, glow: true }); }
   if (!mouse.l || (escCD[k] || 0) > 0 || pl.atkT >= 0 || pl.shieldK >= 0.35 || pl.stunT > 0) return;

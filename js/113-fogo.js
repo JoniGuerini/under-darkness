@@ -254,7 +254,7 @@ HOOK.update.push(dt => {
 
   // o feitiço na mão
   const held = heldBag(), k = held && FOGO_SPELL[held.s.id];
-  if (!k || pl.dead || pl.bat) return;
+  if (!k || pl.dead) return;
   if (Math.random() < dt * 7) { const [hx, hy] = handXY(); parts.push({ x: hx + rnd(-1, 1), y: hy + rnd(-1, 2), vx: rnd(-8, 8), vy: rnd(-28, -8), g: -10, life: 0.3, max: 0.3, col: Math.random() < 0.5 ? '#ffd23a' : '#ff6a1a', size: 1, glow: true }); }
   if (!mouse.l || pl.atkT >= 0 || pl.shieldK >= 0.35 || pl.stunT > 0) return;
   if (k === 'inferno') {

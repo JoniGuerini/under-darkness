@@ -1,9 +1,10 @@
 /* ================= o tabuleiro de runas da Aurélia (js/341-runas.js) =================
    Veste a torre dela com o kit de moradores (--k-*, css/tema-maga.css), igual ao livro do Teodoro (css/encantador.css).
-   O tabuleiro em si é um canvas de 300x250 desenhado em dobro, pixel a pixel. */
-#runas{padding-block:10px}
+   O tabuleiro em si é um canvas de 400x300 desenhado em dobro, pixel a pixel (encolhe um pouco em tela baixa).
+   data-el no #runas (raio, gelo, fogo) pinta a barra e os pontos com a cor do elemento da runa. */
+#runas{padding-block:10px;--rbw:min(800px,calc(100vw - 210px),calc((100vh - 250px) * 4 / 3))}
 #runas .runp{
-  box-sizing:border-box;width:min(800px,100%);display:flex;flex-direction:column;gap:10px;padding:6px 16px 14px;
+  box-sizing:border-box;width:min(960px,100%);display:flex;flex-direction:column;gap:10px;padding:6px 16px 14px;
   position:relative;isolation:isolate;image-rendering:pixelated;
   border-style:solid;border-color:#000;border-width:48px 18px 24px;
   border-image:var(--k-frame) 16 6 8 6 / 48px 18px 24px 18px repeat stretch;
@@ -22,19 +23,26 @@
 #runas button:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
 #runas .rbody{display:flex;gap:12px;align-items:stretch;justify-content:center}
 /* a prateleira das runas que o herói conhece */
-#runas .rlist{flex:none;width:64px;display:flex;flex-direction:column;gap:8px;padding:8px;max-height:500px;overflow:auto;background:rgba(6,4,14,.62);box-shadow:inset 0 0 0 1px var(--k-line),inset 0 2px 0 rgba(0,0,0,.7)}
+#runas .rlist{flex:none;width:64px;display:flex;flex-direction:column;gap:8px;padding:8px;max-height:calc(var(--rbw) * .75 + 8px);overflow:auto;box-sizing:border-box;background:rgba(6,4,14,.62);box-shadow:inset 0 0 0 1px var(--k-line),inset 0 2px 0 rgba(0,0,0,.7)}
 #runas .rslot{width:48px;height:48px;display:grid;place-items:center;cursor:pointer;background:radial-gradient(circle at 50% 42%,var(--k-slot),var(--k-slot-2) 78%);box-shadow:inset 0 0 0 1px var(--k-line),inset 2px 2px 0 1px rgba(0,0,0,.7)}
 #runas .rslot img{width:32px;height:32px;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 0 1px #000) drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
 #runas .rslot:hover{box-shadow:inset 0 0 0 1px var(--k-acc),0 0 10px -3px var(--k-main-glow)}
+#runas .rslot{flex:none}
 #runas .rslot.on{box-shadow:inset 0 0 0 2px #8fd0ff,0 0 14px -2px rgba(90,168,255,.7)}
+#runas .rslot.on.el-gelo{box-shadow:inset 0 0 0 2px #d8f4ff,0 0 14px -2px rgba(143,208,240,.7)}
+#runas .rslot.on.el-fogo{box-shadow:inset 0 0 0 2px #ffd23a,0 0 14px -2px rgba(255,138,30,.7)}
 .rdrag{position:fixed;z-index:9999;width:32px;height:32px;margin:-16px 0 0 -16px;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 0 6px rgba(90,168,255,.8))}
 /* o tabuleiro */
 #runas .rboard{flex:none;padding:4px;background:#000;box-shadow:0 0 0 2px #2e2448,0 0 0 4px #000,0 0 30px rgba(90,168,255,.12)}
-#runCv{display:block;width:600px;height:500px;max-width:calc(100vw - 140px);height:auto;aspect-ratio:6/5;image-rendering:pixelated;touch-action:none}
+#runCv{display:block;width:var(--rbw);height:auto;aspect-ratio:4/3;image-rendering:pixelated;touch-action:none}
 /* o rodapé: nível da runa e a barra de experiência */
 #runas .rfoot{display:flex;align-items:center;gap:12px}
 #runas .rfoot.empty{visibility:hidden}
 #runLvl{white-space:nowrap;font-size:12px;font-weight:600;color:var(--k-acc)}
 #runas .pbar{background:#06040e;box-shadow:inset 0 0 0 1px #2e2448,inset 0 3px 0 rgba(0,0,0,.6)}
 #runas .pbar>i{background:linear-gradient(#f2fbff 0 20%,#8fd0ff 20% 48%,#3f86f0 48% 78%,#1e3e90 78%);box-shadow:0 0 10px 1px rgba(90,168,255,.6)}
-@media (max-width:760px){#runas .ch{flex-wrap:wrap}#runas .rbody{flex-direction:column;align-items:center}#runas .rlist{flex-direction:row;width:auto;max-height:none}#runCv{max-width:calc(100vw - 60px)}}
+#runas[data-el=gelo] .pbar>i{background:linear-gradient(#ffffff 0 20%,#d8f4ff 20% 48%,#8fd0f0 48% 78%,#3a7ab0 78%);box-shadow:0 0 10px 1px rgba(143,208,240,.6)}
+#runas[data-el=fogo] .pbar>i{background:linear-gradient(#fff6d0 0 20%,#ffd23a 20% 48%,#ff8a1e 48% 78%,#c8320e 78%);box-shadow:0 0 10px 1px rgba(255,138,30,.6)}
+#runas[data-el=gelo] #runPts b{color:#d8f4ff;text-shadow:0 0 8px rgba(143,208,240,.7),1px 1px 0 #000}
+#runas[data-el=fogo] #runPts b{color:#ffd23a;text-shadow:0 0 8px rgba(255,138,30,.7),1px 1px 0 #000}
+@media (max-width:760px){#runas{--rbw:calc(100vw - 60px)}#runas .ch{flex-wrap:wrap}#runas .rbody{flex-direction:column;align-items:center}#runas .rlist{flex-direction:row;width:auto;max-width:100%;max-height:none}}

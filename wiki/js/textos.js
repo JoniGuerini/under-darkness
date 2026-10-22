@@ -274,7 +274,7 @@ const UDW_TXT = {
     taverneiro: 'Vende carvão para a fornalha, tochas e candelabros, compra madeira e carvão, conta boatos e cozinha: com a carne crua e os cogumelos que caem dos bichos, faz pratos que se comem parado e devolvem vida e mana aos poucos.',
     anciao: 'O mais velho do vilarejo. Conversa, conta o que sabe das profundezas e dá conselhos.',
     encantador: 'Mora na oficina de pedra à esquerda da forja. Encanta peças: você leva uma peça e uma pedra preciosa, ele sorteia modificadores novos com as chances da pedra. Encantar de novo troca os modificadores. Peças únicas, como as dos chefes, não aceitam encanto.',
-    maga: 'Mora na torre de pedra depois da casa do ancião. Vende cajados, varinhas e tomos (a mercadoria muda todo dia) e um pergaminho lacrado de cada escola de magia (fogo, raio, gelo e metamorfose), que só ela sabe abrir. Compra itens mágicos.'
+    maga: 'Mora na torre de pedra depois da casa do ancião. Vende cajados, varinhas e tomos (a mercadoria muda todo dia) e um pergaminho lacrado de cada escola de magia (fogo, raio e gelo), que só ela sabe abrir, e o tabuleiro de runas dos feitiços. Compra itens mágicos.'
   },
 
   // faixas da catedral (js/45-catedral-mundo.js: cathBand) e minérios (js/45: vein)

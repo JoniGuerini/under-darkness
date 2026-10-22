@@ -7,8 +7,13 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.46.0';
+const VERSAO = '0.47.0';
 const NOVIDADES = [
+  { v: '0.47.0', data: '22/10/2026', titulo: 'Árvores das runas', itens: [
+    'Os 15 feitiços ganharam tabuleiro de runas na Aurélia, cada um com uma árvore de 50 nós.',
+    'A árvore do Arco Voltaico cresceu; quem já tinha pontos nela não perde nenhum.',
+    'A Forma de Morcego saiu do jogo.',
+  ] },
   { v: '0.46.0', data: '22/10/2026', titulo: 'XP pelo nível', itens: [
     'Cada nível que o herói tem acima do monstro tira 20% da XP: 5 ou mais níveis acima, o monstro não dá mais XP.',
     'O herói para no nível 100.',
