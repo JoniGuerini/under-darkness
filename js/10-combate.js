@@ -145,10 +145,10 @@ function killEnemy(e) {
   const D = ET[e.type], col = D.blood || SLIME_BLOOD[e.variant];
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   burst(cx, cy, 22, col, 120, 380, 0.7, 1); burst(cx, cy, 8, '#ffffff', 60, 0, 0.3, 1, true);
-  const xpv = Math.round(e.xp * (1 + pl.xpB));
+  const xpv = Math.round(e.xp * xpPerc(e) * (1 + pl.xpB));
   const n = clamp(Math.round(xpv / 4), 2, 12); const per = Math.floor(xpv / n); let rem = xpv;
   for (let i = 0; i < n; i++) { const v = i === n - 1 ? rem : per; rem -= v; if (v > 0) orbs.push({ x: cx, y: cy, vx: rnd(-70, 70), vy: rnd(-150, -60), v, t: 0 }); }
-  floatText(cx, e.y - 12, `+${xpv} XP`, '#c8ff6a', 0.9);
+  if (xpv > 0) floatText(cx, e.y - 12, `+${xpv} XP`, '#c8ff6a', 0.9);
   sfx.kill();
   rollDrops(e);
   if (pl.onKill > 0 && !pl.dead && pl.hp < pl.maxHp) { const h = Math.min(pl.onKill, pl.maxHp - pl.hp); pl.hp += h; floatText(pl.x + pl.w / 2, pl.y - 6, '+' + Math.round(h), '#7dff8a', 0.75); }
@@ -265,9 +265,18 @@ function drinkPotion() {
   floatText(pcx, pl.y - 6, '+' + POT_HEAL, '#7dff8a', 1.1); burst(pcx, pl.y + 10, 14, '#ff8a9a', 50, -80, 0.7, 1, true); sfx.potion();
   return true;
 }
+// Jonathan 2026-10-22: o herói para no nível 100, e cada nível que ele tem ACIMA do monstro tira 20% da XP
+// (mesmo nível = 100%, 1 acima = 80% ... 5 ou mais acima = nada); monstro do mesmo nível ou acima dá 100%
+const NIVEL_MAX = 100;
+function xpPerc(e) {
+  if (pl.lvl >= NIVEL_MAX) return 0;
+  const nv = nvDe(e.lvl); if (!isFinite(nv)) return 1;
+  return clamp(1 - 0.2 * Math.max(0, pl.lvl - nv), 0, 1);
+}
 function gainXP(v) {
+  if (pl.lvl >= NIVEL_MAX) { pl.lvl = NIVEL_MAX; pl.xp = 0; return; }
   pl.xp += v;
-  while (pl.xp >= xpNeed(pl.lvl)) {
+  while (pl.lvl < NIVEL_MAX && pl.xp >= xpNeed(pl.lvl)) {
     pl.xp -= xpNeed(pl.lvl); pl.lvl++;
     const cx = pl.x + pl.w / 2, cy = pl.y + pl.h / 2;
     burst(cx, cy, 40, '#ffd27a', 140, -60, 1.1, 1, true); levelFlash = 1;
@@ -275,6 +284,7 @@ function gainXP(v) {
     toast(`Nível ${pl.lvl}!`, 'gold');
     sfx.level();
   }
+  if (pl.lvl >= NIVEL_MAX) pl.xp = 0;
 }
 let levelFlash = 0, hurtVig = 0;
 function hurtPlayer(dmg, srcX, src, isProj) {

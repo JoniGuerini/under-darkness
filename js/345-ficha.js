@@ -56,7 +56,8 @@ function refreshChar() {
   $('chLvl').innerHTML = `Nível <b>${pl.lvl}</b>`;
   $('chHp').textContent = `${Math.ceil(pl.hp)} / ${pl.maxHp}`; $('chHpF').style.width = pct(pl.hp / pl.maxHp);
   $('chMp').textContent = `${Math.floor(pl.mana)} / ${pl.maxMana}`; $('chMpF').style.width = pct(pl.mana / pl.maxMana);
-  $('chXp').textContent = `${Math.floor(pl.xp)} / ${need}`; $('chXpF').style.width = pct(Math.min(1, pl.xp / need));
+  const mx = pl.lvl >= NIVEL_MAX;
+  $('chXp').textContent = mx ? 'Nível máximo' : `${Math.floor(pl.xp)} / ${need}`; $('chXpF').style.width = pct(mx ? 1 : Math.min(1, pl.xp / need));
   const m = v => fN(v / T) + ' m';
   // o total de cada tipo de dano (itens e árvore multiplicam um o outro)
   const phys = (1 + (I.dmgPct || 0)) * (1 + a('dmgAll') + a('dmgFis')) - 1, hit = (1 + (I.dmgPct || 0)) * (1 + a('dmgAll') + a('dmgFis') + (bow ? 0 : a('dmgMelee'))) - 1;
@@ -121,7 +122,7 @@ function refreshChar() {
       R('Talentos', free ? `${free} ${free === 1 ? 'livre' : 'livres'}` : 'todos usados', free ? 'up' : '', false, 'Pontos livres para a árvore de talentos. Cada nível dá 1.', `${arv.on.size - 1} nós ligados`),
       R('Inimigos', String(pl.kills), '', false, 'Quantos inimigos você derrotou neste mundo.'),
       R('Ouro', goldTxt(pl.gold), '', false, 'Dinheiro para o vilarejo.'),
-      R('Próximo nível', `${Math.max(0, need - Math.floor(pl.xp))} XP`, '', false, 'Quanta experiência ainda falta para subir de nível.')]]
+      R('Próximo nível', mx ? 'nível máximo' : `${Math.max(0, need - Math.floor(pl.xp))} XP`, '', false, 'Quanta experiência ainda falta para subir de nível.')]]
   ];
   FCH_ROWS = {};
   $('chStats').innerHTML = groups.map(([h, ic, col, sub, rows], gi) => `<section class="fbox"><h4><img src="${fchIcon(ic, col)}" alt="">${h}</h4>${sub ? `<p class="fsub"${gi === 0 && w ? ` style="color:${RAR_COL[itemRar(w)]}"` : ''}>${UDesc(sub)}</p>` : ''}<dl>${rows.map((r, i) => {

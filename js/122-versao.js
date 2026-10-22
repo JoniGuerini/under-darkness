@@ -7,8 +7,12 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.45.0';
+const VERSAO = '0.46.0';
 const NOVIDADES = [
+  { v: '0.46.0', data: '22/10/2026', titulo: 'XP pelo nível', itens: [
+    'Cada nível que o herói tem acima do monstro tira 20% da XP: 5 ou mais níveis acima, o monstro não dá mais XP.',
+    'O herói para no nível 100.',
+  ] },
   { v: '0.45.0', data: '21/10/2026', titulo: 'As 20 camadas', itens: [
     'Novas camadas: Brejo das Bruxas, Necrópole do Rei Eterno, Prisão dos Deuses, Campo da Última Guerra e Ruínas dos Acendedores.',
     'Monstros novos no Reino Élfico.',

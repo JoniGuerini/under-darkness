@@ -12,7 +12,8 @@ function updateHUD() {
   setT('hHp', `${Math.ceil(pl.hp)} / ${pl.maxHp}`); setH('hHpFill', clamp(pl.hp / pl.maxHp, 0, 1) * 100);
   setT('hMp', `${Math.floor(pl.mana)} / ${pl.maxMana}`); setH('hMpFill', clamp(pl.mana / pl.maxMana, 0, 1) * 100);
   const lowOrb = pl.hp / pl.maxHp < 0.3 && !pl.dead; if (hudCache.lowOrb !== lowOrb) { hudCache.lowOrb = lowOrb; $('orbHp').classList.toggle('low', lowOrb); }
-  const need = xpNeed(pl.lvl); setT('hXp', `${Math.floor(pl.xp)} / ${need} XP`); setW('hXpFill', clamp(pl.xp / need, 0, 1) * 100);
+  if (pl.lvl >= NIVEL_MAX) { setT('hXp', 'Nível máximo'); setW('hXpFill', 100); }
+  else { const need = xpNeed(pl.lvl); setT('hXp', `${Math.floor(pl.xp)} / ${need} XP`); setW('hXpFill', clamp(pl.xp / need, 0, 1) * 100); }
   setT('hStats', fmtOuro(pl.gold));
   const h = hourNow(); setT('hClock', `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.floor((h % 1) * 6) * 10).padStart(2, '0')}`);
   const night = isNight(); if (hudCache.sun !== night) { hudCache.sun = night; $('hSun').className = night ? 'sun moon' : 'sun'; }
