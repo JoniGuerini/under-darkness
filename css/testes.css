@@ -55,7 +55,7 @@
 
 /* outros: estação, lua e runas lado a lado */
 #testes .tmundo{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-#testes .tcell{gap:10px;padding:18px 20px;justify-items:center;text-align:center}
+#testes .tcell{gap:10px;padding:18px 20px;justify-items:center;align-content:center;text-align:center}
 #testes .tcell[hidden]{display:none}
 #testes .tcell strong{font-family:var(--font-title);font-weight:400;font-size:24px;line-height:1;color:var(--ember);text-shadow:2px 2px 0 #000}
 #testes .tcell button{min-width:180px;min-height:40px;font-size:12px;font-weight:600}

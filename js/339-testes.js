@@ -3,7 +3,7 @@
    Modo deus: a chave do modo em cima e as chaves de cada efeito lado a lado (60-modo-deus).
    Viagem: o Vilarejo e as camadas em grade; escolher uma camada mostra as faixas dela embaixo (teleporte do 75).
    Batalhão: quantos monstros soltar, um ao lado do outro, e Limpar (75), com a faixa e os monstros vivos de agora; a tela fica aberta para clicar de novo.
-   Outros: pular para a próxima estação (334) e para a próxima fase da lua (337), e +5 pontos de runa (341).
+   Outros: pular para a próxima estação (334) e para a próxima fase da lua (337), +5 pontos de runa e as 15 runas no máximo (341).
    Esc volta ao menu de pausa. Carrega depois do 60-modo-deus.
    Senha: a tela (e o F4 do modo deus) só abre depois da senha do Jonathan. O código guarda só o SHA-256 dela, nunca
    a senha; acertou uma vez, o navegador lembra (localStorage 'ud-testes'). Só segura quem joga, não quem lê o código. */
@@ -65,7 +65,7 @@ async function testesSha(t) {
         <div class="tmundo">
           <div class="tcell"><em>Estação</em><strong id="tEst"></strong><button type="button" class="ghost" id="tEstPula">Próxima estação</button></div>
           <div class="tcell"><em>Lua</em><strong id="tLua"></strong><button type="button" class="ghost" id="tLuaPula">Próxima fase</button></div>
-          <div class="tcell"><em>Runas</em><strong id="tRuna"></strong><button type="button" class="ghost" id="tRunaMais">+5 pontos</button></div>
+          <div class="tcell"><em>Runas</em><strong id="tRuna"></strong><button type="button" class="ghost" id="tRunaMais">+5 pontos</button><button type="button" class="ghost" id="tRunaMax">Maximizar todas</button></div>
         </div>
       </div>
       <div class="tfoot"><button type="button" class="ghost" id="tBack">Voltar</button></div>
@@ -135,7 +135,7 @@ async function testesSha(t) {
   function pintaMundo() {
     $('tEst').textContent = typeof EST_NOMES !== 'undefined' ? EST_NOMES[estNow().s] : '';
     $('tLua').textContent = typeof LUA_FASES !== 'undefined' ? LUA_FASES[luaFase()] : '';
-    if (typeof RUNE_BOARDS !== 'undefined') $('tRuna').textContent = 'Nível ' + Math.max(0, ...Object.keys(RUNE_BOARDS).map(id => runOf(id).lvl));
+    if (typeof RUNE_BOARDS !== 'undefined') $('tRuna').textContent = typeof runCheias === 'function' && runCheias() === Object.keys(RUNE_BOARDS).length ? 'No máximo' : 'Nível ' + Math.max(0, ...Object.keys(RUNE_BOARDS).map(id => runOf(id).lvl));
   }
   $('tEstPula').addEventListener('click', () => { if (typeof estPula === 'function') estPula(); pintaMundo(); tick(); });
   $('tLuaPula').addEventListener('click', () => { if (typeof luaOff === 'undefined') return; luaOff = (luaOff + 1) & 7; luaIcone = ''; saveGame(); pintaMundo(); tick(); });
@@ -143,6 +143,8 @@ async function testesSha(t) {
   if (typeof LUA_FASES === 'undefined') $('tLuaPula').closest('.tcell').hidden = true;
   $('tRunaMais').addEventListener('click', () => { if (typeof runTestePontos === 'function') runTestePontos(); pintaMundo(); });
   if (typeof runTestePontos !== 'function') $('tRunaMais').closest('.tcell').hidden = true;
+  $('tRunaMax').addEventListener('click', () => { if (typeof runTesteMax === 'function') runTesteMax(); pintaMundo(); });
+  if (typeof runTesteMax !== 'function') $('tRunaMax').remove();
 
   /* abas */
   const PINTA = { deus: pintaDeus, viagem: pintaViagem, batalhao: pintaBatalhao, outros: pintaMundo };

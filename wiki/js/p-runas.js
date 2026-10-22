@@ -24,6 +24,7 @@
         <li>Um nó só aceita ponto depois que o nó de onde ele sai tem pelo menos 1. Um nó pode ter vários pontos, mas cada nó tem um efeito só dele.</li>
         <li>Seis galhos saem do encaixe. Dois são do próprio feitiço, com o que só ele faz (mais saltos, mais bolas, a nevasca que segue o herói...). Os outros quatro são comuns e ficam só com os nós que fazem sentido para cada feitiço: <b>Força</b> (dano, crítico, chefes), <b>Elemento</b> (o que o raio, o gelo ou o fogo fazem a mais), <b>Sustento</b> (mana, vida, recarga, eco) e <b>Caça</b> (bônus por situação).</li>
         <li>A Aurélia devolve os pontos de uma runa quando você quiser recomeçar.</li>
+        <li>Menu &gt; Testes, aba Outros, dá +5 pontos a todas as runas ou põe as 15 no máximo, com todos os nós cheios.</li>
       </ul>`;
       for (const el of ['raio', 'gelo', 'fogo']) {
         h += `<h2 style="color:${RUNE_COL[el].O}">${EL[el]}</h2>`;

@@ -10,7 +10,7 @@
    - O que vai no save (chave `runas`): { [id do feitiço]: { xp, lvl, n: { [nó]: pontos } } }, por personagem.
      Nó que ficou sem o pai (save de antes da árvore nova) devolve os pontos.
    - O que cada nó faz em jogo mora em js/423-runas-efeitos (comuns) e js/424-runas-feiticos (próprios, e o castArc).
-   - Menu > Testes, aba Outros (339-testes), dá +5 pontos de runa para testar o tabuleiro sem caçar.
+   - Menu > Testes, aba Outros (339-testes), dá +5 pontos de runa ou põe as 15 runas no máximo, para testar sem caçar.
    Carrega depois do 121-pergaminhos (usa knowsSpell e embrulha talkMenu, closeTalk, newWorld e makeSave). */
 
 let runes = {}, runSel = null, runBuilt = false, runNpc = null, runHover = null, runDirty = true;
@@ -274,5 +274,8 @@ function runLoop() {
   requestAnimationFrame(runLoop);
 }
 
-/* ---- Menu > Testes: pontos de runa para testar (o botão fica na aba Outros da tela de Testes, 339-testes) ---- */
+/* ---- Menu > Testes: pontos de runa e runas no máximo para testar (os botões ficam na aba Outros da tela de Testes, 339-testes) ---- */
 function runTestePontos() { for (const id in RUNE_BOARDS) { const r = runOf(id), B = RUNE_BOARDS[id]; r.lvl = Math.min(B.maxLvl, r.lvl + 5); } runDirty = true; saveGame(); sfx.runLvl(); }
+// as 15 runas no nível máximo, com todos os nós cheios
+function runTesteMax() { for (const id in RUNE_BOARDS) { const B = RUNE_BOARDS[id], r = runOf(id); r.lvl = B.maxLvl; r.xp = 0; r.n = {}; for (const q of B.nodes) r.n[q.k] = q.max; runApply(id); } runDirty = true; saveGame(); sfx.runLvl(); }
+const runCheias = () => Object.keys(RUNE_BOARDS).filter(id => runSpent(id) >= RUNE_BOARDS[id].maxLvl).length;

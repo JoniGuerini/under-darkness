@@ -7,8 +7,11 @@
    - MAIOR vira 1 no lançamento.
    Toda mudança publicada ganha uma linha aqui: se for de uma versão nova, sobe VERSAO e põe a entrada no topo de NOVIDADES.
    A tela de início (39-titulo) mostra a versão no canto e o menu Novidades. Carrega antes do 39-titulo. */
-const VERSAO = '0.47.0';
+const VERSAO = '0.47.1';
 const NOVIDADES = [
+  { v: '0.47.1', data: '22/10/2026', titulo: 'Runas no máximo', itens: [
+    'Testes: Menu > Testes > Outros ganha um botão que põe as 15 runas no nível máximo, com todos os nós cheios.',
+  ] },
   { v: '0.47.0', data: '22/10/2026', titulo: 'Árvores das runas', itens: [
     'Os 15 feitiços ganharam tabuleiro de runas na Aurélia, cada um com uma árvore de 50 nós.',
     'A árvore do Arco Voltaico cresceu; quem já tinha pontos nela não perde nenhum.',
